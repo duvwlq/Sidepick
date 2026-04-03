@@ -1,17 +1,17 @@
 # FailForward Backend
 
-부업 실패 경험 공유 플랫폼 백엔드 API 서버 초기 구성입니다.
+Backend API server bootstrap repository for the FailForward project.
 
-## 기술 스택
+## Stack
 
 - Java 17
-- Spring Boot 3.2
+- Spring Boot 3.2.12
 - Spring Data JPA
-- MySQL 8
+- MySQL 8.4
 - Springdoc OpenAPI
 - Docker Compose
 
-## 디렉터리 구조
+## Repository Layout
 
 - `docs/git-flow.md`
 - `docs/ec2-setup.md`
@@ -19,43 +19,80 @@
 - `docs/api-structure.md`
 - `infra/docker-compose.yml`
 - `infra/mysql/init/001_init.sql`
+- `scripts`
 - `server`
 
-## 로컬 개발 환경 설정
+## Quick Start
 
-### 1. 환경 변수 준비
+### 1. Prepare env file
 
-```bash
-cp .env.example .env
-```
-
-Windows PowerShell에서는:
+Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-### 2. Docker 실행
+macOS / Linux:
 
 ```bash
-docker compose -f infra/docker-compose.yml up --build
+cp .env.example .env
 ```
 
-### 3. 애플리케이션 확인
+### 2. Start with Docker
+
+Windows PowerShell:
+
+```powershell
+.\scripts\dev-up.ps1
+```
+
+macOS / Linux:
+
+```bash
+./scripts/dev-up.sh
+```
+
+Or run Docker Compose directly:
+
+```bash
+docker compose -f infra/docker-compose.yml up -d --build
+```
+
+### 3. Verify
 
 - App: `http://localhost:8081`
 - Health: `http://localhost:8081/api/health`
 - Swagger UI: `http://localhost:8081/swagger-ui.html`
 
-## 제출 산출물 연결
+## Stop
 
-1. GitHub 저장소 운영 문서: `docs/git-flow.md`
-2. AWS EC2 설정 문서: `docs/ec2-setup.md`
-3. DB 스키마 문서 및 SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
-4. API 기본 구조 설계서: `docs/api-structure.md`
-5. 환경 설정 문서: 현재 `README.md`
+Windows PowerShell:
 
-## 주의
+```powershell
+.\scripts\dev-down.ps1
+```
 
-- 현재 저장소에는 외부 서비스 계정값이 포함되어 있지 않습니다.
-- GitHub 저장소 생성, EC2 생성, MySQL 서버 배포는 문서를 따라 실제로 별도 수행해야 합니다.
+macOS / Linux:
+
+```bash
+./scripts/dev-down.sh
+```
+
+## Team Workflow Notes
+
+- Base branch is `develop`.
+- Run `git pull origin develop` before starting local work.
+- Create `.env` locally and do not commit it.
+- Do not commit personal IDE files.
+
+## Reference Docs
+
+1. Git workflow: `docs/git-flow.md`
+2. AWS EC2 setup: `docs/ec2-setup.md`
+3. DB schema and SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
+4. API structure: `docs/api-structure.md`
+
+## Notes
+
+- The repository is ready to run with Docker as the default workflow.
+- EC2 deployment also uses `infra/docker-compose.yml`.
