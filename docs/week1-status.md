@@ -6,11 +6,12 @@
 - `develop` branch workflow
 - Spring Boot project bootstrap
 - Docker Compose local environment
-- MySQL schema SQL
+- PostgreSQL schema SQL
 - Core JPA entities
 - Health endpoint
 - Swagger UI exposure
 - EC2 deployment path documentation
+- Supabase-compatible datasource configuration
 
 ## In Progress
 
@@ -20,10 +21,11 @@
 
 - Spring Security
 - JWT auth
-- Supabase/PostgreSQL integration
+- Full Supabase managed deployment integration
 - User, experience, analysis, and comment APIs beyond health check
 
 ## Why This Differs From The Example Spec
 
 The example spec mixes MySQL and Supabase/PostgreSQL directions.
-This repository currently follows the MySQL-based requirement from the task header.
+This repository is now aligned to the Supabase/PostgreSQL direction.
+Local development still defaults to Docker PostgreSQL because it is easier for every team member to run immediately after `git pull`.

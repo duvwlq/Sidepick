@@ -1,14 +1,15 @@
 # FailForward Backend
 
 Backend API server bootstrap repository for the FailForward project.
-This repository currently follows the MySQL-based week 1 bootstrap scope.
+This repository follows the week 1 scope based on PostgreSQL and Supabase-compatible datasource settings.
 
 ## Stack
 
 - Java 17
 - Spring Boot 3.2.12
 - Spring Data JPA
-- MySQL 8.4
+- PostgreSQL 15
+- Supabase PostgreSQL compatible datasource
 - Springdoc OpenAPI
 - Docker Compose
 
@@ -19,7 +20,7 @@ This repository currently follows the MySQL-based week 1 bootstrap scope.
 - `docs/db-schema.md`
 - `docs/api-structure.md`
 - `infra/docker-compose.yml`
-- `infra/mysql/init/001_init.sql`
+- `infra/postgres/init/001_init.sql`
 - `scripts`
 - `server`
 
@@ -91,11 +92,28 @@ macOS / Linux:
 - Create `.env` locally and do not commit it.
 - Do not commit personal IDE files.
 
+## PostgreSQL Usage Model
+
+- Local development uses the `postgres` service from `infra/docker-compose.yml`.
+- The SQL bootstrap file is `infra/postgres/init/001_init.sql`.
+- Supabase can be used later by replacing datasource values in `.env` and using `infra/docker-compose.supabase.yml`.
+- The current week 1 repository does not depend on Supabase-specific SDKs.
+
+### Supabase Run Option
+
+If the team wants to run the backend against Supabase instead of the local PostgreSQL container:
+
+```bash
+cp .env.example .env
+# replace datasource values with Supabase connection info
+docker compose -f infra/docker-compose.supabase.yml up -d --build
+```
+
 ## Reference Docs
 
 1. Git workflow: `docs/git-flow.md`
 2. AWS EC2 setup: `docs/ec2-setup.md`
-3. DB schema and SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
+3. DB schema and SQL: `docs/db-schema.md`, `infra/postgres/init/001_init.sql`
 4. API structure: `docs/api-structure.md`
 5. Week 1 delivery status: `docs/week1-status.md`
 
