@@ -2,51 +2,54 @@
 
 ## 설계 범위
 
-- 회원
-- 소셜 로그인 연동
-- 게시글
+- 사용자
+- 실패 경험 게시글
 - AI 분석 결과
+- 유사 실패 사례
+- 댓글
 
-## 테이블
+## 테이블 구성
 
 ### `users`
 
 - 사용자 기본 정보
-- 로그인 ID 기준 회원가입 지원
-- 닉네임, 이메일, 전화번호 관리
+- 이메일, 닉네임 유니크 제약
+- 연령대, 프로필 이미지, 활성 상태 저장
 
-### `social_accounts`
+### `failure_experiences`
 
-- 네이버 / 카카오 / 구글 계정 연동 정보
-- 한 유저가 여러 소셜 계정을 연결할 수 있는 구조
+- 사용자가 작성한 실패 경험 게시글
+- 투자금, 기간, 실패 원인, 시장, 마케팅 채널 등 저장
+- 공개 여부와 카운트 컬럼 포함
 
-### `posts`
-
-- 부업 경험 게시글
-- 실패 경험 / 계획 / 카테고리 / 상태 저장
-
-### `analysis_results`
+### `ai_analysis`
 
 - 게시글별 AI 분석 결과
-- 실패 요인 TOP3, 주의 문구, 위험 점수 저장
+- 실패 원인 태그, 3줄 요약, 리스크 점수 저장
+
+### `matched_cases`
+
+- 분석 결과와 연결되는 유사 실패 사례
+- 유사도와 핵심 교훈 저장
+
+### `comments`
+
+- 게시글 댓글 및 대댓글
+- 삭제 여부 플래그 저장
 
 ## 관계
 
-- `users 1:N posts`
-- `users 1:N social_accounts`
-- `posts 1:1 analysis_results`
+- `users 1:N failure_experiences`
+- `failure_experiences 1:1 ai_analysis`
+- `ai_analysis 1:N matched_cases`
+- `failure_experiences 1:N comments`
+- `users 1:N comments`
 
-## 인덱스 기준
+## 인덱스
 
-- `users.login_id`: unique
-- `users.email`: unique
-- `users.nickname`: unique
-- `social_accounts(provider, provider_user_id)`: unique
-- `posts.user_id`, `posts.category`, `posts.created_at`
-- `analysis_results.post_id`: unique
-
-## 비고
-
-- `gender`, `birth_date`, `has_side_hustle_experience`는 통계 및 개인화 분석용 필드입니다.
-- 분석 결과는 재생성될 수 있으므로 `analysis_version`, `generated_at` 추적이 필요합니다.
+- `failure_experiences.user_id`
+- `failure_experiences.business_type`
+- `failure_experiences.created_at`
+- `ai_analysis.experience_id`
+- `comments.experience_id`
 

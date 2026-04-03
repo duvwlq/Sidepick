@@ -1,79 +1,104 @@
-CREATE DATABASE IF NOT EXISTS sidepick
+CREATE DATABASE IF NOT EXISTS failforward
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-USE sidepick;
+USE failforward;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    login_id VARCHAR(50) NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    full_name VARCHAR(50) NOT NULL,
-    birth_date DATE NULL,
-    gender VARCHAR(10) NULL,
-    email VARCHAR(100) NULL,
-    phone VARCHAR(20) NULL,
-    nickname VARCHAR(50) NOT NULL,
-    has_side_hustle_experience BOOLEAN NOT NULL DEFAULT FALSE,
-    nickname_change_count INT NOT NULL DEFAULT 0,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    nickname VARCHAR(20) NOT NULL,
+    age_group VARCHAR(10) NOT NULL,
+    profile_image VARCHAR(500) NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_users_login_id (login_id),
     UNIQUE KEY uk_users_email (email),
-    UNIQUE KEY uk_users_phone (phone),
     UNIQUE KEY uk_users_nickname (nickname)
 );
 
-CREATE TABLE IF NOT EXISTS social_accounts (
+CREATE TABLE IF NOT EXISTS failure_experiences (
     id BIGINT NOT NULL AUTO_INCREMENT,
     user_id BIGINT NOT NULL,
-    provider VARCHAR(20) NOT NULL,
-    provider_user_id VARCHAR(100) NOT NULL,
-    provider_email VARCHAR(100) NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_social_provider_user (provider, provider_user_id),
-    KEY idx_social_user_id (user_id),
-    CONSTRAINT fk_social_user
-        FOREIGN KEY (user_id) REFERENCES users (id)
-        ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS posts (
-    id BIGINT NOT NULL AUTO_INCREMENT,
-    user_id BIGINT NOT NULL,
-    category VARCHAR(50) NOT NULL,
-    title VARCHAR(150) NOT NULL,
+    title VARCHAR(100) NOT NULL,
     content TEXT NOT NULL,
-    side_hustle_name VARCHAR(100) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'PUBLISHED',
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    business_type VARCHAR(50) NOT NULL,
+    investment_amount INT NULL,
+    duration_months INT NULL,
+    failure_reason VARCHAR(50) NOT NULL,
+    target_market VARCHAR(100) NULL,
+    marketing_channels JSON NULL,
+    lessons_learned TEXT NULL,
+    would_retry BOOLEAN NULL,
+    structured_data JSON NULL,
+    view_count INT NOT NULL DEFAULT 0,
+    like_count INT NOT NULL DEFAULT 0,
+    is_public BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    KEY idx_posts_user_id (user_id),
-    KEY idx_posts_category (category),
-    KEY idx_posts_created_at (created_at),
-    CONSTRAINT fk_posts_user
+    KEY idx_failure_experiences_user_id (user_id),
+    KEY idx_failure_experiences_business_type (business_type),
+    KEY idx_failure_experiences_created_at (created_at),
+    CONSTRAINT fk_failure_experiences_user
         FOREIGN KEY (user_id) REFERENCES users (id)
         ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS analysis_results (
+CREATE TABLE IF NOT EXISTS ai_analysis (
     id BIGINT NOT NULL AUTO_INCREMENT,
-    post_id BIGINT NOT NULL,
-    failure_factor_top1 VARCHAR(255) NULL,
-    failure_factor_top2 VARCHAR(255) NULL,
-    failure_factor_top3 VARCHAR(255) NULL,
-    caution_summary TEXT NULL,
-    success_factors TEXT NULL,
-    missing_factors TEXT NULL,
-    risk_score DECIMAL(5,2) NULL,
-    analysis_version VARCHAR(30) NOT NULL DEFAULT 'v1',
-    generated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    experience_id BIGINT NOT NULL,
+    fail_reason_tags JSON NOT NULL,
+    summary_list JSON NOT NULL,
+    risk_factor_analysis TEXT NULL,
+    risk_score DECIMAL(3,1) NULL,
+    processed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_analysis_post_id (post_id),
-    CONSTRAINT fk_analysis_post
-        FOREIGN KEY (post_id) REFERENCES posts (id)
+    UNIQUE KEY uk_ai_analysis_experience_id (experience_id),
+    KEY idx_ai_analysis_experience_id (experience_id),
+    CONSTRAINT fk_ai_analysis_experience
+        FOREIGN KEY (experience_id) REFERENCES failure_experiences (id)
         ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS matched_cases (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    analysis_id BIGINT NOT NULL,
+    case_id VARCHAR(50) NOT NULL,
+    case_title VARCHAR(200) NOT NULL,
+    case_summary TEXT NULL,
+    key_lesson TEXT NULL,
+    match_rate INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_matched_cases_analysis_id (analysis_id),
+    CONSTRAINT fk_matched_cases_analysis
+        FOREIGN KEY (analysis_id) REFERENCES ai_analysis (id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    experience_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    parent_id BIGINT NULL,
+    content VARCHAR(1000) NOT NULL,
+    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_comments_experience_id (experience_id),
+    KEY idx_comments_user_id (user_id),
+    CONSTRAINT fk_comments_experience
+        FOREIGN KEY (experience_id) REFERENCES failure_experiences (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_comments_user
+        FOREIGN KEY (user_id) REFERENCES users (id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_comments_parent
+        FOREIGN KEY (parent_id) REFERENCES comments (id)
+        ON DELETE SET NULL
+);
+

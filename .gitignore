@@ -1,14 +1,15 @@
-.gradle/
+target/
 build/
 out/
-*.iml
+.gradle/
+
 .idea/
-.DS_Store
+.vscode/
+*.iml
 
-server/.gradle/
-server/build/
-server/out/
-
-*.log
 .env
+application-local.yml
+
+docker-compose.override.yml
+*.log
 

@@ -1,42 +1,32 @@
-# GitHub Repo / Git Flow
+# Git Flow 설정
 
-## 기본 브랜치
+## Repository 생성
 
-- `main`: 배포 가능한 안정 브랜치
+- Repository Name: `failforward-backend`
+- Description: `부업 실패 경험 공유 플랫폼 - Backend API Server`
+- Visibility: `Private`
+
+## 브랜치 전략
+
+- `main`: 배포 브랜치
 - `develop`: 통합 개발 브랜치
+- `feature/<topic>`: 기능 개발
+- `fix/<topic>`: 버그 수정
+- `docs/<topic>`: 문서 작업
 
-## 작업 브랜치 규칙
+## 초기 브랜치 생성 예시
 
-- `feature/<topic>`
-- `fix/<topic>`
-- `refactor/<topic>`
-- `docs/<topic>`
+```bash
+git checkout -b develop
+git checkout -b feature/setup-project
+git checkout -b feature/database-schema
+git checkout -b feature/docker-setup
+```
 
-예시:
+## 운영 원칙
 
-- `feature/auth-login`
-- `feature/mysql-schema`
-- `docs/api-spec`
-
-## 작업 흐름
-
-1. `develop`에서 작업 브랜치 생성
-2. 기능 단위 커밋
-3. Pull Request 생성
-4. 리뷰 후 `develop` 병합
-5. 배포 시점에 `develop -> main` 병합
-
-## 커밋 메시지 예시
-
-- `feat: add initial mysql schema`
-- `feat: add docker compose for local mysql`
-- `docs: add ec2 setup guide`
-- `fix: correct users table index`
-
-## 최소 규칙
-
-- 직접 `main` push 금지
-- PR 없이 병합 금지
-- 환경변수, 키 파일, 인증정보 커밋 금지
-- 인프라 변경은 문서와 함께 반영
+- `main` 직접 push 금지
+- Pull Request 없이 병합 금지
+- `.env`, 키 파일, 비밀번호 커밋 금지
+- 스키마 변경 시 SQL과 문서를 같이 수정
 

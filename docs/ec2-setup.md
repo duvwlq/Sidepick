@@ -1,70 +1,53 @@
-# AWS EC2 서버 생성 가이드
+# AWS EC2 서버 생성 및 초기 설정
 
-## 목표
+## 권장 인스턴스 설정
 
-- Ubuntu 기반 EC2 생성
-- Docker / Docker Compose 설치
-- 보안 그룹 최소 개방
-- 배포용 서버 접속 준비
+- Instance Type: `t3.medium`
+- AMI: `Ubuntu 22.04 LTS`
+- Storage: `20GB gp3`
 
-## 권장 스펙
+## Security Group
 
-- AMI: Ubuntu 24.04 LTS
-- Instance Type: `t3.small` 또는 `t3.medium`
-- Storage: 30GB gp3
+- SSH `22`: 본인 IP만 허용
+- HTTP `80`: 전체 허용
+- HTTPS `443`: 전체 허용
+- Custom `8080`: API 테스트용 임시 허용
+- Custom `3000`: 프론트 확인용 임시 허용
 
-## 보안 그룹
-
-- `22/tcp`: 본인 IP만 허용
-- `80/tcp`: 전체 허용
-- `443/tcp`: 전체 허용
-- `3306/tcp`: 외부 미개방 권장
-
-## 생성 절차
-
-1. AWS Console에서 EC2 인스턴스 생성
-2. 키 페어 생성 및 다운로드
-3. 보안 그룹 설정
-4. Elastic IP 연결 여부 결정
-
-## 서버 초기 접속
+## 서버 접속
 
 ```bash
-ssh -i <key.pem> ubuntu@<ec2-public-ip>
+ssh -i failforward-key.pem ubuntu@your-ec2-ip
 ```
 
-## 필수 패키지
+## 초기 설정
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y ca-certificates curl gnupg
+sudo apt install -y curl wget git vim
+sudo apt install -y openjdk-17-jdk
+java -version
 ```
 
 ## Docker 설치
 
 ```bash
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo $VERSION_CODENAME) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
 sudo usermod -aG docker ubuntu
 ```
 
-## 점검
+## Docker Compose 플러그인 설치
 
 ```bash
-docker --version
+sudo apt-get update
+sudo apt-get install -y docker-compose-plugin
 docker compose version
 ```
 
-## 운영 메모
+## 배포 메모
 
-- DB는 EC2 내부 Docker network로만 노출하는 구성이 안전합니다.
-- 애플리케이션 배포 시 `nginx + app container + mysql container` 구조 권장입니다.
-- `.env`, SSH 키, DB 비밀번호는 절대 GitHub에 올리지 않습니다.
+- 운영 DB는 외부 공개 포트를 열지 않는 구성을 권장합니다.
+- 운영에서는 `nginx + spring boot + mysql` 구조를 권장합니다.
+- `.env`는 서버 내부에만 저장합니다.
 
