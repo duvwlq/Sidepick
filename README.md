@@ -122,6 +122,7 @@ macOS / Linux:
 3. DB schema and SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
 4. API structure: `docs/api-structure.md`
 5. Week 1 delivery status: `docs/week1-status.md`
+6. Work summary: `docs/work-summary.md`
 
 ## Notes
 
