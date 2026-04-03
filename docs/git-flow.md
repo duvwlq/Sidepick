@@ -1,32 +1,50 @@
-# Git Flow 설정
+# Git Flow Guide
 
-## Repository 생성
+## Default Branches
 
-- Repository Name: `failforward-backend`
-- Description: `부업 실패 경험 공유 플랫폼 - Backend API Server`
-- Visibility: `Private`
+- `main`: production-ready history
+- `develop`: integration branch for team work
 
-## 브랜치 전략
+## Feature Branch Naming
 
-- `main`: 배포 브랜치
-- `develop`: 통합 개발 브랜치
-- `feature/<topic>`: 기능 개발
-- `fix/<topic>`: 버그 수정
-- `docs/<topic>`: 문서 작업
+- `feature/<topic>`
+- `fix/<topic>`
+- `docs/<topic>`
 
-## 초기 브랜치 생성 예시
+Examples:
+
+- `feature/setup-project`
+- `feature/database-schema`
+- `feature/docker-setup`
+
+## Daily Workflow
 
 ```bash
-git checkout -b develop
-git checkout -b feature/setup-project
-git checkout -b feature/database-schema
-git checkout -b feature/docker-setup
+git checkout develop
+git pull origin develop
+git checkout -b feature/<topic>
 ```
 
-## 운영 원칙
+Work on your branch, then:
 
-- `main` 직접 push 금지
-- Pull Request 없이 병합 금지
-- `.env`, 키 파일, 비밀번호 커밋 금지
-- 스키마 변경 시 SQL과 문서를 같이 수정
+```bash
+git add .
+git commit -m "type: short summary"
+git push -u origin feature/<topic>
+```
 
+## Commit Message Style
+
+- `feat: ...`
+- `fix: ...`
+- `docs: ...`
+- `chore: ...`
+- `refactor: ...`
+- `test: ...`
+
+## Team Rules
+
+- Start from the latest `develop`
+- Do not commit `.env`
+- Do not commit local IDE settings
+- Keep infrastructure and schema changes documented in `docs/`

@@ -1,40 +1,43 @@
-# API 기본 구조 설계서
+# API Structure
 
-## 공통
+## Base
 
 - Base URL: `/api`
-- 응답 형식: `application/json`
-- 인증: 추후 JWT Bearer Token
+- Response format: `application/json`
 
-## 시스템
+## Implemented for Week 1
 
-- `GET /api/health`: 서버 상태 확인
+- `GET /api/health`
 
-## 인증/회원
+## Planned Auth API
 
-- `POST /api/auth/signup`: 회원가입
-- `POST /api/auth/login`: 로그인
-- `GET /api/users/me`: 내 정보 조회
-- `PATCH /api/users/me`: 내 정보 수정
+- `POST /api/auth/signup`
+- `POST /api/auth/login`
+- `GET /api/users/me`
+- `PATCH /api/users/me`
 
-## 실패 경험
+## Planned Failure Experience API
 
-- `POST /api/experiences`: 실패 경험 작성
-- `GET /api/experiences`: 실패 경험 목록 조회
-- `GET /api/experiences/{experienceId}`: 실패 경험 상세 조회
-- `PATCH /api/experiences/{experienceId}`: 실패 경험 수정
-- `DELETE /api/experiences/{experienceId}`: 실패 경험 삭제
+- `POST /api/experiences`
+- `GET /api/experiences`
+- `GET /api/experiences/{experienceId}`
+- `PATCH /api/experiences/{experienceId}`
+- `DELETE /api/experiences/{experienceId}`
 
-## AI 분석
+## Planned AI Analysis API
 
-- `POST /api/experiences/{experienceId}/analysis`: AI 분석 요청
-- `GET /api/experiences/{experienceId}/analysis`: AI 분석 결과 조회
-- `GET /api/analysis/{analysisId}/matched-cases`: 유사 실패 사례 조회
+- `POST /api/experiences/{experienceId}/analysis`
+- `GET /api/experiences/{experienceId}/analysis`
+- `GET /api/analysis/{analysisId}/matched-cases`
 
-## 댓글
+## Planned Comment API
 
-- `POST /api/experiences/{experienceId}/comments`: 댓글 작성
-- `POST /api/comments/{commentId}/replies`: 대댓글 작성
-- `PATCH /api/comments/{commentId}`: 댓글 수정
-- `DELETE /api/comments/{commentId}`: 댓글 삭제
+- `POST /api/experiences/{experienceId}/comments`
+- `POST /api/comments/{commentId}/replies`
+- `PATCH /api/comments/{commentId}`
+- `DELETE /api/comments/{commentId}`
 
+## Notes
+
+- Security and JWT are not implemented yet
+- Week 1 scope currently covers schema, infrastructure, entity mapping, and health endpoint

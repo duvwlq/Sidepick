@@ -1,6 +1,7 @@
 # FailForward Backend
 
 Backend API server bootstrap repository for the FailForward project.
+This repository currently follows the MySQL-based week 1 bootstrap scope.
 
 ## Stack
 
@@ -64,6 +65,11 @@ docker compose -f infra/docker-compose.yml up -d --build
 - Health: `http://localhost:8081/api/health`
 - Swagger UI: `http://localhost:8081/swagger-ui.html`
 
+## EC2 Helper Scripts
+
+- `scripts/ec2-bootstrap.sh`
+- `scripts/ec2-deploy.sh`
+
 ## Stop
 
 Windows PowerShell:
@@ -91,8 +97,10 @@ macOS / Linux:
 2. AWS EC2 setup: `docs/ec2-setup.md`
 3. DB schema and SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
 4. API structure: `docs/api-structure.md`
+5. Week 1 delivery status: `docs/week1-status.md`
 
 ## Notes
 
 - The repository is ready to run with Docker as the default workflow.
 - EC2 deployment also uses `infra/docker-compose.yml`.
+- Security and JWT are planned but not implemented in the current week 1 bootstrap.
