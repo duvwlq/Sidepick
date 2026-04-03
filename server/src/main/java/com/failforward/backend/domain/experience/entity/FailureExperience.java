@@ -70,4 +70,95 @@ public class FailureExperience extends BaseTimeEntity {
 
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic = true;
+
+    private FailureExperience(
+            User user,
+            String title,
+            String content,
+            String businessType,
+            Integer investmentAmount,
+            Integer durationMonths,
+            String failureReason,
+            String targetMarket,
+            String marketingChannels,
+            String lessonsLearned,
+            Boolean wouldRetry,
+            String structuredData
+    ) {
+        this.user = user;
+        this.title = title;
+        this.content = content;
+        this.businessType = businessType;
+        this.investmentAmount = investmentAmount;
+        this.durationMonths = durationMonths;
+        this.failureReason = failureReason;
+        this.targetMarket = targetMarket;
+        this.marketingChannels = marketingChannels;
+        this.lessonsLearned = lessonsLearned;
+        this.wouldRetry = wouldRetry;
+        this.structuredData = structuredData;
+        this.viewCount = 0;
+        this.likeCount = 0;
+        this.isPublic = true;
+    }
+
+    public static FailureExperience create(
+            User user,
+            String title,
+            String content,
+            String businessType,
+            Integer investmentAmount,
+            Integer durationMonths,
+            String failureReason,
+            String targetMarket,
+            String marketingChannels,
+            String lessonsLearned,
+            Boolean wouldRetry,
+            String structuredData
+    ) {
+        return new FailureExperience(
+                user,
+                title,
+                content,
+                businessType,
+                investmentAmount,
+                durationMonths,
+                failureReason,
+                targetMarket,
+                marketingChannels,
+                lessonsLearned,
+                wouldRetry,
+                structuredData
+        );
+    }
+
+    public void increaseViewCount() {
+        this.viewCount = this.viewCount + 1;
+    }
+
+    public void update(
+            String title,
+            String content,
+            String businessType,
+            Integer investmentAmount,
+            Integer durationMonths,
+            String failureReason,
+            String targetMarket,
+            String marketingChannels,
+            String lessonsLearned,
+            Boolean wouldRetry,
+            String structuredData
+    ) {
+        this.title = title;
+        this.content = content;
+        this.businessType = businessType;
+        this.investmentAmount = investmentAmount;
+        this.durationMonths = durationMonths;
+        this.failureReason = failureReason;
+        this.targetMarket = targetMarket;
+        this.marketingChannels = marketingChannels;
+        this.lessonsLearned = lessonsLearned;
+        this.wouldRetry = wouldRetry;
+        this.structuredData = structuredData;
+    }
 }

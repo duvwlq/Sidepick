@@ -46,4 +46,28 @@ public class AiAnalysis {
     @CreationTimestamp
     @Column(name = "processed_at", nullable = false, updatable = false)
     private LocalDateTime processedAt;
+
+    private AiAnalysis(
+            FailureExperience experience,
+            String failReasonTags,
+            String summaryList,
+            String riskFactorAnalysis,
+            BigDecimal riskScore
+    ) {
+        this.experience = experience;
+        this.failReasonTags = failReasonTags;
+        this.summaryList = summaryList;
+        this.riskFactorAnalysis = riskFactorAnalysis;
+        this.riskScore = riskScore;
+    }
+
+    public static AiAnalysis create(
+            FailureExperience experience,
+            String failReasonTags,
+            String summaryList,
+            String riskFactorAnalysis,
+            BigDecimal riskScore
+    ) {
+        return new AiAnalysis(experience, failReasonTags, summaryList, riskFactorAnalysis, riskScore);
+    }
 }

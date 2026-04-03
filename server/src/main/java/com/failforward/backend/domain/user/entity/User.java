@@ -38,5 +38,23 @@ public class User extends BaseTimeEntity {
 
     @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
-}
 
+    private User(String email, String password, String nickname, String ageGroup, String profileImage) {
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+        this.ageGroup = ageGroup;
+        this.profileImage = profileImage;
+        this.isActive = true;
+    }
+
+    public static User create(String email, String password, String nickname, String ageGroup) {
+        return new User(email, password, nickname, ageGroup, null);
+    }
+
+    public void updateProfile(String nickname, String ageGroup, String profileImage) {
+        this.nickname = nickname;
+        this.ageGroup = ageGroup;
+        this.profileImage = profileImage;
+    }
+}

@@ -43,5 +43,25 @@ public class Comment extends BaseTimeEntity {
 
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
-}
 
+    private Comment(FailureExperience experience, User user, Comment parent, String content) {
+        this.experience = experience;
+        this.user = user;
+        this.parent = parent;
+        this.content = content;
+        this.isDeleted = false;
+    }
+
+    public static Comment create(FailureExperience experience, User user, Comment parent, String content) {
+        return new Comment(experience, user, parent, content);
+    }
+
+    public void updateContent(String content) {
+        this.content = content;
+    }
+
+    public void markDeleted() {
+        this.isDeleted = true;
+        this.content = "[deleted]";
+    }
+}

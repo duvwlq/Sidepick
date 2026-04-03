@@ -59,6 +59,23 @@ Or run Docker Compose directly:
 docker compose -f infra/docker-compose.yml up -d --build
 ```
 
+### 2-1. Compile without local Maven
+
+This repository includes a Docker-based Maven wrapper.
+
+Windows PowerShell:
+
+```powershell
+.\mvnw.cmd -DskipTests package
+```
+
+macOS / Linux / Git Bash:
+
+```bash
+chmod +x ./mvnw
+./mvnw -DskipTests package
+```
+
 ### 3. Verify
 
 - App: `http://localhost:8081`

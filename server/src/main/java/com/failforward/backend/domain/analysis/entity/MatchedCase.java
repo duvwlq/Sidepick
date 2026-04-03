@@ -47,4 +47,31 @@ public class MatchedCase {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    private MatchedCase(
+            AiAnalysis analysis,
+            String caseId,
+            String caseTitle,
+            String caseSummary,
+            String keyLesson,
+            Integer matchRate
+    ) {
+        this.analysis = analysis;
+        this.caseId = caseId;
+        this.caseTitle = caseTitle;
+        this.caseSummary = caseSummary;
+        this.keyLesson = keyLesson;
+        this.matchRate = matchRate;
+    }
+
+    public static MatchedCase create(
+            AiAnalysis analysis,
+            String caseId,
+            String caseTitle,
+            String caseSummary,
+            String keyLesson,
+            Integer matchRate
+    ) {
+        return new MatchedCase(analysis, caseId, caseTitle, caseSummary, keyLesson, matchRate);
+    }
 }
