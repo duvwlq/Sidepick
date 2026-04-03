@@ -50,7 +50,7 @@ public class FailureExperience extends BaseTimeEntity {
     @Column(name = "target_market", length = 100)
     private String targetMarket;
 
-    @Column(name = "marketing_channels", columnDefinition = "jsonb")
+    @Column(name = "marketing_channels", columnDefinition = "json")
     private String marketingChannels;
 
     @Column(name = "lessons_learned", columnDefinition = "TEXT")
@@ -59,7 +59,7 @@ public class FailureExperience extends BaseTimeEntity {
     @Column(name = "would_retry")
     private Boolean wouldRetry;
 
-    @Column(name = "structured_data", columnDefinition = "jsonb")
+    @Column(name = "structured_data", columnDefinition = "json")
     private String structuredData;
 
     @Column(name = "view_count", nullable = false)

@@ -1,7 +1,6 @@
 # EC2 Setup Guide
 
-This project currently runs on Docker Compose with PostgreSQL and Spring Boot.
-Supabase can replace the local PostgreSQL container later by overriding datasource values in `.env`.
+This project currently runs on Docker Compose with MySQL and Spring Boot.
 
 ## Recommended Instance
 
@@ -59,14 +58,6 @@ cp .env.example .env
 sudo docker compose -f infra/docker-compose.yml up -d --build
 ```
 
-If the team uses Supabase instead of the local `postgres` container:
-
-```bash
-cp .env.example .env
-vim .env
-# replace SPRING_DATASOURCE_URL / USERNAME / PASSWORD with Supabase values
-sudo docker compose -f infra/docker-compose.supabase.yml up -d --build
-```
 
 ## Verification
 

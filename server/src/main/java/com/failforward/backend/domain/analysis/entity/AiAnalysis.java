@@ -31,10 +31,10 @@ public class AiAnalysis {
     @JoinColumn(name = "experience_id", nullable = false, unique = true)
     private FailureExperience experience;
 
-    @Column(name = "fail_reason_tags", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "fail_reason_tags", nullable = false, columnDefinition = "json")
     private String failReasonTags;
 
-    @Column(name = "summary_list", nullable = false, columnDefinition = "jsonb")
+    @Column(name = "summary_list", nullable = false, columnDefinition = "json")
     private String summaryList;
 
     @Column(name = "risk_factor_analysis", columnDefinition = "TEXT")

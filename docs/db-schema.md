@@ -2,9 +2,9 @@
 
 ## Current Decision
 
-The week 1 backend bootstrap is built on PostgreSQL.
-Local development uses PostgreSQL 15 in Docker Compose.
-Managed deployment can move to Supabase PostgreSQL without changing the entity model.
+The week 1 backend bootstrap is built on MySQL.
+Local development uses MySQL 8.4 in Docker Compose.
+Deployment also uses the same MySQL-based container setup on EC2.
 
 ## Tables
 
@@ -51,11 +51,11 @@ Managed deployment can move to Supabase PostgreSQL without changing the entity m
 
 ## SQL Source
 
-- Schema file: `infra/postgres/init/001_init.sql`
+- Schema file: `infra/mysql/init/001_init.sql`
 
 ## Notes
 
-- JSON-shaped fields are stored with PostgreSQL `JSONB`
+- JSON-shaped fields are stored with MySQL `JSON`
 - JPA runs with `ddl-auto: validate`
 - Schema and entity field names are aligned to the SQL file
-- The current SQL is compatible with local PostgreSQL and Supabase PostgreSQL
+- The current SQL is aligned with local Docker MySQL and EC2 Docker deployment
