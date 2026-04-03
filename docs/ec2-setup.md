@@ -11,7 +11,7 @@
 - SSH `22`: 본인 IP만 허용
 - HTTP `80`: 전체 허용
 - HTTPS `443`: 전체 허용
-- Custom `8080`: API 테스트용 임시 허용
+- Custom `8081`: API 테스트용 임시 허용
 - Custom `3000`: 프론트 확인용 임시 허용
 
 ## 서버 접속
@@ -50,4 +50,3 @@ docker compose version
 - 운영 DB는 외부 공개 포트를 열지 않는 구성을 권장합니다.
 - 운영에서는 `nginx + spring boot + mysql` 구조를 권장합니다.
 - `.env`는 서버 내부에만 저장합니다.
-

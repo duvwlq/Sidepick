@@ -11,10 +11,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+    open-in-view: false
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
 
 management:
@@ -24,7 +24,7 @@ management:
         include: health,info
 
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:8081}
 
 springdoc:
   swagger-ui:
@@ -33,4 +33,3 @@ springdoc:
 logging:
   level:
     com.failforward: DEBUG
-
