@@ -1,92 +1,87 @@
-# Work Summary
+﻿# ?묒뾽 ?붿빟
 
-## Scope
+## 踰붿쐞
 
-This document summarizes the backend work completed so far for the FailForward project.
-The repository is currently aligned to a MySQL-based backend using Spring Boot, Docker Compose, and AWS EC2.
+??臾몄꽌???꾩옱源뚯? 吏꾪뻾??FailForward 諛깆뿏???묒뾽???뺣━??臾몄꽌?낅땲??
+?꾩옱 ??μ냼??Spring Boot, Docker Compose, AWS EC2, MySQL 湲곕컲 諛깆뿏??援ъ“濡??뺣━?섏뼱 ?덉뒿?덈떎.
 
-## Completed Work
+## ?꾨즺???묒뾽
 
-### Repository and Workflow
+### ??μ냼 諛??묒뾽 援ъ“
 
-- Created and configured the GitHub repository
-- Standardized team work on the `develop` branch
-- Organized project structure for `server`, `infra`, `docs`, and `scripts`
+- GitHub ??μ냼 ?앹꽦 諛?珥덇린 ?ㅼ젙 ?꾨즺
+- ? ?묒뾽 湲곗? 釉뚮옖移섎? `develop`?쇰줈 ?듭씪
+- `server`, `infra`, `docs`, `scripts` 以묒떖?쇰줈 ?꾨줈?앺듃 援ъ“ ?뺣━
 
-### Backend Bootstrap
+### 諛깆뿏??珥덇린 援ъ꽦
 
-- Bootstrapped a Spring Boot 3.2 backend with Java 17
-- Configured application settings for MySQL and Docker profile execution
-- Exposed Swagger UI and health check endpoints
+- Spring Boot 3.2? Java 17 湲곗? 諛깆뿏??遺?몄뒪?몃옪 援ъ꽦
+- MySQL 諛?Docker ?꾨줈??湲곗? ?좏뵆由ъ??댁뀡 ?ㅼ젙 ?뺣━
+- Swagger UI 諛??ъ뒪 泥댄겕 ?붾뱶?ъ씤???몄텧
 
-### Database
+### ?곗씠?곕쿋?댁뒪
 
-- Designed the initial MySQL schema based on the planning document
-- Added SQL bootstrap script at `infra/mysql/init/001_init.sql`
-- Reflected the schema in core JPA entities
+- 湲고쉷 臾몄꽌瑜?諛뷀깢?쇰줈 珥덇린 MySQL ?ㅽ궎留??ㅺ퀎
+- `infra/mysql/init/001_init.sql` 珥덇린 SQL ?묒꽦
+- 二쇱슂 ?뚯씠釉?援ъ“瑜?JPA ?뷀떚?곗뿉 諛섏쁺
 
-### API Skeleton
+### API 怨④꺽 援ы쁽
 
-- Added common API response and exception handling classes
-- Added controller, service, repository, and DTO skeletons for:
-  - authentication
-  - users
-  - categories
-  - failure experiences
-  - AI analysis
-  - similar case comparison
-  - decision records
-  - interactions
-  - comments
-- Updated the API structure document to match the current endpoint set
+- 怨듯넻 API ?묐떟 諛??덉쇅 泥섎━ ?대옒??異붽?
+- ?꾨옒 ?꾨찓?몄뿉 ???而⑦듃濡ㅻ윭, ?쒕퉬?? 由ы룷吏?좊━, DTO 怨④꺽 異붽?
+  - ?몄쬆
+  - ?ъ슜??  - 移댄뀒怨좊━
+  - ?ㅽ뙣 寃쏀뿕
+  - AI 遺꾩꽍
+  - ?좎궗 ?щ? 鍮꾧탳
+  - ?섏궗寃곗젙 湲곕줉
+  - ?곹샇?묒슜 湲곕줉
+  - ?볤?
+- ?꾩옱 援ы쁽 ?곹깭??留욊쾶 API 援ъ“ 臾몄꽌 媛깆떊
 
-### Local Environment
+### 濡쒖뺄 ?ㅽ뻾 ?섍꼍
 
-- Configured Docker Compose for backend and MySQL local execution
-- Added helper scripts for local start and stop
-- Added a Docker-based Maven wrapper to build without requiring local Maven installation
+- 諛깆뿏?쒖? MySQL???④퍡 ?꾩슦??Docker Compose 援ъ꽦 ?꾨즺
+- 濡쒖뺄 ?ㅽ뻾 諛?醫낅즺 蹂댁“ ?ㅽ겕由쏀듃 異붽?
+- 濡쒖뺄??Maven???놁뼱??鍮뚮뱶?????덈룄濡?Docker 湲곕컲 Maven wrapper 異붽?
 
-## Verification Status
+## 寃利??꾪솴
 
-### Local Verification
+### 濡쒖뺄 寃利?
+- 濡쒖뺄 Docker ?ㅽ뻾 ?뺤씤 ?꾨즺
+- 諛깆뿏??而⑦뀒?대꼫 湲곕룞 ?뺤씤 ?꾨즺
+- MySQL 而⑦뀒?대꼫 湲곕룞 ?뺤씤 ?꾨즺
+- Swagger UI `http://localhost:8081/swagger-ui.html` ?뺤씤 ?꾨즺
+- ?ъ뒪 泥댄겕 `http://localhost:8081/api/health` ?뺤씤 ?꾨즺
+- `.\mvnw.cmd -DskipTests package` 鍮뚮뱶 諛??⑦궎吏??깃났 ?뺤씤 ?꾨즺
 
-- Local Docker execution confirmed
-- Backend container startup confirmed
-- MySQL container startup confirmed
-- Swagger UI reachable at `http://localhost:8081/swagger-ui.html`
-- Health endpoint reachable at `http://localhost:8081/api/health`
-- Compile and package verification completed through `.\mvnw.cmd -DskipTests package`
+### EC2 寃利?
+- EC2 ?몄뒪?댁뒪 ?앹꽦 諛?湲곕낯 ?섍꼍 ?ㅼ젙 ?쒕룄 ?꾨즺
+- Docker 湲곕컲 諛고룷 ?ㅽ뻾 ?쒕룄 ?꾨즺
+- 而⑦뀒?대꼫 ?쒖옉 濡쒓렇源뚯????뺤씤 ?꾨즺
+- ?ㅻ쭔 ??ъ뼇 臾대즺 ?몄뒪?댁뒪?먯꽌??硫붾え由??쒖빟?쇰줈 ?몃? API 理쒖쥌 寃利앹씠 遺덉븞?뺥뻽??
+## ?꾩옱 寃곗젙 ?ы빆
 
-### EC2 Verification
+- ?곗씠?곕쿋?댁뒪??MySQL 諛⑺뼢?쇰줈 ?뺤젙
+- Supabase???꾩옱 諛깆뿏??踰붿쐞?먯꽌 ?ъ슜?섏? ?딆쓬
+- 諛고룷 ??곸? AWS EC2 + Docker ?좎?
+- ?몄쬆怨?AI ?ㅼ젣 ?댁쁺 濡쒖쭅? ?ㅼ쓬 ?④퀎?먯꽌 援ы쁽 ?덉젙
 
-- EC2 instances were created and base environment setup was attempted
-- Docker-based deployment was executed on EC2
-- Container startup logs were observed
-- Final external API verification on low-spec free-tier instances was unstable due to memory constraints
-
-## Current Decisions
-
-- Database direction is MySQL
-- Supabase is not used in the current backend scope
-- Deployment target remains AWS EC2 with Docker
-- Full authentication and AI production logic are deferred to later implementation stages
-
-## Submission Resources
-
-1. GitHub Repository
+## ?쒖텧??由ъ냼??
+1. GitHub ??μ냼
    - `https://github.com/duvwlq/Sidepick`
-2. EC2 Access Information
-   - Elastic IP used during setup: `13.209.95.216`
-3. Database Direction
-   - MySQL 8.4 with Docker Compose
-4. API Structure
+2. EC2 ?묒냽 ?뺣낫
+   - ?ㅼ젙 怨쇱젙?먯꽌 ?ъ슜??Elastic IP: `13.209.95.216`
+3. ?곗씠?곕쿋?댁뒪 諛⑺뼢
+   - Docker Compose 湲곕컲 MySQL 8.4
+4. API 援ъ“ 臾몄꽌
    - `docs/api-structure.md`
-5. Environment Setup Document
+5. ?섍꼍 ?ㅼ젙 臾몄꽌
    - `README.md`
 
-## Next Steps
+## ?ㅼ쓬 ?묒뾽
 
-- Replace stub auth with Spring Security and JWT
-- Connect controllers to real domain rules and persistence behavior
-- Integrate the backend with frontend requirements after receiving frontend work
-- Revisit EC2 deployment with either a lighter runtime strategy or a larger instance type
+- Spring Security? JWT 湲곕컲 ?몄쬆 援ы쁽
+- 而⑦듃濡ㅻ윭瑜??ㅼ젣 ?꾨찓??濡쒖쭅怨??곸냽??泥섎━濡??곌껐
+- ?꾨줎?몄뿏???묒뾽 ?섎졊 ??API ?곕룞 踰붿쐞 議곗젙
+- EC2 諛고룷????媛踰쇱슫 ?ㅽ뻾 ?꾨왂 ?먮뒗 ?곸쐞 ?몄뒪?댁뒪 ???湲곗??쇰줈 ?ш???

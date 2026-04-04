@@ -1,23 +1,21 @@
-# Git Flow Guide
+﻿# Git ?묒뾽 媛?대뱶
 
-## Default Branches
-
-- `main`: production-ready history
-- `develop`: integration branch for team work
-
-## Feature Branch Naming
+## 湲곕낯 釉뚮옖移?
+- `main`: 諛고룷 湲곗? ?대젰
+- `develop`: ? ?듯빀 ?묒뾽 釉뚮옖移?
+## 湲곕뒫 釉뚮옖移??대쫫 洹쒖튃
 
 - `feature/<topic>`
 - `fix/<topic>`
 - `docs/<topic>`
 
-Examples:
+?덉떆:
 
 - `feature/setup-project`
 - `feature/database-schema`
 - `feature/docker-setup`
 
-## Daily Workflow
+## ?쇱씪 ?묒뾽 ?먮쫫
 
 ```bash
 git checkout develop
@@ -25,7 +23,7 @@ git pull origin develop
 git checkout -b feature/<topic>
 ```
 
-Work on your branch, then:
+?묒뾽 ?꾩뿉???꾨옒 ?쒖꽌濡?吏꾪뻾?⑸땲??
 
 ```bash
 git add .
@@ -33,7 +31,7 @@ git commit -m "type: short summary"
 git push -u origin feature/<topic>
 ```
 
-## Commit Message Style
+## 而ㅻ컠 硫붿떆吏 洹쒖튃
 
 - `feat: ...`
 - `fix: ...`
@@ -42,9 +40,9 @@ git push -u origin feature/<topic>
 - `refactor: ...`
 - `test: ...`
 
-## Team Rules
+## ? ?묒뾽 洹쒖튃
 
-- Start from the latest `develop`
-- Do not commit `.env`
-- Do not commit local IDE settings
-- Keep infrastructure and schema changes documented in `docs/`
+- ??긽 理쒖떊 `develop`?먯꽌 ?묒뾽 ?쒖옉
+- `.env`??而ㅻ컠?섏? ?딆쓬
+- 媛쒖씤 IDE ?ㅼ젙 ?뚯씪? 而ㅻ컠?섏? ?딆쓬
+- ?명봽?쇱? ?ㅽ궎留?蹂寃??ы빆? `docs/`???④퍡 臾몄꽌??

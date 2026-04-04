@@ -1,36 +1,30 @@
-# Week 1 Status
+﻿# 1二쇱감 吏꾪뻾 ?꾪솴
 
-## Completed
+## ?꾨즺????ぉ
 
-- GitHub repository setup and `develop` branch workflow
-- Spring Boot backend bootstrap on Java 17
-- Docker Compose local environment with MySQL 8.4
-- MySQL schema SQL and JPA entity baseline
-- Health endpoint and Swagger UI exposure
-- API skeleton implementation based on the current OpenAPI draft
-- Docker-based Maven wrapper for local compile verification
-- EC2 setup guide and deployment helper scripts
+- GitHub ??μ냼 ?앹꽦 諛?`develop` 釉뚮옖移??묒뾽 ?먮쫫 ?뺣━
+- Java 17 湲곕컲 Spring Boot 諛깆뿏??珥덇린 援ъ꽦
+- MySQL 8.4 湲곕컲 Docker Compose 濡쒖뺄 ?섍꼍 援ъ꽦
+- MySQL ?ㅽ궎留?SQL 諛?JPA ?뷀떚??湲곕낯 援ъ“ 諛섏쁺
+- ?ъ뒪 泥댄겕 ?붾뱶?ъ씤??諛?Swagger UI ?몄텧
+- ?꾩옱 OpenAPI 珥덉븞??湲곗??쇰줈 API 怨④꺽 援ы쁽
+- 濡쒖뺄 Maven ?놁씠 鍮뚮뱶?????덈뒗 Docker 湲곕컲 Maven wrapper 異붽?
+- EC2 ?ㅼ젙 媛?대뱶 諛?諛고룷 蹂댁“ ?ㅽ겕由쏀듃 ?묒꽦
 
-## Verified
+## ?뺤씤 ?꾨즺
 
-- Local Docker environment can boot backend and MySQL
-- Swagger UI is exposed at `http://localhost:8081/swagger-ui.html`
-- Health endpoint is exposed at `http://localhost:8081/api/health`
-- `.\mvnw.cmd -DskipTests package` build succeeded
+- 濡쒖뺄 Docker ?섍꼍?먯꽌 諛깆뿏?쒖? MySQL ?ㅽ뻾 媛??- Swagger UI媛 `http://localhost:8081/swagger-ui.html` ?먯꽌 ?몄텧??- ?ъ뒪 泥댄겕媛 `http://localhost:8081/api/health` ?먯꽌 ?묐떟??- `.\mvnw.cmd -DskipTests package` 鍮뚮뱶 ?깃났 ?뺤씤
 
-## In Progress
+## 吏꾪뻾 以?
+- 臾대즺 ?먮뒗 ??ъ뼇 ?몄뒪?댁뒪?먯꽌 ?덉젙?곸씤 EC2 諛고룷 ?덉감 ?뺣━
+- ?꾩떆 ?ㅽ뀅 濡쒖쭅???ㅼ젣 ?몄쬆, ?곸냽?? AI ?곕룞 濡쒖쭅?쇰줈 援먯껜
 
-- Stable EC2 deployment workflow on free-tier sized instances
-- Replacement of stub logic with real auth, persistence, and AI integration
+## ?꾩옱 ?쒓퀎
 
-## Known Limits
+- Spring Security? JWT???꾩쭅 援ы쁽?섏? ?딆쓬
+- ?꾩옱 ?몄쬆 ?묐떟? ?꾩떆 ?좏겙 ?앹꽦 諛⑹떇?쇰줈 泥섎━??- ?쇰? API ?먮쫫? MVP 怨④꺽 援ы쁽???꾪빐 ?⑥닚?붾맂 ?ㅽ뀅 濡쒖쭅???ъ슜??- EC2 ?몃? 寃利앹? ??ъ뼇 ?몄뒪?댁뒪??硫붾え由??쒖빟?쇰줈 遺덉븞?뺥뻽??
+## ?덉떆 紐낆꽭? ?ㅻⅨ ?댁쑀
 
-- Spring Security and JWT are not implemented yet
-- Current auth responses use placeholder token generation
-- Some API flows use stub or simplified service logic for MVP scaffolding
-- EC2 external verification was unstable due to low-memory instance constraints
+?덉떆 紐낆꽭?먮뒗 Supabase/PostgreSQL怨?MySQL 諛⑺뼢???④퍡 ?욎뿬 ?덉뿀?듬땲??
+?꾩옱 ??μ냼??諛깆뿏???쇨??깃낵 Docker, EC2 諛고룷 ?⑥닚?붾? ?꾪빐 MySQL 諛⑺뼢?쇰줈 ?뺣━?섏뼱 ?덉뒿?덈떎.
 
-## Why This Differs From The Example Spec
-
-The example spec mixed Supabase/PostgreSQL and MySQL directions.
-This repository is aligned to the MySQL direction for backend consistency and simpler Docker and EC2 setup.

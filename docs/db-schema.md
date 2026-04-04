@@ -1,61 +1,55 @@
-# DB Schema Guide
+﻿# DB ?ㅽ궎留?媛?대뱶
 
-## Current Decision
+## ?꾩옱 寃곗젙 ?ы빆
 
-The week 1 backend bootstrap is built on MySQL.
-Local development uses MySQL 8.4 in Docker Compose.
-Deployment also uses the same MySQL-based container setup on EC2.
+1二쇱감 諛깆뿏??遺?몄뒪?몃옪? MySQL 湲곗??쇰줈 援ъ꽦?섏뼱 ?덉뒿?덈떎.
+濡쒖뺄 媛쒕컻? Docker Compose 湲곕컲 MySQL 8.4瑜??ъ슜?섍퀬, 諛고룷 ??떆 媛숈? MySQL 而⑦뀒?대꼫 援ъ꽦??湲곗??쇰줈 吏꾪뻾?⑸땲??
 
-## Tables
+## ?뚯씠釉?援ъ꽦
 
 ### `users`
 
-- account identity
-- nickname and profile info
-- active flag
-- created and updated timestamps
-
+- ?ъ슜??怨꾩젙 ?앸퀎 ?뺣낫
+- ?됰꽕??諛??꾨줈???뺣낫
+- ?쒖꽦???щ?
+- ?앹꽦??諛??섏젙??
 ### `failure_experiences`
 
-- main user post for a failure experience
-- business type, investment, duration, failure reason
-- optional market and marketing data
-- lessons learned and retry intent
-- public flag and counters
-
+- ?ъ슜?먭? ?깅줉???ㅽ뙣 寃쏀뿕 蹂몃Ц
+- ?ъ뾽 ?좏삎, ?ъ옄 湲덉븸, 湲곌컙, ?ㅽ뙣 ?먯씤
+- ?좏깮 ?낅젰???쒖옣 諛?留덉????뺣낫
+- 諛곗슫 ?먭낵 ?щ룄???섏궗
+- 怨듦컻 ?щ? 諛?議고쉶/醫뗭븘????
 ### `ai_analysis`
 
-- one analysis record per failure experience
-- failure reason tags
-- summary list
-- risk factor analysis
-- risk score
+- ?ㅽ뙣 寃쏀뿕 ?섎굹???섎굹??AI 遺꾩꽍 寃곌낵
+- ?ㅽ뙣 ?먯씤 ?쒓렇
+- ?붿빟 由ъ뒪??- ?꾪뿕 ?붿냼 遺꾩꽍
+- ?꾪뿕 ?먯닔
 
 ### `matched_cases`
 
-- similar failure cases linked to an AI analysis
-- title, summary, lesson, match rate
-
+- AI 遺꾩꽍 寃곌낵???곌껐?섎뒗 ?좎궗 ?ㅽ뙣 ?щ?
+- ?쒕ぉ, ?붿빟, 諛곗슱 ?? ?좎궗??
 ### `comments`
 
-- comments and nested replies
-- soft delete flag
+- ?볤? 諛???볤? 援ъ“
+- ?뚰봽????젣 ?щ? ?ы븿
 
-## Relationships
-
+## 愿怨?
 - `users 1:N failure_experiences`
 - `failure_experiences 1:1 ai_analysis`
 - `ai_analysis 1:N matched_cases`
 - `failure_experiences 1:N comments`
 - `users 1:N comments`
 
-## SQL Source
+## SQL ?먮낯
 
-- Schema file: `infra/mysql/init/001_init.sql`
+- ?ㅽ궎留??뚯씪: `infra/mysql/init/001_init.sql`
 
-## Notes
+## 李멸퀬 ?ы빆
 
-- JSON-shaped fields are stored with MySQL `JSON`
-- JPA runs with `ddl-auto: validate`
-- Schema and entity field names are aligned to the SQL file
-- The current SQL is aligned with local Docker MySQL and EC2 Docker deployment
+- JSON ?뺥깭 ?꾨뱶??MySQL `JSON` ??낆쑝濡????- JPA??`ddl-auto: validate` 湲곗??쇰줈 ?숈옉
+- ?뷀떚???꾨뱶紐낃낵 SQL 而щ읆紐낆? ?꾩옱 ?ㅽ궎留?湲곗??쇰줈 留욎떠???덉쓬
+- ?꾩옱 SQL? 濡쒖뺄 Docker MySQL怨?EC2 Docker 諛고룷 湲곗??쇰줈 ?뺣━?섏뼱 ?덉쓬
+
