@@ -1,31 +1,31 @@
-﻿# EC2 ?ㅼ젙 媛?대뱶
+# EC2 설정 가이드
 
-?꾩옱 ?꾨줈?앺듃??MySQL怨?Spring Boot瑜?Docker Compose濡??ㅽ뻾?섎뒗 援ъ“瑜??ъ슜?⑸땲??
+현재 프로젝트는 MySQL과 Spring Boot를 Docker Compose로 실행하는 구조를 사용합니다.
 
-## 沅뚯옣 ?몄뒪?댁뒪
+## 권장 인스턴스
 
 - OS: Ubuntu 22.04 LTS
-- 臾대즺 踰붿쐞 ?뚯뒪?몄슜: `t3.micro`
-- 蹂대떎 ?덉젙?곸씤 ?먭꺽 鍮뚮뱶?? `t3.small` ?댁긽
-- ?ㅽ넗由ъ?: 8 GB ?댁긽
+- 무료 범위 테스트용: `t3.micro`
+- 보다 안정적인 원격 빌드용: `t3.small` 이상
+- 스토리지: 8GB 이상
 
-## ?꾩닔 蹂댁븞 洹몃９ 洹쒖튃
+## 필수 보안 그룹 규칙
 
-- `SSH / 22 / ??IP`
+- `SSH / 22 / 내 IP`
 - `Custom TCP / 8081 / 0.0.0.0/0`
 
-臾몄젣 ?닿껐?⑹쑝濡??쇱떆?곸쑝濡??꾨옒 洹쒖튃???????덉뒿?덈떎.
+문제 해결용으로 일시적으로 아래 규칙을 열 수 있습니다.
 
 - `SSH / 22 / 0.0.0.0/0`
 
-?ㅼ젙???앸굹硫??꾩떆 SSH 洹쒖튃? ?ㅼ떆 ?쒓굅?섎뒗 寃껋쓣 沅뚯옣?⑸땲??
+설정이 끝나면 임시 SSH 규칙은 다시 제거하는 것을 권장합니다.
 
 ## Elastic IP
 
-媛숈? ?쒕쾭瑜?怨꾩냽 ?ъ슜???덉젙?대씪硫?Elastic IP瑜??곌껐?섎뒗 寃껋씠 醫뗭뒿?덈떎.
-?대젃寃??섎㈃ ?몄뒪?댁뒪瑜?以묒? ???ㅼ떆 ?쒖옉?대룄 怨듭씤 IP媛 諛붾뚯? ?딆뒿?덈떎.
+같은 서버를 계속 사용할 예정이라면 Elastic IP를 연결하는 것이 좋습니다.
+이렇게 하면 인스턴스를 중지 후 다시 시작해도 공인 IP가 바뀌지 않습니다.
 
-## 珥덇린 ?ㅼ젙 紐낅졊
+## 초기 설정 명령
 
 ```bash
 sudo apt update && sudo apt upgrade -y
@@ -37,11 +37,11 @@ sudo apt-get update
 sudo apt-get install -y docker-compose-plugin
 ```
 
-`docker` 洹몃９ 異붽? ?꾩뿉????踰??ㅼ떆 ?묒냽?섎뒗 寃껋씠 醫뗭뒿?덈떎.
+`docker` 그룹 추가 후에는 한 번 다시 접속하는 것이 좋습니다.
 
-## 諛고룷 紐낅졊
+## 배포 명령
 
-??μ냼媛 ?쒕쾭???대? ?덈뒗 寃쎌슦:
+저장소가 서버에 이미 있는 경우:
 
 ```bash
 cd ~/Sidepick
@@ -50,7 +50,7 @@ cp .env.example .env
 sudo docker compose -f infra/docker-compose.yml up -d --build
 ```
 
-濡쒖뺄?먯꽌 ?꾨줈?앺듃瑜?蹂듭궗????寃쎌슦:
+로컬에서 프로젝트를 복사해 둔 경우:
 
 ```bash
 cd ~/Sidepick
@@ -58,15 +58,14 @@ cp .env.example .env
 sudo docker compose -f infra/docker-compose.yml up -d --build
 ```
 
-## ?뺤씤 紐낅졊
+## 확인 명령
 
 ```bash
 sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
 curl http://localhost:8081/api/health
 ```
 
-?몃? ?뺤씤 二쇱냼:
+외부 확인 주소:
 
 - `http://<EC2_IP>:8081/api/health`
 - `http://<EC2_IP>:8081/swagger-ui.html`
-

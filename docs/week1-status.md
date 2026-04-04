@@ -1,30 +1,36 @@
-﻿# 1二쇱감 吏꾪뻾 ?꾪솴
+# 1주차 진행 현황
 
-## ?꾨즺????ぉ
+## 완료된 항목
 
-- GitHub ??μ냼 ?앹꽦 諛?`develop` 釉뚮옖移??묒뾽 ?먮쫫 ?뺣━
-- Java 17 湲곕컲 Spring Boot 諛깆뿏??珥덇린 援ъ꽦
-- MySQL 8.4 湲곕컲 Docker Compose 濡쒖뺄 ?섍꼍 援ъ꽦
-- MySQL ?ㅽ궎留?SQL 諛?JPA ?뷀떚??湲곕낯 援ъ“ 諛섏쁺
-- ?ъ뒪 泥댄겕 ?붾뱶?ъ씤??諛?Swagger UI ?몄텧
-- ?꾩옱 OpenAPI 珥덉븞??湲곗??쇰줈 API 怨④꺽 援ы쁽
-- 濡쒖뺄 Maven ?놁씠 鍮뚮뱶?????덈뒗 Docker 湲곕컲 Maven wrapper 異붽?
-- EC2 ?ㅼ젙 媛?대뱶 諛?諛고룷 蹂댁“ ?ㅽ겕由쏀듃 ?묒꽦
+- GitHub 저장소 생성 및 `develop` 브랜치 작업 흐름 정리
+- Java 17 기반 Spring Boot 백엔드 초기 구성
+- MySQL 8.4 기반 Docker Compose 로컬 환경 구성
+- MySQL 스키마 SQL 및 JPA 엔티티 기본 구조 반영
+- 헬스 체크 엔드포인트 및 Swagger UI 노출
+- 현재 OpenAPI 초안을 기준으로 API 골격 구현
+- 로컬 Maven 없이 빌드할 수 있는 Docker 기반 Maven wrapper 추가
+- EC2 설정 가이드 및 배포 보조 스크립트 작성
 
-## ?뺤씤 ?꾨즺
+## 확인 완료
 
-- 濡쒖뺄 Docker ?섍꼍?먯꽌 諛깆뿏?쒖? MySQL ?ㅽ뻾 媛??- Swagger UI媛 `http://localhost:8081/swagger-ui.html` ?먯꽌 ?몄텧??- ?ъ뒪 泥댄겕媛 `http://localhost:8081/api/health` ?먯꽌 ?묐떟??- `.\mvnw.cmd -DskipTests package` 鍮뚮뱶 ?깃났 ?뺤씤
+- 로컬 Docker 환경에서 백엔드와 MySQL 실행 가능
+- Swagger UI가 `http://localhost:8081/swagger-ui.html` 에서 노출됨
+- 헬스 체크가 `http://localhost:8081/api/health` 에서 응답함
+- `.\mvnw.cmd -DskipTests package` 빌드 성공 확인
 
-## 吏꾪뻾 以?
-- 臾대즺 ?먮뒗 ??ъ뼇 ?몄뒪?댁뒪?먯꽌 ?덉젙?곸씤 EC2 諛고룷 ?덉감 ?뺣━
-- ?꾩떆 ?ㅽ뀅 濡쒖쭅???ㅼ젣 ?몄쬆, ?곸냽?? AI ?곕룞 濡쒖쭅?쇰줈 援먯껜
+## 진행 중
 
-## ?꾩옱 ?쒓퀎
+- 무료 또는 저사양 인스턴스에서 안정적인 EC2 배포 절차 정리
+- 임시 스텁 로직을 실제 인증, 영속성, AI 연동 로직으로 교체
 
-- Spring Security? JWT???꾩쭅 援ы쁽?섏? ?딆쓬
-- ?꾩옱 ?몄쬆 ?묐떟? ?꾩떆 ?좏겙 ?앹꽦 諛⑹떇?쇰줈 泥섎━??- ?쇰? API ?먮쫫? MVP 怨④꺽 援ы쁽???꾪빐 ?⑥닚?붾맂 ?ㅽ뀅 濡쒖쭅???ъ슜??- EC2 ?몃? 寃利앹? ??ъ뼇 ?몄뒪?댁뒪??硫붾え由??쒖빟?쇰줈 遺덉븞?뺥뻽??
-## ?덉떆 紐낆꽭? ?ㅻⅨ ?댁쑀
+## 현재 한계
 
-?덉떆 紐낆꽭?먮뒗 Supabase/PostgreSQL怨?MySQL 諛⑺뼢???④퍡 ?욎뿬 ?덉뿀?듬땲??
-?꾩옱 ??μ냼??諛깆뿏???쇨??깃낵 Docker, EC2 諛고룷 ?⑥닚?붾? ?꾪빐 MySQL 諛⑺뼢?쇰줈 ?뺣━?섏뼱 ?덉뒿?덈떎.
+- Spring Security와 JWT는 아직 구현되지 않음
+- 현재 인증 응답은 임시 토큰 생성 방식으로 처리됨
+- 일부 API 흐름은 MVP 골격 구현을 위해 단순화된 스텁 로직을 사용함
+- EC2 외부 검증은 저사양 인스턴스의 메모리 제약으로 불안정했음
 
+## 예시 명세와 다른 이유
+
+예시 명세에는 Supabase/PostgreSQL과 MySQL 방향이 함께 섞여 있었습니다.
+현재 저장소는 백엔드 일관성과 Docker, EC2 배포 단순화를 위해 MySQL 방향으로 정리되어 있습니다.

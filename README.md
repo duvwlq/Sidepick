@@ -1,9 +1,9 @@
-﻿# FailForward Backend
+# FailForward Backend
 
-遺???ㅽ뙣 寃쏀뿕 援ъ“??怨듭쑀 ?뚮옯?쇱쓽 諛깆뿏??API ?쒕쾭 ??μ냼?낅땲??
-?꾩옱 ??μ냼??1二쇱감 踰붿쐞瑜?湲곗??쇰줈 MySQL, Docker, AWS EC2 ?섍꼍??留욎떠 ?뺣━?섏뼱 ?덉뒿?덈떎.
+부업 실패 경험 구조화 공유 플랫폼의 백엔드 API 서버 저장소입니다.
+현재 저장소는 1주차 범위를 기준으로 MySQL, Docker, AWS EC2 환경에 맞춰 정리되어 있습니다.
 
-## 湲곗닠 ?ㅽ깮
+## 기술 스택
 
 - Java 17
 - Spring Boot 3.2.12
@@ -12,7 +12,7 @@
 - Springdoc OpenAPI
 - Docker Compose
 
-## ??μ냼 援ъ“
+## 저장소 구조
 
 - `docs/git-flow.md`
 - `docs/ec2-setup.md`
@@ -25,9 +25,10 @@
 - `scripts`
 - `server`
 
-## 鍮좊Ⅸ ?쒖옉
+## 빠른 시작
 
-### 1. ?섍꼍 蹂???뚯씪 以鍮?
+### 1. 환경 변수 파일 준비
+
 Windows PowerShell:
 
 ```powershell
@@ -40,7 +41,7 @@ macOS / Linux:
 cp .env.example .env
 ```
 
-### 2. Docker濡??ㅽ뻾
+### 2. Docker로 실행
 
 Windows PowerShell:
 
@@ -54,14 +55,15 @@ macOS / Linux:
 ./scripts/dev-up.sh
 ```
 
-?먮뒗 Docker Compose瑜?吏곸젒 ?ㅽ뻾?????덉뒿?덈떎.
+또는 Docker Compose를 직접 실행할 수 있습니다.
 
 ```bash
 docker compose -f infra/docker-compose.yml up -d --build
 ```
 
-### 3. 濡쒖뺄 Maven ?놁씠 而댄뙆??
-????μ냼?먮뒗 Docker 湲곕컲 Maven wrapper媛 ?ы븿?섏뼱 ?덉뒿?덈떎.
+### 3. 로컬 Maven 없이 컴파일
+
+이 저장소에는 Docker 기반 Maven wrapper가 포함되어 있습니다.
 
 Windows PowerShell:
 
@@ -76,18 +78,18 @@ chmod +x ./mvnw
 ./mvnw -DskipTests package
 ```
 
-### 4. ?ㅽ뻾 ?뺤씤
+### 4. 실행 확인
 
-- ?좏뵆由ъ??댁뀡: `http://localhost:8081`
-- ?ъ뒪 泥댄겕: `http://localhost:8081/api/health`
+- 애플리케이션: `http://localhost:8081`
+- 헬스 체크: `http://localhost:8081/api/health`
 - Swagger UI: `http://localhost:8081/swagger-ui.html`
 
-## EC2 蹂댁“ ?ㅽ겕由쏀듃
+## EC2 보조 스크립트
 
 - `scripts/ec2-bootstrap.sh`
 - `scripts/ec2-deploy.sh`
 
-## 醫낅즺
+## 종료
 
 Windows PowerShell:
 
@@ -101,32 +103,31 @@ macOS / Linux:
 ./scripts/dev-down.sh
 ```
 
-## ? ?묒뾽 洹쒖튃
+## 팀 작업 규칙
 
-- 湲곕낯 ?묒뾽 釉뚮옖移섎뒗 `develop`?낅땲??
-- ?묒뾽 ?쒖옉 ??`git pull origin develop`???ㅽ뻾?⑸땲??
-- `.env`??濡쒖뺄?먯꽌留??앹꽦?섍퀬 而ㅻ컠?섏? ?딆뒿?덈떎.
-- 媛쒖씤 IDE ?ㅼ젙 ?뚯씪? 而ㅻ컠?섏? ?딆뒿?덈떎.
+- 기본 작업 브랜치는 `develop`입니다.
+- 작업 시작 전 `git pull origin develop`을 실행합니다.
+- `.env`는 로컬에서만 생성하고 커밋하지 않습니다.
+- 개인 IDE 설정 파일은 커밋하지 않습니다.
 
-## MySQL ?ъ슜 湲곗?
+## MySQL 사용 기준
 
-- 濡쒖뺄 媛쒕컻? `infra/docker-compose.yml`??`mysql` ?쒕퉬?ㅻ? ?ъ슜?⑸땲??
-- 珥덇린 ?ㅽ궎留?SQL ?뚯씪? `infra/mysql/init/001_init.sql`?낅땲??
-- EC2 諛고룷???숈씪??Docker Compose ?뚯씪??湲곗??쇰줈 吏꾪뻾?⑸땲??
-- ?꾩옱 1二쇱감 ??μ냼 踰붿쐞?먮뒗 Supabase ?곕룞???ы븿?섏뼱 ?덉? ?딆뒿?덈떎.
+- 로컬 개발은 `infra/docker-compose.yml`의 `mysql` 서비스를 사용합니다.
+- 초기 스키마 SQL 파일은 `infra/mysql/init/001_init.sql`입니다.
+- EC2 배포도 동일한 Docker Compose 파일을 기준으로 진행합니다.
+- 현재 1주차 저장소 범위에는 Supabase 연동이 포함되어 있지 않습니다.
 
-## 李멸퀬 臾몄꽌
+## 참고 문서
 
-1. Git ?묒뾽 洹쒖튃: `docs/git-flow.md`
-2. AWS EC2 ?ㅼ젙: `docs/ec2-setup.md`
-3. DB ?ㅽ궎留?諛?SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
-4. API 援ъ“: `docs/api-structure.md`
-5. 1二쇱감 吏꾪뻾 ?꾪솴: `docs/week1-status.md`
-6. ?묒뾽 ?붿빟: `docs/work-summary.md`
+1. Git 작업 규칙: `docs/git-flow.md`
+2. AWS EC2 설정: `docs/ec2-setup.md`
+3. DB 스키마 및 SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
+4. API 구조: `docs/api-structure.md`
+5. 1주차 진행 현황: `docs/week1-status.md`
+6. 작업 요약: `docs/work-summary.md`
 
-## 李멸퀬 ?ы빆
+## 참고 사항
 
-- 湲곕낯 ?ㅽ뻾 諛⑹떇? Docker 湲곗??낅땲??
-- EC2 諛고룷??`infra/docker-compose.yml` 湲곗??쇰줈 ?숈옉?⑸땲??
-- Security? JWT???댄썑 ?④퀎?먯꽌 援ы쁽???덉젙?대ŉ, ?꾩옱 1二쇱감 踰붿쐞?먮뒗 ?ы븿?섏뼱 ?덉? ?딆뒿?덈떎.
-
+- 기본 실행 방식은 Docker 기준입니다.
+- EC2 배포도 `infra/docker-compose.yml` 기준으로 동작합니다.
+- Security와 JWT는 이후 단계에서 구현할 예정이며, 현재 1주차 범위에는 포함되어 있지 않습니다.
