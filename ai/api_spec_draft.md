@@ -16,7 +16,10 @@
   "duration_months": 3
 }
 
-#### 응답(Response)
+---
+
+```markdown
+#### 요청(Request)
 ```json
 {
   "success": true,
