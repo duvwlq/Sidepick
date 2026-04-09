@@ -16,7 +16,8 @@
   "duration_months": 3
 }
 
-```markdown
+markdown```
+
 #### 요청(Request)
 ```json
 {
