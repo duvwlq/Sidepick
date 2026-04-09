@@ -17,6 +17,7 @@
 }
 
 #### 응답(Response)
+```json
 {
   "success": true,
   "data": {
@@ -37,6 +38,7 @@
 **POST /api/ai/similar**
 
 #### 요청(Request)
+```json
 {
   "experience_id": 123,
   "content": "온라인 쇼핑몰 실패 경험...",
@@ -45,6 +47,7 @@
 }
 
 #### 응답(Response)
+```json
 {
   "success": true,
   "data": {
@@ -61,3 +64,23 @@
     "processing_time": "1.1초"
   }
 }
+
+### 에러 처리
+
+#### 에러 응답 형식
+{
+  "success": false,
+  "error": {
+    "code": "AI_MODEL_ERROR",
+    "message": "AI 모델 처리 중 오류가 발생했습니다",
+    "details": "CUDA out of memory"
+  },
+  "retry_after": 30
+}
+
+#### 에러 코드 정의
+**INPUT_VALIDATION_ERROR: 입력 데이터 검증 실패
+AI_MODEL_ERROR: AI 모델 처리 오류
+INSUFFICIENT_DATA: 분석할 데이터 부족
+TIMEOUT_ERROR: 처리 시간 초과
+SERVER_OVERLOAD: 서버 과부하**
