@@ -86,9 +86,13 @@
 
 #### 에러 코드 정의
 **INPUT_VALIDATION_ERROR: 입력 데이터 검증 실패**
+
 **AI_MODEL_ERROR: AI 모델 처리 오류**
+
 **INSUFFICIENT_DATA: 분석할 데이터 부족**
+
 **TIMEOUT_ERROR: 처리 시간 초과**
+
 **SERVER_OVERLOAD: 서버 과부하**
 
 
