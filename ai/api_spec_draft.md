@@ -15,10 +15,9 @@
   "investment_amount": 3000000,
   "duration_months": 3
 }
+```
 
-markdown```
-
-#### 요청(Request)
+#### 응답(Response)
 ```json
 {
   "success": true,
@@ -35,6 +34,7 @@ markdown```
   },
   "message": "분석 완료"
 }
+```
 
 ### 2. 유사 사례 검색 API
 **POST /api/ai/similar**
@@ -47,6 +47,7 @@ markdown```
   "limit": 5,
   "min_similarity": 0.7
 }
+```
 
 #### 응답(Response)
 ```json
@@ -66,10 +67,12 @@ markdown```
     "processing_time": "1.1초"
   }
 }
+```
 
 ### 에러 처리
 
 #### 에러 응답 형식
+```json
 {
   "success": false,
   "error": {
@@ -79,6 +82,7 @@ markdown```
   },
   "retry_after": 30
 }
+```
 
 #### 에러 코드 정의
 **INPUT_VALIDATION_ERROR: 입력 데이터 검증 실패
