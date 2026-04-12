@@ -15,7 +15,7 @@ public final class AuthDtos {
             @Email @NotBlank String email,
             @NotBlank @Size(min = 8) String password,
             @NotBlank @Size(min = 2, max = 20) String nickname,
-            @NotBlank String ageGroup
+            String ageGroup
     ) {
     }
 
@@ -47,8 +47,10 @@ public final class AuthDtos {
 
     public record AuthPayload(
             UserSummary user,
+            String tokenType,
             String accessToken,
-            String refreshToken
+            String refreshToken,
+            long accessTokenExpiresIn
     ) {
     }
 }

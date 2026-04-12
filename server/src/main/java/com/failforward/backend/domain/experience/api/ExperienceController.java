@@ -9,6 +9,8 @@ import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceRe
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceUpdateRequest;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.SimilarityMatchResponse;
 import com.failforward.backend.domain.experience.service.ExperienceService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -25,56 +27,64 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/experiences")
+@RequestMapping({"/api/experiences", "/experiences"})
 @RequiredArgsConstructor
+@Tag(name = "Experiences", description = "Failure experience APIs")
 public class ExperienceController {
 
     private final ExperienceService experienceService;
 
+    @Operation(summary = "경험담 목록 조회")
     @GetMapping
     public ApiResponse<ExperienceListPayload> getExperiences(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String failureReason
     ) {
-        return ApiResponse.ok("실패 경험 목록 조회 성공", experienceService.getList(page, size, failureReason));
+        return ApiResponse.ok("Experiences loaded.", experienceService.getList(page, size, failureReason));
     }
 
+    @Operation(summary = "경험담 작성")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ExperienceResponse> createExperience(@Valid @RequestBody ExperienceCreateRequest request) {
-        return ApiResponse.ok("실패 경험 등록 성공", experienceService.create(request));
+        return ApiResponse.ok("Experience created.", experienceService.create(request));
     }
 
+    @Operation(summary = "경험담 상세 조회")
     @GetMapping("/{experienceId}")
     public ApiResponse<ExperienceResponse> getExperience(@PathVariable Long experienceId) {
-        return ApiResponse.ok("실패 경험 상세 조회 성공", experienceService.getDetail(experienceId));
+        return ApiResponse.ok("Experience loaded.", experienceService.getDetail(experienceId));
     }
 
+    @Operation(summary = "경험담 수정")
     @PatchMapping("/{experienceId}")
     public ApiResponse<ExperienceResponse> updateExperience(
             @PathVariable Long experienceId,
             @Valid @RequestBody ExperienceUpdateRequest request
     ) {
-        return ApiResponse.ok("실패 경험 수정 성공", experienceService.update(experienceId, request));
+        return ApiResponse.ok("Experience updated.", experienceService.update(experienceId, request));
     }
 
+    @Operation(summary = "경험담 삭제")
     @DeleteMapping("/{experienceId}")
     public ApiResponse<Void> deleteExperience(@PathVariable Long experienceId) {
         experienceService.delete(experienceId);
-        return ApiResponse.ok("실패 경험 삭제 성공", null);
+        return ApiResponse.ok("Experience deleted.", null);
     }
 
+    @Operation(summary = "유사 경험담 조회")
     @GetMapping("/{experienceId}/similar")
     public ApiResponse<List<SimilarityMatchResponse>> getSimilarExperiences(
             @PathVariable Long experienceId,
             @RequestParam(defaultValue = "10") int limit
     ) {
-        return ApiResponse.ok("유사 사례 조회 성공", experienceService.getSimilar(experienceId, limit));
+        return ApiResponse.ok("Similar experiences loaded.", experienceService.getSimilar(experienceId, limit));
     }
 
+    @Operation(summary = "경험담 비교")
     @PostMapping("/compare")
     public ApiResponse<CompareResponse> compareExperiences(@RequestBody CompareRequest request) {
-        return ApiResponse.ok("실패 경험 비교 분석 성공", experienceService.compare(request.experienceIds()));
+        return ApiResponse.ok("Experiences compared.", experienceService.compare(request.experienceIds()));
     }
 }

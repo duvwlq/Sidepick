@@ -3,70 +3,97 @@ package com.failforward.backend.domain.experience.service;
 import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.api.PageInfo;
+import com.failforward.backend.common.security.CurrentUserProvider;
+import com.failforward.backend.common.support.CategoryCatalog;
 import com.failforward.backend.domain.analysis.repository.AiAnalysisRepository;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
 import com.failforward.backend.domain.user.entity.User;
-import com.failforward.backend.domain.user.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ExperienceService {
 
     private final FailureExperienceRepository experienceRepository;
     private final AiAnalysisRepository analysisRepository;
-    private final UserRepository userRepository;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final CurrentUserProvider currentUserProvider;
+    private final ObjectMapper objectMapper;
 
+    @Transactional
     public ExperienceDtos.ExperienceResponse create(ExperienceDtos.ExperienceCreateRequest request) {
-        User author = getCurrentUser();
-        FailureExperience saved = experienceRepository.save(buildExperience(author, request));
+        User author = currentUserProvider.getCurrentUserEntity();
+        ExperiencePayload payload = buildPayload(request);
+        FailureExperience saved = experienceRepository.save(FailureExperience.create(
+                author,
+                payload.title(),
+                payload.content(),
+                payload.businessType(),
+                payload.investmentAmount(),
+                payload.durationMonths(),
+                payload.failureReason(),
+                payload.targetMarket(),
+                payload.marketingChannelsJson(),
+                payload.lessonsLearned(),
+                payload.wouldRetry(),
+                payload.structuredDataJson()
+        ));
         return ExperienceDtos.ExperienceResponse.from(saved, null);
     }
 
+    @Transactional
     public ExperienceDtos.ExperienceResponse update(Long experienceId, ExperienceDtos.ExperienceUpdateRequest request) {
         FailureExperience experience = getExperienceEntity(experienceId);
-        ExperiencePayload payload = buildPayload(request.categoryId(), request.businessType(), request.investmentAmount(),
-                request.durationMonths(), request.failureReason(), request.targetMarket(), request.marketingChannels(),
-                request.lessonsLearned(), request.wouldRetry());
+        validateOwner(experience);
 
+        ExperiencePayload payload = buildPayload(request);
         experience.update(
                 payload.title(),
                 payload.content(),
-                request.businessType(),
-                request.investmentAmount(),
-                request.durationMonths(),
-                request.failureReason(),
-                request.targetMarket(),
-                payload.marketingChannels(),
-                request.lessonsLearned(),
-                request.wouldRetry(),
-                payload.structuredData()
+                payload.businessType(),
+                payload.investmentAmount(),
+                payload.durationMonths(),
+                payload.failureReason(),
+                payload.targetMarket(),
+                payload.marketingChannelsJson(),
+                payload.lessonsLearned(),
+                payload.wouldRetry(),
+                payload.structuredDataJson()
         );
 
         FailureExperience saved = experienceRepository.save(experience);
         return ExperienceDtos.ExperienceResponse.from(saved, analysisRepository.findByExperience(saved).orElse(null));
     }
 
+    @Transactional
     public void delete(Long experienceId) {
-        experienceRepository.delete(getExperienceEntity(experienceId));
+        FailureExperience experience = getExperienceEntity(experienceId);
+        validateOwner(experience);
+        experienceRepository.delete(experience);
     }
 
     public ExperienceDtos.ExperienceListPayload getList(int page, int size, String failureReason) {
         List<FailureExperience> filtered = experienceRepository.findAll().stream()
-                .filter(experience -> failureReason == null || failureReason.equals(experience.getFailureReason()))
+                .filter(FailureExperience::getIsPublic)
+                .filter(experience -> failureReason == null || failureReason.isBlank()
+                        || failureReason.equalsIgnoreCase(experience.getFailureReason()))
+                .sorted(Comparator.comparing(FailureExperience::getCreatedAt).reversed())
                 .toList();
 
+        int safePage = Math.max(page, 0);
         int safeSize = size <= 0 ? 20 : size;
-        int fromIndex = Math.min(page * safeSize, filtered.size());
+        int fromIndex = Math.min(safePage * safeSize, filtered.size());
         int toIndex = Math.min(fromIndex + safeSize, filtered.size());
 
         List<ExperienceDtos.ExperienceResponse> experiences = filtered.subList(fromIndex, toIndex).stream()
@@ -79,10 +106,11 @@ public class ExperienceService {
         int totalPages = filtered.isEmpty() ? 0 : (int) Math.ceil((double) filtered.size() / safeSize);
         return new ExperienceDtos.ExperienceListPayload(
                 experiences,
-                new PageInfo(page, safeSize, filtered.size(), totalPages, toIndex < filtered.size())
+                new PageInfo(safePage, safeSize, filtered.size(), totalPages, toIndex < filtered.size())
         );
     }
 
+    @Transactional
     public ExperienceDtos.ExperienceResponse getDetail(Long experienceId) {
         FailureExperience experience = getExperienceEntity(experienceId);
         experience.increaseViewCount();
@@ -93,16 +121,17 @@ public class ExperienceService {
     public List<ExperienceDtos.SimilarityMatchResponse> getSimilar(Long experienceId, int limit) {
         FailureExperience target = getExperienceEntity(experienceId);
         return experienceRepository.findAll().stream()
+                .filter(FailureExperience::getIsPublic)
                 .filter(candidate -> !candidate.getId().equals(experienceId))
                 .map(candidate -> toSimilarity(target, candidate))
                 .sorted((left, right) -> Double.compare(right.similarityScore(), left.similarityScore()))
-                .limit(limit)
+                .limit(Math.max(limit, 1))
                 .toList();
     }
 
     public ExperienceDtos.CompareResponse compare(List<Long> experienceIds) {
         if (experienceIds == null || experienceIds.size() < 2) {
-            throw new BadRequestException("비교할 실패 경험 ID를 2개 이상 전달해야 합니다.");
+            throw new BadRequestException("At least two experience IDs are required.");
         }
 
         List<FailureExperience> experiences = experienceIds.stream()
@@ -119,33 +148,40 @@ public class ExperienceService {
 
         List<String> commonPatterns = experiences.stream()
                 .map(FailureExperience::getFailureReason)
+                .filter(reason -> reason != null && !reason.isBlank())
                 .distinct()
                 .limit(3)
-                .map(reason -> "공통 실패 원인 후보: " + reason)
+                .map(reason -> "Shared failure reason: " + reason)
                 .toList();
 
         List<String> differences = experiences.stream()
                 .map(FailureExperience::getBusinessType)
+                .filter(type -> type != null && !type.isBlank())
                 .distinct()
                 .limit(3)
-                .map(type -> "사업 유형 차이: " + type)
+                .map(type -> "Different business type: " + type)
                 .toList();
 
         return new ExperienceDtos.CompareResponse(
                 payload,
                 commonPatterns,
                 differences,
-                List.of("마케팅 전략 사전 점검", "시장 검증 이후 재도전")
+                List.of(
+                        "Validate customer demand before spending more budget.",
+                        "Reduce scope and test faster with a smaller release."
+                )
         );
     }
 
     public FailureExperience getExperienceEntity(Long experienceId) {
         return experienceRepository.findById(experienceId)
-                .orElseThrow(() -> new NotFoundException("실패 경험을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("Experience not found."));
     }
 
-    private FailureExperience buildExperience(User author, ExperienceDtos.ExperienceCreateRequest request) {
-        ExperiencePayload payload = buildPayload(
+    private ExperiencePayload buildPayload(ExperienceDtos.ExperienceCreateRequest request) {
+        return buildPayload(
+                request.title(),
+                request.content(),
                 request.categoryId(),
                 request.businessType(),
                 request.investmentAmount(),
@@ -156,24 +192,27 @@ public class ExperienceService {
                 request.lessonsLearned(),
                 request.wouldRetry()
         );
+    }
 
-        return FailureExperience.create(
-                author,
-                payload.title(),
-                payload.content(),
+    private ExperiencePayload buildPayload(ExperienceDtos.ExperienceUpdateRequest request) {
+        return buildPayload(
+                request.title(),
+                request.content(),
+                request.categoryId(),
                 request.businessType(),
                 request.investmentAmount(),
                 request.durationMonths(),
                 request.failureReason(),
                 request.targetMarket(),
-                payload.marketingChannels(),
+                request.marketingChannels(),
                 request.lessonsLearned(),
-                request.wouldRetry(),
-                payload.structuredData()
+                request.wouldRetry()
         );
     }
 
     private ExperiencePayload buildPayload(
+            String title,
+            String content,
             Long categoryId,
             String businessType,
             Integer investmentAmount,
@@ -184,20 +223,30 @@ public class ExperienceService {
             String lessonsLearned,
             Boolean wouldRetry
     ) {
+        CategoryCatalog.CategoryItem categoryItem = CategoryCatalog.getById(categoryId);
+        String resolvedBusinessType = hasText(businessType) ? businessType : categoryItem.name();
+        String resolvedFailureReason = hasText(failureReason) ? failureReason : "UNSPECIFIED";
+        String resolvedTitle = hasText(title) ? title : resolvedBusinessType + " failure experience";
+        String resolvedLessons = hasText(lessonsLearned) ? lessonsLearned : content;
+
         Map<String, Object> structured = new HashMap<>();
         structured.put("categoryId", categoryId);
+        structured.put("categoryName", categoryItem.name());
         structured.put("targetMarket", targetMarket);
-        structured.put("wouldRetry", wouldRetry);
-
-        String title = businessType + " 실패 경험";
-        String content = lessonsLearned != null && !lessonsLearned.isBlank()
-                ? lessonsLearned
-                : failureReason + " 관련 실패 경험";
+        structured.put("wouldRetry", wouldRetry != null ? wouldRetry : Boolean.FALSE);
 
         return new ExperiencePayload(
-                title,
+                resolvedTitle,
                 content,
-                writeJson(marketingChannels),
+                resolvedBusinessType,
+                investmentAmount,
+                durationMonths,
+                resolvedFailureReason,
+                targetMarket,
+                marketingChannels == null ? List.of() : marketingChannels,
+                resolvedLessons,
+                wouldRetry != null ? wouldRetry : Boolean.FALSE,
+                writeJson(marketingChannels == null ? List.of() : marketingChannels),
                 writeJson(structured)
         );
     }
@@ -209,25 +258,25 @@ public class ExperienceService {
 
         if (target.getBusinessType().equals(candidate.getBusinessType())) {
             score += 0.3;
-            matching.add("동일한 업종 (" + candidate.getBusinessType() + ")");
+            matching.add("Same business type");
         } else {
-            differences.add("업종 차이");
+            differences.add("Business type differs");
         }
 
         if (target.getFailureReason().equals(candidate.getFailureReason())) {
             score += 0.2;
-            matching.add("유사한 실패 원인 (" + candidate.getFailureReason() + ")");
+            matching.add("Same failure reason");
         } else {
-            differences.add("실패 원인 차이");
+            differences.add("Failure reason differs");
         }
 
         if (target.getInvestmentAmount() != null && candidate.getInvestmentAmount() != null) {
             int gap = Math.abs(target.getInvestmentAmount() - candidate.getInvestmentAmount());
             if (gap <= 500000) {
                 score += 0.1;
-                matching.add("유사한 투자 규모");
+                matching.add("Similar investment amount");
             } else {
-                differences.add("투자 규모 차이");
+                differences.add("Investment amount differs");
             }
         }
 
@@ -242,24 +291,38 @@ public class ExperienceService {
         );
     }
 
-    private User getCurrentUser() {
-        return userRepository.findAll().stream().findFirst()
-                .orElseThrow(() -> new BadRequestException("회원가입한 사용자가 없어 실패 경험을 생성할 수 없습니다."));
+    private void validateOwner(FailureExperience experience) {
+        User currentUser = currentUserProvider.getCurrentUserEntity();
+        if (!experience.getUser().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You can only modify your own experience.");
+        }
     }
 
     private String writeJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
         } catch (Exception exception) {
-            throw new BadRequestException("JSON 데이터 직렬화에 실패했습니다.");
+            throw new BadRequestException("Failed to serialize JSON payload.");
         }
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private record ExperiencePayload(
             String title,
             String content,
-            String marketingChannels,
-            String structuredData
+            String businessType,
+            Integer investmentAmount,
+            Integer durationMonths,
+            String failureReason,
+            String targetMarket,
+            List<String> marketingChannels,
+            String lessonsLearned,
+            Boolean wouldRetry,
+            String marketingChannelsJson,
+            String structuredDataJson
     ) {
     }
 }

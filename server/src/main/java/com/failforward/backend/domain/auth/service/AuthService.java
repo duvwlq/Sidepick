@@ -1,22 +1,28 @@
 package com.failforward.backend.domain.auth.service;
 
 import com.failforward.backend.common.api.BadRequestException;
+import com.failforward.backend.common.security.JwtTokenProvider;
 import com.failforward.backend.domain.auth.dto.AuthDtos.AuthPayload;
 import com.failforward.backend.domain.auth.dto.AuthDtos.LoginRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.SignUpRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.UserSummary;
 import com.failforward.backend.domain.user.entity.User;
 import com.failforward.backend.domain.user.repository.UserRepository;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
+    @Transactional
     public AuthPayload signUp(SignUpRequest request) {
         userRepository.findByEmail(request.email())
                 .ifPresent(user -> {
@@ -29,21 +35,36 @@ public class AuthService {
 
         User user = userRepository.save(User.create(
                 request.email(),
-                request.password(),
+                passwordEncoder.encode(request.password()),
                 request.nickname(),
-                request.ageGroup()
+                normalizeAgeGroup(request.ageGroup())
         ));
-        return new AuthPayload(UserSummary.from(user), issueToken(), issueToken());
+        return issueAuthPayload(user);
     }
 
     public AuthPayload login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
-                .filter(found -> found.getPassword().equals(request.password()))
                 .orElseThrow(() -> new BadRequestException("Email or password is invalid."));
-        return new AuthPayload(UserSummary.from(user), issueToken(), issueToken());
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new BadRequestException("Email or password is invalid.");
+        }
+        return issueAuthPayload(user);
     }
 
-    private String issueToken() {
-        return UUID.randomUUID().toString();
+    private AuthPayload issueAuthPayload(User user) {
+        return new AuthPayload(
+                UserSummary.from(user),
+                "Bearer",
+                jwtTokenProvider.generateAccessToken(user),
+                jwtTokenProvider.generateRefreshToken(user),
+                3600L
+        );
+    }
+
+    private String normalizeAgeGroup(String ageGroup) {
+        if (ageGroup == null || ageGroup.isBlank()) {
+            return "UNKNOWN";
+        }
+        return ageGroup;
     }
 }

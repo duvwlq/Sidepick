@@ -22,11 +22,13 @@ public final class ExperienceDtos {
     }
 
     public record ExperienceCreateRequest(
+            String title,
+            @NotBlank String content,
             @NotNull Long categoryId,
-            @NotBlank String businessType,
+            String businessType,
             Integer investmentAmount,
             Integer durationMonths,
-            @NotBlank String failureReason,
+            String failureReason,
             String targetMarket,
             List<String> marketingChannels,
             String lessonsLearned,
@@ -35,11 +37,13 @@ public final class ExperienceDtos {
     }
 
     public record ExperienceUpdateRequest(
+            String title,
+            @NotBlank String content,
             @NotNull Long categoryId,
-            @NotBlank String businessType,
+            String businessType,
             Integer investmentAmount,
             Integer durationMonths,
-            @NotBlank String failureReason,
+            String failureReason,
             String targetMarket,
             List<String> marketingChannels,
             String lessonsLearned,
@@ -52,6 +56,7 @@ public final class ExperienceDtos {
             UserSummary author,
             CategoryResponse category,
             String title,
+            String content,
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
@@ -86,6 +91,7 @@ public final class ExperienceDtos {
                             categoryItem.color()
                     ),
                     experience.getTitle(),
+                    experience.getContent(),
                     experience.getBusinessType(),
                     experience.getInvestmentAmount(),
                     experience.getDurationMonths(),

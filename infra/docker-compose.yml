@@ -35,7 +35,7 @@ services:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:mysql://mysql:3306/failforward?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-failforward}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-failforward}
-      JWT_SECRET: ${JWT_SECRET:-change-me}
+      APP_JWT_SECRET: ${APP_JWT_SECRET:-sidepick-development-jwt-secret-key-must-be-32-bytes}
     ports:
       - "8081:8081"
 

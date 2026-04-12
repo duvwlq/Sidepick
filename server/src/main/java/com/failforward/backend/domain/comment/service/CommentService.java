@@ -2,6 +2,7 @@ package com.failforward.backend.domain.comment.service;
 
 import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
+import com.failforward.backend.common.security.CurrentUserProvider;
 import com.failforward.backend.domain.comment.dto.CommentCreateRequest;
 import com.failforward.backend.domain.comment.dto.CommentCreateRequest.CommentResponse;
 import com.failforward.backend.domain.comment.entity.Comment;
@@ -9,7 +10,6 @@ import com.failforward.backend.domain.comment.repository.CommentRepository;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
 import com.failforward.backend.domain.user.entity.User;
-import com.failforward.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +19,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final FailureExperienceRepository experienceRepository;
-    private final UserRepository userRepository;
+    private final CurrentUserProvider currentUserProvider;
 
     public CommentResponse create(Long experienceId, CommentCreateRequest request) {
         FailureExperience experience = experienceRepository.findById(experienceId)
@@ -54,7 +54,10 @@ public class CommentService {
     }
 
     private User getCurrentUser() {
-        return userRepository.findAll().stream().findFirst()
-                .orElseThrow(() -> new BadRequestException("A user is required to create comments."));
+        try {
+            return currentUserProvider.getCurrentUserEntity();
+        } catch (Exception exception) {
+            throw new BadRequestException("A user is required to create comments.");
+        }
     }
 }
