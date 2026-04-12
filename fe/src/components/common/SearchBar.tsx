@@ -1,29 +1,26 @@
-import searchIcon from '../../assets/images/Search.svg';
+import searchIcon from '../../assets/images/search.svg';
 
 type SearchBarProps = {
   placeholder?: string;
   value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 export default function SearchBar({
-  placeholder = '원하는 실패 사례를 검색해보세요!',
+  placeholder = '현재는 목록 조회만 연결되어 있습니다.',
   value,
   onChange,
 }: SearchBarProps) {
   return (
-    <div className="flex items-center bg-gray-100 rounded-[999px] h-10 px-4 py-2.5">
-      {/* 인풋 */}
+    <div className="flex h-10 items-center rounded-[999px] bg-gray-100 px-4 py-2.5">
       <input
         type="text"
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="bg-transparent outline-none flex-1 text-sm"
+        className="flex-1 bg-transparent text-sm outline-none"
       />
-
-      {/* 아이콘 */}
-      <img src={searchIcon} alt="검색" className="w-6 h-6 text-gray-400" />
+      <img src={searchIcon} alt="검색" className="h-6 w-6 text-gray-400" />
     </div>
   );
 }
