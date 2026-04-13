@@ -35,6 +35,7 @@ This repository does not use the standard Maven wrapper. The root `mvnw` scripts
 Prerequisites:
 
 - MySQL running with the schema from `infra/mysql/init/001_init.sql`
+- The schema now includes the `business_categories` table and seed data
 - Docker Desktop running if you use the provided wrapper scripts
 
 Run from the repo root:
@@ -122,5 +123,6 @@ If `title`, `businessType`, or `failureReason` are missing, the server fills def
 ## Known Gaps
 
 - Refresh token rotation is not implemented yet.
-- Business categories are still backed by the in-code catalog, not a database table.
+- Logout and token invalidation are not implemented yet.
+- User deactivation status is not reflected in auth decisions yet.
 - Automated build verification requires Docker Desktop or a local Maven installation.
