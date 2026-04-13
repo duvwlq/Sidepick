@@ -27,7 +27,7 @@ public class AnalysisService {
     public PatternAnalysisResponse getAnalysis(Long experienceId) {
         FailureExperience experience = getExperience(experienceId);
         AiAnalysis analysis = analysisRepository.findByExperience(experience)
-                .orElseThrow(() -> new NotFoundException("분석 결과를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("Analysis result not found."));
         return PatternAnalysisResponse.from(analysis);
     }
 
@@ -40,7 +40,7 @@ public class AnalysisService {
 
     public List<MatchedCaseResponse> getMatchedCases(Long analysisId) {
         AiAnalysis analysis = analysisRepository.findById(analysisId)
-                .orElseThrow(() -> new NotFoundException("분석 결과를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("Analysis result not found."));
         return matchedCaseRepository.findByAnalysis(analysis).stream()
                 .map(MatchedCaseResponse::from)
                 .toList();
@@ -49,18 +49,21 @@ public class AnalysisService {
     private AiAnalysis saveGeneratedAnalysis(FailureExperience experience) {
         AiAnalysis analysis = analysisRepository.save(AiAnalysis.create(
                 experience,
-                writeJson(List.of(experience.getFailureReason(), "구조화 재검토 필요")),
-                writeJson(List.of(experience.getBusinessType() + " 실패 경험 요약", "재도전 전 전략 보완 필요")),
-                "마케팅, 시장 검증, 자금 계획 측면에서 보완이 필요한 것으로 분석되었습니다.",
+                writeJson(List.of(experience.getFailureReason(), "Need better structure validation")),
+                writeJson(List.of(
+                        experience.getBusinessType() + " failure experience summary",
+                        "Budget and validation plan need improvement"
+                )),
+                "The current analysis suggests stronger market validation and tighter budget planning.",
                 BigDecimal.valueOf(0.87)
         ));
 
         matchedCaseRepository.save(MatchedCase.create(
                 analysis,
                 "CASE-" + experience.getId(),
-                experience.getBusinessType() + " 유사 사례",
+                experience.getBusinessType() + " similar case",
                 experience.getLessonsLearned(),
-                "실패 원인과 자금 계획을 함께 검토할 것",
+                "Review the failure reason and budget plan before the next attempt.",
                 92
         ));
 
@@ -69,14 +72,14 @@ public class AnalysisService {
 
     private FailureExperience getExperience(Long experienceId) {
         return experienceRepository.findById(experienceId)
-                .orElseThrow(() -> new NotFoundException("실패 경험을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("Experience not found."));
     }
 
     private String writeJson(List<String> value) {
         try {
             return objectMapper.writeValueAsString(value);
         } catch (Exception exception) {
-            throw new IllegalStateException("분석 데이터 생성에 실패했습니다.", exception);
+            throw new IllegalStateException("Failed to create analysis payload.", exception);
         }
     }
 }

@@ -4,8 +4,9 @@ import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.api.PageInfo;
 import com.failforward.backend.common.security.CurrentUserProvider;
-import com.failforward.backend.common.support.CategoryCatalog;
 import com.failforward.backend.domain.analysis.repository.AiAnalysisRepository;
+import com.failforward.backend.domain.category.entity.BusinessCategory;
+import com.failforward.backend.domain.category.service.CategoryService;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
@@ -29,6 +30,7 @@ public class ExperienceService {
     private final FailureExperienceRepository experienceRepository;
     private final AiAnalysisRepository analysisRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final CategoryService categoryService;
     private final ObjectMapper objectMapper;
 
     @Transactional
@@ -37,6 +39,7 @@ public class ExperienceService {
         ExperiencePayload payload = buildPayload(request);
         FailureExperience saved = experienceRepository.save(FailureExperience.create(
                 author,
+                payload.category(),
                 payload.title(),
                 payload.content(),
                 payload.businessType(),
@@ -59,6 +62,7 @@ public class ExperienceService {
 
         ExperiencePayload payload = buildPayload(request);
         experience.update(
+                payload.category(),
                 payload.title(),
                 payload.content(),
                 payload.businessType(),
@@ -223,19 +227,20 @@ public class ExperienceService {
             String lessonsLearned,
             Boolean wouldRetry
     ) {
-        CategoryCatalog.CategoryItem categoryItem = CategoryCatalog.getById(categoryId);
-        String resolvedBusinessType = hasText(businessType) ? businessType : categoryItem.name();
+        BusinessCategory category = categoryService.getCategory(categoryId);
+        String resolvedBusinessType = hasText(businessType) ? businessType : category.getName();
         String resolvedFailureReason = hasText(failureReason) ? failureReason : "UNSPECIFIED";
         String resolvedTitle = hasText(title) ? title : resolvedBusinessType + " failure experience";
         String resolvedLessons = hasText(lessonsLearned) ? lessonsLearned : content;
 
         Map<String, Object> structured = new HashMap<>();
         structured.put("categoryId", categoryId);
-        structured.put("categoryName", categoryItem.name());
+        structured.put("categoryName", category.getName());
         structured.put("targetMarket", targetMarket);
         structured.put("wouldRetry", wouldRetry != null ? wouldRetry : Boolean.FALSE);
 
         return new ExperiencePayload(
+                category,
                 resolvedTitle,
                 content,
                 resolvedBusinessType,
@@ -311,6 +316,7 @@ public class ExperienceService {
     }
 
     private record ExperiencePayload(
+            BusinessCategory category,
             String title,
             String content,
             String businessType,

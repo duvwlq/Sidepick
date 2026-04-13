@@ -29,8 +29,8 @@ public final class AnalysisDtos {
                     analysis.getId(),
                     analysis.getExperience().getId(),
                     tags,
-                    tags.stream().map(tag -> "위험 요인: " + tag).toList(),
-                    List.of("재도전 의지 확인 필요", "배운 점 기반 재시도 가능"),
+                    tags.stream().map(tag -> "Risk factor: " + tag).toList(),
+                    List.of("Review market validation again.", "Retry with a smaller scope."),
                     summaries.isEmpty() ? analysis.getRiskFactorAnalysis() : String.join(" / ", summaries),
                     analysis.getRiskScore(),
                     analysis.getProcessedAt()

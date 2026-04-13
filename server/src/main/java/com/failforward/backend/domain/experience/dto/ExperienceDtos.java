@@ -1,9 +1,9 @@
 package com.failforward.backend.domain.experience.dto;
 
 import com.failforward.backend.common.api.PageInfo;
-import com.failforward.backend.common.support.CategoryCatalog;
 import com.failforward.backend.domain.analysis.entity.AiAnalysis;
 import com.failforward.backend.domain.auth.dto.AuthDtos.UserSummary;
+import com.failforward.backend.domain.category.dto.CategoryResponse;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,22 +73,16 @@ public final class ExperienceDtos {
             LocalDateTime updatedAt
     ) {
         public static ExperienceResponse from(FailureExperience experience, AiAnalysis analysis) {
-            Long categoryId = 5L;
             Map<String, Object> structured = parseObject(experience.getStructuredData());
-            if (structured.get("categoryId") instanceof Number number) {
-                categoryId = number.longValue();
-            }
-
-            CategoryCatalog.CategoryItem categoryItem = CategoryCatalog.getById(categoryId);
             return new ExperienceResponse(
                     experience.getId(),
                     UserSummary.from(experience.getUser()),
                     new CategoryResponse(
-                            categoryItem.id(),
-                            categoryItem.name(),
-                            categoryItem.description(),
-                            categoryItem.icon(),
-                            categoryItem.color()
+                            experience.getCategory().getId(),
+                            experience.getCategory().getName(),
+                            experience.getCategory().getDescription(),
+                            experience.getCategory().getIcon(),
+                            experience.getCategory().getColor()
                     ),
                     experience.getTitle(),
                     experience.getContent(),

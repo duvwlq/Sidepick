@@ -1,6 +1,5 @@
 package com.failforward.backend.domain.experience.api;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -8,16 +7,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.failforward.backend.support.ApiIntegrationTestSupport;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,13 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-class ExperienceApiIntegrationTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
 
     @Test
     void createExperienceWithoutAuthReturnsUnauthorized() throws Exception {
@@ -157,44 +147,5 @@ class ExperienceApiIntegrationTest {
                         .header(HttpHeaders.AUTHORIZATION, bearer(otherToken)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.data.code").value("FORBIDDEN"));
-    }
-
-    private String registerAndLogin(String email, String password, String nickname, String ageGroup) throws Exception {
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "%s",
-                                  "password": "%s",
-                                  "nickname": "%s",
-                                  "ageGroup": "%s"
-                                }
-                                """.formatted(email, password, nickname, ageGroup)))
-                .andExpect(status().isCreated());
-
-        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "%s",
-                                  "password": "%s"
-                                }
-                                """.formatted(email, password)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        JsonNode json = objectMapper.readTree(loginResult.getResponse().getContentAsString());
-        String token = json.path("data").path("accessToken").asText();
-        assertThat(token).isNotBlank();
-        return token;
-    }
-
-    private long readId(MvcResult result) throws Exception {
-        JsonNode json = objectMapper.readTree(result.getResponse().getContentAsString());
-        return json.path("data").path("id").asLong();
-    }
-
-    private String bearer(String token) {
-        return "Bearer " + token;
     }
 }

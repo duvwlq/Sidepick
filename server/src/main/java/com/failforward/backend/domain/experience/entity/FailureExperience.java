@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.experience.entity;
 
 import com.failforward.backend.common.entity.BaseTimeEntity;
+import com.failforward.backend.domain.category.entity.BusinessCategory;
 import com.failforward.backend.domain.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,6 +29,10 @@ public class FailureExperience extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private BusinessCategory category;
 
     @Column(nullable = false, length = 100)
     private String title;
@@ -73,6 +78,7 @@ public class FailureExperience extends BaseTimeEntity {
 
     private FailureExperience(
             User user,
+            BusinessCategory category,
             String title,
             String content,
             String businessType,
@@ -86,6 +92,7 @@ public class FailureExperience extends BaseTimeEntity {
             String structuredData
     ) {
         this.user = user;
+        this.category = category;
         this.title = title;
         this.content = content;
         this.businessType = businessType;
@@ -104,6 +111,7 @@ public class FailureExperience extends BaseTimeEntity {
 
     public static FailureExperience create(
             User user,
+            BusinessCategory category,
             String title,
             String content,
             String businessType,
@@ -118,6 +126,7 @@ public class FailureExperience extends BaseTimeEntity {
     ) {
         return new FailureExperience(
                 user,
+                category,
                 title,
                 content,
                 businessType,
@@ -137,6 +146,7 @@ public class FailureExperience extends BaseTimeEntity {
     }
 
     public void update(
+            BusinessCategory category,
             String title,
             String content,
             String businessType,
@@ -149,6 +159,7 @@ public class FailureExperience extends BaseTimeEntity {
             Boolean wouldRetry,
             String structuredData
     ) {
+        this.category = category;
         this.title = title;
         this.content = content;
         this.businessType = businessType;

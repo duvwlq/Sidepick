@@ -1,6 +1,6 @@
 package com.failforward.backend.domain.category.dto;
 
-import com.failforward.backend.common.support.CategoryCatalog.CategoryItem;
+import com.failforward.backend.domain.category.entity.BusinessCategory;
 
 public record CategoryResponse(
         Long id,
@@ -9,7 +9,13 @@ public record CategoryResponse(
         String icon,
         String color
 ) {
-    public static CategoryResponse from(CategoryItem item) {
-        return new CategoryResponse(item.id(), item.name(), item.description(), item.icon(), item.color());
+    public static CategoryResponse from(BusinessCategory category) {
+        return new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getDescription(),
+                category.getIcon(),
+                category.getColor()
+        );
     }
 }

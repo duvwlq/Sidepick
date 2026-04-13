@@ -16,9 +16,18 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS business_categories (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description TEXT,
+    icon VARCHAR(20) NOT NULL,
+    color VARCHAR(20) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS failure_experiences (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
+    category_id BIGINT NOT NULL,
     title VARCHAR(100) NOT NULL,
     content TEXT NOT NULL,
     business_type VARCHAR(50) NOT NULL,
@@ -35,6 +44,8 @@ CREATE TABLE IF NOT EXISTS failure_experiences (
     is_public BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_failure_experiences_category
+        FOREIGN KEY (category_id) REFERENCES business_categories(id),
     CONSTRAINT fk_failure_experiences_user
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -82,9 +93,23 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 
 CREATE INDEX idx_failure_experiences_user_id ON failure_experiences(user_id);
+CREATE INDEX idx_failure_experiences_category_id ON failure_experiences(category_id);
 CREATE INDEX idx_failure_experiences_business_type ON failure_experiences(business_type);
 CREATE INDEX idx_failure_experiences_created_at ON failure_experiences(created_at);
 CREATE INDEX idx_ai_analysis_experience_id ON ai_analysis(experience_id);
 CREATE INDEX idx_matched_cases_analysis_id ON matched_cases(analysis_id);
 CREATE INDEX idx_comments_experience_id ON comments(experience_id);
 CREATE INDEX idx_comments_user_id ON comments(user_id);
+
+INSERT INTO business_categories (id, name, description, icon, color)
+VALUES
+    (1, '온라인사업', '쇼핑몰, 블로그, 유튜브 등 온라인 기반 부업', '💻', '#3B82F6'),
+    (2, '오프라인사업', '매장 운영, 로컬 서비스, 오프라인 판매 중심 부업', '🏪', '#10B981'),
+    (3, '콘텐츠', '전자책, 강의, 뉴스레터, 크리에이터형 부업', '📝', '#F59E0B'),
+    (4, '투자형', '스마트스토어 자동화, 재고형 사업, 소규모 투자 시도', '💰', '#EF4444'),
+    (5, '기타', '명확히 분류되지 않는 기타 부업', '📦', '#8B5CF6')
+ON DUPLICATE KEY UPDATE
+    name = VALUES(name),
+    description = VALUES(description),
+    icon = VALUES(icon),
+    color = VALUES(color);
