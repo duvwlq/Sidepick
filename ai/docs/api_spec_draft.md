@@ -1,4 +1,4 @@
-# FailForward AI-BE API 규격서 (초안) (BE 확인 부탁드립니다)
+# FailForward AI-BE API 규격서 (초안)
 
 ## API 엔드포인트 설계
 
