@@ -2,12 +2,16 @@ package com.failforward.backend.domain.analysis.dto;
 
 import com.failforward.backend.domain.analysis.entity.AiAnalysis;
 import com.failforward.backend.domain.analysis.entity.MatchedCase;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
 public final class AnalysisDtos {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private AnalysisDtos() {
     }
@@ -23,15 +27,16 @@ public final class AnalysisDtos {
             LocalDateTime processedAt
     ) {
         public static PatternAnalysisResponse from(AiAnalysis analysis) {
-            List<String> tags = parseJsonList(analysis.getFailReasonTags());
-            List<String> summaries = parseJsonList(analysis.getSummaryList());
+            List<String> extractedPatterns = parseJsonList(analysis.getFailReasonTags());
+            List<String> riskFactors = parseJsonList(analysis.getRiskFactorAnalysis());
+            List<String> successFactors = parseJsonList(analysis.getSummaryList());
             return new PatternAnalysisResponse(
                     analysis.getId(),
                     analysis.getExperience().getId(),
-                    tags,
-                    tags.stream().map(tag -> "Risk factor: " + tag).toList(),
-                    List.of("Review market validation again.", "Retry with a smaller scope."),
-                    summaries.isEmpty() ? analysis.getRiskFactorAnalysis() : String.join(" / ", summaries),
+                    extractedPatterns,
+                    riskFactors,
+                    successFactors,
+                    analysis.getStructuredSummary(),
                     analysis.getRiskScore(),
                     analysis.getProcessedAt()
             );
@@ -64,6 +69,11 @@ public final class AnalysisDtos {
         if (value == null || value.isBlank()) {
             return Collections.emptyList();
         }
+        try {
+            return OBJECT_MAPPER.readValue(value, new TypeReference<>() {});
+        } catch (Exception ignored) {
+        }
+
         String normalized = value.replace("[", "").replace("]", "").replace("\"", "");
         if (normalized.isBlank()) {
             return Collections.emptyList();

@@ -4,7 +4,7 @@ import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.api.PageInfo;
 import com.failforward.backend.common.security.CurrentUserProvider;
-import com.failforward.backend.domain.analysis.repository.AiAnalysisRepository;
+import com.failforward.backend.domain.analysis.service.AIAnalysisService;
 import com.failforward.backend.domain.category.entity.BusinessCategory;
 import com.failforward.backend.domain.category.service.CategoryService;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos;
@@ -13,22 +13,23 @@ import com.failforward.backend.domain.experience.repository.FailureExperienceRep
 import com.failforward.backend.domain.user.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ExperienceService {
 
     private final FailureExperienceRepository experienceRepository;
-    private final AiAnalysisRepository analysisRepository;
+    private final AIAnalysisService aiAnalysisService;
     private final CurrentUserProvider currentUserProvider;
     private final CategoryService categoryService;
     private final ObjectMapper objectMapper;
@@ -37,6 +38,8 @@ public class ExperienceService {
     public ExperienceDtos.ExperienceResponse create(ExperienceDtos.ExperienceCreateRequest request) {
         User author = currentUserProvider.getCurrentUserEntity();
         ExperiencePayload payload = buildPayload(request);
+        log.info("Experience creation started for userId={}", author.getId());
+
         FailureExperience saved = experienceRepository.save(FailureExperience.create(
                 author,
                 payload.category(),
@@ -52,7 +55,10 @@ public class ExperienceService {
                 payload.wouldRetry(),
                 payload.structuredDataJson()
         ));
-        return ExperienceDtos.ExperienceResponse.from(saved, null);
+
+        var analysis = aiAnalysisService.analyzeAfterExperienceCreate(saved).orElse(null);
+        log.info("Experience created successfully with id={}", saved.getId());
+        return ExperienceDtos.ExperienceResponse.from(saved, analysis);
     }
 
     @Transactional
@@ -77,7 +83,7 @@ public class ExperienceService {
         );
 
         FailureExperience saved = experienceRepository.save(experience);
-        return ExperienceDtos.ExperienceResponse.from(saved, analysisRepository.findByExperience(saved).orElse(null));
+        return ExperienceDtos.ExperienceResponse.from(saved, aiAnalysisService.reanalyzeAfterExperienceUpdate(saved).orElse(null));
     }
 
     @Transactional
@@ -88,11 +94,9 @@ public class ExperienceService {
     }
 
     public ExperienceDtos.ExperienceListPayload getList(int page, int size, String failureReason) {
-        List<FailureExperience> filtered = experienceRepository.findAll().stream()
-                .filter(FailureExperience::getIsPublic)
+        List<FailureExperience> filtered = experienceRepository.findAllByIsPublicTrueOrderByCreatedAtDesc().stream()
                 .filter(experience -> failureReason == null || failureReason.isBlank()
                         || failureReason.equalsIgnoreCase(experience.getFailureReason()))
-                .sorted(Comparator.comparing(FailureExperience::getCreatedAt).reversed())
                 .toList();
 
         int safePage = Math.max(page, 0);
@@ -103,7 +107,7 @@ public class ExperienceService {
         List<ExperienceDtos.ExperienceResponse> experiences = filtered.subList(fromIndex, toIndex).stream()
                 .map(experience -> ExperienceDtos.ExperienceResponse.from(
                         experience,
-                        analysisRepository.findByExperience(experience).orElse(null)
+                        aiAnalysisService.findByExperience(experience).orElse(null)
                 ))
                 .toList();
 
@@ -119,13 +123,12 @@ public class ExperienceService {
         FailureExperience experience = getExperienceEntity(experienceId);
         experience.increaseViewCount();
         FailureExperience saved = experienceRepository.save(experience);
-        return ExperienceDtos.ExperienceResponse.from(saved, analysisRepository.findByExperience(saved).orElse(null));
+        return ExperienceDtos.ExperienceResponse.from(saved, aiAnalysisService.findByExperience(saved).orElse(null));
     }
 
     public List<ExperienceDtos.SimilarityMatchResponse> getSimilar(Long experienceId, int limit) {
         FailureExperience target = getExperienceEntity(experienceId);
-        return experienceRepository.findAll().stream()
-                .filter(FailureExperience::getIsPublic)
+        return experienceRepository.findAllByIsPublicTrueOrderByCreatedAtDesc().stream()
                 .filter(candidate -> !candidate.getId().equals(experienceId))
                 .map(candidate -> toSimilarity(target, candidate))
                 .sorted((left, right) -> Double.compare(right.similarityScore(), left.similarityScore()))
@@ -146,7 +149,7 @@ public class ExperienceService {
         List<ExperienceDtos.ExperienceResponse> payload = experiences.stream()
                 .map(experience -> ExperienceDtos.ExperienceResponse.from(
                         experience,
-                        analysisRepository.findByExperience(experience).orElse(null)
+                        aiAnalysisService.findByExperience(experience).orElse(null)
                 ))
                 .toList();
 
@@ -178,7 +181,7 @@ public class ExperienceService {
     }
 
     public FailureExperience getExperienceEntity(Long experienceId) {
-        return experienceRepository.findById(experienceId)
+        return experienceRepository.findWithUserAndCategoryById(experienceId)
                 .orElseThrow(() -> new NotFoundException("Experience not found."));
     }
 
@@ -288,7 +291,7 @@ public class ExperienceService {
         return new ExperienceDtos.SimilarityMatchResponse(
                 ExperienceDtos.ExperienceResponse.from(
                         candidate,
-                        analysisRepository.findByExperience(candidate).orElse(null)
+                        aiAnalysisService.findByExperience(candidate).orElse(null)
                 ),
                 Math.min(score, 0.99),
                 matching,

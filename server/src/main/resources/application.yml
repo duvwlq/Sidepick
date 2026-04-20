@@ -41,3 +41,9 @@ app:
     secret: ${APP_JWT_SECRET:sidepick-development-jwt-secret-key-must-be-32-bytes}
     access-token-expiration-seconds: ${APP_JWT_ACCESS_EXPIRES:3600}
     refresh-token-expiration-seconds: ${APP_JWT_REFRESH_EXPIRES:1209600}
+
+ai:
+  server:
+    url: ${AI_SERVER_URL:http://localhost:8000}
+    connect-timeout: ${AI_SERVER_CONNECT_TIMEOUT:3000}
+    read-timeout: ${AI_SERVER_READ_TIMEOUT:5000}

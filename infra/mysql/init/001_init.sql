@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS ai_analysis (
     experience_id BIGINT NOT NULL UNIQUE,
     fail_reason_tags JSON NOT NULL,
     summary_list JSON NOT NULL,
+    structured_summary TEXT,
     risk_factor_analysis TEXT,
     risk_score DECIMAL(3,1),
     processed_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

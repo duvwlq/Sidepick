@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface MatchedCaseRepository extends JpaRepository<MatchedCase, Long> {
 
     List<MatchedCase> findByAnalysis(AiAnalysis analysis);
+
+    void deleteByAnalysis(AiAnalysis analysis);
 }

@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.experience.dto;
 
 import com.failforward.backend.common.api.PageInfo;
+import com.failforward.backend.domain.analysis.dto.AnalysisDtos.PatternAnalysisResponse;
 import com.failforward.backend.domain.analysis.entity.AiAnalysis;
 import com.failforward.backend.domain.auth.dto.AuthDtos.UserSummary;
 import com.failforward.backend.domain.category.dto.CategoryResponse;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -65,6 +67,7 @@ public final class ExperienceDtos {
             List<String> marketingChannels,
             String lessonsLearned,
             Boolean wouldRetry,
+            AnalysisSummary analysis,
             Map<String, Object> structuredData,
             Integer viewCount,
             Integer likeCount,
@@ -94,12 +97,35 @@ public final class ExperienceDtos {
                     parseStringList(experience.getMarketingChannels()),
                     experience.getLessonsLearned(),
                     experience.getWouldRetry(),
+                    AnalysisSummary.from(analysis),
                     structured,
                     experience.getViewCount(),
                     experience.getLikeCount(),
                     analysis != null,
                     experience.getCreatedAt(),
                     experience.getUpdatedAt()
+            );
+        }
+    }
+
+    public record AnalysisSummary(
+            String structuredSummary,
+            List<String> extractedPatterns,
+            List<String> riskFactors,
+            List<String> successFactors,
+            BigDecimal confidenceScore
+    ) {
+        public static AnalysisSummary from(AiAnalysis analysis) {
+            if (analysis == null) {
+                return null;
+            }
+            PatternAnalysisResponse response = PatternAnalysisResponse.from(analysis);
+            return new AnalysisSummary(
+                    response.structuredSummary(),
+                    response.extractedPatterns(),
+                    response.riskFactors(),
+                    response.successFactors(),
+                    response.confidenceScore()
             );
         }
     }

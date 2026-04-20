@@ -37,6 +37,9 @@ public class AiAnalysis {
     @Column(name = "summary_list", nullable = false, columnDefinition = "json")
     private String summaryList;
 
+    @Column(name = "structured_summary", columnDefinition = "TEXT")
+    private String structuredSummary;
+
     @Column(name = "risk_factor_analysis", columnDefinition = "TEXT")
     private String riskFactorAnalysis;
 
@@ -51,12 +54,14 @@ public class AiAnalysis {
             FailureExperience experience,
             String failReasonTags,
             String summaryList,
+            String structuredSummary,
             String riskFactorAnalysis,
             BigDecimal riskScore
     ) {
         this.experience = experience;
         this.failReasonTags = failReasonTags;
         this.summaryList = summaryList;
+        this.structuredSummary = structuredSummary;
         this.riskFactorAnalysis = riskFactorAnalysis;
         this.riskScore = riskScore;
     }
@@ -65,9 +70,24 @@ public class AiAnalysis {
             FailureExperience experience,
             String failReasonTags,
             String summaryList,
+            String structuredSummary,
             String riskFactorAnalysis,
             BigDecimal riskScore
     ) {
-        return new AiAnalysis(experience, failReasonTags, summaryList, riskFactorAnalysis, riskScore);
+        return new AiAnalysis(experience, failReasonTags, summaryList, structuredSummary, riskFactorAnalysis, riskScore);
+    }
+
+    public void updateFromAiResult(
+            String failReasonTags,
+            String summaryList,
+            String structuredSummary,
+            String riskFactorAnalysis,
+            BigDecimal riskScore
+    ) {
+        this.failReasonTags = failReasonTags;
+        this.summaryList = summaryList;
+        this.structuredSummary = structuredSummary;
+        this.riskFactorAnalysis = riskFactorAnalysis;
+        this.riskScore = riskScore;
     }
 }

@@ -12,8 +12,10 @@ import com.failforward.backend.domain.experience.repository.FailureExperienceRep
 import com.failforward.backend.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CommentService {
 
@@ -28,7 +30,7 @@ public class CommentService {
         Comment parent = request.parentId() == null ? null : getCommentEntity(request.parentId());
 
         Comment comment = commentRepository.save(Comment.create(experience, user, parent, request.content()));
-        return CommentResponse.from(comment);
+        return CommentResponse.from(getCommentWithDetails(comment.getId()));
     }
 
     public CommentResponse createReply(Long commentId, CommentCreateRequest request) {
@@ -39,7 +41,8 @@ public class CommentService {
     public CommentResponse update(Long commentId, CommentCreateRequest request) {
         Comment comment = getCommentEntity(commentId);
         comment.updateContent(request.content());
-        return CommentResponse.from(commentRepository.save(comment));
+        commentRepository.save(comment);
+        return CommentResponse.from(getCommentWithDetails(comment.getId()));
     }
 
     public void delete(Long commentId) {
@@ -50,6 +53,11 @@ public class CommentService {
 
     private Comment getCommentEntity(Long commentId) {
         return commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("Comment not found."));
+    }
+
+    private Comment getCommentWithDetails(Long commentId) {
+        return commentRepository.findWithDetailsById(commentId)
                 .orElseThrow(() -> new NotFoundException("Comment not found."));
     }
 

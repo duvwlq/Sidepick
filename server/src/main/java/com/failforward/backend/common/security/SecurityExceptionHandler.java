@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,7 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
             AuthenticationException authException
     ) throws IOException {
         writeResponse(response, HttpStatus.UNAUTHORIZED, "Authentication failed.", "UNAUTHORIZED",
-                authException.getMessage());
+                authException.getMessage(), request.getRequestURI());
     }
 
     @Override
@@ -39,7 +40,7 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
             AccessDeniedException accessDeniedException
     ) throws IOException {
         writeResponse(response, HttpStatus.FORBIDDEN, "Access denied.", "FORBIDDEN",
-                accessDeniedException.getMessage());
+                accessDeniedException.getMessage(), request.getRequestURI());
     }
 
     private void writeResponse(
@@ -47,14 +48,17 @@ public class SecurityExceptionHandler implements AuthenticationEntryPoint, Acces
             HttpStatus status,
             String message,
             String code,
-            String detail
+            String detail,
+            String path
     ) throws IOException {
         response.setStatus(status.value());
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
         objectMapper.writeValue(response.getWriter(), ApiResponse.fail(message, Map.of(
                 "code", code,
-                "detail", detail
+                "detail", detail,
+                "timestamp", OffsetDateTime.now().toString(),
+                "path", path
         )));
     }
 }
