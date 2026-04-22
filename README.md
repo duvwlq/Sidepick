@@ -1,133 +1,84 @@
-# FailForward Backend
+# Sidepick MVP
 
-부업 실패 경험 구조화 공유 플랫폼의 백엔드 API 서버 저장소입니다.
-현재 저장소는 1주차 범위를 기준으로 MySQL, Docker, AWS EC2 환경에 맞춰 정리되어 있습니다.
+Sidepick MVP 배포 기준 저장소입니다.
 
-## 기술 스택
+현재 운영 구조는 아래와 같습니다.
 
-- Java 17
-- Spring Boot 3.2.12
-- Spring Data JPA
-- MySQL 8.4
-- Springdoc OpenAPI
-- Docker Compose
+- Frontend: AWS Amplify
+- Backend: AWS EC2 + Nginx + Spring Boot
+- Database: AWS RDS MySQL
+- Backend API: `https://api.side-pick.app/api`
 
-## 저장소 구조
+## Services
 
-- `docs/git-flow.md`
-- `docs/ec2-setup.md`
-- `docs/db-schema.md`
-- `docs/api-structure.md`
-- `docs/week1-status.md`
-- `docs/work-summary.md`
-- `infra/docker-compose.yml`
-- `infra/mysql/init/001_init.sql`
-- `scripts`
-- `server`
+- Frontend URL:
+  - `https://codex-backend-mvp-verify.d1kbzcbfbyz1zc.amplifyapp.com`
+- Backend health:
+  - `https://api.side-pick.app/api/health`
 
-## 빠른 시작
+## Repository Structure
 
-### 1. 환경 변수 파일 준비
+- `fe`: Vite + React frontend
+- `server`: Spring Boot backend
+- `ai`: AI service code
+- `infra`: local/docker infra files
+- `scripts`: local helper scripts
+- `docs`: project notes
+- `배포_준비_전체_가이드.md`: AWS 배포/운영 가이드
 
-Windows PowerShell:
+## Frontend
+
+Frontend is built on Amplify.
+
+Important env:
+
+```env
+VITE_API_BASE_URL=https://api.side-pick.app/api
+```
+
+Local run:
 
 ```powershell
-Copy-Item .env.example .env
+cd fe
+npm install
+npm run dev
 ```
 
-macOS / Linux:
-
-```bash
-cp .env.example .env
-```
-
-### 2. Docker로 실행
-
-Windows PowerShell:
+Local build:
 
 ```powershell
-.\scripts\dev-up.ps1
+cd fe
+npm run build
 ```
 
-macOS / Linux:
+## Backend
 
-```bash
-./scripts/dev-up.sh
-```
+Backend runs on EC2 and is proxied by Nginx.
 
-또는 Docker Compose를 직접 실행할 수 있습니다.
+Production flow:
 
-```bash
-docker compose -f infra/docker-compose.yml up -d --build
-```
+- Nginx: `80/443`
+- Spring Boot: `127.0.0.1:8081`
+- Public API domain: `api.side-pick.app`
 
-### 3. 로컬 Maven 없이 컴파일
+See full backend setup in [server/README.md](/D:/Codex_Folder/Sidepick/server/README.md).
 
-이 저장소에는 Docker 기반 Maven wrapper가 포함되어 있습니다.
+## Deployment Notes
 
-Windows PowerShell:
+- Amplify uses root `amplify.yml`
+- Frontend build is executed from `fe/`
+- EC2 public `8081` inbound is not required after Nginx/HTTPS is configured
+- Production CORS must allow the actual frontend origin only
 
-```powershell
-.\mvnw.cmd -DskipTests package
-```
+## Immediate Ops Checklist
 
-macOS / Linux / Git Bash:
+- Confirm `APP_CORS_ALLOWED_ORIGINS` contains the actual frontend domain
+- Keep `SPRING_JPA_HIBERNATE_DDL_AUTO=validate`
+- Keep `APP_JWT_SECRET` as a strong production secret
+- Rotate RDS password if it was exposed during setup
+- Restrict EC2 inbound rules to `22`, `80`, `443`
 
-```bash
-chmod +x ./mvnw
-./mvnw -DskipTests package
-```
+## Useful Links
 
-### 4. 실행 확인
-
-- 애플리케이션: `http://localhost:8081`
-- 헬스 체크: `http://localhost:8081/api/health`
-- Swagger UI: `http://localhost:8081/swagger-ui.html`
-
-## EC2 보조 스크립트
-
-- `scripts/ec2-bootstrap.sh`
-- `scripts/ec2-deploy.sh`
-
-## 종료
-
-Windows PowerShell:
-
-```powershell
-.\scripts\dev-down.ps1
-```
-
-macOS / Linux:
-
-```bash
-./scripts/dev-down.sh
-```
-
-## 팀 작업 규칙
-
-- 기본 작업 브랜치는 `develop`입니다.
-- 작업 시작 전 `git pull origin develop`을 실행합니다.
-- `.env`는 로컬에서만 생성하고 커밋하지 않습니다.
-- 개인 IDE 설정 파일은 커밋하지 않습니다.
-
-## MySQL 사용 기준
-
-- 로컬 개발은 `infra/docker-compose.yml`의 `mysql` 서비스를 사용합니다.
-- 초기 스키마 SQL 파일은 `infra/mysql/init/001_init.sql`입니다.
-- EC2 배포도 동일한 Docker Compose 파일을 기준으로 진행합니다.
-- 현재 1주차 저장소 범위에는 Supabase 연동이 포함되어 있지 않습니다.
-
-## 참고 문서
-
-1. Git 작업 규칙: `docs/git-flow.md`
-2. AWS EC2 설정: `docs/ec2-setup.md`
-3. DB 스키마 및 SQL: `docs/db-schema.md`, `infra/mysql/init/001_init.sql`
-4. API 구조: `docs/api-structure.md`
-5. 1주차 진행 현황: `docs/week1-status.md`
-6. 작업 요약: `docs/work-summary.md`
-
-## 참고 사항
-
-- 기본 실행 방식은 Docker 기준입니다.
-- EC2 배포도 `infra/docker-compose.yml` 기준으로 동작합니다.
-- Security와 JWT는 이후 단계에서 구현할 예정이며, 현재 1주차 범위에는 포함되어 있지 않습니다.
+- [Backend README](/D:/Codex_Folder/Sidepick/server/README.md)
+- [Deployment Guide](/D:/Codex_Folder/Sidepick/배포_준비_전체_가이드.md)

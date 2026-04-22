@@ -1,67 +1,105 @@
-# Sidepick Backend MVP
+# Sidepick Backend
 
-## Current Scope
+## Current Production Shape
 
-This backend is prepared for the MVP flow below.
+- Runtime: Java 17
+- Framework: Spring Boot 3.2.12
+- Database: AWS RDS MySQL
+- Reverse proxy: Nginx on EC2
+- Public API base URL: `https://api.side-pick.app/api`
+- Internal app port: `8081`
 
-1. Register
-2. Login
-3. Create experience as an authenticated user
-4. Get experience list
-5. Get experience detail
+## Production Environment Variables
 
-## Base URL and Ports
+`~/backend.env` example:
 
-- Backend base URL: `http://localhost:8081`
-- API base path: `http://localhost:8081/api`
-- Swagger UI: `http://localhost:8081/swagger-ui.html`
-- FE dev server expected origin: `http://localhost:5173`
-
-## Required Environment
-
-The app reads these properties from environment variables.
-
-- `SERVER_PORT=8081`
-- `SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/failforward?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul`
-- `SPRING_DATASOURCE_USERNAME=failforward`
-- `SPRING_DATASOURCE_PASSWORD=failforward`
-- `APP_JWT_SECRET=sidepick-development-jwt-secret-key-must-be-32-bytes`
-- `APP_CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173`
-
-## Run
-
-This repository does not use the standard Maven wrapper. The root `mvnw` scripts run Maven inside Docker.
-
-Prerequisites:
-
-- MySQL running with the schema from `infra/mysql/init/001_init.sql`
-- The schema now includes the `business_categories` table and seed data
-- Docker Desktop running if you use the provided wrapper scripts
-
-Run from the repo root:
-
-```powershell
-.\mvnw.cmd -DskipTests package
-docker compose up -d
+```env
+SPRING_PROFILES_ACTIVE='prod'
+SERVER_PORT='8081'
+SPRING_DATASOURCE_URL='jdbc:mysql://<RDS-ENDPOINT>:3306/failforward?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul'
+SPRING_DATASOURCE_USERNAME='<RDS-USERNAME>'
+SPRING_DATASOURCE_PASSWORD='<RDS-PASSWORD>'
+SPRING_JPA_HIBERNATE_DDL_AUTO='validate'
+APP_JWT_SECRET='<LONG-RANDOM-SECRET>'
+APP_CORS_ALLOWED_ORIGINS='https://codex-backend-mvp-verify.d1kbzcbfbyz1zc.amplifyapp.com'
+AI_SERVER_URL='http://localhost:8000'
 ```
 
-If you have local Maven installed, you can also run from `server/`:
+Notes:
 
-```powershell
-mvn spring-boot:run
+- `SPRING_DATASOURCE_URL` must be quoted because it contains `&`
+- `APP_JWT_SECRET` must be at least 32 bytes
+- `APP_CORS_ALLOWED_ORIGINS` should contain only actual frontend origins
+- `SPRING_JPA_HIBERNATE_DDL_AUTO` should stay `validate` in production
+
+## EC2 Run Commands
+
+Build:
+
+```bash
+cd ~/Sidepick/server
+mvn -DskipTests package
 ```
 
-## Auth Header
+Run:
 
-Protected endpoints require this header:
-
-```http
-Authorization: Bearer <accessToken>
+```bash
+set -a
+source ~/backend.env
+set +a
+nohup java -jar target/failforward-backend-0.0.1-SNAPSHOT.jar > ~/backend.log 2>&1 &
 ```
 
-## Main Endpoints
+Restart:
 
-Public:
+```bash
+pkill -f failforward-backend || true
+set -a
+source ~/backend.env
+set +a
+cd ~/Sidepick/server
+nohup java -jar target/failforward-backend-0.0.1-SNAPSHOT.jar > ~/backend.log 2>&1 &
+```
+
+Health check:
+
+```bash
+curl https://api.side-pick.app/api/health
+```
+
+Logs:
+
+```bash
+tail -n 100 ~/backend.log
+```
+
+## Nginx Reverse Proxy
+
+Example config:
+
+```nginx
+server {
+    listen 80;
+    server_name api.side-pick.app;
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+HTTPS is issued with Certbot:
+
+```bash
+sudo certbot --nginx -d api.side-pick.app
+```
+
+## Main Public Endpoints
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
@@ -78,51 +116,10 @@ Protected:
 - `PATCH /api/experiences/{id}`
 - `DELETE /api/experiences/{id}`
 
-## Response Shape
+## Ops Checklist
 
-Success:
-
-```json
-{
-  "success": true,
-  "message": "Experience created.",
-  "data": {}
-}
-```
-
-Error:
-
-```json
-{
-  "success": false,
-  "message": "Authentication failed.",
-  "data": {
-    "code": "UNAUTHORIZED",
-    "detail": "Full authentication is required to access this resource"
-  }
-}
-```
-
-## Experience Request Notes
-
-For MVP, the backend accepts a flexible create payload. The minimum practical body is:
-
-- `content`
-- `categoryId`
-
-If `title`, `businessType`, or `failureReason` are missing, the server fills defaults.
-
-## Frontend Integration Notes
-
-- FE should use `http://localhost:8081/api` as the API base URL.
-- After login or registration, store `data.accessToken`.
-- Send `Authorization: Bearer <token>` for create/update/delete requests.
-- Experience list response is under `data.experiences`.
-- Pagination metadata is under `data.pagination`.
-
-## Known Gaps
-
-- Refresh token rotation is not implemented yet.
-- Logout and token invalidation are not implemented yet.
-- User deactivation status is not reflected in auth decisions yet.
-- Automated build verification requires Docker Desktop or a local Maven installation.
+- Close public inbound `8081` after Nginx/HTTPS is ready
+- Rotate RDS password if it was exposed
+- Rotate JWT secret if it was temporary
+- Restrict CORS to deployed frontend domains
+- Renew/check certificate automatically with Certbot timer
