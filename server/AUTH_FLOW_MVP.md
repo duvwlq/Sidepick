@@ -1,55 +1,58 @@
-# Sidepick Auth Flow MVP
+# Sidepick 인증 흐름 MVP
 
-## Overview
+## 개요
 
-This document defines the frontend-to-backend auth flow for the current MVP.
+이 문서는 현재 MVP 기준의 프론트엔드-백엔드 인증 흐름을 정의합니다.
 
-Supported sign-in methods:
+현재 지원하는 로그인 방식:
 
-- Email/password sign-up and login
-- Kakao OAuth login
-- Google OAuth login
+- 이메일/비밀번호 회원가입 및 로그인
+- 카카오 OAuth 로그인
+- 구글 OAuth 로그인
 
-Deferred:
+현재 제외된 항목:
 
-- Phone OTP verification
-- Carrier / identity verification
+- 휴대폰 OTP 인증
+- 통신사/실명 기반 본인확인
 
-## Email Sign-up Flow
+## 이메일 회원가입 흐름
 
-1. Frontend calls `POST /api/auth/register`
-2. Backend creates a local user and returns tokens immediately
-3. Backend response contains `emailVerificationRequired=true`
-4. Frontend calls `POST /api/auth/email-verifications`
-5. User enters the verification code
-6. Frontend calls `POST /api/auth/email-verifications/confirm`
-7. After confirmation, frontend may keep the current session or re-login
+1. 프론트엔드가 `POST /api/auth/register`를 호출합니다.
+2. 백엔드가 로컬 사용자를 생성하고 즉시 토큰을 반환합니다.
+3. 응답에는 `emailVerificationRequired=true`가 포함됩니다.
+4. 프론트엔드가 `POST /api/auth/email-verifications`를 호출합니다.
+5. 사용자가 인증 코드를 입력합니다.
+6. 프론트엔드가 `POST /api/auth/email-verifications/confirm`를 호출합니다.
+7. 인증 완료 후 현재 세션을 유지하거나 필요 시 다시 로그인시킵니다.
 
-## Email Login Flow
+## 이메일 로그인 흐름
 
-1. Frontend calls `POST /api/auth/login`
-2. Backend returns tokens even if `emailVerified=false`
-3. Frontend must check:
-   - `data.emailVerificationRequired`
-   - `data.user.emailVerified`
-4. If the account is not verified, frontend should show:
-   - verification prompt
-   - resend verification action
-   - limited access messaging
+1. 프론트엔드가 `POST /api/auth/login`을 호출합니다.
+2. `emailVerified=false`여도 백엔드는 토큰을 반환합니다.
+3. 프론트엔드는 아래 값을 반드시 확인해야 합니다.
 
-## Email Verification Policy
+- `data.emailVerificationRequired`
+- `data.user.emailVerified`
 
-- Unverified users can log in
-- Unverified users cannot write experiences
-- Read-only actions remain available
+4. 계정이 미인증 상태면 아래 UI가 필요합니다.
 
-## Kakao Login Flow
+- 인증 필요 안내
+- 인증 메일 재전송 동작
+- 쓰기 기능 제한 안내
 
-1. Frontend completes Kakao authorize step
-2. Frontend receives `code`
-3. Frontend calls `POST /api/auth/oauth/kakao`
+## 이메일 인증 정책
 
-Request example:
+- 미인증 사용자도 로그인은 가능
+- 미인증 사용자는 경험 등록/수정/삭제 불가
+- 읽기 중심 기능은 사용 가능
+
+## 카카오 로그인 흐름
+
+1. 프론트엔드가 카카오 인가 단계를 완료합니다.
+2. 프론트엔드가 `code`를 전달받습니다.
+3. 프론트엔드가 `POST /api/auth/oauth/kakao`를 호출합니다.
+
+요청 예시:
 
 ```json
 {
@@ -58,18 +61,18 @@ Request example:
 }
 ```
 
-4. Backend exchanges the code for an access token with Kakao
-5. Backend calls Kakao user info API
-6. Backend finds or creates the Sidepick user
-7. Backend returns Sidepick JWT tokens
+4. 백엔드가 카카오 토큰 교환 API를 호출합니다.
+5. 백엔드가 카카오 사용자 정보 API를 호출합니다.
+6. 백엔드가 Sidepick 사용자 계정을 조회하거나 생성합니다.
+7. 백엔드가 Sidepick JWT 토큰을 반환합니다.
 
-## Google Login Flow
+## 구글 로그인 흐름
 
-1. Frontend completes Google OAuth authorize step
-2. Frontend receives `code`
-3. Frontend calls `POST /api/auth/oauth/google`
+1. 프론트엔드가 구글 OAuth 인가 단계를 완료합니다.
+2. 프론트엔드가 `code`를 전달받습니다.
+3. 프론트엔드가 `POST /api/auth/oauth/google`를 호출합니다.
 
-Request example:
+요청 예시:
 
 ```json
 {
@@ -78,14 +81,14 @@ Request example:
 }
 ```
 
-4. Backend exchanges the code for Google tokens
-5. Backend calls Google user info API
-6. Backend finds or creates the Sidepick user
-7. Backend returns Sidepick JWT tokens
+4. 백엔드가 구글 토큰 교환 API를 호출합니다.
+5. 백엔드가 구글 사용자 정보 API를 호출합니다.
+6. 백엔드가 Sidepick 사용자 계정을 조회하거나 생성합니다.
+7. 백엔드가 Sidepick JWT 토큰을 반환합니다.
 
-## Auth Payload Contract
+## 인증 응답 규격
 
-All successful auth endpoints return the same payload shape:
+모든 인증 성공 응답은 동일한 구조를 반환합니다.
 
 ```json
 {
@@ -112,21 +115,21 @@ All successful auth endpoints return the same payload shape:
 }
 ```
 
-## Frontend Rules
+## 프론트엔드 적용 규칙
 
-- Always branch on `authProvider`, `emailVerified`, and `emailVerificationRequired`
-- Allow browsing even if email is not verified
-- Block experience write entry points for unverified local users
-- For social users, treat login as verified
+- 항상 `authProvider`, `emailVerified`, `emailVerificationRequired`를 기준으로 분기합니다.
+- 이메일 미인증 상태여도 탐색과 조회는 허용합니다.
+- 경험 등록, 수정, 삭제 진입은 이메일 미인증 로컬 계정에서 막아야 합니다.
+- 소셜 로그인 사용자는 인증된 계정처럼 처리합니다.
 
-## Required Server Environment Values
+## 필수 서버 환경 변수
 
 - `APP_OAUTH_KAKAO_CLIENT_ID`
-- `APP_OAUTH_KAKAO_CLIENT_SECRET` optional depending on Kakao app configuration
+- `APP_OAUTH_KAKAO_CLIENT_SECRET`
 - `APP_OAUTH_GOOGLE_CLIENT_ID`
 - `APP_OAUTH_GOOGLE_CLIENT_SECRET`
 
-## Notes
+## 참고 사항
 
-- The current backend exposes the email verification code in non-production configuration when `APP_EMAIL_VERIFICATION_EXPOSE_CODE=true`
-- Set `APP_EMAIL_VERIFICATION_EXPOSE_CODE=false` when a real mail sender is connected
+- 현재 백엔드는 `APP_EMAIL_VERIFICATION_EXPOSE_CODE=true`인 비운영 환경에서 인증 코드를 응답에 노출할 수 있습니다.
+- 실제 메일 발송을 붙인 뒤에는 `APP_EMAIL_VERIFICATION_EXPOSE_CODE=false`로 전환해야 합니다.
