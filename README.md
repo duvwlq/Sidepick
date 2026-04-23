@@ -1,29 +1,74 @@
-# Sidepick Backend Infra
+# Sidepick MVP
 
-현재 저장소는 백엔드 1주차 범위 중 아래 항목만 정리한 상태입니다.
+Sidepick is an MVP for collecting structured side-job failure stories, browsing similar cases, and using AI analysis to help users form better judgment criteria.
 
-1. AWS EC2 서버 생성 가이드
-2. Docker 환경 설정
-3. MySQL DB 스키마 초안
-4. GitHub Repo / Git Flow 규칙
+## Current Stack
 
-## 구조
+- Frontend: Vite + React in `fe/`
+- Backend: Spring Boot in `server/`
+- Database: MySQL
+- Infra: Docker Compose for local infra, EC2 + Nginx for production
+- Public API base: `https://api.side-pick.app/api`
 
-- `docs/ec2-setup.md`: EC2 생성 및 서버 초기 설정
-- `docs/db-schema.md`: MySQL 스키마 설계 문서
-- `docs/git-flow.md`: 브랜치 전략 및 Git Flow
-- `infra/docker-compose.yml`: 로컬 MySQL 실행용 Docker 설정
-- `infra/mysql/init/001_init.sql`: 초기 DB 스키마 SQL
+## Repository Layout
 
-## 로컬 실행
+- `fe/`: frontend app
+- `server/`: backend API
+- `ai/`: AI-related code and notes
+- `infra/`: local database and migration setup
+- `scripts/`: local helper scripts
+- `docs/`: project notes and cleanup inventory
+- `screenshots/`: reference screenshots and presentation assets
 
-```bash
-docker compose -f infra/docker-compose.yml up -d
+## Backend Auth Status
+
+The backend currently supports:
+
+- Email/password sign-up and login
+- Email verification state management
+- Kakao OAuth login
+- Google OAuth login
+- Write restrictions for unverified local accounts
+
+See:
+
+- [Backend README](D:/Codex_Folder/Sidepick/server/README.md)
+- [Auth Flow MVP](D:/Codex_Folder/Sidepick/server/AUTH_FLOW_MVP.md)
+- [Frontend Auth Handoff](D:/Codex_Folder/Sidepick/docs/frontend-auth-handoff.md)
+
+## Local Frontend
+
+```powershell
+cd fe
+npm install
+npm run dev
 ```
 
-## 기본 DB 정보
+Important env:
 
-- DB: `sidepick`
-- User: `sidepick`
-- Password: `sidepick`
-- Port: `3306`
+```env
+VITE_API_BASE_URL=https://api.side-pick.app/api
+VITE_KAKAO_CLIENT_ID=<kakao-rest-api-key>
+```
+
+## Local Backend
+
+The repo uses Docker-backed Maven wrapper commands through `mvnw.cmd`.
+
+```powershell
+cd server
+../mvnw.cmd test
+```
+
+Production environment details live in [server/README.md](D:/Codex_Folder/Sidepick/server/README.md).
+
+## Waiting-Period Maintenance
+
+While frontend work is in progress, the most useful maintenance items are:
+
+- keep auth and deployment docs current
+- keep OAuth environment values out of Git
+- avoid deleting user notes/screenshots without review
+- use the cleanup inventory before removing loose docs
+
+See [Cleanup Inventory](D:/Codex_Folder/Sidepick/docs/repo-cleanup-inventory.md).

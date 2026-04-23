@@ -10,16 +10,13 @@ export default function SimilarCaseCard({
   similarity,
 }: SimilarCaseCardProps) {
   return (
-    <button
-      type="button"
-      className="w-full rounded-2xl bg-[#F5F5F5] p-4 text-left"
-    >
+    <div className="w-full rounded-2xl bg-[#F5F5F5] p-4 text-left">
       <div className="mb-2 flex items-center justify-between">
-        <div className="flex gap-2  bg-gray-100 rounded-lg">
+        <div className="flex flex-wrap gap-2 rounded-lg bg-gray-100 p-1">
           {tags.map((tag, index) => (
             <span
               key={`${tag}-${index}`}
-              className="text-[10px] text-[#9A9A9A] px-2 py-0.5"
+              className="px-2 py-0.5 text-[10px] text-[#9A9A9A]"
             >
               {tag}
             </span>
@@ -31,9 +28,9 @@ export default function SimilarCaseCard({
         </span>
       </div>
 
-      <p className="self-stretch justify-start text-neutral-950 text-lg font-semibold font-['Pretendard'] leading-7">
+      <p className="text-lg font-semibold leading-7 text-neutral-950">
         {title}
       </p>
-    </button>
+    </div>
   );
 }
