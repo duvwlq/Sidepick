@@ -53,7 +53,7 @@ export function useExperienceWrite() {
   const isValid = useMemo(() => {
     switch (step) {
       case 1:
-        return form.categories.length > 0;
+        return form.categories.length > 0 && form.currentStatus !== '';
       case 2:
         return form.causes.length > 0;
       case 3:
