@@ -1,8 +1,8 @@
 import { Link, useLocation } from 'react-router-dom';
-import homeIcon from '../../assets/images/Home.svg';
-import exploreIcon from '../../assets/images/Search.svg';
+import homeIcon from '../../assets/images/home.svg';
+import exploreIcon from '../../assets/images/search.svg';
 import createIcon from '../../assets/images/plus-circle.svg';
-import myIcon from '../../assets/images/User.svg';
+import myIcon from '../../assets/images/user.svg';
 
 const menus = [
   { name: '홈', path: '/', icon: homeIcon },

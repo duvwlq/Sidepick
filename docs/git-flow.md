@@ -1,42 +1,50 @@
-# GitHub Repo / Git Flow
+# Git 작업 가이드
 
 ## 기본 브랜치
 
-- `main`: 배포 가능한 안정 브랜치
-- `develop`: 통합 개발 브랜치
+- `main`: 배포 기준 이력
+- `develop`: 팀 통합 작업 브랜치
 
-## 작업 브랜치 규칙
+## 기능 브랜치 이름 규칙
 
 - `feature/<topic>`
 - `fix/<topic>`
-- `refactor/<topic>`
 - `docs/<topic>`
 
 예시:
 
-- `feature/auth-login`
-- `feature/mysql-schema`
-- `docs/api-spec`
+- `feature/setup-project`
+- `feature/database-schema`
+- `feature/docker-setup`
 
-## 작업 흐름
+## 일일 작업 흐름
 
-1. `develop`에서 작업 브랜치 생성
-2. 기능 단위 커밋
-3. Pull Request 생성
-4. 리뷰 후 `develop` 병합
-5. 배포 시점에 `develop -> main` 병합
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/<topic>
+```
 
-## 커밋 메시지 예시
+작업 후에는 아래 순서로 진행합니다.
 
-- `feat: add initial mysql schema`
-- `feat: add docker compose for local mysql`
-- `docs: add ec2 setup guide`
-- `fix: correct users table index`
+```bash
+git add .
+git commit -m "type: short summary"
+git push -u origin feature/<topic>
+```
 
-## 최소 규칙
+## 커밋 메시지 규칙
 
-- 직접 `main` push 금지
-- PR 없이 병합 금지
-- 환경변수, 키 파일, 인증정보 커밋 금지
-- 인프라 변경은 문서와 함께 반영
+- `feat: ...`
+- `fix: ...`
+- `docs: ...`
+- `chore: ...`
+- `refactor: ...`
+- `test: ...`
 
+## 팀 작업 규칙
+
+- 항상 최신 `develop`에서 작업을 시작합니다.
+- `.env`는 커밋하지 않습니다.
+- 개인 IDE 설정 파일은 커밋하지 않습니다.
+- 인프라와 스키마 변경 사항은 `docs/`에 함께 문서화합니다.

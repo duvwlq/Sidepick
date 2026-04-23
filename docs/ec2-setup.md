@@ -1,70 +1,71 @@
-# AWS EC2 서버 생성 가이드
+# EC2 설정 가이드
 
-## 목표
+현재 프로젝트는 MySQL과 Spring Boot를 Docker Compose로 실행하는 구조를 사용합니다.
 
-- Ubuntu 기반 EC2 생성
-- Docker / Docker Compose 설치
-- 보안 그룹 최소 개방
-- 배포용 서버 접속 준비
+## 권장 인스턴스
 
-## 권장 스펙
+- OS: Ubuntu 22.04 LTS
+- 무료 범위 테스트용: `t3.micro`
+- 보다 안정적인 원격 빌드용: `t3.small` 이상
+- 스토리지: 8GB 이상
 
-- AMI: Ubuntu 24.04 LTS
-- Instance Type: `t3.small` 또는 `t3.medium`
-- Storage: 30GB gp3
+## 필수 보안 그룹 규칙
 
-## 보안 그룹
+- `SSH / 22 / 내 IP`
+- `Custom TCP / 8081 / 0.0.0.0/0`
 
-- `22/tcp`: 본인 IP만 허용
-- `80/tcp`: 전체 허용
-- `443/tcp`: 전체 허용
-- `3306/tcp`: 외부 미개방 권장
+문제 해결용으로 일시적으로 아래 규칙을 열 수 있습니다.
 
-## 생성 절차
+- `SSH / 22 / 0.0.0.0/0`
 
-1. AWS Console에서 EC2 인스턴스 생성
-2. 키 페어 생성 및 다운로드
-3. 보안 그룹 설정
-4. Elastic IP 연결 여부 결정
+설정이 끝나면 임시 SSH 규칙은 다시 제거하는 것을 권장합니다.
 
-## 서버 초기 접속
+## Elastic IP
 
-```bash
-ssh -i <key.pem> ubuntu@<ec2-public-ip>
-```
+같은 서버를 계속 사용할 예정이라면 Elastic IP를 연결하는 것이 좋습니다.
+이렇게 하면 인스턴스를 중지 후 다시 시작해도 공인 IP가 바뀌지 않습니다.
 
-## 필수 패키지
+## 초기 설정 명령
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y ca-certificates curl gnupg
-```
-
-## Docker 설치
-
-```bash
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo $VERSION_CODENAME) stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt install -y curl wget git vim openjdk-17-jdk
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
 sudo usermod -aG docker ubuntu
+sudo apt-get update
+sudo apt-get install -y docker-compose-plugin
 ```
 
-## 점검
+`docker` 그룹 추가 후에는 한 번 다시 접속하는 것이 좋습니다.
+
+## 배포 명령
+
+저장소가 서버에 이미 있는 경우:
 
 ```bash
-docker --version
-docker compose version
+cd ~/Sidepick
+git pull origin develop
+cp .env.example .env
+sudo docker compose -f infra/docker-compose.yml up -d --build
 ```
 
-## 운영 메모
+로컬에서 프로젝트를 복사해 둔 경우:
 
-- DB는 EC2 내부 Docker network로만 노출하는 구성이 안전합니다.
-- 애플리케이션 배포 시 `nginx + app container + mysql container` 구조 권장입니다.
-- `.env`, SSH 키, DB 비밀번호는 절대 GitHub에 올리지 않습니다.
+```bash
+cd ~/Sidepick
+cp .env.example .env
+sudo docker compose -f infra/docker-compose.yml up -d --build
+```
 
+## 확인 명령
+
+```bash
+sudo docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+curl http://localhost:8081/api/health
+```
+
+외부 확인 주소:
+
+- `http://<EC2_IP>:8081/api/health`
+- `http://<EC2_IP>:8081/swagger-ui.html`

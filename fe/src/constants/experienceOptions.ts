@@ -1,12 +1,3 @@
-export const categoryOptions = [
-  '카테고리1',
-  '카테고리2',
-  '카테고리3',
-  '카테고리4',
-  '카테고리5',
-  '카테고리6',
-];
-
 export const causeOptions = [
   '시장 조사 부족',
   '실행력 부족',
