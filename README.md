@@ -1,42 +1,42 @@
 # Sidepick MVP
 
-Sidepick MVP 배포 기준 저장소입니다.
+Sidepick is an MVP for collecting structured side-job failure stories, browsing similar cases, and using AI analysis to help users form better judgment criteria.
 
-현재 운영 구조는 아래와 같습니다.
+## Current Stack
 
-- Frontend: AWS Amplify
-- Backend: AWS EC2 + Nginx + Spring Boot
-- Database: AWS RDS MySQL
-- Backend API: `https://api.side-pick.app/api`
+- Frontend: Vite + React in `fe/`
+- Backend: Spring Boot in `server/`
+- Database: MySQL
+- Infra: Docker Compose for local infra, EC2 + Nginx for production
+- Public API base: `https://api.side-pick.app/api`
 
-## Services
+## Repository Layout
 
-- Frontend URL:
-  - `https://codex-backend-mvp-verify.d1kbzcbfbyz1zc.amplifyapp.com`
-- Backend health:
-  - `https://api.side-pick.app/api/health`
+- `fe/`: frontend app
+- `server/`: backend API
+- `ai/`: AI-related code and notes
+- `infra/`: local database and migration setup
+- `scripts/`: local helper scripts
+- `docs/`: project notes and cleanup inventory
+- `screenshots/`: reference screenshots and presentation assets
 
-## Repository Structure
+## Backend Auth Status
 
-- `fe`: Vite + React frontend
-- `server`: Spring Boot backend
-- `ai`: AI service code
-- `infra`: local/docker infra files
-- `scripts`: local helper scripts
-- `docs`: project notes
-- `배포_준비_전체_가이드.md`: AWS 배포/운영 가이드
+The backend currently supports:
 
-## Frontend
+- Email/password sign-up and login
+- Email verification state management
+- Kakao OAuth login
+- Google OAuth login
+- Write restrictions for unverified local accounts
 
-Frontend is built on Amplify.
+See:
 
-Important env:
+- [Backend README](D:/Codex_Folder/Sidepick/server/README.md)
+- [Auth Flow MVP](D:/Codex_Folder/Sidepick/server/AUTH_FLOW_MVP.md)
+- [Frontend Auth Handoff](D:/Codex_Folder/Sidepick/docs/frontend-auth-handoff.md)
 
-```env
-VITE_API_BASE_URL=https://api.side-pick.app/api
-```
-
-Local run:
+## Local Frontend
 
 ```powershell
 cd fe
@@ -44,41 +44,31 @@ npm install
 npm run dev
 ```
 
-Local build:
+Important env:
 
-```powershell
-cd fe
-npm run build
+```env
+VITE_API_BASE_URL=https://api.side-pick.app/api
+VITE_KAKAO_CLIENT_ID=<kakao-rest-api-key>
 ```
 
-## Backend
+## Local Backend
 
-Backend runs on EC2 and is proxied by Nginx.
+The repo uses Docker-backed Maven wrapper commands through `mvnw.cmd`.
 
-Production flow:
+```powershell
+cd server
+../mvnw.cmd test
+```
 
-- Nginx: `80/443`
-- Spring Boot: `127.0.0.1:8081`
-- Public API domain: `api.side-pick.app`
+Production environment details live in [server/README.md](D:/Codex_Folder/Sidepick/server/README.md).
 
-See full backend setup in [server/README.md](/D:/Codex_Folder/Sidepick/server/README.md).
+## Waiting-Period Maintenance
 
-## Deployment Notes
+While frontend work is in progress, the most useful maintenance items are:
 
-- Amplify uses root `amplify.yml`
-- Frontend build is executed from `fe/`
-- EC2 public `8081` inbound is not required after Nginx/HTTPS is configured
-- Production CORS must allow the actual frontend origin only
+- keep auth and deployment docs current
+- keep OAuth environment values out of Git
+- avoid deleting user notes/screenshots without review
+- use the cleanup inventory before removing loose docs
 
-## Immediate Ops Checklist
-
-- Confirm `APP_CORS_ALLOWED_ORIGINS` contains the actual frontend domain
-- Keep `SPRING_JPA_HIBERNATE_DDL_AUTO=validate`
-- Keep `APP_JWT_SECRET` as a strong production secret
-- Rotate RDS password if it was exposed during setup
-- Restrict EC2 inbound rules to `22`, `80`, `443`
-
-## Useful Links
-
-- [Backend README](/D:/Codex_Folder/Sidepick/server/README.md)
-- [Deployment Guide](/D:/Codex_Folder/Sidepick/배포_준비_전체_가이드.md)
+See [Cleanup Inventory](D:/Codex_Folder/Sidepick/docs/repo-cleanup-inventory.md).

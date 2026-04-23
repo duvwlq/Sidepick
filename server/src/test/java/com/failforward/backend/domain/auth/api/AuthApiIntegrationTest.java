@@ -52,14 +52,17 @@ class AuthApiIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.user.email").value("auth_test@sidepick.dev"))
+                .andExpect(jsonPath("$.data.user.emailVerified").value(false))
                 .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.data.refreshToken").isNotEmpty())
-                .andExpect(jsonPath("$.data.accessTokenExpiresIn").value(3600));
+                .andExpect(jsonPath("$.data.accessTokenExpiresIn").value(3600))
+                .andExpect(jsonPath("$.data.emailVerificationRequired").value(true));
 
         User savedUser = userRepository.findByEmail("auth_test@sidepick.dev").orElseThrow();
         assertThat(savedUser.getPassword()).isNotEqualTo("password123");
         assertThat(checkpw("password123", savedUser.getPassword())).isTrue();
+        assertThat(savedUser.getEmailVerified()).isFalse();
     }
 
     @Test
@@ -112,10 +115,56 @@ class AuthApiIntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
                 .andExpect(jsonPath("$.data.refreshToken").isNotEmpty())
+                .andExpect(jsonPath("$.data.emailVerificationRequired").value(true))
                 .andReturn();
 
         JsonNode json = objectMapper.readTree(result.getResponse().getContentAsString());
         assertThat(json.path("data").path("accessToken").asText()).startsWith("eyJ");
         assertThat(json.path("data").path("refreshToken").asText()).startsWith("eyJ");
+    }
+
+    @Test
+    void emailVerificationFlowMarksUserVerified() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "verify_test@sidepick.dev",
+                                  "password": "password123",
+                                  "nickname": "verifyuser",
+                                  "ageGroup": "20s"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        MvcResult requestResult = mockMvc.perform(post("/api/auth/email-verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "verify_test@sidepick.dev"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("PENDING"))
+                .andReturn();
+
+        String code = objectMapper.readTree(requestResult.getResponse().getContentAsString())
+                .path("data")
+                .path("verificationCode")
+                .asText();
+
+        mockMvc.perform(post("/api/auth/email-verifications/confirm")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "verify_test@sidepick.dev",
+                                  "code": "%s"
+                                }
+                                """.formatted(code)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("VERIFIED"));
+
+        User verifiedUser = userRepository.findByEmail("verify_test@sidepick.dev").orElseThrow();
+        assertThat(verifiedUser.getEmailVerified()).isTrue();
     }
 }

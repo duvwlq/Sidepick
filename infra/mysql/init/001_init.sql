@@ -7,11 +7,37 @@ USE failforward;
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(255),
     nickname VARCHAR(20) UNIQUE NOT NULL,
     age_group VARCHAR(10) NOT NULL,
     profile_image VARCHAR(500),
+    auth_provider VARCHAR(20) NOT NULL DEFAULT 'LOCAL',
+    email_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    profile_completed BOOLEAN NOT NULL DEFAULT TRUE,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS social_accounts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    provider VARCHAR(20) NOT NULL,
+    provider_user_id VARCHAR(120) NOT NULL,
+    provider_email VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT uq_social_accounts_provider UNIQUE (provider, provider_user_id),
+    CONSTRAINT fk_social_accounts_user
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS email_verification_tokens (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    code VARCHAR(10) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    verified_at TIMESTAMP NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -33,7 +59,12 @@ CREATE TABLE IF NOT EXISTS failure_experiences (
     business_type VARCHAR(50) NOT NULL,
     investment_amount INTEGER,
     duration_months INTEGER,
+    average_daily_hours VARCHAR(30),
+    is_concurrent_with_main_job BOOLEAN,
+    monthly_revenue INTEGER,
     failure_reason VARCHAR(50) NOT NULL,
+    failure_reasons JSON,
+    difficulties JSON,
     target_market VARCHAR(100),
     marketing_channels JSON,
     lessons_learned TEXT,
@@ -101,6 +132,7 @@ CREATE INDEX idx_ai_analysis_experience_id ON ai_analysis(experience_id);
 CREATE INDEX idx_matched_cases_analysis_id ON matched_cases(analysis_id);
 CREATE INDEX idx_comments_experience_id ON comments(experience_id);
 CREATE INDEX idx_comments_user_id ON comments(user_id);
+CREATE INDEX idx_email_verification_tokens_email ON email_verification_tokens(email);
 
 INSERT INTO business_categories (id, name, description, icon, color)
 VALUES

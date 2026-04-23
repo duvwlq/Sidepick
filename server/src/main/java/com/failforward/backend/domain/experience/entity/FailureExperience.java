@@ -49,8 +49,23 @@ public class FailureExperience extends BaseTimeEntity {
     @Column(name = "duration_months")
     private Integer durationMonths;
 
+    @Column(name = "average_daily_hours", length = 30)
+    private String averageDailyHours;
+
+    @Column(name = "is_concurrent_with_main_job")
+    private Boolean isConcurrentWithMainJob;
+
+    @Column(name = "monthly_revenue")
+    private Integer monthlyRevenue;
+
     @Column(name = "failure_reason", nullable = false, length = 50)
     private String failureReason;
+
+    @Column(name = "failure_reasons", columnDefinition = "json")
+    private String failureReasons;
+
+    @Column(name = "difficulties", columnDefinition = "json")
+    private String difficulties;
 
     @Column(name = "target_market", length = 100)
     private String targetMarket;
@@ -84,7 +99,12 @@ public class FailureExperience extends BaseTimeEntity {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            String averageDailyHours,
+            Boolean isConcurrentWithMainJob,
+            Integer monthlyRevenue,
             String failureReason,
+            String failureReasons,
+            String difficulties,
             String targetMarket,
             String marketingChannels,
             String lessonsLearned,
@@ -98,7 +118,12 @@ public class FailureExperience extends BaseTimeEntity {
         this.businessType = businessType;
         this.investmentAmount = investmentAmount;
         this.durationMonths = durationMonths;
+        this.averageDailyHours = averageDailyHours;
+        this.isConcurrentWithMainJob = isConcurrentWithMainJob;
+        this.monthlyRevenue = monthlyRevenue;
         this.failureReason = failureReason;
+        this.failureReasons = failureReasons;
+        this.difficulties = difficulties;
         this.targetMarket = targetMarket;
         this.marketingChannels = marketingChannels;
         this.lessonsLearned = lessonsLearned;
@@ -117,7 +142,12 @@ public class FailureExperience extends BaseTimeEntity {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            String averageDailyHours,
+            Boolean isConcurrentWithMainJob,
+            Integer monthlyRevenue,
             String failureReason,
+            String failureReasons,
+            String difficulties,
             String targetMarket,
             String marketingChannels,
             String lessonsLearned,
@@ -132,7 +162,12 @@ public class FailureExperience extends BaseTimeEntity {
                 businessType,
                 investmentAmount,
                 durationMonths,
+                averageDailyHours,
+                isConcurrentWithMainJob,
+                monthlyRevenue,
                 failureReason,
+                failureReasons,
+                difficulties,
                 targetMarket,
                 marketingChannels,
                 lessonsLearned,
@@ -152,7 +187,12 @@ public class FailureExperience extends BaseTimeEntity {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            String averageDailyHours,
+            Boolean isConcurrentWithMainJob,
+            Integer monthlyRevenue,
             String failureReason,
+            String failureReasons,
+            String difficulties,
             String targetMarket,
             String marketingChannels,
             String lessonsLearned,
@@ -165,7 +205,12 @@ public class FailureExperience extends BaseTimeEntity {
         this.businessType = businessType;
         this.investmentAmount = investmentAmount;
         this.durationMonths = durationMonths;
+        this.averageDailyHours = averageDailyHours;
+        this.isConcurrentWithMainJob = isConcurrentWithMainJob;
+        this.monthlyRevenue = monthlyRevenue;
         this.failureReason = failureReason;
+        this.failureReasons = failureReasons;
+        this.difficulties = difficulties;
         this.targetMarket = targetMarket;
         this.marketingChannels = marketingChannels;
         this.lessonsLearned = lessonsLearned;

@@ -23,6 +23,12 @@ SPRING_JPA_HIBERNATE_DDL_AUTO='validate'
 APP_JWT_SECRET='<LONG-RANDOM-SECRET>'
 APP_CORS_ALLOWED_ORIGINS='https://codex-backend-mvp-verify.d1kbzcbfbyz1zc.amplifyapp.com'
 AI_SERVER_URL='http://localhost:8000'
+APP_EMAIL_VERIFICATION_EXPIRATION_MINUTES='10'
+APP_EMAIL_VERIFICATION_EXPOSE_CODE='false'
+APP_OAUTH_KAKAO_CLIENT_ID='<KAKAO-REST-API-KEY>'
+APP_OAUTH_KAKAO_CLIENT_SECRET='<KAKAO-CLIENT-SECRET-OPTIONAL>'
+APP_OAUTH_GOOGLE_CLIENT_ID='<GOOGLE-OAUTH-CLIENT-ID>'
+APP_OAUTH_GOOGLE_CLIENT_SECRET='<GOOGLE-OAUTH-CLIENT-SECRET>'
 ```
 
 Notes:
@@ -103,6 +109,10 @@ sudo certbot --nginx -d api.side-pick.app
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
+- `POST /api/auth/email-verifications`
+- `POST /api/auth/email-verifications/confirm`
+- `POST /api/auth/oauth/kakao`
+- `POST /api/auth/oauth/google`
 - `GET /api/experiences`
 - `GET /api/experiences/{id}`
 - `GET /api/categories`
@@ -115,6 +125,13 @@ Protected:
 - `POST /api/experiences`
 - `PATCH /api/experiences/{id}`
 - `DELETE /api/experiences/{id}`
+
+## Auth Notes
+
+- Local accounts can log in before email verification is complete.
+- Unverified local accounts are blocked from experience write actions.
+- Social accounts are treated as verified at login time.
+- OAuth setup details for frontend integration are documented in [AUTH_FLOW_MVP.md](D:/Codex_Folder/Sidepick/server/AUTH_FLOW_MVP.md).
 
 ## Ops Checklist
 

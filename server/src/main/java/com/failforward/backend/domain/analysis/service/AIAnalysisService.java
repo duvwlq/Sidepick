@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -37,6 +38,7 @@ public class AIAnalysisService {
     private final FailureExperienceRepository experienceRepository;
     private final AiAnalysisRepository aiAnalysisRepository;
     private final MatchedCaseRepository matchedCaseRepository;
+    @Qualifier("aiRestTemplate")
     private final RestTemplate aiRestTemplate;
     private final AiServerProperties aiServerProperties;
     private final ObjectMapper objectMapper;

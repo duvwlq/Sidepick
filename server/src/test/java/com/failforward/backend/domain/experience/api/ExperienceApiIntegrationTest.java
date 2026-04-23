@@ -40,6 +40,50 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void unverifiedUserCannotCreateExperience() throws Exception {
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "unverified@sidepick.dev",
+                                  "password": "password123",
+                                  "nickname": "unverifiedUser",
+                                  "ageGroup": "20s"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "unverified@sidepick.dev",
+                                  "password": "password123"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .path("data")
+                .path("accessToken")
+                .asText();
+
+        mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Blocked experience",
+                                  "content": "This should fail until the email is verified.",
+                                  "categoryId": 1
+                                }
+                                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.data.detail").value("Email verification is required to write experiences."));
+    }
+
+    @Test
     void authenticatedOwnerCanRunExperienceCrud() throws Exception {
         String token = registerAndLogin("owner@sidepick.dev", "password123", "ownerUser", "20s");
 
@@ -54,7 +98,12 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                   "businessType": "Online store",
                                   "investmentAmount": 500000,
                                   "durationMonths": 2,
+                                  "averageDailyHours": "1_TO_3_HOURS",
+                                  "isConcurrentWithMainJob": true,
+                                  "monthlyRevenue": 150000,
                                   "failureReason": "No product-market fit",
+                                  "failureReasons": ["No product-market fit", "Weak execution"],
+                                  "difficulties": ["Customer acquisition", "Time management"],
                                   "targetMarket": "Students",
                                   "marketingChannels": ["Instagram", "Blog"],
                                   "lessonsLearned": "Validate demand first.",
@@ -64,6 +113,10 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.author.email").value("owner@sidepick.dev"))
+                .andExpect(jsonPath("$.data.averageDailyHours").value("1_TO_3_HOURS"))
+                .andExpect(jsonPath("$.data.isConcurrentWithMainJob").value(true))
+                .andExpect(jsonPath("$.data.monthlyRevenue").value(150000))
+                .andExpect(jsonPath("$.data.failureReasons[0]").value("No product-market fit"))
                 .andReturn();
 
         long experienceId = readId(createResult);
@@ -89,7 +142,12 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                   "businessType": "Online store",
                                   "investmentAmount": 650000,
                                   "durationMonths": 3,
+                                  "averageDailyHours": "UNDER_1_HOUR",
+                                  "isConcurrentWithMainJob": false,
+                                  "monthlyRevenue": 100000,
                                   "failureReason": "Weak validation",
+                                  "failureReasons": ["Weak validation"],
+                                  "difficulties": ["Information gap"],
                                   "targetMarket": "Students",
                                   "marketingChannels": ["Instagram"],
                                   "lessonsLearned": "Only owner can update.",
@@ -98,7 +156,9 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("Owner experience updated"))
-                .andExpect(jsonPath("$.data.failureReason").value("Weak validation"));
+                .andExpect(jsonPath("$.data.failureReason").value("Weak validation"))
+                .andExpect(jsonPath("$.data.averageDailyHours").value("UNDER_1_HOUR"))
+                .andExpect(jsonPath("$.data.isConcurrentWithMainJob").value(false));
 
         mockMvc.perform(delete("/api/experiences/{experienceId}", experienceId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))

@@ -37,6 +37,7 @@ public class ExperienceService {
     @Transactional
     public ExperienceDtos.ExperienceResponse create(ExperienceDtos.ExperienceCreateRequest request) {
         User author = currentUserProvider.getCurrentUserEntity();
+        validateVerifiedWriter(author);
         ExperiencePayload payload = buildPayload(request);
         log.info("Experience creation started for userId={}", author.getId());
 
@@ -48,7 +49,12 @@ public class ExperienceService {
                 payload.businessType(),
                 payload.investmentAmount(),
                 payload.durationMonths(),
+                payload.averageDailyHours(),
+                payload.isConcurrentWithMainJob(),
+                payload.monthlyRevenue(),
                 payload.failureReason(),
+                payload.failureReasonsJson(),
+                payload.difficultiesJson(),
                 payload.targetMarket(),
                 payload.marketingChannelsJson(),
                 payload.lessonsLearned(),
@@ -65,6 +71,7 @@ public class ExperienceService {
     public ExperienceDtos.ExperienceResponse update(Long experienceId, ExperienceDtos.ExperienceUpdateRequest request) {
         FailureExperience experience = getExperienceEntity(experienceId);
         validateOwner(experience);
+        validateVerifiedWriter(currentUserProvider.getCurrentUserEntity());
 
         ExperiencePayload payload = buildPayload(request);
         experience.update(
@@ -74,7 +81,12 @@ public class ExperienceService {
                 payload.businessType(),
                 payload.investmentAmount(),
                 payload.durationMonths(),
+                payload.averageDailyHours(),
+                payload.isConcurrentWithMainJob(),
+                payload.monthlyRevenue(),
                 payload.failureReason(),
+                payload.failureReasonsJson(),
+                payload.difficultiesJson(),
                 payload.targetMarket(),
                 payload.marketingChannelsJson(),
                 payload.lessonsLearned(),
@@ -90,6 +102,7 @@ public class ExperienceService {
     public void delete(Long experienceId) {
         FailureExperience experience = getExperienceEntity(experienceId);
         validateOwner(experience);
+        validateVerifiedWriter(currentUserProvider.getCurrentUserEntity());
         experienceRepository.delete(experience);
     }
 
@@ -193,7 +206,12 @@ public class ExperienceService {
                 request.businessType(),
                 request.investmentAmount(),
                 request.durationMonths(),
+                request.averageDailyHours(),
+                request.isConcurrentWithMainJob(),
+                request.monthlyRevenue(),
                 request.failureReason(),
+                request.failureReasons(),
+                request.difficulties(),
                 request.targetMarket(),
                 request.marketingChannels(),
                 request.lessonsLearned(),
@@ -209,7 +227,12 @@ public class ExperienceService {
                 request.businessType(),
                 request.investmentAmount(),
                 request.durationMonths(),
+                request.averageDailyHours(),
+                request.isConcurrentWithMainJob(),
+                request.monthlyRevenue(),
                 request.failureReason(),
+                request.failureReasons(),
+                request.difficulties(),
                 request.targetMarket(),
                 request.marketingChannels(),
                 request.lessonsLearned(),
@@ -224,7 +247,12 @@ public class ExperienceService {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            String averageDailyHours,
+            Boolean isConcurrentWithMainJob,
+            Integer monthlyRevenue,
             String failureReason,
+            List<String> failureReasons,
+            List<String> difficulties,
             String targetMarket,
             List<String> marketingChannels,
             String lessonsLearned,
@@ -232,13 +260,27 @@ public class ExperienceService {
     ) {
         BusinessCategory category = categoryService.getCategory(categoryId);
         String resolvedBusinessType = hasText(businessType) ? businessType : category.getName();
-        String resolvedFailureReason = hasText(failureReason) ? failureReason : "UNSPECIFIED";
+        List<String> resolvedFailureReasons = failureReasons == null ? List.of() : failureReasons.stream()
+                .filter(this::hasText)
+                .toList();
+        List<String> resolvedDifficulties = difficulties == null ? List.of() : difficulties.stream()
+                .filter(this::hasText)
+                .toList();
+        String resolvedFailureReason = hasText(failureReason)
+                ? failureReason
+                : (resolvedFailureReasons.isEmpty() ? "UNSPECIFIED" : resolvedFailureReasons.get(0));
         String resolvedTitle = hasText(title) ? title : resolvedBusinessType + " failure experience";
         String resolvedLessons = hasText(lessonsLearned) ? lessonsLearned : content;
 
         Map<String, Object> structured = new HashMap<>();
         structured.put("categoryId", categoryId);
         structured.put("categoryName", category.getName());
+        structured.put("durationMonths", durationMonths);
+        structured.put("averageDailyHours", averageDailyHours);
+        structured.put("isConcurrentWithMainJob", isConcurrentWithMainJob != null ? isConcurrentWithMainJob : Boolean.FALSE);
+        structured.put("monthlyRevenue", monthlyRevenue);
+        structured.put("failureReasons", resolvedFailureReasons);
+        structured.put("difficulties", resolvedDifficulties);
         structured.put("targetMarket", targetMarket);
         structured.put("wouldRetry", wouldRetry != null ? wouldRetry : Boolean.FALSE);
 
@@ -249,7 +291,12 @@ public class ExperienceService {
                 resolvedBusinessType,
                 investmentAmount,
                 durationMonths,
+                averageDailyHours,
+                isConcurrentWithMainJob,
+                monthlyRevenue,
                 resolvedFailureReason,
+                writeJson(resolvedFailureReasons),
+                writeJson(resolvedDifficulties),
                 targetMarket,
                 marketingChannels == null ? List.of() : marketingChannels,
                 resolvedLessons,
@@ -306,6 +353,12 @@ public class ExperienceService {
         }
     }
 
+    private void validateVerifiedWriter(User user) {
+        if (user.requiresEmailVerification()) {
+            throw new AccessDeniedException("Email verification is required to write experiences.");
+        }
+    }
+
     private String writeJson(Object value) {
         try {
             return objectMapper.writeValueAsString(value);
@@ -325,7 +378,12 @@ public class ExperienceService {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            String averageDailyHours,
+            Boolean isConcurrentWithMainJob,
+            Integer monthlyRevenue,
             String failureReason,
+            String failureReasonsJson,
+            String difficultiesJson,
             String targetMarket,
             List<String> marketingChannels,
             String lessonsLearned,

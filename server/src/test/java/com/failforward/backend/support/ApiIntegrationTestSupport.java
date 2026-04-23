@@ -33,6 +33,30 @@ public abstract class ApiIntegrationTestSupport {
                                 """.formatted(email, password, nickname, ageGroup)))
                 .andExpect(status().isCreated());
 
+        MvcResult verificationRequestResult = mockMvc.perform(post("/api/auth/email-verifications")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "%s"
+                                }
+                                """.formatted(email)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode verificationRequestJson = objectMapper.readTree(verificationRequestResult.getResponse().getContentAsString());
+        String verificationCode = verificationRequestJson.path("data").path("verificationCode").asText();
+        assertThat(verificationCode).hasSize(6);
+
+        mockMvc.perform(post("/api/auth/email-verifications/confirm")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "%s",
+                                  "code": "%s"
+                                }
+                                """.formatted(email, verificationCode)))
+                .andExpect(status().isOk());
+
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

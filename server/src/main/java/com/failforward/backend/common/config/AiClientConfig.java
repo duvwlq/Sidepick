@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@EnableConfigurationProperties(AiServerProperties.class)
+@EnableConfigurationProperties({AiServerProperties.class, OAuthProperties.class})
 public class AiClientConfig {
 
     @Bean
@@ -16,6 +16,14 @@ public class AiClientConfig {
         return builder
                 .setConnectTimeout(Duration.ofMillis(properties.connectTimeout()))
                 .setReadTimeout(Duration.ofMillis(properties.readTimeout()))
+                .build();
+    }
+
+    @Bean
+    public RestTemplate oauthRestTemplate(RestTemplateBuilder builder) {
+        return builder
+                .setConnectTimeout(Duration.ofSeconds(5))
+                .setReadTimeout(Duration.ofSeconds(5))
                 .build();
     }
 }

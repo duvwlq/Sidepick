@@ -2,7 +2,11 @@ package com.failforward.backend.domain.auth.api;
 
 import com.failforward.backend.common.api.ApiResponse;
 import com.failforward.backend.domain.auth.dto.AuthDtos.AuthPayload;
+import com.failforward.backend.domain.auth.dto.AuthDtos.EmailVerificationConfirmRequest;
+import com.failforward.backend.domain.auth.dto.AuthDtos.EmailVerificationPayload;
+import com.failforward.backend.domain.auth.dto.AuthDtos.EmailVerificationRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.LoginRequest;
+import com.failforward.backend.domain.auth.dto.AuthDtos.OAuthLoginRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.SignUpRequest;
 import com.failforward.backend.domain.auth.service.AuthService;
 import jakarta.validation.Valid;
@@ -35,5 +39,33 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<AuthPayload> login(@Valid @RequestBody LoginRequest request) {
         return ApiResponse.ok("Login succeeded.", authService.login(request));
+    }
+
+    @Operation(summary = "이메일 인증 코드 발급")
+    @PostMapping("/email-verifications")
+    public ApiResponse<EmailVerificationPayload> requestEmailVerification(
+            @Valid @RequestBody EmailVerificationRequest request
+    ) {
+        return ApiResponse.ok("Email verification requested.", authService.requestEmailVerification(request));
+    }
+
+    @Operation(summary = "이메일 인증 코드 확인")
+    @PostMapping("/email-verifications/confirm")
+    public ApiResponse<EmailVerificationPayload> confirmEmailVerification(
+            @Valid @RequestBody EmailVerificationConfirmRequest request
+    ) {
+        return ApiResponse.ok("Email verification confirmed.", authService.confirmEmailVerification(request));
+    }
+
+    @Operation(summary = "카카오 OAuth 로그인")
+    @PostMapping("/oauth/kakao")
+    public ApiResponse<AuthPayload> loginWithKakao(@Valid @RequestBody OAuthLoginRequest request) {
+        return ApiResponse.ok("Kakao login succeeded.", authService.loginWithKakao(request));
+    }
+
+    @Operation(summary = "구글 OAuth 로그인")
+    @PostMapping("/oauth/google")
+    public ApiResponse<AuthPayload> loginWithGoogle(@Valid @RequestBody OAuthLoginRequest request) {
+        return ApiResponse.ok("Google login succeeded.", authService.loginWithGoogle(request));
     }
 }
