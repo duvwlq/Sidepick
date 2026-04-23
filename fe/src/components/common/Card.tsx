@@ -1,65 +1,59 @@
-import amountIcon from '../../assets/images/amount.svg';
 import durationIcon from '../../assets/images/duration.svg';
 import viewsIcon from '../../assets/images/views.svg';
+import amountIcon from '../../assets/images/amount.svg';
 
 type CardProps = {
   title: string;
-  category: string;
-  failureReason: string;
   duration: string;
   views: number;
   amount: number;
   date: string;
-  content: string;
 };
 
 export default function Card({
   title,
-  category,
-  failureReason,
   duration,
   views,
   amount,
   date,
-  content,
 }: CardProps) {
   return (
-    <div className="inline-flex w-full flex-col items-start justify-start rounded-[10px] bg-zinc-100 p-5">
-      <div className="flex w-full justify-between gap-2 pb-1">
-        <div className="flex items-start justify-start gap-1">
-          <span className="rounded bg-gray-200 px-2 py-1 text-xs">
-            {category}
-          </span>
-          <span className="rounded bg-gray-200 px-2 py-1 text-xs">
-            {failureReason}
-          </span>
+    <div className="w-full bg-zinc-100 rounded-[10px] p-5 inline-flex flex-col justify-start items-start">
+      {/* 키워드 */}
+      <div className="flex gap-2 w-full justify-between pb-1">
+        <div className="flex justify-start items-start gap-1">
+          <span className="text-xs bg-gray-200 px-2 py-1 rounded">키워드</span>
+          <span className="text-xs bg-gray-200 px-2 py-1 rounded">키워드</span>
+          <span className="text-xs bg-gray-200 px-2 py-1 rounded">키워드</span>
         </div>
-        <div className="text-center text-xs font-semibold leading-5 text-zinc-800 underline">
-          상세보기
+        <div className="text-center justify-start text-zinc-800 text-xs font-semibold font-['Pretendard'] underline leading-5">
+          자세히보기
         </div>
       </div>
+      {/* 제목 */}
+      <h2 className="justify-start font-semibold text-neutral-950 text-lg mb-2.5">
+        {title}
+      </h2>
 
-      <h2 className="mb-2.5 text-lg font-semibold text-neutral-950">{title}</h2>
-      <p className="mb-3 line-clamp-3 text-sm text-gray-600">{content}</p>
-
-      <div className="flex w-full text-sm text-gray-500">
-        <div className="w-full space-y-1">
-          <div className="flex items-center gap-1">
-            <img src={durationIcon} alt="duration" className="h-4 w-4" />
+      {/* 정보 */}
+      <div className="w-full flex text-sm text-gray-500">
+        <div className="w-full space-y-1 gap-1">
+          <div className="flex gap-1 items-center">
+            <img src={durationIcon} alt="duration" className="w-4 h-4" />
             <p>{duration}</p>
           </div>
-          <div className="flex items-center gap-1">
-            <img src={viewsIcon} alt="views" className="h-4 w-4" />
+          <div className="flex gap-1  items-center">
+            <img src={viewsIcon} alt="views" className="w-4 h-4" />
             <p>{views}</p>
           </div>
         </div>
 
         <div className="w-full space-y-1 text-right">
-          <div className="flex items-center justify-end gap-1">
-            <img src={amountIcon} alt="amount" className="h-4 w-4" />
-            <p>{amount.toLocaleString()}원</p>
+          <div className="flex gap-1  items-center">
+            <img src={amountIcon} alt="amount" className="w-4 h-4" />
+            <p>{amount}</p>
           </div>
-          <p>{date}</p>
+          <p className="text-left">{date}</p>
         </div>
       </div>
     </div>
