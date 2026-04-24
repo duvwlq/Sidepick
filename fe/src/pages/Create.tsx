@@ -25,8 +25,18 @@ export default function Create() {
     useExperienceWrite();
 
   useEffect(() => {
+    if (!token) {
+      navigate(
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
+          '경험 등록은 로그인 후 이용할 수 있어요.',
+        )}`,
+        { replace: true },
+      );
+      return;
+    }
+
     void loadCategories();
-  }, []);
+  }, [navigate, token]);
 
   async function loadCategories() {
     setCategoryLoading(true);
@@ -35,10 +45,10 @@ export default function Create() {
     try {
       const payload = await getCategories();
       setCategories(payload);
-    } catch (error) {
+    } catch (loadError) {
       setCategoryError(
-        error instanceof Error
-          ? error.message
+        loadError instanceof Error
+          ? loadError.message
           : '카테고리 목록을 불러오지 못했습니다.',
       );
     } finally {
@@ -61,31 +71,52 @@ export default function Create() {
       return;
     }
 
+    if (!user?.emailVerified) {
+      setSubmitError('이메일 인증을 완료해야 경험을 작성할 수 있습니다.');
+      return;
+    }
+
     const selectedCategory = categories.find(
       (item) => item.name === form.categories[0],
     );
+
+    if (!selectedCategory) {
+      setSubmitError('카테고리를 선택해 주세요.');
+      return;
+    }
 
     setSubmitting(true);
     setSubmitError('');
 
     try {
       const created = await createExperience(token, {
-        title: `${selectedCategory?.name ?? '기타'} 실패 경험`,
+        title: `${selectedCategory.name} 경험`,
         content: form.content,
-        categoryId: selectedCategory?.id ?? 5,
-        businessType: selectedCategory?.name ?? '기타',
+        categoryId: selectedCategory.id,
+        businessType: selectedCategory.name,
         investmentAmount: parseNumber(form.expense),
         durationMonths: mapPeriodToMonths(form.totalPeriod),
+        averageDailyHours: mapDailyHours(form.dailyHours),
+        isConcurrentWithMainJob:
+          form.isConcurrentWithMainJob === '예'
+            ? true
+            : form.isConcurrentWithMainJob === '아니오'
+              ? false
+              : undefined,
+        monthlyRevenue: parseNumber(form.revenue),
         failureReason: form.causes[0] ?? '기타',
-        targetMarket: form.currentStatus || undefined,
-        marketingChannels: form.difficulties,
+        failureReasons: form.causes,
+        difficulties: form.difficulties,
         lessonsLearned: form.content,
         wouldRetry: true,
       });
+
       navigate(`/experiences/${created.id}`);
-    } catch (error) {
+    } catch (createError) {
       setSubmitError(
-        error instanceof Error ? error.message : '경험담 등록에 실패했습니다.',
+        createError instanceof Error
+          ? createError.message
+          : '경험 등록에 실패했습니다.',
       );
     } finally {
       setSubmitting(false);
@@ -99,15 +130,19 @@ export default function Create() {
       showRightIcon={false}
       onBack={handleBack}
     >
-      <div className="px-4 pt-4">
-        <div className="mb-4 rounded-[10px] bg-white p-4 text-sm text-gray-600">
+      <div className="px-4 pb-6 pt-4">
+        <div className="mb-4 rounded-[22px] bg-white px-5 py-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
           {user ? (
             <div>
-              <div className="font-medium text-gray-900">{user.nickname}</div>
-              <div>{user.email}</div>
+              <div className="text-base font-semibold text-[#111111]">
+                {user.nickname}
+              </div>
+              <div className="mt-1 text-sm text-[#666666]">{user.email}</div>
             </div>
           ) : (
-            <div>로그인 후 작성할 수 있습니다.</div>
+            <div className="text-sm text-[#666666]">
+              로그인 후 경험을 작성할 수 있습니다.
+            </div>
           )}
         </div>
 
@@ -125,19 +160,19 @@ export default function Create() {
 
         {step === 2 ? (
           <StepSelectable
-            title="주된 실패 원인은 무엇이었나요?"
-            explain="가장 가까운 항목 하나를 선택해 주세요."
+            title="실패를 겪은 원인이 무엇인가요?"
+            explain="가장 가까운 이유를 하나 선택해 주세요."
             options={causeOptions}
             selected={form.causes}
             onSelect={(value) =>
-              setForm((prev) => ({ ...prev, causes: [value] }))
+              setForm((previous) => ({ ...previous, causes: [value] }))
             }
           />
         ) : null}
 
         {step === 3 ? (
           <StepSelectable
-            title="가장 어려웠던 지점은 무엇이었나요?"
+            title="부업을 진행하면서 특히 어려웠던 점은 무엇이었나요?"
             explain="복수 선택도 가능합니다."
             options={difficultyOptions}
             selected={form.difficulties}
@@ -149,18 +184,22 @@ export default function Create() {
           <StepFreeWrite
             value={form.content}
             onChange={(value) =>
-              setForm((prev) => ({ ...prev, content: value }))
+              setForm((previous) => ({ ...previous, content: value }))
             }
           />
         ) : null}
 
         {submitError ? (
-          <div className="mt-4 text-sm text-red-600">{submitError}</div>
+          <div className="mt-4 text-sm text-[#D33B3B]">{submitError}</div>
         ) : null}
 
         <BottomButton
           label={
-            step === 4 ? (submitting ? '등록 중...' : '작성 완료') : '다음 단계'
+            step === 4
+              ? submitting
+                ? '등록 중...'
+                : '작성 완료'
+              : '다음 단계'
           }
           disabled={!isValid || submitting || categoryLoading}
           onClick={step === 4 ? () => void handleSubmit() : next}
@@ -176,8 +215,33 @@ function parseNumber(value: string) {
 }
 
 function mapPeriodToMonths(value: string) {
-  if (value.includes('1')) return 1;
-  if (value.includes('3')) return 3;
-  if (value.includes('6')) return 6;
-  return undefined;
+  switch (value) {
+    case '1개월 미만':
+      return 1;
+    case '1~3개월':
+      return 3;
+    case '3~6개월':
+      return 6;
+    case '6개월~1년':
+      return 12;
+    case '1년 이상':
+      return 12;
+    default:
+      return undefined;
+  }
+}
+
+function mapDailyHours(value: string) {
+  switch (value) {
+    case '1시간 미만':
+      return 'UNDER_1_HOUR';
+    case '1~3시간':
+      return 'ONE_TO_THREE_HOURS';
+    case '3~5시간':
+      return 'THREE_TO_FIVE_HOURS';
+    case '5시간 이상':
+      return 'OVER_FIVE_HOURS';
+    default:
+      return undefined;
+  }
 }

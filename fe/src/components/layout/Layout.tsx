@@ -28,8 +28,8 @@ export default function Layout({
   onRightIconClick,
 }: Props) {
   return (
-    <div className="max-w-md min-h-screen bg-gray-100">
-      {showHeader && (
+    <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
+      {showHeader ? (
         <HeaderNav
           title={title}
           leftType={leftType}
@@ -38,15 +38,13 @@ export default function Layout({
           onMenuClick={onMenuClick}
           onRightIconClick={onRightIconClick}
         />
-      )}
+      ) : null}
 
-      <main
-        className={`${showHeader ? 'pt-16' : ''} ${showBottomNav ? 'pb-26' : ''}`}
-      >
+      <main className={`${showHeader ? 'pt-[123px]' : ''} ${showBottomNav ? 'pb-[110px]' : ''}`}>
         {children}
       </main>
 
-      {showBottomNav && <BottomNav />}
+      {showBottomNav ? <BottomNav /> : null}
     </div>
   );
 }

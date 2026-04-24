@@ -14,17 +14,16 @@ export default function StepSelectable({
   onSelect,
 }: Props) {
   return (
-    <div className="space-y-5 rounded-[10px] bg-white p-5">
-      <h2 className="mb-5 text-xl font-bold">{title}</h2>
+    <div className="rounded-[24px] bg-white px-5 pb-6 pt-7 shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
+      <h2 className="text-[20px] font-semibold leading-[1.45] text-[#111111]">
+        {title}
+      </h2>
 
       {explain ? (
-        <div className="flex items-start gap-1 text-base text-neutral-950">
-          <div className="font-semibold">{explain}</div>
-          <div>*</div>
-        </div>
+        <p className="mt-2 text-sm leading-6 text-[#666666]">{explain}</p>
       ) : null}
 
-      <div className="space-y-2">
+      <div className="mt-6 space-y-2.5">
         {options.map((item) => {
           const active = selected.includes(item);
 
@@ -33,8 +32,10 @@ export default function StepSelectable({
               key={item}
               type="button"
               onClick={() => onSelect(item)}
-              className={`h-11 w-full rounded-xl border ${
-                active ? 'border-black bg-gray-50' : 'border-gray-200'
+              className={`flex min-h-12 w-full items-center rounded-[16px] border px-4 text-left text-sm transition ${
+                active
+                  ? 'border-[#111111] bg-[#FAFAFA] text-[#111111]'
+                  : 'border-[#E4E7EC] bg-white text-[#555555]'
               }`}
             >
               {item}

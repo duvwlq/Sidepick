@@ -68,12 +68,24 @@ public class AuthService {
                     throw new BadRequestException("Nickname is already in use.");
                 });
 
+        EmailVerificationToken verificationToken = emailVerificationTokenRepository
+                .findTopByEmailOrderByCreatedAtDesc(request.email())
+                .orElseThrow(() -> new BadRequestException("Email verification is required before registration."));
+
+        if (!verificationToken.isVerified()) {
+            throw new BadRequestException("Email verification must be completed before registration.");
+        }
+        if (verificationToken.isExpired(LocalDateTime.now())) {
+            throw new BadRequestException("Email verification has expired. Please request a new code.");
+        }
+
         User user = userRepository.save(User.create(
                 request.email(),
                 passwordEncoder.encode(request.password()),
                 request.nickname(),
                 normalizeAgeGroup(request.ageGroup())
         ));
+        user.verifyEmail();
         return issueAuthPayload(user);
     }
 
@@ -92,7 +104,11 @@ public class AuthService {
     @Transactional
     public EmailVerificationPayload requestEmailVerification(EmailVerificationRequest request) {
         userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new BadRequestException("User with that email was not found."));
+                .ifPresent(user -> {
+                    if (Boolean.TRUE.equals(user.getEmailVerified())) {
+                        throw new BadRequestException("This email is already verified.");
+                    }
+                });
 
         emailVerificationTokenRepository.deleteByEmail(request.email());
         String code = generateVerificationCode();
@@ -121,14 +137,14 @@ public class AuthService {
         if (!token.getCode().equals(request.code())) {
             throw new BadRequestException("Verification code is invalid.");
         }
-
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new BadRequestException("User with that email was not found."));
-        user.verifyEmail();
         token.verify(LocalDateTime.now());
-
-        userRepository.save(user);
         emailVerificationTokenRepository.save(token);
+
+        userRepository.findByEmail(request.email())
+                .ifPresent(user -> {
+                    user.verifyEmail();
+                    userRepository.save(user);
+                });
 
         return new EmailVerificationPayload(
                 request.email(),

@@ -1,8 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import homeIcon from '../../assets/images/home.svg';
 import exploreIcon from '../../assets/images/search.svg';
 import createIcon from '../../assets/images/plus-circle.svg';
 import myIcon from '../../assets/images/user.svg';
+import { getAccessToken } from '../../lib/session';
 
 const menus = [
   { name: '홈', path: '/', icon: homeIcon },
@@ -13,37 +14,52 @@ const menus = [
 
 export default function BottomNav() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const token = getAccessToken();
+
+  function moveWithAuthGuard(path: string) {
+    if (!token && (path === '/create' || path === '/mypage')) {
+      const reason =
+        path === '/create'
+          ? '경험 등록은 로그인 후 이용할 수 있어요.'
+          : '마이페이지는 로그인 후 이용할 수 있어요.';
+      navigate(
+        `/auth?next=${encodeURIComponent(path)}&reason=${encodeURIComponent(reason)}`,
+      );
+      return;
+    }
+
+    navigate(path);
+  }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white rounded-tl-[20px] rounded-tr-[20px] shadow-[0px_0px_10px_0px_rgba(0,0,0,0.15)]">
-      <ul className="flex justify-around px-8 py-4">
+    <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[375px] -translate-x-1/2 rounded-t-[20px] bg-white px-12 pb-6 pt-3 shadow-[0_0_10px_rgba(0,0,0,0.15)]">
+      <ul className="flex items-center justify-between">
         {menus.map((menu) => {
           const isActive = location.pathname === menu.path;
 
           return (
-            <li
-              key={menu.path}
-              className="w-10 h-14 justify-center items-center"
-            >
-              <Link to={menu.path} className="flex flex-col items-center">
-                <div className="h-10 flex flex-col items-center justify-center">
+            <li key={menu.path}>
+              <button
+                type="button"
+                onClick={() => moveWithAuthGuard(menu.path)}
+                className="flex flex-col items-center gap-1"
+              >
+                <div className="flex h-6 w-6 items-center justify-center">
                   <img
                     src={menu.icon}
-                    alt={menu.name}
-                    className={`w-6 h-6 ${
-                      isActive ? 'opacity-100' : 'opacity-40'
-                    }`}
+                    alt=""
+                    className={`h-6 w-6 ${isActive ? 'opacity-100' : 'opacity-30'}`}
                   />
                 </div>
-
                 <span
-                  className={`text-xs ${
-                    isActive ? 'text-black' : 'text-gray-400'
+                  className={`text-[10px] leading-none ${
+                    isActive ? 'text-black' : 'text-black/30'
                   }`}
                 >
                   {menu.name}
                 </span>
-              </Link>
+              </button>
             </li>
           );
         })}

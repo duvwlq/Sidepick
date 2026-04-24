@@ -8,7 +8,7 @@ export interface FormState {
   dailyHours: string;
   expense: string;
   revenue: string;
-  currentStatus: '예' | '아니오' | '';
+  isConcurrentWithMainJob: '예' | '아니오' | '';
   causes: string[];
   difficulties: string[];
   content: string;
@@ -20,7 +20,7 @@ const initialState: FormState = {
   dailyHours: '',
   expense: '',
   revenue: '',
-  currentStatus: '',
+  isConcurrentWithMainJob: '',
   causes: [],
   difficulties: [],
   content: '',
@@ -32,20 +32,22 @@ export function useExperienceWrite() {
 
   const progress = useMemo(() => (step / 4) * 100, [step]);
 
-  const next = () => setStep((s) => Math.min(4, s + 1) as Step);
-  const prev = () => setStep((s) => Math.max(1, s - 1) as Step);
+  const next = () => setStep((current) => Math.min(4, current + 1) as Step);
+  const prev = () => setStep((current) => Math.max(1, current - 1) as Step);
 
   const toggleArray = (
     key: 'categories' | 'causes' | 'difficulties',
     value: string,
   ) => {
-    setForm((prev) => {
-      const arr = prev[key];
-      const exists = arr.includes(value);
+    setForm((previous) => {
+      const values = previous[key];
+      const exists = values.includes(value);
 
       return {
-        ...prev,
-        [key]: exists ? arr.filter((v) => v !== value) : [...arr, value],
+        ...previous,
+        [key]: exists
+          ? values.filter((item) => item !== value)
+          : [...values, value],
       };
     });
   };
@@ -53,7 +55,12 @@ export function useExperienceWrite() {
   const isValid = useMemo(() => {
     switch (step) {
       case 1:
-        return form.categories.length > 0;
+        return (
+          form.categories.length > 0 &&
+          Boolean(form.totalPeriod) &&
+          Boolean(form.dailyHours) &&
+          Boolean(form.isConcurrentWithMainJob)
+        );
       case 2:
         return form.causes.length > 0;
       case 3:
