@@ -7,12 +7,8 @@ import AiAnalysisResultPage from './pages/AiAnalysisResultPage';
 import ExperienceDetail from './pages/ExperienceDetail';
 import { AuthFlowProvider } from './context/AuthFlowContext';
 import AuthEntryPage from './pages/auth/AuthEntryPage';
-import LoginPage from './pages/auth/LoginPage';
+import EmailAuthComingSoonPage from './pages/auth/EmailAuthComingSoonPage';
 import KakaoCallbackPage from './pages/auth/KakaoCallbackPage';
-import SignupEmailPage from './pages/auth/SignupEmailPage';
-import SignupVerifyPage from './pages/auth/SignupVerifyPage';
-import SignupPasswordPage from './pages/auth/SignupPasswordPage';
-import SignupNicknamePage from './pages/auth/SignupNicknamePage';
 
 export default function App() {
   return (
@@ -21,12 +17,12 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<AuthEntryPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<EmailAuthComingSoonPage />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
-          <Route path="/signup/email" element={<SignupEmailPage />} />
-          <Route path="/signup/verify" element={<SignupVerifyPage />} />
-          <Route path="/signup/password" element={<SignupPasswordPage />} />
-          <Route path="/signup/nickname" element={<SignupNicknamePage />} />
+          <Route path="/signup/email" element={<EmailAuthComingSoonPage />} />
+          <Route path="/signup/verify" element={<EmailAuthComingSoonPage />} />
+          <Route path="/signup/password" element={<EmailAuthComingSoonPage />} />
+          <Route path="/signup/nickname" element={<EmailAuthComingSoonPage />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/create" element={<Create />} />
           <Route path="/experiences/:id" element={<ExperienceDetail />} />

@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.auth.service;
 
 import com.failforward.backend.common.api.BadRequestException;
+import com.failforward.backend.common.config.MailProperties;
 import com.failforward.backend.common.config.OAuthProperties;
 import com.failforward.backend.common.security.JwtTokenProvider;
 import com.failforward.backend.domain.auth.dto.AuthDtos.AuthPayload;
@@ -47,6 +48,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuthProperties oAuthProperties;
+    private final MailProperties mailProperties;
+    private final EmailVerificationMailService emailVerificationMailService;
     @Qualifier("oauthRestTemplate")
     private final RestTemplate oauthRestTemplate;
     private final SecureRandom secureRandom = new SecureRandom();
@@ -114,6 +117,12 @@ public class AuthService {
         String code = generateVerificationCode();
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(emailVerificationExpirationMinutes);
         emailVerificationTokenRepository.save(EmailVerificationToken.issue(request.email(), code, expiresAt));
+        if (!mailProperties.enabled() && !exposeVerificationCode) {
+            throw new BadRequestException("Email delivery is disabled on the server.");
+        }
+        if (mailProperties.enabled()) {
+            emailVerificationMailService.sendVerificationCode(request.email(), code, expiresAt);
+        }
 
         return new EmailVerificationPayload(
                 request.email(),

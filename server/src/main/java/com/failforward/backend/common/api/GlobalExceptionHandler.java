@@ -78,6 +78,15 @@ public class GlobalExceptionHandler {
                 request.getRequestURI());
     }
 
+    @ExceptionHandler(MailDeliveryException.class)
+    public ResponseEntity<ApiResponse<Map<String, Object>>> handleMailDelivery(
+            MailDeliveryException exception,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Mail delivery failed.", "MAIL_DELIVERY_FAILED",
+                exception.getMessage(), request.getRequestURI());
+    }
+
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Map<String, Object>>> handleMethodNotAllowed(
             HttpRequestMethodNotSupportedException exception,

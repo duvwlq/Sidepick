@@ -1,21 +1,17 @@
 import { useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import AuthButton from '../../components/auth/AuthButton';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthLayout from '../../components/auth/AuthLayout';
 
-export default function AuthEntryPage() {
+export default function EmailAuthComingSoonPage() {
+  const navigate = useNavigate();
   const location = useLocation();
   const [kakaoError, setKakaoError] = useState('');
 
   const nextPath = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return params.get('next') || '/';
-  }, [location.search]);
-
-  const reason = useMemo(() => {
-    const params = new URLSearchParams(location.search);
-    return params.get('reason') || '';
   }, [location.search]);
 
   function handleKakaoLogin() {
@@ -38,33 +34,39 @@ export default function AuthEntryPage() {
 
   return (
     <AuthLayout>
-      <AuthHeader title="로그인 / 회원가입" />
+      <AuthHeader
+        title="이메일 로그인"
+        onBack={() =>
+          navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
+            replace: true,
+          })
+        }
+      />
 
       <section className="flex min-h-[calc(100vh-150px)] flex-col justify-center gap-4">
-        <div className="mb-8">
-          <h2 className="whitespace-pre-line text-[28px] font-semibold leading-9 text-black">
-            Sidepick를 이용하려면{'\n'}로그인이 필요해요
+        <div className="rounded-[28px] border border-[#E8E8E8] bg-white px-6 py-7">
+          <h2 className="whitespace-pre-line text-[24px] font-semibold leading-8 text-black">
+            이메일 로그인은{'\n'}준비 중입니다
           </h2>
-          <p className="mt-3 text-sm text-[#777777]">
-            현재 운영 환경에서는 카카오 로그인만 지원합니다.
+          <p className="mt-3 text-sm leading-6 text-[#666666]">
+            운영 환경 안정화를 위해 현재는 카카오 로그인만 제공하고 있습니다.
+            이메일 로그인과 회원가입은 준비가 끝나는 대로 다시 열 예정입니다.
           </p>
-          {reason ? (
-            <div className="mt-4 rounded-2xl bg-[#F6F7F9] px-4 py-3 text-sm text-[#555555]">
-              {reason}
-            </div>
-          ) : null}
         </div>
 
         <AuthButton variant="kakao" onClick={handleKakaoLogin}>
           카카오로 계속하기
         </AuthButton>
-
-        <div className="rounded-2xl border border-[#E9E9E9] bg-[#FAFAFA] px-4 py-4">
-          <p className="text-sm font-medium text-[#222222]">이메일 로그인 / 회원가입은 준비 중입니다.</p>
-          <p className="mt-2 text-xs leading-5 text-[#777777]">
-            운영 안정화를 위해 현재는 카카오 로그인만 우선 제공하고 있습니다.
-          </p>
-        </div>
+        <AuthButton
+          variant="secondary"
+          onClick={() =>
+            navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
+              replace: true,
+            })
+          }
+        >
+          이전 화면으로 돌아가기
+        </AuthButton>
 
         {kakaoError ? <p className="text-sm text-red-500">{kakaoError}</p> : null}
       </section>
