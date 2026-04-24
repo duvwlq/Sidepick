@@ -1,4 +1,5 @@
 USE failforward;
+SET NAMES utf8mb4;
 
 CREATE TABLE IF NOT EXISTS business_categories (
     id BIGINT PRIMARY KEY,
@@ -10,11 +11,11 @@ CREATE TABLE IF NOT EXISTS business_categories (
 
 INSERT INTO business_categories (id, name, description, icon, color)
 VALUES
-    (1, '온라인사업', '스마트스토어, 블로그, 유튜브 등 온라인 기반 부업', '🛒', '#3B82F6'),
-    (2, '오프라인사업', '매장 운영, 로컬 서비스 등 오프라인 판매 중심 부업', '🏪', '#10B981'),
-    (3, '콘텐츠', '전자책, 강의, 뉴스레터, 크리에이터형 부업', '📝', '#F59E0B'),
-    (4, '투자형', '스마트스토어 자동화, 광고형 사업, 소규모 투자 시도', '📈', '#EF4444'),
-    (5, '기타', '명확히 분류되지 않는 기타 부업', '📦', '#8B5CF6')
+    (1, '온라인 사업', '스마트스토어, 블로그, 유튜브 등 온라인 기반 부업', '💻', '#3B82F6'),
+    (2, '오프라인 사업', '매장 운영, 지역 서비스 등 오프라인 판매 중심 부업', '🏪', '#10B981'),
+    (3, '콘텐츠', '전자책, 강의, 뉴스레터, 크리에이터형 부업', '🎨', '#F59E0B'),
+    (4, '투자·자동화', '광고 운영, 자동화 수익화, 실험형 사이드 프로젝트', '📈', '#EF4444'),
+    (5, '기타', '명확히 분류되지 않는 기타 부업 경험', '✨', '#8B5CF6')
 ON DUPLICATE KEY UPDATE
     name = VALUES(name),
     description = VALUES(description),

@@ -1,37 +1,31 @@
-import type { FormEvent } from 'react';
-import type { UserSummary } from '../../lib/api';
-
-type AuthMode = 'login' | 'register';
-
 type Props = {
-  mode: AuthMode;
-  onModeChange: (mode: AuthMode) => void;
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-  loading: boolean;
-  error: string;
-  user: UserSummary | null;
+  email: string | null;
+  nickname: string | null;
+  emailVerified?: boolean;
   onLogout: () => void;
+  onLogin: () => void;
+  onSignUp: () => void;
 };
 
 export default function AuthPanel({
-  mode,
-  onModeChange,
-  onSubmit,
-  loading,
-  error,
-  user,
+  email,
+  nickname,
+  emailVerified,
   onLogout,
+  onLogin,
+  onSignUp,
 }: Props) {
-  if (user) {
+  if (email && nickname) {
     return (
       <div className="rounded-[10px] bg-white p-4 shadow-sm">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-sm text-gray-500">로그인한 사용자</div>
-            <div className="text-lg font-semibold text-gray-900">
-              {user.nickname}
+            <div className="text-lg font-semibold text-gray-900">{nickname}</div>
+            <div className="text-sm text-gray-500">{email}</div>
+            <div className="mt-2 text-xs text-gray-500">
+              이메일 인증 상태: {emailVerified ? '완료' : '미완료'}
             </div>
-            <div className="text-sm text-gray-500">{user.email}</div>
           </div>
           <button
             type="button"
@@ -47,80 +41,29 @@ export default function AuthPanel({
 
   return (
     <div className="rounded-[10px] bg-white p-4 shadow-sm">
-      <div className="mb-3 flex gap-2">
+      <div className="mb-2 text-lg font-semibold text-gray-900">
+        로그인을 시작해 보세요
+      </div>
+      <div className="mb-4 text-sm text-gray-500">
+        이메일 로그인과 회원가입을 하면 서비스를 더 편하게 이용할 수
+        있습니다.
+      </div>
+      <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => onModeChange('login')}
-          className={`rounded-full px-3 py-1 text-sm ${
-            mode === 'login'
-              ? 'bg-black text-white'
-              : 'bg-gray-100 text-gray-700'
-          }`}
+          onClick={onLogin}
+          className="h-11 flex-1 rounded-xl bg-black text-sm font-medium text-white"
         >
           로그인
         </button>
         <button
           type="button"
-          onClick={() => onModeChange('register')}
-          className={`rounded-full px-3 py-1 text-sm ${
-            mode === 'register'
-              ? 'bg-black text-white'
-              : 'bg-gray-100 text-gray-700'
-          }`}
+          onClick={onSignUp}
+          className="h-11 flex-1 rounded-xl border border-gray-300 text-sm font-medium text-gray-700"
         >
           회원가입
         </button>
       </div>
-
-      <form className="space-y-3" onSubmit={onSubmit}>
-        <input
-          name="email"
-          type="email"
-          placeholder="이메일"
-          className="h-11 w-full rounded-xl border border-gray-200 px-3 text-sm"
-          required
-        />
-        <input
-          name="password"
-          type="password"
-          placeholder="비밀번호"
-          className="h-11 w-full rounded-xl border border-gray-200 px-3 text-sm"
-          required
-        />
-        {mode === 'register' ? (
-          <>
-            <input
-              name="nickname"
-              type="text"
-              placeholder="닉네임"
-              className="h-11 w-full rounded-xl border border-gray-200 px-3 text-sm"
-              required
-            />
-            <input
-              name="ageGroup"
-              type="text"
-              placeholder="연령대 예: 20s"
-              defaultValue="20s"
-              className="h-11 w-full rounded-xl border border-gray-200 px-3 text-sm"
-              required
-            />
-          </>
-        ) : null}
-
-        {error ? <div className="text-sm text-red-600">{error}</div> : null}
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="h-11 w-full rounded-xl bg-black text-sm font-medium text-white disabled:bg-gray-400"
-        >
-          {loading
-            ? '처리 중...'
-            : mode === 'login'
-              ? '로그인'
-              : '회원가입'}
-        </button>
-      </form>
     </div>
   );
 }

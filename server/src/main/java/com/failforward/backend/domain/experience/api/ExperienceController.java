@@ -39,9 +39,11 @@ public class ExperienceController {
     public ApiResponse<ExperienceListPayload> getExperiences(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
-            @RequestParam(required = false) String failureReason
+            @RequestParam(required = false) String failureReason,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "latest") String sort
     ) {
-        return ApiResponse.ok("Experiences loaded.", experienceService.getList(page, size, failureReason));
+        return ApiResponse.ok("Experiences loaded.", experienceService.getList(page, size, failureReason, q, sort));
     }
 
     @Operation(summary = "경험담 작성")

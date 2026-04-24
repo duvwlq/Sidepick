@@ -106,8 +106,12 @@ public class ExperienceService {
         experienceRepository.delete(experience);
     }
 
-    public ExperienceDtos.ExperienceListPayload getList(int page, int size, String failureReason) {
-        List<FailureExperience> filtered = experienceRepository.findAllByIsPublicTrueOrderByCreatedAtDesc().stream()
+    public ExperienceDtos.ExperienceListPayload getList(int page, int size, String failureReason, String q, String sort) {
+        List<FailureExperience> base = "popular".equalsIgnoreCase(sort)
+                ? experienceRepository.searchPublicPopular(normalizeQuery(q))
+                : experienceRepository.searchPublicLatest(normalizeQuery(q));
+
+        List<FailureExperience> filtered = base.stream()
                 .filter(experience -> failureReason == null || failureReason.isBlank()
                         || failureReason.equalsIgnoreCase(experience.getFailureReason()))
                 .toList();
@@ -369,6 +373,10 @@ public class ExperienceService {
 
     private boolean hasText(String value) {
         return value != null && !value.isBlank();
+    }
+
+    private String normalizeQuery(String value) {
+        return value == null ? null : value.trim();
     }
 
     private record ExperiencePayload(

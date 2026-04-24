@@ -5,18 +5,18 @@ type Props = {
 
 export default function ProgressHeader({ step, progress }: Props) {
   return (
-    <div className="mb-4">
-      <div className="flex justify-between text-xs mb-2">
-        <div>
-          <span className="font-medium">{step}</span>
-          <span className="text-gray-400">/4 단계</span>
+    <div className="mb-5">
+      <div className="mb-2 flex items-center justify-between text-xs">
+        <div className="text-[#555555]">
+          <span className="font-semibold text-[#111111]">{step}</span>
+          <span>/4 단계</span>
         </div>
-        <span className="font-semibold">{progress}%</span>
+        <span className="font-semibold text-[#555555]">{progress}%</span>
       </div>
 
-      <div className="w-full h-1.5 bg-gray-200 rounded-full">
+      <div className="h-2 rounded-full bg-[#ECEFF4]">
         <div
-          className="h-1.5 bg-black rounded-full transition-all"
+          className="h-2 rounded-full bg-[#111111] transition-all"
           style={{ width: `${progress}%` }}
         />
       </div>
