@@ -25,6 +25,9 @@ APP_CORS_ALLOWED_ORIGINS='https://side-pick.app,https://www.side-pick.app'
 AI_SERVER_URL='http://localhost:8000'
 APP_EMAIL_VERIFICATION_EXPIRATION_MINUTES='10'
 APP_EMAIL_VERIFICATION_EXPOSE_CODE='false'
+APP_AUTH_LOCAL_ENABLED='false'
+APP_AUTH_KAKAO_ENABLED='true'
+APP_AUTH_GOOGLE_ENABLED='false'
 APP_MAIL_ENABLED='true'
 APP_MAIL_FROM_ADDRESS='no-reply@side-pick.app'
 APP_MAIL_FROM_NAME='Sidepick'
@@ -159,6 +162,7 @@ sudo certbot --nginx -d api.side-pick.app
 - 일반 계정은 이메일 인증 전에도 로그인할 수 있습니다.
 - 이메일 미인증 일반 계정은 경험 작성 계열 기능이 제한됩니다.
 - 소셜 로그인 계정은 로그인 시점에 인증 완료 상태로 처리합니다.
+- 운영 환경에서는 `APP_AUTH_LOCAL_ENABLED`, `APP_AUTH_KAKAO_ENABLED`, `APP_AUTH_GOOGLE_ENABLED`로 로그인 수단을 제어할 수 있습니다.
 - 프론트 OAuth 연결 규칙은 [AUTH_FLOW_MVP.md](D:/Codex_Folder/Sidepick/server/AUTH_FLOW_MVP.md) 참고
 
 ## 운영 체크리스트

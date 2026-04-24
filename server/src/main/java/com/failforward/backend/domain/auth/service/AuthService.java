@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.auth.service;
 
 import com.failforward.backend.common.api.BadRequestException;
+import com.failforward.backend.common.config.AuthFeatureProperties;
 import com.failforward.backend.common.config.MailProperties;
 import com.failforward.backend.common.config.OAuthProperties;
 import com.failforward.backend.common.security.JwtTokenProvider;
@@ -48,6 +49,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final OAuthProperties oAuthProperties;
+    private final AuthFeatureProperties authFeatureProperties;
     private final MailProperties mailProperties;
     private final EmailVerificationMailService emailVerificationMailService;
     @Qualifier("oauthRestTemplate")
@@ -62,6 +64,7 @@ public class AuthService {
 
     @Transactional
     public AuthPayload signUp(SignUpRequest request) {
+        ensureLocalAuthEnabled();
         userRepository.findByEmail(request.email())
                 .ifPresent(user -> {
                     throw new BadRequestException("Email is already in use.");
@@ -93,6 +96,7 @@ public class AuthService {
     }
 
     public AuthPayload login(LoginRequest request) {
+        ensureLocalAuthEnabled();
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadRequestException("Email or password is invalid."));
         if (user.getPassword() == null || user.getAuthProvider() != AuthProvider.LOCAL) {
@@ -106,6 +110,7 @@ public class AuthService {
 
     @Transactional
     public EmailVerificationPayload requestEmailVerification(EmailVerificationRequest request) {
+        ensureLocalAuthEnabled();
         userRepository.findByEmail(request.email())
                 .ifPresent(user -> {
                     if (Boolean.TRUE.equals(user.getEmailVerified())) {
@@ -134,6 +139,7 @@ public class AuthService {
 
     @Transactional
     public EmailVerificationPayload confirmEmailVerification(EmailVerificationConfirmRequest request) {
+        ensureLocalAuthEnabled();
         EmailVerificationToken token = emailVerificationTokenRepository.findTopByEmailOrderByCreatedAtDesc(request.email())
                 .orElseThrow(() -> new BadRequestException("Email verification was not requested."));
 
@@ -165,6 +171,7 @@ public class AuthService {
 
     @Transactional
     public AuthPayload loginWithKakao(OAuthLoginRequest request) {
+        ensureKakaoAuthEnabled();
         OAuthProperties.Provider providerConfig = requireConfiguredProvider(AuthProvider.KAKAO);
         OAuthTokenResponse tokenResponse = exchangeAuthorizationCode(
                 "https://kauth.kakao.com/oauth/token",
@@ -181,6 +188,7 @@ public class AuthService {
 
     @Transactional
     public AuthPayload loginWithGoogle(OAuthLoginRequest request) {
+        ensureGoogleAuthEnabled();
         OAuthProperties.Provider providerConfig = requireConfiguredProvider(AuthProvider.GOOGLE);
         OAuthTokenResponse tokenResponse = exchangeAuthorizationCode(
                 "https://oauth2.googleapis.com/token",
@@ -206,6 +214,24 @@ public class AuthService {
                 3600L,
                 user.requiresEmailVerification()
         );
+    }
+
+    private void ensureLocalAuthEnabled() {
+        if (!authFeatureProperties.localEnabled()) {
+            throw new BadRequestException("Email login is not available right now.");
+        }
+    }
+
+    private void ensureKakaoAuthEnabled() {
+        if (!authFeatureProperties.kakaoEnabled()) {
+            throw new BadRequestException("Kakao login is not available right now.");
+        }
+    }
+
+    private void ensureGoogleAuthEnabled() {
+        if (!authFeatureProperties.googleEnabled()) {
+            throw new BadRequestException("Google login is not available right now.");
+        }
     }
 
     private OAuthProperties.Provider requireConfiguredProvider(AuthProvider provider) {

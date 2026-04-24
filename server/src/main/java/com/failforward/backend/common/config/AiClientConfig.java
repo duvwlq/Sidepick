@@ -8,7 +8,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
-@EnableConfigurationProperties({AiServerProperties.class, OAuthProperties.class, MailProperties.class})
+@EnableConfigurationProperties({
+        AiServerProperties.class,
+        OAuthProperties.class,
+        MailProperties.class,
+        AuthFeatureProperties.class
+})
 public class AiClientConfig {
 
     @Bean

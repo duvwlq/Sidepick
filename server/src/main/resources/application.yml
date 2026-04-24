@@ -57,6 +57,9 @@ app:
     from-address: ${APP_MAIL_FROM_ADDRESS:no-reply@side-pick.app}
     from-name: ${APP_MAIL_FROM_NAME:Sidepick}
   auth:
+    local-enabled: ${APP_AUTH_LOCAL_ENABLED:true}
+    kakao-enabled: ${APP_AUTH_KAKAO_ENABLED:true}
+    google-enabled: ${APP_AUTH_GOOGLE_ENABLED:true}
     email-verification:
       expiration-minutes: ${APP_EMAIL_VERIFICATION_EXPIRATION_MINUTES:10}
       expose-code: ${APP_EMAIL_VERIFICATION_EXPOSE_CODE:true}
