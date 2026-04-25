@@ -21,18 +21,6 @@ public abstract class ApiIntegrationTestSupport {
     protected ObjectMapper objectMapper;
 
     protected String registerAndLogin(String email, String password, String nickname, String ageGroup) throws Exception {
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "%s",
-                                  "password": "%s",
-                                  "nickname": "%s",
-                                  "ageGroup": "%s"
-                                }
-                                """.formatted(email, password, nickname, ageGroup)))
-                .andExpect(status().isCreated());
-
         MvcResult verificationRequestResult = mockMvc.perform(post("/api/auth/email-verifications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -56,6 +44,18 @@ public abstract class ApiIntegrationTestSupport {
                                 }
                                 """.formatted(email, verificationCode)))
                 .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "email": "%s",
+                                  "password": "%s",
+                                  "nickname": "%s",
+                                  "ageGroup": "%s"
+                                }
+                                """.formatted(email, password, nickname, ageGroup)))
+                .andExpect(status().isCreated());
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

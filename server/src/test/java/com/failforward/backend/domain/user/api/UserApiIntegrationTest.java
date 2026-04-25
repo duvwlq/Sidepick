@@ -36,6 +36,9 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.user.email").value("me_test@sidepick.dev"))
                 .andExpect(jsonPath("$.data.user.nickname").value("meUser"))
-                .andExpect(jsonPath("$.data.user.ageGroup").value("20s"));
+                .andExpect(jsonPath("$.data.user.ageGroup").value("20s"))
+                .andExpect(jsonPath("$.data.user.authProvider").value("LOCAL"))
+                .andExpect(jsonPath("$.data.user.emailVerified").value(true))
+                .andExpect(jsonPath("$.data.user.profileCompleted").value(true));
     }
 }

@@ -7,12 +7,16 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.failforward.backend.domain.user.entity.User;
+import com.failforward.backend.domain.user.repository.UserRepository;
 import com.failforward.backend.support.ApiIntegrationTestSupport;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Test
     void createExperienceWithoutAuthReturnsUnauthorized() throws Exception {
         mockMvc.perform(post("/api/experiences")
@@ -31,7 +38,9 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "title": "Unauthorized",
                                   "content": "This request should fail because it has no bearer token.",
-                                  "categoryId": 1
+                                  "categoryId": 1,
+                                  "failureReason": "No auth",
+                                  "failureReasons": ["No auth"]
                                 }
                                 """))
                 .andExpect(status().isUnauthorized())
@@ -41,17 +50,13 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
 
     @Test
     void unverifiedUserCannotCreateExperience() throws Exception {
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                  "email": "unverified@sidepick.dev",
-                                  "password": "password123",
-                                  "nickname": "unverifiedUser",
-                                  "ageGroup": "20s"
-                                }
-                                """))
-                .andExpect(status().isCreated());
+        User unverifiedUser = User.create(
+                "unverified@sidepick.dev",
+                BCrypt.hashpw("password123", BCrypt.gensalt()),
+                "unverifiedUser",
+                "20s"
+        );
+        userRepository.save(unverifiedUser);
 
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -76,7 +81,9 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "title": "Blocked experience",
                                   "content": "This should fail until the email is verified.",
-                                  "categoryId": 1
+                                  "categoryId": 1,
+                                  "failureReason": "Verification required",
+                                  "failureReasons": ["Verification required"]
                                 }
                                 """))
                 .andExpect(status().isForbidden())
@@ -171,6 +178,128 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void listSupportsSearchAndStructuredFilters() throws Exception {
+        String token = registerAndLogin("filter@sidepick.dev", "password123", "filterUser", "20s");
+
+        createExperienceWithPayload(token, """
+                {
+                  "title": "Shopping mall failure",
+                  "content": "Ad spend was high and demand validation was weak.",
+                  "categoryId": 1,
+                  "businessType": "Online store",
+                  "investmentAmount": 300000,
+                  "durationMonths": 2,
+                  "failureReason": "Weak demand validation",
+                  "failureReasons": ["Weak demand validation"],
+                  "targetMarket": "Students"
+                }
+                """);
+
+        createExperienceWithPayload(token, """
+                {
+                  "title": "Content side project failure",
+                  "content": "The project ran long and revenue did not scale.",
+                  "categoryId": 2,
+                  "businessType": "Content creation",
+                  "investmentAmount": 1500000,
+                  "durationMonths": 8,
+                  "failureReason": "Revenue stagnation",
+                  "failureReasons": ["Revenue stagnation"],
+                  "targetMarket": "Office workers"
+                }
+                """);
+
+        mockMvc.perform(get("/api/experiences")
+                        .param("q", "mall")
+                        .param("categoryId", "1")
+                        .param("durationMonthsMax", "3")
+                        .param("investmentAmountMax", "500000")
+                        .param("sort", "latest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(1))
+                .andExpect(jsonPath("$.data.experiences[0].title").value("Shopping mall failure"));
+
+        mockMvc.perform(get("/api/experiences")
+                        .param("failureReason", "Revenue stagnation")
+                        .param("durationMonthsMin", "6")
+                        .param("investmentAmountMin", "1000000")
+                        .param("sort", "popular"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(1))
+                .andExpect(jsonPath("$.data.experiences[0].title").value("Content side project failure"));
+    }
+
+    @Test
+    void listRejectsInvalidFilterRanges() throws Exception {
+        mockMvc.perform(get("/api/experiences")
+                        .param("durationMonthsMin", "10")
+                        .param("durationMonthsMax", "3"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/experiences")
+                        .param("investmentAmountMin", "1000000")
+                        .param("investmentAmountMax", "100"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/experiences")
+                        .param("durationMonthsMin", "-1"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(get("/api/experiences")
+                        .param("investmentAmountMin", "-1"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void invalidExperiencePayloadReturnsBadRequest() throws Exception {
+        String token = registerAndLogin("invalid@sidepick.dev", "password123", "invalidUser", "20s");
+
+        mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Invalid",
+                                  "content": "",
+                                  "categoryId": 1,
+                                  "investmentAmount": -10,
+                                  "failureReasons": []
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void detailIncreasesViewCountOnEachRequest() throws Exception {
+        String token = registerAndLogin("viewcount@sidepick.dev", "password123", "viewUser", "20s");
+
+        MvcResult createResult = mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "View count target",
+                                  "content": "Checking that detail view count increments once per request.",
+                                  "categoryId": 1,
+                                  "failureReason": "View count",
+                                  "failureReasons": ["View count"]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long experienceId = readId(createResult);
+
+        mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.viewCount").value(1));
+
+        mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.viewCount").value(2));
+    }
+
+    @Test
     void nonOwnerCannotUpdateOrDeleteExperience() throws Exception {
         String ownerToken = registerAndLogin("owner2@sidepick.dev", "password123", "ownerUser2", "20s");
         String otherToken = registerAndLogin("other@sidepick.dev", "password123", "otherUser", "30s");
@@ -182,7 +311,9 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "title": "Protected experience",
                                   "content": "Only the owner should modify this experience.",
-                                  "categoryId": 1
+                                  "categoryId": 1,
+                                  "failureReason": "Ownership",
+                                  "failureReasons": ["Ownership"]
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -197,7 +328,9 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "title": "Should fail",
                                   "content": "This update must be rejected.",
-                                  "categoryId": 1
+                                  "categoryId": 1,
+                                  "failureReason": "Ownership",
+                                  "failureReasons": ["Ownership"]
                                 }
                                 """))
                 .andExpect(status().isForbidden())
@@ -207,5 +340,16 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                         .header(HttpHeaders.AUTHORIZATION, bearer(otherToken)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.data.code").value("FORBIDDEN"));
+    }
+
+    private long createExperienceWithPayload(String token, String payload) throws Exception {
+        MvcResult createResult = mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(payload))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        return readId(createResult);
     }
 }

@@ -113,7 +113,8 @@ class ExperienceAiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "title": "AI failure fallback",
                                   "content": "Experience should still be stored when AI is down.",
-                                  "categoryId": 1
+                                  "categoryId": 1,
+                                  "failureReason": "AI fallback reason"
                                 }
                                 """))
                 .andExpect(status().isCreated())

@@ -106,15 +106,41 @@ public class ExperienceService {
         experienceRepository.delete(experience);
     }
 
-    public ExperienceDtos.ExperienceListPayload getList(int page, int size, String failureReason, String q, String sort) {
-        List<FailureExperience> base = "popular".equalsIgnoreCase(sort)
-                ? experienceRepository.searchPublicPopular(normalizeQuery(q))
-                : experienceRepository.searchPublicLatest(normalizeQuery(q));
-
-        List<FailureExperience> filtered = base.stream()
-                .filter(experience -> failureReason == null || failureReason.isBlank()
-                        || failureReason.equalsIgnoreCase(experience.getFailureReason()))
-                .toList();
+    public ExperienceDtos.ExperienceListPayload getList(
+            int page,
+            int size,
+            String failureReason,
+            String q,
+            String sort,
+            Long categoryId,
+            Integer durationMonthsMin,
+            Integer durationMonthsMax,
+            Integer investmentAmountMin,
+            Integer investmentAmountMax
+    ) {
+        validateSearchCriteria(durationMonthsMin, durationMonthsMax, investmentAmountMin, investmentAmountMax);
+        String normalizedSort = normalizeSort(sort);
+        String normalizedQuery = normalizeFilter(q);
+        String normalizedFailureReason = normalizeFilter(failureReason);
+        List<FailureExperience> filtered = "popular".equals(normalizedSort)
+                ? experienceRepository.searchPublicPopular(
+                normalizedQuery,
+                categoryId,
+                normalizedFailureReason,
+                durationMonthsMin,
+                durationMonthsMax,
+                investmentAmountMin,
+                investmentAmountMax
+        )
+                : experienceRepository.searchPublicLatest(
+                normalizedQuery,
+                categoryId,
+                normalizedFailureReason,
+                durationMonthsMin,
+                durationMonthsMax,
+                investmentAmountMin,
+                investmentAmountMax
+        );
 
         int safePage = Math.max(page, 0);
         int safeSize = size <= 0 ? 20 : size;
@@ -263,6 +289,7 @@ public class ExperienceService {
             Boolean wouldRetry
     ) {
         BusinessCategory category = categoryService.getCategory(categoryId);
+        validateWriteRequest(content, investmentAmount, durationMonths, monthlyRevenue, failureReason, failureReasons);
         String resolvedBusinessType = hasText(businessType) ? businessType : category.getName();
         List<String> resolvedFailureReasons = failureReasons == null ? List.of() : failureReasons.stream()
                 .filter(this::hasText)
@@ -377,6 +404,70 @@ public class ExperienceService {
 
     private String normalizeQuery(String value) {
         return value == null ? null : value.trim();
+    }
+
+    private String normalizeSort(String value) {
+        return value == null ? "latest" : value.trim().toLowerCase();
+    }
+
+    private String normalizeFilter(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private void validateSearchCriteria(
+            Integer durationMonthsMin,
+            Integer durationMonthsMax,
+            Integer investmentAmountMin,
+            Integer investmentAmountMax
+    ) {
+        if (durationMonthsMin != null && durationMonthsMin < 0) {
+            throw new BadRequestException("Minimum duration must be zero or greater.");
+        }
+        if (durationMonthsMax != null && durationMonthsMax < 0) {
+            throw new BadRequestException("Maximum duration must be zero or greater.");
+        }
+        if (investmentAmountMin != null && investmentAmountMin < 0) {
+            throw new BadRequestException("Minimum investment amount must be zero or greater.");
+        }
+        if (investmentAmountMax != null && investmentAmountMax < 0) {
+            throw new BadRequestException("Maximum investment amount must be zero or greater.");
+        }
+        if (durationMonthsMin != null && durationMonthsMax != null && durationMonthsMin > durationMonthsMax) {
+            throw new BadRequestException("Minimum duration cannot exceed maximum duration.");
+        }
+        if (investmentAmountMin != null && investmentAmountMax != null && investmentAmountMin > investmentAmountMax) {
+            throw new BadRequestException("Minimum investment amount cannot exceed maximum investment amount.");
+        }
+    }
+
+    private void validateWriteRequest(
+            String content,
+            Integer investmentAmount,
+            Integer durationMonths,
+            Integer monthlyRevenue,
+            String failureReason,
+            List<String> failureReasons
+    ) {
+        if (!hasText(content)) {
+            throw new BadRequestException("Experience content is required.");
+        }
+        if (investmentAmount != null && investmentAmount < 0) {
+            throw new BadRequestException("Investment amount must be zero or greater.");
+        }
+        if (durationMonths != null && durationMonths < 0) {
+            throw new BadRequestException("Duration must be zero or greater.");
+        }
+        if (monthlyRevenue != null && monthlyRevenue < 0) {
+            throw new BadRequestException("Monthly revenue must be zero or greater.");
+        }
+        boolean hasStructuredFailureReason = failureReasons != null && failureReasons.stream().anyMatch(this::hasText);
+        if (!hasText(failureReason) && !hasStructuredFailureReason) {
+            throw new BadRequestException("At least one failure reason is required.");
+        }
     }
 
     private record ExperiencePayload(
