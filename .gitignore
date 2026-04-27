@@ -13,3 +13,6 @@ application-local.yml
 docker-compose.override.yml
 *.log
 Thumbs.db
+.tmp/
+.tmp_feedback.pdf
+worktrees/

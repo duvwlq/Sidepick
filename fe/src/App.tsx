@@ -17,7 +17,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<AuthEntryPage />} />
-          <Route path="/login" element={<EmailAuthComingSoonPage />} />
+          <Route path="/login" element={<AuthEntryPage />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
           <Route path="/signup/email" element={<EmailAuthComingSoonPage />} />
           <Route path="/signup/verify" element={<EmailAuthComingSoonPage />} />

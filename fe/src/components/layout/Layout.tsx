@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import HeaderNav from './HeaderNav';
 import BottomNav from './ButtomNav';
+import HeaderNav from './HeaderNav';
 
 type HeaderLeftType = 'menu' | 'back' | 'none';
 
@@ -9,6 +9,7 @@ type Props = {
   title?: string;
   leftType?: HeaderLeftType;
   showRightIcon?: boolean;
+  rightIcon?: 'bell' | 'search' | 'none';
   showHeader?: boolean;
   showBottomNav?: boolean;
   onBack?: () => void;
@@ -21,6 +22,7 @@ export default function Layout({
   title = '사이드픽',
   leftType = 'menu',
   showRightIcon = true,
+  rightIcon = 'bell',
   showHeader = true,
   showBottomNav = true,
   onBack,
@@ -34,13 +36,18 @@ export default function Layout({
           title={title}
           leftType={leftType}
           showRightIcon={showRightIcon}
+          rightIcon={rightIcon}
           onBack={onBack}
           onMenuClick={onMenuClick}
           onRightIconClick={onRightIconClick}
         />
       ) : null}
 
-      <main className={`${showHeader ? 'pt-[123px]' : ''} ${showBottomNav ? 'pb-[110px]' : ''}`}>
+      <main
+        className={`${showHeader ? 'pt-[123px]' : ''} ${
+          showBottomNav ? 'pb-[110px]' : ''
+        }`}
+      >
         {children}
       </main>
 

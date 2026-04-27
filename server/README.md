@@ -5,13 +5,34 @@
 - 런타임: Java 17
 - 프레임워크: Spring Boot 3.2.12
 - 데이터베이스: AWS RDS MySQL
-- 리버스 프록시: EC2 Nginx
+- 운영 서버: AWS EC2
+- 리버스 프록시: Nginx
+- 백엔드 실행 방식: Docker Compose
 - 공개 API 주소: `https://api.side-pick.app/api`
-- 내부 애플리케이션 포트: `8081`
 
-## 운영 환경 변수
+## 로컬 실행
 
-`~/backend.env` 예시:
+로컬에서는 [D:\Codex_Folder\Sidepick\infra\docker-compose.yml](D:/Codex_Folder/Sidepick/infra/docker-compose.yml)을 사용합니다.
+
+```powershell
+cd D:\Codex_Folder\Sidepick\infra
+docker compose up -d --build
+```
+
+로컬 기본 포트:
+
+- MySQL: 컨테이너 내부 `3306`
+- Backend: `http://localhost:8081`
+
+## 운영 실행
+
+운영 서버에서는 [D:\Codex_Folder\Sidepick\infra\docker-compose.prod.yml](D:/Codex_Folder/Sidepick/infra/docker-compose.prod.yml)을 사용합니다.
+
+### 1. 운영 환경변수 파일 준비
+
+EC2 서버에 `~/backend.env` 파일을 만듭니다.
+
+예시:
 
 ```env
 SPRING_PROFILES_ACTIVE='prod'
@@ -28,7 +49,7 @@ APP_EMAIL_VERIFICATION_EXPOSE_CODE='false'
 APP_AUTH_LOCAL_ENABLED='false'
 APP_AUTH_KAKAO_ENABLED='true'
 APP_AUTH_GOOGLE_ENABLED='false'
-APP_MAIL_ENABLED='true'
+APP_MAIL_ENABLED='false'
 APP_MAIL_FROM_ADDRESS='no-reply@side-pick.app'
 APP_MAIL_FROM_NAME='Sidepick'
 SPRING_MAIL_HOST='<SMTP-HOST>'
@@ -47,72 +68,43 @@ APP_OAUTH_GOOGLE_CLIENT_ID='<GOOGLE-OAUTH-CLIENT-ID>'
 APP_OAUTH_GOOGLE_CLIENT_SECRET='<GOOGLE-OAUTH-CLIENT-SECRET>'
 ```
 
-참고:
-
-- `SPRING_DATASOURCE_URL`에는 `&`가 들어가므로 따옴표를 유지하는 것이 안전합니다.
-- `APP_JWT_SECRET`는 최소 32바이트 이상으로 설정해야 합니다.
-- `APP_CORS_ALLOWED_ORIGINS`에는 실제 프론트 도메인만 넣는 것이 좋습니다.
-- `SPRING_JPA_HIBERNATE_DDL_AUTO`는 운영에서 `validate` 유지 권장입니다.
-- 실제 메일 발송은 SMTP 공통 방식으로 동작하므로 AWS SES SMTP 자격 증명도 그대로 사용할 수 있습니다.
-
-## 이메일 인증 메일 발송
-
-운영에서 이메일 인증을 사용하려면 아래 조건이 필요합니다.
-
-- `APP_MAIL_ENABLED='true'`
-- `SPRING_MAIL_HOST`, `SPRING_MAIL_PORT`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` 설정
-- `APP_MAIL_FROM_ADDRESS`, `APP_MAIL_FROM_NAME` 설정
-
-AWS SES를 사용할 경우:
-
-- SMTP 호스트는 사용하는 SES 리전의 SMTP 엔드포인트를 사용합니다.
-- SES SMTP 사용자명/비밀번호는 IAM 액세스 키가 아니라 SES SMTP 자격 증명을 사용해야 합니다.
-- 발신 주소(`APP_MAIL_FROM_ADDRESS`)는 SES에서 검증된 주소 또는 도메인이어야 합니다.
-
-## EC2 실행 명령
-
-빌드:
+### 2. 운영 서버에서 Docker 배포
 
 ```bash
-cd ~/Sidepick/server
-mvn -DskipTests package
+cd ~/Sidepick/infra
+docker compose --env-file ~/backend.env -f docker-compose.prod.yml up -d --build
 ```
 
-실행:
+재배포:
 
 ```bash
-set -a
-source ~/backend.env
-set +a
-nohup java -jar target/failforward-backend-0.0.1-SNAPSHOT.jar > ~/backend.log 2>&1 &
+cd ~/Sidepick/infra
+docker compose --env-file ~/backend.env -f docker-compose.prod.yml up -d --build backend
 ```
 
-재시작:
+중지:
 
 ```bash
-pkill -f failforward-backend || true
-set -a
-source ~/backend.env
-set +a
-cd ~/Sidepick/server
-nohup java -jar target/failforward-backend-0.0.1-SNAPSHOT.jar > ~/backend.log 2>&1 &
-```
-
-헬스체크:
-
-```bash
-curl https://api.side-pick.app/api/health
+cd ~/Sidepick/infra
+docker compose --env-file ~/backend.env -f docker-compose.prod.yml down
 ```
 
 로그 확인:
 
 ```bash
-tail -n 100 ~/backend.log
+cd ~/Sidepick/infra
+docker compose --env-file ~/backend.env -f docker-compose.prod.yml logs -f backend
 ```
 
-## Nginx 리버스 프록시
+## 헬스체크
 
-예시 설정:
+```bash
+curl https://api.side-pick.app/api/health
+```
+
+## Nginx 프록시 예시
+
+운영 서버에서는 Nginx가 호스트에서 실행되고, Docker 컨테이너의 `127.0.0.1:8081`로 프록시합니다.
 
 ```nginx
 server {
@@ -157,18 +149,17 @@ sudo certbot --nginx -d api.side-pick.app
 - `PATCH /api/experiences/{id}`
 - `DELETE /api/experiences/{id}`
 
-## 인증 관련 메모
+## 인증 정책 메모
 
-- 일반 계정은 이메일 인증 전에도 로그인할 수 있습니다.
-- 이메일 미인증 일반 계정은 경험 작성 계열 기능이 제한됩니다.
-- 소셜 로그인 계정은 로그인 시점에 인증 완료 상태로 처리합니다.
-- 운영 환경에서는 `APP_AUTH_LOCAL_ENABLED`, `APP_AUTH_KAKAO_ENABLED`, `APP_AUTH_GOOGLE_ENABLED`로 로그인 수단을 제어할 수 있습니다.
-- 프론트 OAuth 연결 규칙은 [AUTH_FLOW_MVP.md](D:/Codex_Folder/Sidepick/server/AUTH_FLOW_MVP.md) 참고
+- 운영 기준 로그인은 카카오 중심입니다.
+- 운영 환경에서는 `APP_AUTH_LOCAL_ENABLED`, `APP_AUTH_KAKAO_ENABLED`, `APP_AUTH_GOOGLE_ENABLED`로 인증 수단을 제어합니다.
+- 현재 운영 권장값:
+  - `APP_AUTH_LOCAL_ENABLED='false'`
+  - `APP_AUTH_KAKAO_ENABLED='true'`
+  - `APP_AUTH_GOOGLE_ENABLED='false'`
 
-## 운영 체크리스트
+## 메일 발송 메모
 
-- Nginx/HTTPS 구성이 끝나면 외부 `8081` 포트는 열지 않는 것이 좋습니다.
-- RDS 비밀번호가 노출되었으면 교체해야 합니다.
-- 임시 JWT 시크릿을 썼다면 교체해야 합니다.
-- CORS는 실제 운영 프론트 도메인만 허용해야 합니다.
-- Certbot 자동 갱신 타이머 상태를 확인하는 것이 좋습니다.
+- 실제 이메일 인증을 운영에서 열려면 SMTP 또는 AWS SES 자격증명이 필요합니다.
+- SMTP 설정이 없는데 `APP_MAIL_ENABLED='true'`이면 메일 발송이 실패합니다.
+- 운영에서 메일을 다시 열기 전까지는 카카오 로그인만 노출하는 구조를 권장합니다.

@@ -14,50 +14,52 @@ function formatDuration(months: number | null) {
   }
 
   if (months >= 12) {
-    return months === 12 ? '1년' : `${months}개월`;
+    if (months % 12 === 0) {
+      return `${months / 12}년`;
+    }
+    return `${months}개월`;
   }
 
   return `${months}개월`;
 }
 
-function getFailureLabel(experience: Experience) {
-  if (experience.failureReasons.length > 0) {
-    return experience.failureReasons[0];
-  }
-  if (experience.difficulties.length > 0) {
-    return experience.difficulties[0];
-  }
-  return experience.failureReason ?? '기타';
+function getKeywordLabels(experience: Experience) {
+  const merged = [
+    ...experience.failureReasons,
+    ...experience.difficulties,
+    experience.failureReason ?? '',
+    experience.category.name,
+  ].filter(Boolean);
+
+  return Array.from(new Set(merged)).slice(0, 3);
 }
 
 export default function ExperienceFeed({ experiences, loading, error }: Props) {
   return (
-    <div className="px-4 pb-6">
-      <div className="space-y-3">
+    <div className="bg-[#F3F4F6] px-4 pb-6">
+      <div className="overflow-hidden rounded-[18px] bg-white">
         {loading ? (
-          <div className="rounded-[22px] bg-white px-5 py-10 text-center text-sm text-[#666666] shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-            경험 목록을 불러오는 중입니다.
+          <div className="px-5 py-12 text-center text-sm text-[#666666]">
+            사례 목록을 불러오는 중입니다.
           </div>
         ) : error ? (
-          <div className="rounded-[22px] bg-white px-5 py-10 text-center text-sm text-[#D33B3B] shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+          <div className="px-5 py-12 text-center text-sm text-[#D33B3B]">
             {error}
           </div>
         ) : experiences.length === 0 ? (
-          <div className="rounded-[22px] bg-white px-5 py-10 text-center text-sm text-[#666666] shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-            아직 등록된 경험이 없습니다.
+          <div className="px-5 py-12 text-center text-sm text-[#666666]">
+            아직 등록된 사례가 없습니다.
           </div>
         ) : (
           experiences.map((item) => (
             <Link key={item.id} to={`/experiences/${item.id}`} className="block">
               <Card
                 title={item.title}
-                category={item.category.name}
-                failureReason={getFailureLabel(item)}
+                tags={getKeywordLabels(item)}
                 duration={formatDuration(item.durationMonths)}
                 views={item.viewCount}
                 amount={item.investmentAmount ?? 0}
                 date={item.createdAt.slice(0, 10)}
-                content={item.content}
               />
             </Link>
           ))

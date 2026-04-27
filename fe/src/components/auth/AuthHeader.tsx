@@ -9,7 +9,7 @@ export default function AuthHeader({ title, onBack }: Props) {
   const navigate = useNavigate();
 
   return (
-    <header className="mb-8 flex items-center gap-3">
+    <header className="mb-10 flex items-center gap-3 px-1 pt-1">
       <button
         type="button"
         aria-label="뒤로가기"
@@ -20,11 +20,11 @@ export default function AuthHeader({ title, onBack }: Props) {
           }
           navigate(-1);
         }}
-        className="text-xl leading-none text-black"
+        className="flex size-8 items-center justify-center text-[22px] leading-none text-black"
       >
         ←
       </button>
-      <div className="text-base font-semibold text-black">{title}</div>
+      <div className="text-[24px] font-semibold leading-8 text-black">{title}</div>
     </header>
   );
 }
