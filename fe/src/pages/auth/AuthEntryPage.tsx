@@ -1,29 +1,17 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AuthHeader from '../../components/auth/AuthHeader';
+import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
-
-function DisabledInput({
-  label,
-  type = 'text',
-}: {
-  label: string;
-  type?: 'text' | 'password';
-}) {
-  return (
-    <label className="block">
-      <span className="mb-2 block text-sm font-medium text-[#7D7D7D]">{label}</span>
-      <input
-        type={type}
-        disabled
-        className="h-14 w-full rounded-[16px] border border-[#E8E8E8] bg-[#F5F5F5] px-4 text-sm text-[#B4B4B4]"
-      />
-    </label>
-  );
-}
+import { login } from '../../lib/api';
+import { saveSession } from '../../lib/session';
 
 export default function AuthEntryPage() {
   const location = useLocation();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
   const [kakaoError, setKakaoError] = useState('');
 
   const nextPath = useMemo(() => {
@@ -35,6 +23,33 @@ export default function AuthEntryPage() {
     const params = new URLSearchParams(location.search);
     return params.get('reason') || '';
   }, [location.search]);
+
+  async function handleLogin() {
+    if (!email.trim() || !password.trim()) {
+      setLoginError('이메일과 비밀번호를 모두 입력해주세요.');
+      return;
+    }
+
+    setLoading(true);
+    setLoginError('');
+
+    try {
+      const payload = await login({
+        email: email.trim(),
+        password,
+      });
+      saveSession(payload.accessToken, payload.refreshToken, payload.user);
+      window.location.href = nextPath;
+    } catch (error) {
+      setLoginError(
+        error instanceof Error
+          ? error.message
+          : '로그인에 실패했습니다. 다시 시도해주세요.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
 
   function handleKakaoLogin() {
     const kakaoClientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
@@ -66,16 +81,33 @@ export default function AuthEntryPage() {
         ) : null}
 
         <div className="space-y-5">
-          <DisabledInput label="아이디" />
-          <DisabledInput label="비밀번호" type="password" />
+          <AuthInput
+            label="이메일"
+            type="email"
+            placeholder="이메일을 입력해주세요"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+          <AuthInput
+            label="비밀번호"
+            type="password"
+            placeholder="비밀번호를 입력해주세요"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
         </div>
+
+        {loginError ? (
+          <p className="mt-4 text-sm text-[#D33B3B]">{loginError}</p>
+        ) : null}
 
         <button
           type="button"
-          disabled
-          className="mt-6 h-14 w-full rounded-[16px] bg-[#D8D8D8] text-base font-semibold text-white"
+          onClick={() => void handleLogin()}
+          disabled={loading}
+          className="mt-6 h-14 w-full rounded-[16px] bg-[#111111] text-base font-semibold text-white disabled:bg-[#D8D8D8]"
         >
-          로그인
+          {loading ? '로그인 중..' : '로그인'}
         </button>
 
         <div className="mt-4 flex items-center justify-center gap-3 text-sm text-[#7D7D7D]">
@@ -117,7 +149,7 @@ export default function AuthEntryPage() {
           </div>
 
           <p className="mt-4 text-center text-xs leading-5 text-[#8C8C8C]">
-            현재 운영 환경에서는 카카오 로그인만 지원하고 있습니다.
+            운영 기준 소셜 로그인은 카카오 우선으로 유지합니다.
           </p>
           {kakaoError ? (
             <p className="mt-3 text-center text-sm text-[#D33B3B]">{kakaoError}</p>
