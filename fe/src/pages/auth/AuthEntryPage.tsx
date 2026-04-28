@@ -107,7 +107,7 @@ export default function AuthEntryPage() {
           disabled={loading}
           className="mt-6 h-14 w-full rounded-[16px] bg-[#111111] text-base font-semibold text-white disabled:bg-[#D8D8D8]"
         >
-          {loading ? '로그인 중..' : '로그인'}
+          {loading ? '로그인 중...' : '로그인'}
         </button>
 
         <div className="mt-4 flex items-center justify-center gap-3 text-sm text-[#7D7D7D]">
@@ -128,7 +128,9 @@ export default function AuthEntryPage() {
         </div>
 
         <div className="mt-10">
-          <p className="text-center text-sm font-medium text-[#6A6A6A]">간편 로그인</p>
+          <p className="text-center text-sm font-medium text-[#6A6A6A]">
+            소셜 로그인
+          </p>
 
           <div className="mt-4 space-y-3">
             <button
@@ -149,7 +151,7 @@ export default function AuthEntryPage() {
           </div>
 
           <p className="mt-4 text-center text-xs leading-5 text-[#8C8C8C]">
-            운영 기준 소셜 로그인은 카카오 우선으로 유지합니다.
+            이메일 로그인과 카카오 로그인을 모두 사용할 수 있습니다.
           </p>
           {kakaoError ? (
             <p className="mt-3 text-center text-sm text-[#D33B3B]">{kakaoError}</p>
