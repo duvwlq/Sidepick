@@ -12,3 +12,8 @@ server/out/
 *.log
 .env
 
+# Python
+venv/
+__pycache__/
+*.pyc
+
