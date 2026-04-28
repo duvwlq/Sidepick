@@ -1,4 +1,4 @@
-from llm_analyzer import analyze_experience
+from server.llm_analyzer import analyze_experience
 import json
 
 # 5개 샘플 케이스

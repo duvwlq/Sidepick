@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional
-from llm_analyzer import analyze_experience
+from server.llm_analyzer import analyze_experience
 
 app = FastAPI(
     title="Sidepick AI Server",
