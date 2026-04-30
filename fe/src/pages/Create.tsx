@@ -29,7 +29,7 @@ export default function Create() {
     if (!token) {
       navigate(
         `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
-          '경험 등록은 로그인 후 이용할 수 있어요.',
+          '경험 등록을 하려면 로그인이 필요해요',
         )}`,
         { replace: true },
       );
@@ -183,17 +183,16 @@ export default function Create() {
         ) : null}
 
         {submitError ? (
-          <div className="w-full font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#D33B3B]">
+          <div className="w-full font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B] [font-feature-settings:'case'_1]">
             {submitError}
           </div>
         ) : null}
 
         <BottomButton
-          label={
-            step === 4 ? (submitting ? '등록 중...' : '작성 완료') : '다음 단계'
-          }
+          label={step === 4 ? (submitting ? '등록 중...' : '작성 완료') : '다음 단계'}
           disabled={!isValid || submitting || categoryLoading}
           onClick={step === 4 ? () => void handleSubmit() : next}
+          showChevron={step !== 4}
         />
       </div>
     </Layout>
@@ -217,7 +216,7 @@ function StepTitle({
     >
       <h2
         className={`whitespace-pre-line text-center font-['Pretendard'] text-[20px] font-[600] leading-[24px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1] ${
-          multiline ? 'w-[267px]' : 'w-full'
+          multiline ? 'w-[267px]' : 'w-[228px]'
         }`}
       >
         {title}

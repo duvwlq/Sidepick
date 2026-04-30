@@ -26,7 +26,11 @@ export default function StepSelectable({ options, selected, onSelect }: Props) {
               }`}
             >
               <CheckIcon active={active} />
-              <span className="min-w-0 flex-1 truncate text-left font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575] [font-feature-settings:'case'_1]">
+              <span
+                className={`min-w-0 flex-1 truncate text-left font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+                  active ? 'text-[#131416]' : 'text-[#757575]'
+                }`}
+              >
                 {item}
               </span>
             </button>
@@ -39,10 +43,15 @@ export default function StepSelectable({ options, selected, onSelect }: Props) {
 
 function CheckIcon({ active }: { active: boolean }) {
   return (
-    <svg viewBox="0 0 14 14" className="h-[14px] w-[14px]" fill="none" aria-hidden="true">
+    <svg
+      viewBox="0 0 14 14"
+      className="h-[14px] w-[14px] shrink-0"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M3 7.1L5.7 9.8L11 4.5"
-        stroke={active ? '#131416' : '#BABABA'}
+        stroke={active ? '#131416' : '#757575'}
         strokeWidth="1.3"
         strokeLinecap="round"
         strokeLinejoin="round"

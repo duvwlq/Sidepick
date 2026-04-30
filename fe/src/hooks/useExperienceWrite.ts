@@ -34,7 +34,7 @@ export function useExperienceWrite() {
   const [step, setStep] = useState<Step>(1);
   const [form, setForm] = useState<FormState>(initialState);
 
-  const progress = useMemo(() => (step / 4) * 100, [step]);
+  const progress = useMemo(() => step * 25, [step]);
 
   const next = () => setStep((current) => Math.min(4, current + 1) as Step);
   const prev = () => setStep((current) => Math.max(1, current - 1) as Step);
