@@ -44,7 +44,7 @@ export default function Layout({
       ) : null}
 
       <main
-        className={`${showHeader ? 'pt-[123px]' : ''} ${
+        className={`${showHeader ? 'pt-[64px]' : ''} ${
           showBottomNav ? 'pb-[110px]' : ''
         }`}
       >
