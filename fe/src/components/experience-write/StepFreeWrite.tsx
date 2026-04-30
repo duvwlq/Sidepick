@@ -15,7 +15,7 @@ export default function StepFreeWrite({ value, onChange }: Props) {
 
       <div className="mt-6">
         <div className="mb-2 text-sm font-semibold text-[#111111]">
-          최소 20자 이상 작성해 주세요 <span className="text-[#D33B3B]">*</span>
+          최소 10자 이상 작성해 주세요 <span className="text-[#D33B3B]">*</span>
         </div>
         <textarea
           value={value}

@@ -70,7 +70,7 @@ export function useExperienceWrite() {
       case 3:
         return form.difficulties.length > 0;
       case 4:
-        return form.content.trim().length >= 20;
+        return form.content.trim().length >= 10;
       default:
         return false;
     }
