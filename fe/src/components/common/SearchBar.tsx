@@ -20,7 +20,7 @@ export default function SearchBar({
 }: SearchBarProps) {
   return (
     <div
-      className={`flex h-12 items-center rounded-full bg-[#F1F3F5] px-4 ${className} ${
+      className={`flex h-10 items-center justify-between rounded-full bg-[#F8F8F8] px-4 py-[10px] ${className} ${
         onClick ? 'cursor-text' : ''
       }`}
       onClick={onClick}
@@ -31,9 +31,9 @@ export default function SearchBar({
         onChange={onChange}
         readOnly={readOnly}
         placeholder={placeholder}
-        className="flex-1 bg-transparent text-sm text-[#111111] outline-none placeholder:text-[#9AA0A6]"
+        className="flex-1 bg-transparent text-[14px] font-normal leading-[1.4] text-[#131416] outline-none placeholder:text-[#BABABA]"
       />
-      <img src={searchIcon} alt="검색" className="h-5 w-5 opacity-60" />
+      <img src={searchIcon} alt="검색" className="h-5 w-5 shrink-0" />
     </div>
   );
 }

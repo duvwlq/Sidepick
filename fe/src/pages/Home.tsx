@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import amountIcon from '../assets/images/amount.svg';
+import durationIcon from '../assets/images/duration.svg';
+import viewsIcon from '../assets/images/views.svg';
 import SearchBar from '../components/common/SearchBar';
 import Layout from '../components/layout/Layout';
 import {
@@ -70,50 +73,88 @@ function HomeCard({
   onClick: () => void;
 }) {
   const tags = getKeywordLabels(experience);
-  const wrapperClass = compact
-    ? 'w-[240px] shrink-0 rounded-[10px] bg-[#F8F8F8] p-3'
-    : 'w-full rounded-[10px] bg-[#F8F8F8] p-3';
+  const amountLabel = `${(experience.investmentAmount ?? 0).toLocaleString()}원`;
+  const durationLabel = formatDuration(experience.durationMonths);
+  const viewsLabel = experience.viewCount.toLocaleString();
+  const dateLabel = formatDate(experience.createdAt);
 
   return (
-    <button type="button" onClick={onClick} className={`${wrapperClass} text-left`}>
-      <div className="mb-3 flex flex-wrap gap-1">
-        {tags.length ? (
-          tags.map((tag) => (
-            <span
-              key={`${experience.id}-${tag}`}
-              className="rounded-[999px] bg-[#D9D9D9] px-2 py-[3px] text-[10px] leading-none text-white"
-            >
-              {tag}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex flex-col items-start gap-[10px] rounded-[10px] border border-[#EEE] bg-[#F8F8F8] p-4 text-left ${
+        compact ? 'w-[240px] shrink-0' : 'w-full'
+      }`}
+    >
+      <div className="flex w-full flex-col gap-2">
+        <div className={`flex w-full items-start ${compact ? 'gap-1' : 'justify-between'}`}>
+          <div className="flex flex-wrap gap-1">
+            {tags.length ? (
+              tags.map((tag) => (
+                <span
+                  key={`${experience.id}-${tag}`}
+                  className="flex h-5 items-center justify-center rounded-[999px] bg-[#BABABA] px-2 text-[12px] font-normal leading-[1.2] text-white"
+                >
+                  {tag}
+                </span>
+              ))
+            ) : (
+              <span className="flex h-5 items-center justify-center rounded-[999px] bg-[#BABABA] px-2 text-[12px] font-normal leading-[1.2] text-white">
+                키워드
+              </span>
+            )}
+          </div>
+          {!compact ? (
+            <span className="shrink-0 text-[12px] font-semibold leading-[1.2] text-[#494949] underline">
+              자세히보기
             </span>
-          ))
-        ) : (
-          <span className="rounded-[999px] bg-[#D9D9D9] px-2 py-[3px] text-[10px] leading-none text-white">
-            키워드
-          </span>
-        )}
-      </div>
+          ) : null}
+        </div>
 
-      <div className="mb-3 flex items-start justify-between gap-3">
-        <h3 className="line-clamp-1 text-sm font-semibold leading-[1.4] text-[#131416]">
+        <h3 className="w-full text-[16px] font-semibold leading-[1.2] text-black">
           {experience.title}
         </h3>
-        {!compact ? (
-          <span className="shrink-0 text-[10px] leading-[1.2] text-[#494949]">
-            자세히보기
-          </span>
-        ) : null}
       </div>
 
-      <div className="grid grid-cols-2 gap-x-5 gap-y-2 text-[10px] leading-[1.4] text-[#8A8A8A]">
-        <div>
-          <div>{formatDuration(experience.durationMonths)}</div>
-          <div>↗↗ 조회수</div>
+      <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-1">
+        <div className="flex items-center gap-1 text-[12px] font-normal leading-[1.4] text-[#8A8A8A]">
+          <img src={durationIcon} alt="" className="h-4 w-4 shrink-0" />
+          <span>{durationLabel}</span>
         </div>
-        <div className="text-right">
-          <div>$ 투자금</div>
-          <div>{compact ? '작성 날짜' : formatDate(experience.createdAt)}</div>
+        <div className="flex items-center gap-1 text-[12px] font-normal leading-[1.4] text-[#8A8A8A]">
+          <img src={amountIcon} alt="" className="h-4 w-4 shrink-0" />
+          <span>{amountLabel}</span>
         </div>
+        <div className="flex items-center gap-1 text-[12px] font-normal leading-[1.4] text-[#8A8A8A]">
+          <img src={viewsIcon} alt="" className="h-4 w-4 shrink-0" />
+          <span>{viewsLabel}</span>
+        </div>
+        <div className="text-[12px] font-normal leading-[1.4] text-[#8A8A8A]">{dateLabel}</div>
       </div>
+    </button>
+  );
+}
+
+function CategoryTab({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button type="button" onClick={onClick} className="shrink-0">
+      <span
+        className={`flex items-center justify-center px-2 py-1 text-[14px] leading-[1.2] ${
+          active
+            ? 'border-b-[1.5px] border-[#494949] font-semibold text-[#494949]'
+            : 'font-normal text-[#BABABA]'
+        }`}
+      >
+        {label}
+      </span>
     </button>
   );
 }
@@ -131,8 +172,8 @@ function SegmentButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[33px] flex-1 items-center justify-center rounded-full text-xs leading-[1.2] ${
-        active ? 'bg-white text-[#131416]' : 'text-[#8A8A8A]'
+      className={`flex h-[33px] flex-1 items-center justify-center rounded-full py-[10px] text-[14px] font-medium leading-[1.2] ${
+        active ? 'border-2 border-[#E6E6E6] bg-white text-[#131416]' : 'text-[#757575]'
       }`}
     >
       {label}
@@ -219,131 +260,125 @@ export default function Home() {
 
   return (
     <Layout title="사이드픽" leftType="menu" showRightIcon>
-      <div className="space-y-0 bg-white">
-        <section className="px-4 pb-3 pt-0">
+      <div className="bg-white">
+        <section className="bg-white px-4 pb-3">
           <SearchBar
             placeholder="원하는 실패 사례를 검색해보세요!"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
-            className="h-10 rounded-full px-4"
           />
         </section>
 
-        <section className="px-4 py-3">
-          <h2 className="mb-4 text-base font-semibold leading-[1.2] text-[#131416]">
+        <section className="flex flex-col items-center gap-4 px-4 py-3">
+          <h2 className="w-full text-[16px] font-semibold leading-[1.2] text-[#131416]">
             인기 카테고리
           </h2>
 
-          <div className="mb-4 flex items-center gap-4 text-xs leading-[1.2]">
+          <div className="flex w-full items-center">
             {CATEGORY_TABS.map((tab) => (
-              <button
+              <CategoryTab
                 key={tab}
-                type="button"
+                active={selectedCategory === tab}
+                label={tab}
                 onClick={() => setSelectedCategory(tab)}
-                className={
-                  selectedCategory === tab
-                    ? 'font-semibold text-[#131416]'
-                    : 'text-[#BABABA]'
-                }
-              >
-                {tab}
-              </button>
+              />
             ))}
           </div>
 
-          <div className="-mx-4 overflow-x-auto px-4">
-            <div className="flex gap-4">
-              {featuredExperiences.length ? (
-                featuredExperiences.map((experience) => (
+          {featuredExperiences.length ? (
+            <div className="-mx-4 w-[375px] overflow-x-auto pl-4">
+              <div className="flex items-center gap-4 pr-4">
+                {featuredExperiences.map((experience) => (
                   <HomeCard
                     key={experience.id}
                     experience={experience}
                     compact
                     onClick={() => navigate(`/experiences/${experience.id}`)}
                   />
-                ))
-              ) : (
-                <div className="w-full rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
-                  표시할 인기 사례가 없습니다.
-                </div>
-              )}
+                ))}
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="w-full rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
+              표시할 인기 사례가 없습니다.
+            </div>
+          )}
         </section>
 
-        <section className="px-4 py-3">
-          <h2 className="mb-3 text-base font-semibold leading-[1.2] text-[#131416]">
-            탐색
-          </h2>
-
-          <div className="rounded-[999px] bg-[#EEE] p-[2px]">
-            <div className="flex">
-              <SegmentButton
-                active={sort === 'latest'}
-                label="최근 등록된 사례"
-                onClick={() => setSort('latest')}
-              />
-              <SegmentButton
-                active={sort === 'popular'}
-                label="인기 사례"
-                onClick={() => setSort('popular')}
-              />
-            </div>
-          </div>
-
-          <div className="mt-3 space-y-[10px]">
-            {listLoading ? (
-              <div className="rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
-                사례를 불러오는 중입니다.
-              </div>
-            ) : listError ? (
-              <div className="rounded-[10px] bg-[#FFF5F5] px-4 py-8 text-center text-sm text-[#D33B3B]">
-                {listError}
-              </div>
-            ) : exploreExperiences.length ? (
-              exploreExperiences.map((experience) => (
-                <HomeCard
-                  key={experience.id}
-                  experience={experience}
-                  onClick={() => navigate(`/experiences/${experience.id}`)}
-                />
-              ))
-            ) : (
-              <div className="rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
-                아직 등록된 사례가 없습니다.
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={() => navigate('/explore')}
-            className="mt-3 flex w-full items-center justify-center text-xs leading-[1.2] text-[#8A8A8A]"
-          >
-            모든 사례 보기
-          </button>
-        </section>
-
-        <section className="px-4 pb-6 pt-3">
-          <div className="rounded-[10px] bg-[#6E6E6E] px-5 py-5 text-white">
-            <div className="mb-10 space-y-2">
-              <h2 className="text-2xl font-semibold leading-[1.2]">
+        <section className="bg-white p-4">
+          <div className="flex flex-col items-start gap-[39px] rounded-[10px] bg-[#757575] p-5 text-white">
+            <div className="flex w-full flex-col gap-2">
+              <h2 className="text-[20px] font-semibold leading-[1.2]">
                 실패도 좋은 경험이예요!
               </h2>
-              <p className="text-xs leading-[1.4] text-white/90">
-                경험을 등록하면 AI가 나의 실패 원인을 분석해주고,
-                <br />
-                나와 유사한 사례를 보여주며 원하는 선택을 하도록 도와드릴게요!
-              </p>
+              <div className="text-[12px] font-light leading-[1.4] text-white">
+                <p>경험을 등록하면 AI가 나의 실패 원인을 분석해주고,</p>
+                <p>나와 유사한 사례들을 보여주며 원하는 선택을 하도록 도와드릴게요!</p>
+              </div>
             </div>
 
             <button
               type="button"
               onClick={handlePrimaryAction}
-              className="flex h-10 w-full items-center justify-between rounded-[8px] bg-white px-3 text-xs font-semibold text-[#131416]"
+              className="flex h-10 w-full items-center justify-between rounded-[8px] bg-white px-3 py-[5px] text-[12px] font-semibold leading-[1.2] text-black"
             >
-              <span>내 경험 분석하러 가기</span>
-              <span className="text-base">›</span>
+              <span>나의 경험 분석하러 가기</span>
+              <span className="text-base leading-none">→</span>
+            </button>
+          </div>
+        </section>
+
+        <section className="flex flex-col items-start justify-center gap-[10px] px-4 py-3">
+          <h2 className="w-full text-[16px] font-semibold leading-[1.2] text-[#131416]">
+            탐색
+          </h2>
+
+          <div className="flex w-full flex-col items-center gap-3">
+            <div className="w-full rounded-[999px] bg-[#E6E6E6]">
+              <div className="flex w-full items-center justify-center">
+                <SegmentButton
+                  active={sort === 'latest'}
+                  label="최근 등록된 사례"
+                  onClick={() => setSort('latest')}
+                />
+                <SegmentButton
+                  active={sort === 'popular'}
+                  label="인기 사례"
+                  onClick={() => setSort('popular')}
+                />
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col items-start gap-[10px]">
+              {listLoading ? (
+                <div className="w-full rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
+                  사례를 불러오는 중입니다.
+                </div>
+              ) : listError ? (
+                <div className="w-full rounded-[10px] bg-[#FFF5F5] px-4 py-8 text-center text-sm text-[#D33B3B]">
+                  {listError}
+                </div>
+              ) : exploreExperiences.length ? (
+                exploreExperiences.map((experience) => (
+                  <HomeCard
+                    key={experience.id}
+                    experience={experience}
+                    onClick={() => navigate(`/experiences/${experience.id}`)}
+                  />
+                ))
+              ) : (
+                <div className="w-full rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
+                  아직 등록된 사례가 없습니다.
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/explore')}
+              className="text-[12px] font-normal leading-[1.2] text-[#5D5D5D] underline"
+            >
+              모든 사례 보기
             </button>
           </div>
         </section>

@@ -34,40 +34,25 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-50 w-full max-w-[375px] -translate-x-1/2 rounded-t-[22px] bg-white px-12 pb-6 pt-3 shadow-[0_-4px_18px_rgba(0,0,0,0.08)]">
-      <ul className="flex items-center justify-between">
-        {menus.map((menu) => {
-          const isActive =
-            menu.path === '/'
-              ? location.pathname === '/'
-              : location.pathname.startsWith(menu.path);
+    <nav className="fixed bottom-[-2px] left-1/2 z-50 flex w-full max-w-[375px] -translate-x-1/2 items-center justify-between rounded-t-[20px] bg-white px-12 pb-6 pt-3 shadow-[0_0_5px_rgba(0,0,0,0.15)]">
+      {menus.map((menu) => {
+        const isActive =
+          menu.path === '/'
+            ? location.pathname === '/'
+            : location.pathname.startsWith(menu.path);
 
-          return (
-            <li key={menu.path}>
-              <button
-                type="button"
-                onClick={() => moveWithAuthGuard(menu.path)}
-                className="flex flex-col items-center gap-1.5"
-              >
-                <div className="flex h-6 w-6 items-center justify-center">
-                  <img
-                    src={menu.icon}
-                    alt=""
-                    className={`h-6 w-6 ${isActive ? 'opacity-100' : 'opacity-35'}`}
-                  />
-                </div>
-                <span
-                  className={`text-[10px] leading-none ${
-                    isActive ? 'text-black' : 'text-black/35'
-                  }`}
-                >
-                  {menu.name}
-                </span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+        return (
+          <button
+            key={menu.path}
+            type="button"
+            onClick={() => moveWithAuthGuard(menu.path)}
+            className={`flex flex-col items-center gap-1 ${isActive ? 'opacity-100' : 'opacity-30'}`}
+          >
+            <img src={menu.icon} alt="" className="h-6 w-6" />
+            <span className="text-[10px] font-normal leading-none text-black">{menu.name}</span>
+          </button>
+        );
+      })}
     </nav>
   );
 }
