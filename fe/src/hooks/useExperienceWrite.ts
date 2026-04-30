@@ -70,6 +70,8 @@ export function useExperienceWrite() {
       case 3:
         return form.difficulties.length > 0;
       case 4:
+        // 자유서술 최소 글자 수 기준입니다.
+        // 현재는 10자 이상일 때만 "작성 완료"가 활성화됩니다.
         return form.content.trim().length >= 10;
       default:
         return false;

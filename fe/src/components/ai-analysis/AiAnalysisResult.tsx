@@ -15,6 +15,11 @@ type Props = {
   experienceId: number | null;
 };
 
+type PatternItem = {
+  label: string;
+  percent: number;
+};
+
 function formatDate(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -58,18 +63,28 @@ function formatTag(label: string) {
   return label.replaceAll('_', ' ').trim();
 }
 
-function buildPatternItems(report: AnalysisReport | null) {
+function getPatternSource(report: AnalysisReport | null) {
   if (!report) {
     return [];
   }
 
-  const baseLabels = report.riskFactors.length
-    ? report.riskFactors
-    : report.keywords?.length
-      ? report.keywords
-      : report.extractedPatterns;
+  if (report.failureCategory) {
+    return [report.failureCategory, ...report.extractedPatterns];
+  }
 
-  const source = baseLabels.filter(Boolean).slice(0, 3);
+  if (report.extractedPatterns.length) {
+    return report.extractedPatterns;
+  }
+
+  if (report.keywords?.length) {
+    return report.keywords;
+  }
+
+  return report.riskFactors;
+}
+
+function buildPatternItems(report: AnalysisReport | null): PatternItem[] {
+  const source = getPatternSource(report).filter(Boolean).slice(0, 3);
   if (!source.length) {
     return [];
   }
@@ -93,7 +108,7 @@ function SectionTitle({
   description: string;
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <h2 className="text-base font-semibold leading-[1.2] text-[#131416]">
         {title}
       </h2>
@@ -102,8 +117,36 @@ function SectionTitle({
   );
 }
 
+function MetricItem({
+  icon,
+  label,
+  value,
+  withDivider = true,
+}: {
+  icon?: string;
+  label: string;
+  value: string;
+  withDivider?: boolean;
+}) {
+  return (
+    <div className="flex w-full flex-col gap-2">
+      <div className="flex h-[14px] items-center gap-1 text-xs leading-[1.2] text-[#8A8A8A]">
+        {icon ? <img src={icon} alt="" className="h-[14px] w-[14px]" /> : null}
+        <span>{label}</span>
+      </div>
+      <p
+        className={[
+          'text-base font-semibold leading-[1.4] text-[#131416]',
+          withDivider ? 'border-b border-[#E7E7E7] pb-[10px]' : '',
+        ].join(' ')}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
 export default function AiAnalysisResult({ experienceId }: Props) {
-  const token = getAccessToken();
   const [experience, setExperience] = useState<Experience | null>(null);
   const [report, setReport] = useState<AnalysisReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,16 +170,19 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       const experiencePayload = await getExperience(targetExperienceId);
       let reportPayload = await getReport(targetExperienceId);
 
-      if (reportPayload.reportStatus === 'NOT_READY' && token) {
-        try {
-          await createAnalysis(token, targetExperienceId);
-          reportPayload = await getReport(targetExperienceId);
-        } catch (requestError) {
-          if (
-            requestError instanceof ApiError &&
-            (requestError.status === 502 || requestError.status === 504)
-          ) {
-            throw requestError;
+      if (reportPayload.reportStatus === 'NOT_READY') {
+        const token = getAccessToken();
+        if (token) {
+          try {
+            await createAnalysis(token, targetExperienceId);
+            reportPayload = await getReport(targetExperienceId);
+          } catch (requestError) {
+            if (
+              requestError instanceof ApiError &&
+              (requestError.status === 502 || requestError.status === 504)
+            ) {
+              throw requestError;
+            }
           }
         }
       }
@@ -175,11 +221,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
     const base = report.keywords?.length
       ? report.keywords
-      : report.extractedPatterns.length
-        ? report.extractedPatterns
+      : report.riskFactors.length
+        ? report.riskFactors
         : report.failureCategory
           ? [report.failureCategory]
-          : [];
+          : report.extractedPatterns;
 
     return base.filter(Boolean).slice(0, 3).map((item) => `# ${formatTag(item)}`);
   }, [report]);
@@ -207,9 +253,9 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   }
 
   return (
-    <div className="bg-[#EEE]">
-      <section className="bg-white px-4 py-4">
-        <div className="mb-8 flex items-center gap-2">
+    <div className="flex flex-col gap-[2px] bg-[#EEE]">
+      <section className="flex flex-col gap-8 bg-white p-4">
+        <div className="flex items-center gap-2">
           {experience.author.profileImage ? (
             <img
               src={experience.author.profileImage}
@@ -219,8 +265,8 @@ export default function AiAnalysisResult({ experienceId }: Props) {
           ) : (
             <div className="h-8 w-8 rounded-full bg-[#F1F1F1]" />
           )}
-          <div className="flex flex-col gap-[2px]">
-            <div className="flex items-center gap-1 text-xs leading-[1.4]">
+          <div className="flex flex-col gap-[2px] text-xs leading-[1.4]">
+            <div className="flex items-center gap-1">
               <span className="font-semibold text-[#131416]">
                 {experience.author.nickname}
               </span>
@@ -228,13 +274,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                 {formatDate(experience.createdAt)}
               </span>
             </div>
-            <span className="text-xs leading-[1.4] text-[#494949]">
-              {experience.category.name}
-            </span>
+            <span className="text-[#494949]">{experience.category.name}</span>
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <h1 className="text-[18px] font-semibold leading-[1.2] text-[#131416]">
             {experience.title}
           </h1>
@@ -245,7 +289,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             {chips.map((chip) => (
               <span
                 key={chip}
-                className="rounded-[999px] bg-[#EEE] px-2 py-[3px] text-xs leading-[1.2] text-[#757575]"
+                className="flex h-[18px] items-center rounded-[999px] bg-[#EEE] px-2 text-xs leading-[1.2] text-[#757575]"
               >
                 {chip}
               </span>
@@ -254,45 +298,30 @@ export default function AiAnalysisResult({ experienceId }: Props) {
         </div>
       </section>
 
-      <section className="mt-[2px] bg-white px-4 py-4">
-        <div className="rounded-[10px] bg-white">
-          <div className="space-y-[10px]">
-            <div className="space-y-2">
-              <div className="flex items-center gap-1 text-xs leading-[1.2] text-[#8A8A8A]">
-                <img src={durationIcon} alt="" className="h-[14px] w-[14px]" />
-                <span>진행 기간</span>
-              </div>
-              <p className="border-b border-[#E7E7E7] pb-[10px] text-base font-semibold leading-[1.4] text-[#131416]">
-                {formatDuration(experience.durationMonths)}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center gap-1 text-xs leading-[1.2] text-[#8A8A8A]">
-                <img src={amountIcon} alt="" className="h-[14px] w-[14px]" />
-                <span>투자금</span>
-              </div>
-              <p className="border-b border-[#E7E7E7] pb-[10px] text-base font-semibold leading-[1.4] text-[#131416]">
-                {formatCurrency(experience.investmentAmount)}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="text-xs leading-[1.2] text-[#8A8A8A]">수익</div>
-              <p className="text-base font-semibold leading-[1.4] text-[#131416]">
-                {formatCurrency(experience.monthlyRevenue)}
-              </p>
-            </div>
-          </div>
-        </div>
+      <section className="flex flex-col gap-[10px] bg-white p-4">
+        <MetricItem
+          icon={durationIcon}
+          label="진행 기간"
+          value={formatDuration(experience.durationMonths)}
+        />
+        <MetricItem
+          icon={amountIcon}
+          label="투자금"
+          value={formatCurrency(experience.investmentAmount)}
+        />
+        <MetricItem
+          label="수익"
+          value={formatCurrency(experience.monthlyRevenue)}
+          withDivider={false}
+        />
       </section>
 
-      <section className="mt-[2px] bg-white px-4 py-4">
+      <section className="flex flex-col gap-3 bg-white p-4">
         <SectionTitle
           title="핵심 이슈"
           description="해당 사례에서 찾아볼 수 있는 핵심 이슈입니다."
         />
-        <div className="mt-3 space-y-[10px]">
+        <div className="flex flex-col gap-[10px]">
           {issueItems.length ? (
             issueItems.map((item) => (
               <div
@@ -310,34 +339,32 @@ export default function AiAnalysisResult({ experienceId }: Props) {
         </div>
       </section>
 
-      <section className="mt-[2px] bg-white px-4 pb-[110px] pt-4">
+      <section className="flex flex-col gap-3 bg-white px-4 pb-[110px] pt-4">
         <SectionTitle
           title="실패 패턴"
           description="유사 카테고리 내 실패 원인 별 비중 그래프 데이터입니다."
         />
-        <div className="mt-3 rounded-[10px] bg-[#EEE] p-4">
-          <div className="space-y-4">
-            {patternItems.length ? (
-              patternItems.map((item) => (
-                <div key={item.label} className="space-y-1">
-                  <div className="flex items-start justify-between text-xs leading-[1.4] text-[#494949]">
-                    <span>{item.label}</span>
-                    <span>{String(item.percent).padStart(2, '0')}%</span>
-                  </div>
-                  <div className="h-[10px] overflow-hidden rounded-[999px] bg-[#D8D8D8]">
-                    <div
-                      className="h-full rounded-[999px] bg-black"
-                      style={{ width: `${item.percent}%` }}
-                    />
-                  </div>
+        <div className="flex flex-col gap-4 rounded-[10px] bg-[#EEE] p-4">
+          {patternItems.length ? (
+            patternItems.map((item) => (
+              <div key={item.label} className="flex w-full flex-col gap-1">
+                <div className="flex items-start justify-between text-xs leading-[1.4] text-[#494949]">
+                  <span>{item.label}</span>
+                  <span>{String(item.percent).padStart(2, '0')}%</span>
                 </div>
-              ))
-            ) : (
-              <div className="text-sm leading-[1.4] text-[#757575]">
-                아직 패턴 데이터를 표시할 수 없습니다.
+                <div className="h-[10px] overflow-hidden rounded-[999px] bg-[#D8D8D8]">
+                  <div
+                    className="h-full rounded-[999px] bg-black"
+                    style={{ width: `${item.percent}%` }}
+                  />
+                </div>
               </div>
-            )}
-          </div>
+            ))
+          ) : (
+            <div className="text-sm leading-[1.4] text-[#757575]">
+              아직 패턴 데이터를 표시할 수 없습니다.
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -108,8 +108,8 @@ export default function Create() {
         failureReason: form.causes[0] ?? '기타',
         failureReasons: form.causes,
         difficulties: form.difficulties,
-        difficultyEtc: '',
-        difficultyExtra: '',
+        difficultyEtc: form.difficultyEtc.trim(),
+        difficultyExtra: form.difficultyExtra.trim(),
         lessonsLearned: form.content,
         wouldRetry: true,
       });
@@ -180,6 +180,14 @@ export default function Create() {
             options={difficultyOptions}
             selected={form.difficulties}
             onSelect={(value) => toggleArray('difficulties', value)}
+            etcValue={form.difficultyEtc}
+            onEtcChange={(value) =>
+              setForm((previous) => ({ ...previous, difficultyEtc: value }))
+            }
+            extraValue={form.difficultyExtra}
+            onExtraChange={(value) =>
+              setForm((previous) => ({ ...previous, difficultyExtra: value }))
+            }
           />
         ) : null}
 

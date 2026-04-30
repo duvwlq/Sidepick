@@ -16,6 +16,20 @@ function BackIcon() {
   );
 }
 
+function HeartIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
+      <path
+        d="M20.25 8.75C20.25 13.5 12 18.25 12 18.25S3.75 13.5 3.75 8.75C3.75 6.4 5.65 4.5 8 4.5C9.36 4.5 10.58 5.14 11.35 6.14L12 6.98L12.65 6.14C13.42 5.14 14.64 4.5 16 4.5C18.35 4.5 20.25 6.4 20.25 8.75Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function BookmarkIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
@@ -66,19 +80,28 @@ export default function AiAnalysisResultPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-4 py-5">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="flex h-6 w-6 items-center justify-center text-[#131416]"
-            aria-label="뒤로 가기"
-          >
-            <BackIcon />
-          </button>
+        <div className="flex h-16 items-center justify-between px-4 py-5">
+          <div className="flex w-[52px] items-center gap-1 text-[#131416]">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex h-6 w-6 items-center justify-center"
+              aria-label="뒤로 가기"
+            >
+              <BackIcon />
+            </button>
+            <button
+              type="button"
+              className="flex h-6 w-6 items-center justify-center"
+              aria-label="좋아요"
+            >
+              <HeartIcon />
+            </button>
+          </div>
           <h1 className="text-base font-semibold leading-[1.2] text-[#131416]">
             분석 결과
           </h1>
-          <div className="flex items-center gap-1 text-[#131416]">
+          <div className="flex w-[52px] items-center gap-1 text-[#131416]">
             <button
               type="button"
               className="flex h-6 w-6 items-center justify-center"

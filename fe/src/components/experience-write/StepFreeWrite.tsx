@@ -14,6 +14,7 @@ export default function StepFreeWrite({ value, onChange }: Props) {
       </p>
 
       <div className="mt-6">
+        {/* 자유서술 안내 문구입니다. 최소 글자 수 문구를 바꾸려면 여기서 수정하면 됩니다. */}
         <div className="mb-2 text-sm font-semibold text-[#111111]">
           최소 10자 이상 작성해 주세요 <span className="text-[#D33B3B]">*</span>
         </div>

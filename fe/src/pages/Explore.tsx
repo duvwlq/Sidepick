@@ -9,13 +9,14 @@ type SortKey = 'latest' | 'popular';
 
 const RECENT_SEARCHES_KEY = 'sidepick.recentSearches';
 const DEFAULT_RECOMMENDED_KEYWORDS = [
-  '온라인 쇼핑몰',
+  '온라인 사업',
   '마케팅',
   '투자금',
   '브랜딩',
-  '재고',
+  '광고',
   'SNS 광고',
 ];
+const FILTER_TAGS = ['tag', 'tag', 'tag', 'tag', 'tag', 'tag', 'tag', 'tag'];
 
 function readRecentSearches() {
   const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
@@ -31,11 +32,74 @@ function readRecentSearches() {
   }
 }
 
+function FilterIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-6 w-6"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M4 7H9M15 7H20M12 5V9M4 17H13M17 17H20M15 15V19"
+        stroke="#1F1F1F"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function FilterTag({ label }: { label: string }) {
+  return (
+    <button
+      type="button"
+      className="flex shrink-0 items-center justify-center rounded-full bg-[#EEE] px-[10px] py-1 text-[12px] font-normal leading-[1.2] text-[#757575]"
+    >
+      {label}
+    </button>
+  );
+}
+
+function Chip({
+  label,
+  onClick,
+  onRemove,
+}: {
+  label: string;
+  onClick: () => void;
+  onRemove?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex h-[33px] items-center gap-1 rounded-full bg-[#F4F5F7] px-3 text-[12px] font-normal leading-[1.2] text-[#757575]"
+    >
+      <span>{label}</span>
+      {onRemove ? (
+        <span
+          role="button"
+          aria-label={`${label} 삭제`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemove();
+          }}
+          className="text-[#BABABA]"
+        >
+          ×
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
 export default function Explore() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [draftKeyword, setDraftKeyword] = useState('');
-  const [sort, setSort] = useState<SortKey>('latest');
+  const [sort] = useState<SortKey>('latest');
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -86,7 +150,10 @@ export default function Explore() {
       return;
     }
 
-    const nextKeywords = [nextKeyword, ...recentKeywords.filter((item) => item !== nextKeyword)].slice(0, 6);
+    const nextKeywords = [
+      nextKeyword,
+      ...recentKeywords.filter((item) => item !== nextKeyword),
+    ].slice(0, 6);
     persistRecentKeywords(nextKeywords);
   }
 
@@ -94,85 +161,71 @@ export default function Explore() {
     persistRecentKeywords(recentKeywords.filter((item) => item !== target));
   }
 
-  const categoryChips = useMemo(
-    () => ['전체', '온라인 사업', '서비스업', '요식업', 'IT·개발'],
-    [],
-  );
+  const recommendedKeywords = useMemo(() => DEFAULT_RECOMMENDED_KEYWORDS, []);
 
   if (isSearchMode) {
     return (
       <Layout
         title="검색"
         leftType="back"
-        rightIcon="none"
+        rightIcon="bell"
         onBack={() => setIsSearchMode(false)}
       >
-        <div className="space-y-7 px-4 pt-4 pb-6">
-          <SearchBar
-            value={draftKeyword}
-            onChange={(event) => setDraftKeyword(event.target.value)}
-            className="h-14 rounded-[18px]"
-          />
+        <div className="bg-white">
+          <section className="px-4 pb-3">
+            <SearchBar
+              value={draftKeyword}
+              onChange={(event) => setDraftKeyword(event.target.value)}
+              onClick={() => undefined}
+            />
+          </section>
 
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-[#222222]">최근 검색어</h2>
+          <section className="px-4 py-4">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-[16px] font-semibold leading-[1.2] text-[#131416]">
+                최근 검색어
+              </h2>
               <button
                 type="button"
                 onClick={() => persistRecentKeywords([])}
-                className="text-xs text-[#8B8F96]"
+                className="text-[12px] font-normal leading-[1.2] text-[#757575]"
               >
                 전체 삭제
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1">
               {recentKeywords.map((item) => (
-                <button
+                <Chip
                   key={item}
-                  type="button"
+                  label={item}
                   onClick={() => submitKeyword(item)}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#F2F3F5] px-4 py-2 text-sm text-[#4E5661]"
-                >
-                  <span>{item}</span>
-                  <span
-                    role="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      removeRecentKeyword(item);
-                    }}
-                    className="text-[#A0A6AF]"
-                  >
-                    ×
-                  </span>
-                </button>
+                  onRemove={() => removeRecentKeyword(item)}
+                />
               ))}
             </div>
           </section>
 
-          <section>
-            <h2 className="mb-3 text-sm font-semibold text-[#222222]">추천 키워드</h2>
-            <div className="flex flex-wrap gap-2">
-              {DEFAULT_RECOMMENDED_KEYWORDS.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => submitKeyword(item)}
-                  className="rounded-full bg-[#F4F5F7] px-4 py-2 text-sm text-[#606873]"
-                >
-                  {item}
-                </button>
+          <section className="px-4 py-4">
+            <h2 className="mb-4 text-[16px] font-semibold leading-[1.2] text-[#131416]">
+              추천 키워드
+            </h2>
+            <div className="flex flex-wrap gap-1">
+              {recommendedKeywords.map((item) => (
+                <Chip key={item} label={item} onClick={() => submitKeyword(item)} />
               ))}
             </div>
           </section>
 
-          <button
-            type="button"
-            onClick={() => submitKeyword(draftKeyword)}
-            className="h-14 w-full rounded-[18px] bg-[#111111] text-base font-semibold text-white"
-          >
-            검색하기
-          </button>
+          <div className="px-4 pt-4">
+            <button
+              type="button"
+              onClick={() => submitKeyword(draftKeyword)}
+              className="h-12 w-full rounded-[8px] bg-black text-[14px] font-semibold leading-[1.2] text-white"
+            >
+              검색하기
+            </button>
+          </div>
         </div>
       </Layout>
     );
@@ -186,74 +239,24 @@ export default function Explore() {
       onBack={() => navigate(-1)}
       onRightIconClick={() => setIsSearchMode(true)}
     >
-      <div className="space-y-4 bg-[#F3F4F6] pb-6">
-        <section className="space-y-3 bg-white px-4 pt-4 pb-4">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
-            <button
-              type="button"
-              className="flex h-10 min-w-10 items-center justify-center rounded-full border border-[#E3E5E8] bg-white text-[#5D6570]"
-            >
-              ≡
-            </button>
-            {categoryChips.map((item, index) => (
-              <button
-                key={item}
-                type="button"
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-sm ${
-                  index === 0
-                    ? 'bg-[#111111] text-white'
-                    : 'border border-[#E3E5E8] bg-white text-[#606873]'
-                }`}
-              >
-                {item}
-              </button>
+      <div className="flex flex-col gap-[2px] bg-[#EEE]">
+        <section className="flex w-full cursor-pointer items-center gap-2 bg-white px-4 py-[10px]">
+          <button
+            type="button"
+            className="flex h-6 w-6 shrink-0 items-center justify-center"
+            aria-label="필터 열기"
+          >
+            <FilterIcon />
+          </button>
+          <div className="-mr-4 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pr-4">
+            {FILTER_TAGS.map((tag, index) => (
+              <FilterTag key={`${tag}-${index}`} label={tag} />
             ))}
-          </div>
-
-          <SearchBar
-            value={keyword}
-            readOnly
-            onClick={() => setIsSearchMode(true)}
-          />
-
-          <div className="flex gap-2">
-            <SortButton
-              active={sort === 'latest'}
-              onClick={() => setSort('latest')}
-              label="최신순"
-            />
-            <SortButton
-              active={sort === 'popular'}
-              onClick={() => setSort('popular')}
-              label="인기순"
-            />
           </div>
         </section>
 
         <CardList experiences={experiences} loading={loading} error={error} />
       </div>
     </Layout>
-  );
-}
-
-function SortButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-        active ? 'bg-[#111111] text-white' : 'bg-[#E7EAEE] text-[#5F6670]'
-      }`}
-    >
-      {label}
-    </button>
   );
 }
