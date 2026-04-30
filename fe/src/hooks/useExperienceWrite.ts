@@ -11,6 +11,8 @@ export interface FormState {
   isConcurrentWithMainJob: '예' | '아니오' | '';
   causes: string[];
   difficulties: string[];
+  difficultyEtc: string;
+  difficultyExtra: string;
   content: string;
 }
 
@@ -23,6 +25,8 @@ const initialState: FormState = {
   isConcurrentWithMainJob: '',
   causes: [],
   difficulties: [],
+  difficultyEtc: '',
+  difficultyExtra: '',
   content: '',
 };
 
@@ -66,7 +70,7 @@ export function useExperienceWrite() {
       case 3:
         return form.difficulties.length > 0;
       case 4:
-        return form.content.trim().length >= 50;
+        return form.content.trim().length >= 20;
       default:
         return false;
     }
