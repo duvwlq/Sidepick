@@ -75,7 +75,7 @@ export default function AuthEntryPage() {
     const redirectUri = `${window.location.origin}/auth/google/callback`;
 
     if (!googleClientId) {
-      setGoogleError('援ш? 濡쒓렇???ㅼ젙???뺤씤?????놁뒿?덈떎.');
+      setGoogleError('구글 로그인 설정을 확인할 수 없습니다.');
       return;
     }
 
@@ -171,7 +171,7 @@ export default function AuthEntryPage() {
           </div>
 
           <p className="mt-4 text-center text-xs leading-5 text-[#8C8C8C]">
-            이메일 로그인과 카카오 로그인을 모두 사용할 수 있습니다.
+            이메일 로그인과 소셜 로그인을 모두 사용할 수 있습니다.
           </p>
           {kakaoError ? (
             <p className="mt-3 text-center text-sm text-[#D33B3B]">{kakaoError}</p>
