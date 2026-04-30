@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import SearchBar from '../components/common/SearchBar';
-import Card from '../components/common/Card';
 import Layout from '../components/layout/Layout';
 import {
   getExperiences,
@@ -13,16 +12,31 @@ import { clearSession, getAccessToken, getStoredUser } from '../lib/session';
 
 type SortKey = 'latest' | 'popular';
 
+const CATEGORY_TABS = ['유튜브', '쇼핑몰', '블로그', '주식'] as const;
+
 function formatDuration(months: number | null) {
-  if (!months) {
-    return '기간 미입력';
+  if (!months || months <= 0) {
+    return '소요 시간';
   }
 
-  if (months >= 12) {
-    return months === 12 ? '1년' : `${months}개월`;
+  if (months < 12) {
+    return `${months}개월`;
   }
 
-  return `${months}개월`;
+  const years = Math.floor(months / 12);
+  const remainMonths = months % 12;
+  return remainMonths ? `${years}년 ${remainMonths}개월` : `${years}년`;
+}
+
+function formatDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(
+    date.getDate(),
+  ).padStart(2, '0')}`;
 }
 
 function getKeywordLabels(experience: Experience) {
@@ -35,10 +49,104 @@ function getKeywordLabels(experience: Experience) {
   return Array.from(new Set(merged)).slice(0, 3);
 }
 
+function matchesCategory(experience: Experience, category: string) {
+  const haystacks = [
+    experience.category.name,
+    experience.title,
+    experience.content,
+    experience.businessType ?? '',
+  ].map((value) => value.toLowerCase());
+
+  return haystacks.some((value) => value.includes(category.toLowerCase()));
+}
+
+function HomeCard({
+  experience,
+  compact = false,
+  onClick,
+}: {
+  experience: Experience;
+  compact?: boolean;
+  onClick: () => void;
+}) {
+  const tags = getKeywordLabels(experience);
+  const wrapperClass = compact
+    ? 'w-[240px] shrink-0 rounded-[10px] bg-[#F8F8F8] p-3'
+    : 'w-full rounded-[10px] bg-[#F8F8F8] p-3';
+
+  return (
+    <button type="button" onClick={onClick} className={`${wrapperClass} text-left`}>
+      <div className="mb-3 flex flex-wrap gap-1">
+        {tags.length ? (
+          tags.map((tag) => (
+            <span
+              key={`${experience.id}-${tag}`}
+              className="rounded-[999px] bg-[#D9D9D9] px-2 py-[3px] text-[10px] leading-none text-white"
+            >
+              {tag}
+            </span>
+          ))
+        ) : (
+          <span className="rounded-[999px] bg-[#D9D9D9] px-2 py-[3px] text-[10px] leading-none text-white">
+            키워드
+          </span>
+        )}
+      </div>
+
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <h3 className="line-clamp-1 text-sm font-semibold leading-[1.4] text-[#131416]">
+          {experience.title}
+        </h3>
+        {!compact ? (
+          <span className="shrink-0 text-[10px] leading-[1.2] text-[#494949]">
+            자세히보기
+          </span>
+        ) : null}
+      </div>
+
+      <div className="grid grid-cols-2 gap-x-5 gap-y-2 text-[10px] leading-[1.4] text-[#8A8A8A]">
+        <div>
+          <div>{formatDuration(experience.durationMonths)}</div>
+          <div>↗↗ 조회수</div>
+        </div>
+        <div className="text-right">
+          <div>$ 투자금</div>
+          <div>{compact ? '작성 날짜' : formatDate(experience.createdAt)}</div>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function SegmentButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-[33px] flex-1 items-center justify-center rounded-full text-xs leading-[1.2] ${
+        active ? 'bg-white text-[#131416]' : 'text-[#8A8A8A]'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const [keyword, setKeyword] = useState('');
   const [sort, setSort] = useState<SortKey>('latest');
+  const [selectedCategory, setSelectedCategory] = useState<(typeof CATEGORY_TABS)[number]>(
+    CATEGORY_TABS[0],
+  );
   const [user, setUser] = useState<UserSummary | null>(() => getStoredUser());
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [listLoading, setListLoading] = useState(true);
@@ -55,9 +163,7 @@ export default function Home() {
     }
 
     void getMe(token)
-      .then((payload) => {
-        setUser(payload.user);
-      })
+      .then((payload) => setUser(payload.user))
       .catch(() => {
         clearSession();
         setUser(null);
@@ -87,11 +193,6 @@ export default function Home() {
     }
   }
 
-  const previewExperiences = useMemo(
-    () => experiences.slice(0, 4),
-    [experiences],
-  );
-
   function moveToAuth(nextPath: string, reason: string) {
     navigate(
       `/auth?next=${encodeURIComponent(nextPath)}&reason=${encodeURIComponent(reason)}`,
@@ -107,164 +208,146 @@ export default function Home() {
     navigate('/create');
   }
 
-  function handleAnalysisCardClick() {
-    if (!user) {
-      moveToAuth('/analysis-result', 'AI 분석 결과는 로그인 후 확인할 수 있어요.');
-      return;
-    }
+  const featuredExperiences = useMemo(() => {
+    const filtered = experiences.filter((experience) =>
+      matchesCategory(experience, selectedCategory),
+    );
+    return (filtered.length ? filtered : experiences).slice(0, 3);
+  }, [experiences, selectedCategory]);
 
-    navigate('/analysis-result');
-  }
+  const exploreExperiences = useMemo(() => experiences.slice(0, 4), [experiences]);
 
   return (
     <Layout title="사이드픽" leftType="menu" showRightIcon>
-      <div className="space-y-[30px] bg-white pb-6">
-        <section className="px-4">
+      <div className="space-y-0 bg-white">
+        <section className="px-4 pb-3 pt-0">
           <SearchBar
-            placeholder="원하는 실패 경험을 검색해 보세요"
+            placeholder="원하는 실패 사례를 검색해보세요!"
             value={keyword}
             onChange={(event) => setKeyword(event.target.value)}
+            className="h-10 rounded-full px-4"
           />
         </section>
 
-        <section className="bg-black px-5 py-5 text-white">
-          <div>
-            <h2 className="text-[20px] font-semibold leading-6">
-              실패를 좋은 경험으로
-            </h2>
-            <p className="mt-2 text-xs font-light leading-[1.4] text-white">
-              경험을 등록하면 AI가 실패 원인을 분석해 주고
-            </p>
-            <p className="text-xs font-light leading-[1.4] text-white">
-              비슷한 사례를 보여주며 다음 선택을 돕습니다.
-            </p>
+        <section className="px-4 py-3">
+          <h2 className="mb-4 text-base font-semibold leading-[1.2] text-[#131416]">
+            인기 카테고리
+          </h2>
+
+          <div className="mb-4 flex items-center gap-4 text-xs leading-[1.2]">
+            {CATEGORY_TABS.map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setSelectedCategory(tab)}
+                className={
+                  selectedCategory === tab
+                    ? 'font-semibold text-[#131416]'
+                    : 'text-[#BABABA]'
+                }
+              >
+                {tab}
+              </button>
+            ))}
           </div>
 
-          <button
-            type="button"
-            onClick={handlePrimaryAction}
-            className="mt-[39px] flex h-10 w-full items-center justify-between rounded-[8px] bg-white px-3 text-xs font-semibold text-black"
-          >
-            <span>
-              {user ? '내 경험 분석하러 가기' : '로그인하고 경험 분석하러 가기'}
-            </span>
-            <span className="text-base">→</span>
-          </button>
+          <div className="-mx-4 overflow-x-auto px-4">
+            <div className="flex gap-4">
+              {featuredExperiences.length ? (
+                featuredExperiences.map((experience) => (
+                  <HomeCard
+                    key={experience.id}
+                    experience={experience}
+                    compact
+                    onClick={() => navigate(`/experiences/${experience.id}`)}
+                  />
+                ))
+              ) : (
+                <div className="w-full rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
+                  표시할 인기 사례가 없습니다.
+                </div>
+              )}
+            </div>
+          </div>
         </section>
 
-        <section className="px-4">
-          <button
-            type="button"
-            onClick={handleAnalysisCardClick}
-            className="flex w-full items-center gap-5 rounded-[10px] border border-[#E6E6E6] bg-white p-5 text-left"
-          >
-            <div className="flex h-[70px] w-[70px] items-center justify-center rounded-full bg-[#F4F4F5]">
-              <div className="h-[54px] w-[54px] rounded-full bg-[radial-gradient(circle,_#E5E7EB_1px,_transparent_1px)] [background-size:6px_6px]" />
-            </div>
-            <div className="flex-1">
-              <div className="text-[20px] font-semibold leading-8 text-[#0A0A0A]">
-                AI 분석 결과
-              </div>
-              <div className="mt-2 text-sm leading-5 text-[#4A5565]">
-                AI 기반 부업 경험 분석
-              </div>
-              <div className="text-sm leading-5 text-[#4A5565]">
-                결과 확인하기
-              </div>
-            </div>
-            <span className="text-xl text-[#6B7280]">→</span>
-          </button>
-        </section>
+        <section className="px-4 py-3">
+          <h2 className="mb-3 text-base font-semibold leading-[1.2] text-[#131416]">
+            탐색
+          </h2>
 
-        <section className="px-4">
-          <div className="rounded-[10px] border border-[#E6E6E6] bg-white px-4 py-3">
-            <div className="flex h-10 items-center rounded-full bg-[#E6E6E6] p-[2px]">
-              <TabButton
+          <div className="rounded-[999px] bg-[#EEE] p-[2px]">
+            <div className="flex">
+              <SegmentButton
                 active={sort === 'latest'}
                 label="최근 등록된 사례"
                 onClick={() => setSort('latest')}
               />
-              <TabButton
+              <SegmentButton
                 active={sort === 'popular'}
                 label="인기 사례"
                 onClick={() => setSort('popular')}
               />
             </div>
+          </div>
 
-            <div className="mt-3 space-y-[10px]">
-              {listLoading ? (
-                <div className="rounded-[10px] bg-[#EEEEEE] px-4 py-8 text-center text-sm text-[#666666]">
-                  사례를 불러오는 중입니다.
-                </div>
-              ) : listError ? (
-                <div className="rounded-[10px] bg-[#FFF5F5] px-4 py-8 text-center text-sm text-[#D33B3B]">
-                  {listError}
-                </div>
-              ) : previewExperiences.length === 0 ? (
-                <div className="rounded-[10px] bg-[#EEEEEE] px-4 py-8 text-center text-sm text-[#666666]">
-                  아직 등록된 사례가 없습니다.
-                </div>
-              ) : (
-                previewExperiences.map((experience) => {
-                  const keywords = getKeywordLabels(experience);
+          <div className="mt-3 space-y-[10px]">
+            {listLoading ? (
+              <div className="rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
+                사례를 불러오는 중입니다.
+              </div>
+            ) : listError ? (
+              <div className="rounded-[10px] bg-[#FFF5F5] px-4 py-8 text-center text-sm text-[#D33B3B]">
+                {listError}
+              </div>
+            ) : exploreExperiences.length ? (
+              exploreExperiences.map((experience) => (
+                <HomeCard
+                  key={experience.id}
+                  experience={experience}
+                  onClick={() => navigate(`/experiences/${experience.id}`)}
+                />
+              ))
+            ) : (
+              <div className="rounded-[10px] bg-[#F8F8F8] px-4 py-8 text-center text-sm text-[#757575]">
+                아직 등록된 사례가 없습니다.
+              </div>
+            )}
+          </div>
 
-                  return (
-                    <button
-                      key={experience.id}
-                      type="button"
-                      onClick={() => navigate(`/experiences/${experience.id}`)}
-                      className="w-full text-left"
-                    >
-                      <Card
-                        title={experience.title}
-                        category={keywords[0] ?? experience.category.name}
-                        failureReason={keywords[1] ?? experience.category.name}
-                        duration={formatDuration(experience.durationMonths)}
-                        views={experience.viewCount}
-                        amount={experience.investmentAmount ?? 0}
-                        date={experience.createdAt.slice(0, 10)}
-                        content={experience.content}
-                      />
-                    </button>
-                  );
-                })
-              )}
+          <button
+            type="button"
+            onClick={() => navigate('/explore')}
+            className="mt-3 flex w-full items-center justify-center text-xs leading-[1.2] text-[#8A8A8A]"
+          >
+            모든 사례 보기
+          </button>
+        </section>
+
+        <section className="px-4 pb-6 pt-3">
+          <div className="rounded-[10px] bg-[#6E6E6E] px-5 py-5 text-white">
+            <div className="mb-10 space-y-2">
+              <h2 className="text-2xl font-semibold leading-[1.2]">
+                실패도 좋은 경험이예요!
+              </h2>
+              <p className="text-xs leading-[1.4] text-white/90">
+                경험을 등록하면 AI가 나의 실패 원인을 분석해주고,
+                <br />
+                나와 유사한 사례를 보여주며 원하는 선택을 하도록 도와드릴게요!
+              </p>
             </div>
 
             <button
               type="button"
-              onClick={() => navigate('/explore')}
-              className="mt-3 w-full text-center text-xs text-[#5D5D5D] underline"
+              onClick={handlePrimaryAction}
+              className="flex h-10 w-full items-center justify-between rounded-[8px] bg-white px-3 text-xs font-semibold text-[#131416]"
             >
-              모든 사례 보기
+              <span>내 경험 분석하러 가기</span>
+              <span className="text-base">›</span>
             </button>
           </div>
         </section>
       </div>
     </Layout>
-  );
-}
-
-function TabButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex h-full flex-1 items-center justify-center rounded-full text-sm font-medium leading-[1.2] ${
-        active
-          ? 'border-2 border-[#E6E6E6] bg-white text-black'
-          : 'text-[#5D5D5D]'
-      }`}
-    >
-      {label}
-    </button>
   );
 }
