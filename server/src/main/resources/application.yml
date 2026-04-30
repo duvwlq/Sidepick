@@ -66,7 +66,7 @@ app:
     google-enabled: ${APP_AUTH_GOOGLE_ENABLED:true}
     email-verification:
       expiration-minutes: ${APP_EMAIL_VERIFICATION_EXPIRATION_MINUTES:10}
-      expose-code: ${APP_EMAIL_VERIFICATION_EXPOSE_CODE:true}
+      expose-code: ${APP_EMAIL_VERIFICATION_EXPOSE_CODE:false}
   oauth:
     kakao:
       client-id: ${APP_OAUTH_KAKAO_CLIENT_ID:}

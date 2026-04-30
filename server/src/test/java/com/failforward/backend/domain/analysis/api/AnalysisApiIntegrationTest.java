@@ -33,6 +33,9 @@ import org.springframework.web.client.RestTemplate;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
 
+    private static final String FAILURE_CATEGORY = "market_validation_gap";
+    private static final String SUMMARY = "The team failed because customer validation and early promotion were both insufficient.";
+
     @Autowired
     private RestTemplate aiRestTemplate;
 
@@ -87,9 +90,9 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.experienceId").value(experienceId))
                 .andExpect(jsonPath("$.data.keywords[0]").value("market research gap"))
-                .andExpect(jsonPath("$.data.failureCategory").value("타겟분석실패"))
+                .andExpect(jsonPath("$.data.failureCategory").value(FAILURE_CATEGORY))
                 .andExpect(jsonPath("$.data.riskLevel").value("high"))
-                .andExpect(jsonPath("$.data.structuredSummary").value("시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다."))
+                .andExpect(jsonPath("$.data.structuredSummary").value(SUMMARY))
                 .andReturn();
 
         long analysisId = readId(createResult);
@@ -117,9 +120,9 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.experienceId").value(experienceId))
                 .andExpect(jsonPath("$.data.reportStatus").value("READY"))
-                .andExpect(jsonPath("$.data.summary").value("시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다."))
+                .andExpect(jsonPath("$.data.summary").value(SUMMARY))
                 .andExpect(jsonPath("$.data.extractedPatterns[0]").value("market research gap"))
-                .andExpect(jsonPath("$.data.riskFactors[0]").value("타겟분석실패"))
+                .andExpect(jsonPath("$.data.riskFactors.length()").value(0))
                 .andExpect(jsonPath("$.data.similarCases[0].caseId").isNotEmpty())
                 .andExpect(jsonPath("$.data.similarCases[0].title").isNotEmpty())
                 .andExpect(jsonPath("$.data.similarCases[0].matchRate").isNumber());
@@ -137,8 +140,8 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
         DefaultResponseCreator response = withSuccess("""
                 {
                   "keywords": ["market research gap", "validation gap"],
-                  "failure_category": "타겟분석실패",
-                  "summary": "시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다.",
+                  "failure_category": "market_validation_gap",
+                  "summary": "The team failed because customer validation and early promotion were both insufficient.",
                   "risk_level": "high"
                 }
                 """, MediaType.APPLICATION_JSON);

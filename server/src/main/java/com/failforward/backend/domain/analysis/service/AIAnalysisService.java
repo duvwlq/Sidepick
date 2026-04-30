@@ -116,6 +116,7 @@ public class AIAnalysisService {
     private AiAnalysis requestAndPersistAnalysis(FailureExperience experience, AiAnalysis existingAnalysis) {
         log.info("AI request started for experienceId={}", experience.getId());
         AiAnalysisResponse response = requestAnalysis(experience);
+        String emptyRiskFactors = writeJson(List.of());
 
         AiAnalysis analysis = existingAnalysis;
         if (analysis == null) {
@@ -126,7 +127,7 @@ public class AIAnalysisService {
                     response.summary(),
                     response.failureCategory(),
                     response.riskLevel(),
-                    response.failureCategory(),
+                    emptyRiskFactors,
                     toRiskScore(response.riskLevel())
             );
         } else {
@@ -136,7 +137,7 @@ public class AIAnalysisService {
                     response.summary(),
                     response.failureCategory(),
                     response.riskLevel(),
-                    response.failureCategory(),
+                    emptyRiskFactors,
                     toRiskScore(response.riskLevel())
             );
             matchedCaseRepository.deleteByAnalysis(analysis);
