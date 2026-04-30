@@ -58,6 +58,23 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void getReportReturnsNotReadyWhenAnalysisDoesNotExist() throws Exception {
+        String token = registerAndLogin("report_pending@sidepick.dev", "password123", "reportPending", "20s");
+        expectAiFailure();
+        long experienceId = createExperience(token, "Pending report", "This experience has no stored analysis yet.");
+
+        mockMvc.perform(get("/api/reports/{experienceId}", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.experienceId").value(experienceId))
+                .andExpect(jsonPath("$.data.reportStatus").value("NOT_READY"))
+                .andExpect(jsonPath("$.data.analysisId").isEmpty())
+                .andExpect(jsonPath("$.data.similarCases.length()").value(0));
+
+        mockServer.verify();
+    }
+
+    @Test
     void createAnalysisAndLoadMatchedCasesWorksForAuthenticatedUser() throws Exception {
         String token = registerAndLogin("analysis_create@sidepick.dev", "password123", "analysisCreate", "20s");
         expectAiFailure();
@@ -69,12 +86,10 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.experienceId").value(experienceId))
-                .andExpect(jsonPath("$.data.extractedPatterns[0]").value("market research gap"))
-                .andExpect(jsonPath("$.data.riskFactors[0]").value("weak marketing execution"))
-                .andExpect(jsonPath("$.data.successFactors[0]").value("start with faster validation"))
-                .andExpect(jsonPath("$.data.structuredSummary")
-                        .value("The launch failed because market validation and marketing planning were both weak."))
-                .andExpect(jsonPath("$.data.confidenceScore").value(0.82))
+                .andExpect(jsonPath("$.data.keywords[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data.failureCategory").value("타겟분석실패"))
+                .andExpect(jsonPath("$.data.riskLevel").value("high"))
+                .andExpect(jsonPath("$.data.structuredSummary").value("시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다."))
                 .andReturn();
 
         long analysisId = readId(createResult);
@@ -91,8 +106,29 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
         mockServer.verify();
     }
 
+    @Test
+    void getReportReturnsSummaryAndSimilarCasesWhenAnalysisExists() throws Exception {
+        String token = registerAndLogin("report_ready@sidepick.dev", "password123", "reportReady", "20s");
+        expectAiAnalysis();
+        long experienceId = createExperience(token, "Report target", "This experience should expose a ready report.");
+
+        mockMvc.perform(get("/api/reports/{experienceId}", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.experienceId").value(experienceId))
+                .andExpect(jsonPath("$.data.reportStatus").value("READY"))
+                .andExpect(jsonPath("$.data.summary").value("시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다."))
+                .andExpect(jsonPath("$.data.extractedPatterns[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data.riskFactors[0]").value("타겟분석실패"))
+                .andExpect(jsonPath("$.data.similarCases[0].caseId").isNotEmpty())
+                .andExpect(jsonPath("$.data.similarCases[0].title").isNotEmpty())
+                .andExpect(jsonPath("$.data.similarCases[0].matchRate").isNumber());
+
+        mockServer.verify();
+    }
+
     private void expectAiFailure() {
-        mockServer.expect(requestTo("http://localhost:8000/analyze"))
+        mockServer.expect(requestTo("http://localhost:8001/analyze"))
                 .andExpect(method(POST))
                 .andRespond(withServerError());
     }
@@ -100,18 +136,14 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
     private void expectAiAnalysis() {
         DefaultResponseCreator response = withSuccess("""
                 {
-                  "id": 1,
-                  "experienceId": 1,
-                  "extractedPatterns": ["market research gap", "validation gap"],
-                  "riskFactors": ["weak marketing execution"],
-                  "successFactors": ["start with faster validation"],
-                  "structuredSummary": "The launch failed because market validation and marketing planning were both weak.",
-                  "confidenceScore": 0.82,
-                  "processedAt": "2026-04-15T00:00:00"
+                  "keywords": ["market research gap", "validation gap"],
+                  "failure_category": "타겟분석실패",
+                  "summary": "시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다.",
+                  "risk_level": "high"
                 }
                 """, MediaType.APPLICATION_JSON);
 
-        mockServer.expect(requestTo("http://localhost:8000/analyze"))
+        mockServer.expect(requestTo("http://localhost:8001/analyze"))
                 .andExpect(method(POST))
                 .andRespond(response);
     }

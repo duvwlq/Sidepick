@@ -2,6 +2,7 @@ package com.failforward.backend.domain.analysis.dto;
 
 import com.failforward.backend.domain.analysis.entity.AiAnalysis;
 import com.failforward.backend.domain.analysis.entity.MatchedCase;
+import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -20,6 +21,9 @@ public final class AnalysisDtos {
             Long id,
             Long experienceId,
             List<String> extractedPatterns,
+            List<String> keywords,
+            String failureCategory,
+            String riskLevel,
             List<String> riskFactors,
             List<String> successFactors,
             String structuredSummary,
@@ -34,6 +38,9 @@ public final class AnalysisDtos {
                     analysis.getId(),
                     analysis.getExperience().getId(),
                     extractedPatterns,
+                    extractedPatterns,
+                    analysis.getFailureCategory(),
+                    analysis.getRiskLevel(),
                     riskFactors,
                     successFactors,
                     analysis.getStructuredSummary(),
@@ -61,6 +68,90 @@ public final class AnalysisDtos {
                     matchedCase.getKeyLesson(),
                     matchedCase.getMatchRate(),
                     matchedCase.getCreatedAt()
+            );
+        }
+    }
+
+    public record AnalysisReportResponse(
+            Long experienceId,
+            Long analysisId,
+            String reportStatus,
+            String title,
+            String summary,
+            List<String> extractedPatterns,
+            List<String> keywords,
+            String failureCategory,
+            String riskLevel,
+            List<String> riskFactors,
+            List<String> advice,
+            BigDecimal confidenceScore,
+            LocalDateTime processedAt,
+            List<ReportSimilarCaseResponse> similarCases
+    ) {
+        public static AnalysisReportResponse from(
+                FailureExperience experience,
+                AiAnalysis analysis,
+                List<MatchedCase> similarCases
+        ) {
+            PatternAnalysisResponse response = PatternAnalysisResponse.from(analysis);
+            return new AnalysisReportResponse(
+                    experience.getId(),
+                    analysis.getId(),
+                    "READY",
+                    experience.getTitle(),
+                    response.structuredSummary(),
+                    response.extractedPatterns(),
+                    response.keywords(),
+                    response.failureCategory(),
+                    response.riskLevel(),
+                    response.riskFactors(),
+                    response.successFactors().isEmpty()
+                            ? (response.structuredSummary() == null || response.structuredSummary().isBlank()
+                                    ? List.of()
+                                    : List.of(response.structuredSummary()))
+                            : response.successFactors(),
+                    response.confidenceScore(),
+                    response.processedAt(),
+                    similarCases.stream()
+                            .map(ReportSimilarCaseResponse::from)
+                            .toList()
+            );
+        }
+
+        public static AnalysisReportResponse notReady(FailureExperience experience) {
+            return new AnalysisReportResponse(
+                    experience.getId(),
+                    null,
+                    "NOT_READY",
+                    experience.getTitle(),
+                    null,
+                    List.of(),
+                    List.of(),
+                    null,
+                    null,
+                    List.of(),
+                    List.of(),
+                    null,
+                    null,
+                    List.of()
+            );
+        }
+    }
+
+    public record ReportSimilarCaseResponse(
+            String caseId,
+            String title,
+            String summary,
+            String keyLesson,
+            Integer matchRate
+    ) {
+        public static ReportSimilarCaseResponse from(MatchedCase matchedCase) {
+            return new ReportSimilarCaseResponse(
+                    matchedCase.getCaseId(),
+                    matchedCase.getCaseTitle(),
+                    matchedCase.getCaseSummary(),
+                    matchedCase.getKeyLesson(),
+                    matchedCase.getMatchRate()
             );
         }
     }

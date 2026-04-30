@@ -8,6 +8,7 @@ import com.failforward.backend.domain.analysis.dto.AiServerDtos.AiAnalysisReques
 import com.failforward.backend.domain.analysis.dto.AiServerDtos.AiAnalysisResponse;
 import com.failforward.backend.domain.analysis.dto.AnalysisDtos.MatchedCaseResponse;
 import com.failforward.backend.domain.analysis.dto.AnalysisDtos.PatternAnalysisResponse;
+import com.failforward.backend.domain.analysis.dto.AnalysisDtos.AnalysisReportResponse;
 import com.failforward.backend.domain.analysis.entity.AiAnalysis;
 import com.failforward.backend.domain.analysis.entity.MatchedCase;
 import com.failforward.backend.domain.analysis.repository.AiAnalysisRepository;
@@ -52,6 +53,17 @@ public class AIAnalysisService {
         AiAnalysis analysis = aiAnalysisRepository.findByExperience(experience)
                 .orElseThrow(() -> new NotFoundException("Analysis result not found."));
         return PatternAnalysisResponse.from(analysis);
+    }
+
+    public AnalysisReportResponse getReport(Long experienceId) {
+        FailureExperience experience = getExperience(experienceId);
+        Optional<AiAnalysis> analysis = aiAnalysisRepository.findByExperience(experience);
+        if (analysis.isEmpty()) {
+            return AnalysisReportResponse.notReady(experience);
+        }
+
+        List<MatchedCase> similarCases = matchedCaseRepository.findByAnalysis(analysis.get());
+        return AnalysisReportResponse.from(experience, analysis.get(), similarCases);
     }
 
     @Transactional
@@ -109,19 +121,23 @@ public class AIAnalysisService {
         if (analysis == null) {
             analysis = AiAnalysis.create(
                     experience,
-                    writeJson(response.extractedPatterns()),
-                    writeJson(response.successFactors()),
-                    response.structuredSummary(),
-                    writeJson(response.riskFactors()),
-                    response.confidenceScore()
+                    writeJson(response.keywords()),
+                    buildAdviceJson(response),
+                    response.summary(),
+                    response.failureCategory(),
+                    response.riskLevel(),
+                    response.failureCategory(),
+                    toRiskScore(response.riskLevel())
             );
         } else {
             analysis.updateFromAiResult(
-                    writeJson(response.extractedPatterns()),
-                    writeJson(response.successFactors()),
-                    response.structuredSummary(),
-                    writeJson(response.riskFactors()),
-                    response.confidenceScore()
+                    writeJson(response.keywords()),
+                    buildAdviceJson(response),
+                    response.summary(),
+                    response.failureCategory(),
+                    response.riskLevel(),
+                    response.failureCategory(),
+                    toRiskScore(response.riskLevel())
             );
             matchedCaseRepository.deleteByAnalysis(analysis);
         }
@@ -132,8 +148,8 @@ public class AIAnalysisService {
                 "CASE-" + experience.getId(),
                 experience.getBusinessType() + " similar case",
                 experience.getLessonsLearned(),
-                response.structuredSummary(),
-                90
+                response.summary(),
+                defaultMatchRate(response.riskLevel())
         ));
 
         log.info("AI response stored successfully for experienceId={}, analysisId={}",
@@ -177,5 +193,43 @@ public class AIAnalysisService {
         } catch (Exception exception) {
             throw new AiServerException("Failed to serialize AI analysis payload.", exception);
         }
+    }
+
+    private String buildAdviceJson(AiAnalysisResponse response) {
+        if (response == null) {
+            return "[]";
+        }
+
+        List<String> advice = List.of(
+                response.summary() == null ? "" : response.summary().trim()
+        ).stream()
+                .filter(item -> !item.isBlank())
+                .toList();
+
+        return writeJson(advice);
+    }
+
+    private java.math.BigDecimal toRiskScore(String riskLevel) {
+        if (riskLevel == null) {
+            return null;
+        }
+        return switch (riskLevel.toLowerCase()) {
+            case "high" -> java.math.BigDecimal.valueOf(0.9);
+            case "medium" -> java.math.BigDecimal.valueOf(0.6);
+            case "low" -> java.math.BigDecimal.valueOf(0.3);
+            default -> null;
+        };
+    }
+
+    private int defaultMatchRate(String riskLevel) {
+        if (riskLevel == null) {
+            return 70;
+        }
+        return switch (riskLevel.toLowerCase()) {
+            case "high" -> 80;
+            case "medium" -> 70;
+            case "low" -> 60;
+            default -> 70;
+        };
     }
 }

@@ -49,12 +49,15 @@ public class ExperienceService {
                 payload.businessType(),
                 payload.investmentAmount(),
                 payload.durationMonths(),
+                payload.weeklyHours(),
                 payload.averageDailyHours(),
                 payload.isConcurrentWithMainJob(),
                 payload.monthlyRevenue(),
                 payload.failureReason(),
                 payload.failureReasonsJson(),
                 payload.difficultiesJson(),
+                payload.difficultyEtc(),
+                payload.difficultyExtra(),
                 payload.targetMarket(),
                 payload.marketingChannelsJson(),
                 payload.lessonsLearned(),
@@ -81,12 +84,15 @@ public class ExperienceService {
                 payload.businessType(),
                 payload.investmentAmount(),
                 payload.durationMonths(),
+                payload.weeklyHours(),
                 payload.averageDailyHours(),
                 payload.isConcurrentWithMainJob(),
                 payload.monthlyRevenue(),
                 payload.failureReason(),
                 payload.failureReasonsJson(),
                 payload.difficultiesJson(),
+                payload.difficultyEtc(),
+                payload.difficultyExtra(),
                 payload.targetMarket(),
                 payload.marketingChannelsJson(),
                 payload.lessonsLearned(),
@@ -236,12 +242,15 @@ public class ExperienceService {
                 request.businessType(),
                 request.investmentAmount(),
                 request.durationMonths(),
+                request.weeklyHours(),
                 request.averageDailyHours(),
                 request.isConcurrentWithMainJob(),
                 request.monthlyRevenue(),
                 request.failureReason(),
                 request.failureReasons(),
                 request.difficulties(),
+                request.difficultyEtc(),
+                request.difficultyExtra(),
                 request.targetMarket(),
                 request.marketingChannels(),
                 request.lessonsLearned(),
@@ -257,12 +266,15 @@ public class ExperienceService {
                 request.businessType(),
                 request.investmentAmount(),
                 request.durationMonths(),
+                request.weeklyHours(),
                 request.averageDailyHours(),
                 request.isConcurrentWithMainJob(),
                 request.monthlyRevenue(),
                 request.failureReason(),
                 request.failureReasons(),
                 request.difficulties(),
+                request.difficultyEtc(),
+                request.difficultyExtra(),
                 request.targetMarket(),
                 request.marketingChannels(),
                 request.lessonsLearned(),
@@ -277,12 +289,15 @@ public class ExperienceService {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
             Integer monthlyRevenue,
             String failureReason,
             List<String> failureReasons,
             List<String> difficulties,
+            String difficultyEtc,
+            String difficultyExtra,
             String targetMarket,
             List<String> marketingChannels,
             String lessonsLearned,
@@ -291,12 +306,16 @@ public class ExperienceService {
         BusinessCategory category = categoryService.getCategory(categoryId);
         validateWriteRequest(content, investmentAmount, durationMonths, monthlyRevenue, failureReason, failureReasons);
         String resolvedBusinessType = hasText(businessType) ? businessType : category.getName();
+        Integer resolvedDurationMonths = durationMonths != null && durationMonths > 0 ? durationMonths : 1;
+        Integer resolvedWeeklyHours = weeklyHours != null && weeklyHours > 0 ? weeklyHours : 1;
         List<String> resolvedFailureReasons = failureReasons == null ? List.of() : failureReasons.stream()
                 .filter(this::hasText)
                 .toList();
         List<String> resolvedDifficulties = difficulties == null ? List.of() : difficulties.stream()
                 .filter(this::hasText)
                 .toList();
+        String resolvedDifficultyEtc = hasText(difficultyEtc) ? difficultyEtc.trim() : "";
+        String resolvedDifficultyExtra = hasText(difficultyExtra) ? difficultyExtra.trim() : "";
         String resolvedFailureReason = hasText(failureReason)
                 ? failureReason
                 : (resolvedFailureReasons.isEmpty() ? "UNSPECIFIED" : resolvedFailureReasons.get(0));
@@ -306,12 +325,15 @@ public class ExperienceService {
         Map<String, Object> structured = new HashMap<>();
         structured.put("categoryId", categoryId);
         structured.put("categoryName", category.getName());
-        structured.put("durationMonths", durationMonths);
+        structured.put("durationMonths", resolvedDurationMonths);
+        structured.put("weeklyHours", resolvedWeeklyHours);
         structured.put("averageDailyHours", averageDailyHours);
         structured.put("isConcurrentWithMainJob", isConcurrentWithMainJob != null ? isConcurrentWithMainJob : Boolean.FALSE);
         structured.put("monthlyRevenue", monthlyRevenue);
         structured.put("failureReasons", resolvedFailureReasons);
         structured.put("difficulties", resolvedDifficulties);
+        structured.put("difficultyEtc", resolvedDifficultyEtc);
+        structured.put("difficultyExtra", resolvedDifficultyExtra);
         structured.put("targetMarket", targetMarket);
         structured.put("wouldRetry", wouldRetry != null ? wouldRetry : Boolean.FALSE);
 
@@ -321,13 +343,16 @@ public class ExperienceService {
                 content,
                 resolvedBusinessType,
                 investmentAmount,
-                durationMonths,
+                resolvedDurationMonths,
+                resolvedWeeklyHours,
                 averageDailyHours,
                 isConcurrentWithMainJob,
                 monthlyRevenue,
                 resolvedFailureReason,
                 writeJson(resolvedFailureReasons),
                 writeJson(resolvedDifficulties),
+                resolvedDifficultyEtc,
+                resolvedDifficultyExtra,
                 targetMarket,
                 marketingChannels == null ? List.of() : marketingChannels,
                 resolvedLessons,
@@ -477,12 +502,15 @@ public class ExperienceService {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
             Integer monthlyRevenue,
             String failureReason,
             String failureReasonsJson,
             String difficultiesJson,
+            String difficultyEtc,
+            String difficultyExtra,
             String targetMarket,
             List<String> marketingChannels,
             String lessonsLearned,

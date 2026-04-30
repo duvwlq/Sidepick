@@ -64,7 +64,11 @@ Headers:
   "businessType": "Online store",
   "investmentAmount": 800000,
   "durationMonths": 3,
+  "weeklyHours": 12,
   "failureReason": "No product-market fit",
+  "difficulties": ["광고 효율이 낮았음", "시간 분배가 어려웠음"],
+  "difficultyEtc": "콘텐츠 제작 인력이 부족했음",
+  "difficultyExtra": "평일 퇴근 후 작업 시간이 부족했음",
   "targetMarket": "Office workers in their 20s",
   "marketingChannels": ["Instagram", "Naver Blog"],
   "lessonsLearned": "Validate demand before scaling ads.",
@@ -96,10 +100,70 @@ Headers:
   "businessType": "Online store",
   "investmentAmount": 700000,
   "durationMonths": 4,
+  "weeklyHours": 8,
   "failureReason": "Weak validation",
+  "difficulties": ["고객 반응 파악이 늦었음"],
+  "difficultyEtc": "초기 타겟 설정이 모호했음",
+  "difficultyExtra": "광고 예산 배분 기준이 없었음",
   "targetMarket": "Office workers in their 20s",
   "marketingChannels": ["Instagram"],
   "lessonsLearned": "Run smaller tests first.",
   "wouldRetry": false
+}
+```
+
+## 7. Get Report For FE
+
+`GET http://localhost:8081/api/reports/1`
+
+Sample success data when analysis is ready:
+
+```json
+{
+  "success": true,
+  "message": "Report loaded.",
+  "data": {
+    "experienceId": 1,
+    "analysisId": 1,
+    "reportStatus": "READY",
+    "title": "Smart store launch failure",
+    "summary": "시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다.",
+    "extractedPatterns": ["market research gap", "validation gap"],
+    "riskFactors": ["타겟분석실패"],
+    "advice": [],
+    "confidenceScore": 0.9,
+    "processedAt": "2026-04-15T00:00:00",
+    "similarCases": [
+      {
+        "caseId": "CASE-1",
+        "title": "Online store similar case",
+        "summary": "Validate demand before scaling ads.",
+        "keyLesson": "시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다.",
+        "matchRate": 80
+      }
+    ]
+  }
+}
+```
+
+Sample success data when analysis is not ready yet:
+
+```json
+{
+  "success": true,
+  "message": "Report loaded.",
+  "data": {
+    "experienceId": 1,
+    "analysisId": null,
+    "reportStatus": "NOT_READY",
+    "title": "Smart store launch failure",
+    "summary": null,
+    "extractedPatterns": [],
+    "riskFactors": [],
+    "advice": [],
+    "confidenceScore": null,
+    "processedAt": null,
+    "similarCases": []
+  }
 }
 ```

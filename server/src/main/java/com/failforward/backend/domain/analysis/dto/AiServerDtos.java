@@ -2,8 +2,9 @@ package com.failforward.backend.domain.analysis.dto;
 
 import com.failforward.backend.domain.experience.dto.ExperienceDtos;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class AiServerDtos {
 
@@ -11,58 +12,58 @@ public final class AiServerDtos {
     }
 
     public record AiAnalysisRequest(
-            Long experienceId,
-            Long categoryId,
-            String categoryName,
-            String title,
-            String content,
-            String businessType,
-            Integer investmentAmount,
-            Integer durationMonths,
-            String averageDailyHours,
-            Boolean isConcurrentWithMainJob,
-            Integer monthlyRevenue,
-            String failureReason,
-            List<String> failureReasons,
+            String category,
             List<String> difficulties,
-            String targetMarket,
-            List<String> marketingChannels,
-            String lessonsLearned,
-            Boolean wouldRetry
+            @JsonProperty("difficulty_etc")
+            String difficultyEtc,
+            @JsonProperty("difficulty_extra")
+            String difficultyExtra,
+            @JsonProperty("duration_months")
+            Integer durationMonths,
+            @JsonProperty("weekly_hours")
+            Integer weeklyHours,
+            @JsonProperty("free_text")
+            String freeText
     ) {
         public static AiAnalysisRequest from(FailureExperience experience) {
+            Map<String, Object> structuredData = ExperienceDtos.parseObject(experience.getStructuredData());
+            Integer durationMonths = experience.getDurationMonths() != null
+                    ? experience.getDurationMonths()
+                    : 1;
+            Integer weeklyHours = experience.getWeeklyHours() != null
+                    ? experience.getWeeklyHours()
+                    : 1;
             return new AiAnalysisRequest(
-                    experience.getId(),
-                    experience.getCategory().getId(),
                     experience.getCategory().getName(),
-                    experience.getTitle(),
-                    experience.getContent(),
-                    experience.getBusinessType(),
-                    experience.getInvestmentAmount(),
-                    experience.getDurationMonths(),
-                    experience.getAverageDailyHours(),
-                    experience.getIsConcurrentWithMainJob(),
-                    experience.getMonthlyRevenue(),
-                    experience.getFailureReason(),
-                    ExperienceDtos.parseStringList(experience.getFailureReasons()),
                     ExperienceDtos.parseStringList(experience.getDifficulties()),
-                    experience.getTargetMarket(),
-                    ExperienceDtos.parseStringList(experience.getMarketingChannels()),
-                    experience.getLessonsLearned(),
-                    experience.getWouldRetry()
+                    readStructuredString(structuredData, "difficultyEtc", experience.getDifficultyEtc()),
+                    readStructuredString(structuredData, "difficultyExtra", experience.getDifficultyExtra()),
+                    durationMonths,
+                    weeklyHours,
+                    experience.getContent()
             );
+        }
+
+        private static String readStructuredString(
+                Map<String, Object> structuredData,
+                String key,
+                String fallback
+        ) {
+            Object value = structuredData.get(key);
+            if (value instanceof String text && !text.isBlank()) {
+                return text;
+            }
+            return fallback == null ? "" : fallback;
         }
     }
 
     public record AiAnalysisResponse(
-            Long id,
-            Long experienceId,
-            List<String> extractedPatterns,
-            List<String> riskFactors,
-            List<String> successFactors,
-            String structuredSummary,
-            BigDecimal confidenceScore,
-            String processedAt
+            List<String> keywords,
+            @JsonProperty("failure_category")
+            String failureCategory,
+            String summary,
+            @JsonProperty("risk_level")
+            String riskLevel
     ) {
     }
 }

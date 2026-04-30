@@ -96,6 +96,7 @@ export default function Create() {
         businessType: selectedCategory.name,
         investmentAmount: parseNumber(form.expense),
         durationMonths: mapPeriodToMonths(form.totalPeriod),
+        weeklyHours: mapDailyHoursToWeeklyHours(form.dailyHours),
         averageDailyHours: mapDailyHours(form.dailyHours),
         isConcurrentWithMainJob:
           form.isConcurrentWithMainJob === '예'
@@ -107,6 +108,8 @@ export default function Create() {
         failureReason: form.causes[0] ?? '기타',
         failureReasons: form.causes,
         difficulties: form.difficulties,
+        difficultyEtc: '',
+        difficultyExtra: '',
         lessonsLearned: form.content,
         wouldRetry: true,
       });
@@ -241,6 +244,21 @@ function mapDailyHours(value: string) {
       return 'THREE_TO_FIVE_HOURS';
     case '5시간 이상':
       return 'OVER_FIVE_HOURS';
+    default:
+      return undefined;
+  }
+}
+
+function mapDailyHoursToWeeklyHours(value: string) {
+  switch (value) {
+    case '1시간 미만':
+      return 3;
+    case '1~3시간':
+      return 14;
+    case '3~5시간':
+      return 28;
+    case '5시간 이상':
+      return 40;
     default:
       return undefined;
   }

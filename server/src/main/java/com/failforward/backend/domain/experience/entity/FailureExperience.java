@@ -49,6 +49,9 @@ public class FailureExperience extends BaseTimeEntity {
     @Column(name = "duration_months")
     private Integer durationMonths;
 
+    @Column(name = "weekly_hours")
+    private Integer weeklyHours;
+
     @Column(name = "average_daily_hours", length = 30)
     private String averageDailyHours;
 
@@ -66,6 +69,12 @@ public class FailureExperience extends BaseTimeEntity {
 
     @Column(name = "difficulties", columnDefinition = "json")
     private String difficulties;
+
+    @Column(name = "difficulty_etc", columnDefinition = "TEXT")
+    private String difficultyEtc;
+
+    @Column(name = "difficulty_extra", columnDefinition = "TEXT")
+    private String difficultyExtra;
 
     @Column(name = "target_market", length = 100)
     private String targetMarket;
@@ -99,12 +108,15 @@ public class FailureExperience extends BaseTimeEntity {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
             Integer monthlyRevenue,
             String failureReason,
             String failureReasons,
             String difficulties,
+            String difficultyEtc,
+            String difficultyExtra,
             String targetMarket,
             String marketingChannels,
             String lessonsLearned,
@@ -118,12 +130,15 @@ public class FailureExperience extends BaseTimeEntity {
         this.businessType = businessType;
         this.investmentAmount = investmentAmount;
         this.durationMonths = durationMonths;
+        this.weeklyHours = weeklyHours;
         this.averageDailyHours = averageDailyHours;
         this.isConcurrentWithMainJob = isConcurrentWithMainJob;
         this.monthlyRevenue = monthlyRevenue;
         this.failureReason = failureReason;
         this.failureReasons = failureReasons;
         this.difficulties = difficulties;
+        this.difficultyEtc = difficultyEtc;
+        this.difficultyExtra = difficultyExtra;
         this.targetMarket = targetMarket;
         this.marketingChannels = marketingChannels;
         this.lessonsLearned = lessonsLearned;
@@ -142,12 +157,15 @@ public class FailureExperience extends BaseTimeEntity {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
             Integer monthlyRevenue,
             String failureReason,
             String failureReasons,
             String difficulties,
+            String difficultyEtc,
+            String difficultyExtra,
             String targetMarket,
             String marketingChannels,
             String lessonsLearned,
@@ -162,12 +180,15 @@ public class FailureExperience extends BaseTimeEntity {
                 businessType,
                 investmentAmount,
                 durationMonths,
+                weeklyHours,
                 averageDailyHours,
                 isConcurrentWithMainJob,
                 monthlyRevenue,
                 failureReason,
                 failureReasons,
                 difficulties,
+                difficultyEtc,
+                difficultyExtra,
                 targetMarket,
                 marketingChannels,
                 lessonsLearned,
@@ -187,12 +208,15 @@ public class FailureExperience extends BaseTimeEntity {
             String businessType,
             Integer investmentAmount,
             Integer durationMonths,
+            Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
             Integer monthlyRevenue,
             String failureReason,
             String failureReasons,
             String difficulties,
+            String difficultyEtc,
+            String difficultyExtra,
             String targetMarket,
             String marketingChannels,
             String lessonsLearned,
@@ -205,12 +229,15 @@ public class FailureExperience extends BaseTimeEntity {
         this.businessType = businessType;
         this.investmentAmount = investmentAmount;
         this.durationMonths = durationMonths;
+        this.weeklyHours = weeklyHours;
         this.averageDailyHours = averageDailyHours;
         this.isConcurrentWithMainJob = isConcurrentWithMainJob;
         this.monthlyRevenue = monthlyRevenue;
         this.failureReason = failureReason;
         this.failureReasons = failureReasons;
         this.difficulties = difficulties;
+        this.difficultyEtc = difficultyEtc;
+        this.difficultyExtra = difficultyExtra;
         this.targetMarket = targetMarket;
         this.marketingChannels = marketingChannels;
         this.lessonsLearned = lessonsLearned;

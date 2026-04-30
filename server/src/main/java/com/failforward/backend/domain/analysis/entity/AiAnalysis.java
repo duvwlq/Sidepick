@@ -40,6 +40,12 @@ public class AiAnalysis {
     @Column(name = "structured_summary", columnDefinition = "TEXT")
     private String structuredSummary;
 
+    @Column(name = "failure_category", length = 50)
+    private String failureCategory;
+
+    @Column(name = "risk_level", length = 20)
+    private String riskLevel;
+
     @Column(name = "risk_factor_analysis", columnDefinition = "TEXT")
     private String riskFactorAnalysis;
 
@@ -55,6 +61,8 @@ public class AiAnalysis {
             String failReasonTags,
             String summaryList,
             String structuredSummary,
+            String failureCategory,
+            String riskLevel,
             String riskFactorAnalysis,
             BigDecimal riskScore
     ) {
@@ -62,6 +70,8 @@ public class AiAnalysis {
         this.failReasonTags = failReasonTags;
         this.summaryList = summaryList;
         this.structuredSummary = structuredSummary;
+        this.failureCategory = failureCategory;
+        this.riskLevel = riskLevel;
         this.riskFactorAnalysis = riskFactorAnalysis;
         this.riskScore = riskScore;
     }
@@ -71,22 +81,37 @@ public class AiAnalysis {
             String failReasonTags,
             String summaryList,
             String structuredSummary,
+            String failureCategory,
+            String riskLevel,
             String riskFactorAnalysis,
             BigDecimal riskScore
     ) {
-        return new AiAnalysis(experience, failReasonTags, summaryList, structuredSummary, riskFactorAnalysis, riskScore);
+        return new AiAnalysis(
+                experience,
+                failReasonTags,
+                summaryList,
+                structuredSummary,
+                failureCategory,
+                riskLevel,
+                riskFactorAnalysis,
+                riskScore
+        );
     }
 
     public void updateFromAiResult(
             String failReasonTags,
             String summaryList,
             String structuredSummary,
+            String failureCategory,
+            String riskLevel,
             String riskFactorAnalysis,
             BigDecimal riskScore
     ) {
         this.failReasonTags = failReasonTags;
         this.summaryList = summaryList;
         this.structuredSummary = structuredSummary;
+        this.failureCategory = failureCategory;
+        this.riskLevel = riskLevel;
         this.riskFactorAnalysis = riskFactorAnalysis;
         this.riskScore = riskScore;
     }

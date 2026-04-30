@@ -56,9 +56,12 @@ export type Category = {
 export type AnalysisSummary = {
   structuredSummary: string;
   extractedPatterns: string[];
+  keywords: string[];
+  failureCategory: string;
+  riskLevel: string;
   riskFactors: string[];
   successFactors: string[];
-  confidenceScore: number;
+  confidenceScore: number | null;
 };
 
 export type Experience = {
@@ -70,12 +73,15 @@ export type Experience = {
   businessType: string | null;
   investmentAmount: number | null;
   durationMonths: number | null;
+  weeklyHours: number | null;
   averageDailyHours: string | null;
   isConcurrentWithMainJob: boolean | null;
   monthlyRevenue: number | null;
   failureReason: string | null;
   failureReasons: string[];
   difficulties: string[];
+  difficultyEtc: string | null;
+  difficultyExtra: string | null;
   targetMarket: string | null;
   marketingChannels: string[];
   lessonsLearned: string | null;
@@ -104,10 +110,13 @@ export type PatternAnalysis = {
   id: number;
   experienceId: number;
   extractedPatterns: string[];
+  keywords: string[];
+  failureCategory: string;
+  riskLevel: string;
   riskFactors: string[];
   successFactors: string[];
   structuredSummary: string;
-  confidenceScore: number;
+  confidenceScore: number | null;
   processedAt: string;
 };
 
@@ -121,6 +130,31 @@ export type MatchedCase = {
   createdAt: string;
 };
 
+export type AnalysisReportSimilarCase = {
+  caseId: string;
+  title: string;
+  summary: string | null;
+  keyLesson: string | null;
+  matchRate: number;
+};
+
+export type AnalysisReport = {
+  experienceId: number;
+  analysisId: number | null;
+  reportStatus: 'READY' | 'NOT_READY';
+  title: string;
+  summary: string | null;
+  extractedPatterns: string[];
+  keywords?: string[];
+  failureCategory?: string | null;
+  riskLevel?: string | null;
+  riskFactors: string[];
+  advice: string[];
+  confidenceScore: number | null;
+  processedAt: string | null;
+  similarCases: AnalysisReportSimilarCase[];
+};
+
 export type ExperienceUpsertInput = {
   title?: string;
   content: string;
@@ -128,12 +162,15 @@ export type ExperienceUpsertInput = {
   businessType?: string;
   investmentAmount?: number;
   durationMonths?: number;
+  weeklyHours?: number;
   averageDailyHours?: string;
   isConcurrentWithMainJob?: boolean;
   monthlyRevenue?: number;
   failureReason?: string;
   failureReasons?: string[];
   difficulties?: string[];
+  difficultyEtc?: string;
+  difficultyExtra?: string;
   targetMarket?: string;
   marketingChannels?: string[];
   lessonsLearned?: string;
@@ -293,6 +330,10 @@ export function deleteExperience(token: string, id: number | string) {
 
 export function getAnalysis(experienceId: number | string) {
   return request<PatternAnalysis>(`/experiences/${experienceId}/analysis`);
+}
+
+export function getReport(experienceId: number | string) {
+  return request<AnalysisReport>(`/reports/${experienceId}`);
 }
 
 export function createAnalysis(token: string, experienceId: number | string) {
