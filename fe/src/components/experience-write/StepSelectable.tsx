@@ -1,37 +1,16 @@
+import FieldLabel from './FieldLabal';
+
 type Props = {
-  title: string;
-  explain?: string;
   options: string[];
   selected: string[];
   onSelect: (value: string) => void;
-  etcValue?: string;
-  onEtcChange?: (value: string) => void;
-  extraValue?: string;
-  onExtraChange?: (value: string) => void;
 };
 
-export default function StepSelectable({
-  title,
-  explain,
-  options,
-  selected,
-  onSelect,
-  etcValue,
-  onEtcChange,
-  extraValue,
-  onExtraChange,
-}: Props) {
+export default function StepSelectable({ options, selected, onSelect }: Props) {
   return (
-    <div className="rounded-[24px] bg-white px-5 pb-6 pt-7 shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
-      <h2 className="text-[20px] font-semibold leading-[1.45] text-[#111111]">
-        {title}
-      </h2>
-
-      {explain ? (
-        <p className="mt-2 text-sm leading-6 text-[#666666]">{explain}</p>
-      ) : null}
-
-      <div className="mt-6 space-y-2.5">
+    <div className="flex w-full flex-col items-start gap-[10px]">
+      <FieldLabel label="복수 선택 가능" required />
+      <div className="flex w-full flex-col gap-[10px]">
         {options.map((item) => {
           const active = selected.includes(item);
 
@@ -40,45 +19,34 @@ export default function StepSelectable({
               key={item}
               type="button"
               onClick={() => onSelect(item)}
-              className={`flex min-h-12 w-full items-center rounded-[16px] border px-4 text-left text-sm transition ${
+              className={`flex h-[40px] w-full items-center gap-[4px] rounded-[8px] border px-[16px] py-[10px] ${
                 active
-                  ? 'border-[#111111] bg-[#FAFAFA] text-[#111111]'
-                  : 'border-[#E4E7EC] bg-white text-[#555555]'
+                  ? 'border-[#131416] bg-[#F8F8F8]'
+                  : 'border-[#E6E6E6] bg-[#FFFFFF]'
               }`}
             >
-              {item}
+              <CheckIcon active={active} />
+              <span className="min-w-0 flex-1 truncate text-left font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575] [font-feature-settings:'case'_1]">
+                {item}
+              </span>
             </button>
           );
         })}
       </div>
-
-      {onEtcChange ? (
-        <div className="mt-5">
-          <div className="mb-2 text-sm font-semibold text-[#111111]">
-            湲고? ?대젮??/ ?붿씤
-          </div>
-          <textarea
-            value={etcValue ?? ''}
-            onChange={(event) => onEtcChange(event.target.value)}
-            className="min-h-24 w-full rounded-[16px] border border-[#E4E7EC] px-4 py-3 text-sm leading-6 text-[#111111] outline-none placeholder:text-[#9CA3AF]"
-            placeholder="泥댄겕由ъ뒪?몄뿉 ?놁뒗 ?대젮??/?붿씤???곸뼱二쇱꽭??"
-          />
-        </div>
-      ) : null}
-
-      {onExtraChange ? (
-        <div className="mt-5">
-          <div className="mb-2 text-sm font-semibold text-[#111111]">
-            蹂댁“ ?ㅻ챸
-          </div>
-          <textarea
-            value={extraValue ?? ''}
-            onChange={(event) => onExtraChange(event.target.value)}
-            className="min-h-24 w-full rounded-[16px] border border-[#E4E7EC] px-4 py-3 text-sm leading-6 text-[#111111] outline-none placeholder:text-[#9CA3AF]"
-            placeholder="?붽?濡?꽕紐낇븷 ?댁슜???덉쑝硫?留곸꽦?댁＜?몄슂."
-          />
-        </div>
-      ) : null}
     </div>
+  );
+}
+
+function CheckIcon({ active }: { active: boolean }) {
+  return (
+    <svg viewBox="0 0 14 14" className="h-[14px] w-[14px]" fill="none" aria-hidden="true">
+      <path
+        d="M3 7.1L5.7 9.8L11 4.5"
+        stroke={active ? '#131416' : '#BABABA'}
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

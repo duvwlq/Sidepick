@@ -3,7 +3,7 @@ import menuIcon from '../../assets/images/menu.svg';
 import searchIcon from '../../assets/images/search.svg';
 
 type HeaderLeftType = 'menu' | 'back' | 'none';
-type RightIconType = 'bell' | 'search' | 'none';
+type RightIconType = 'bell' | 'search' | 'menu' | 'none';
 
 type Props = {
   title: string;
@@ -73,8 +73,14 @@ export default function HeaderNav({
       return <div className="h-[24px] w-[24px]" />;
     }
 
-    const icon = rightIcon === 'search' ? searchIcon : bellIcon;
-    const label = rightIcon === 'search' ? '검색 열기' : '알림';
+    const icon =
+      rightIcon === 'search' ? searchIcon : rightIcon === 'menu' ? menuIcon : bellIcon;
+    const label =
+      rightIcon === 'search'
+        ? '검색 열기'
+        : rightIcon === 'menu'
+          ? '메뉴 열기'
+          : '알림';
 
     return (
       <button

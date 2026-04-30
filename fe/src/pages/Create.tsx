@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import BottomButton from '../components/experience-write/BottomButton';
 import ProgressHeader from '../components/experience-write/ProgressHeader';
 import StepBasicInfo from '../components/experience-write/StepBasicInfo';
+import StepDetailInfo from '../components/experience-write/StepDetailInfo';
 import StepFreeWrite from '../components/experience-write/StepFreeWrite';
 import StepSelectable from '../components/experience-write/StepSelectable';
 import Layout from '../components/layout/Layout';
-import { causeOptions, difficultyOptions } from '../constants/experienceOptions';
+import { difficultyOptions } from '../constants/experienceOptions';
 import { useExperienceWrite } from '../hooks/useExperienceWrite';
 import { createExperience, getCategories, type Category } from '../lib/api';
 import { getAccessToken, getStoredUser } from '../lib/session';
@@ -105,8 +106,8 @@ export default function Create() {
               ? false
               : undefined,
         monthlyRevenue: parseNumber(form.revenue),
-        failureReason: form.causes[0] ?? '기타',
-        failureReasons: form.causes,
+        failureReason: form.difficulties[0] ?? '기타',
+        failureReasons: form.difficulties,
         difficulties: form.difficulties,
         difficultyEtc: form.difficultyEtc.trim(),
         difficultyExtra: form.difficultyExtra.trim(),
@@ -130,26 +131,27 @@ export default function Create() {
     <Layout
       title="경험 등록"
       leftType="back"
-      showRightIcon={false}
+      rightIcon="menu"
       onBack={handleBack}
     >
-      <div className="px-4 pb-6 pt-4">
-        <div className="mb-4 rounded-[22px] bg-white px-5 py-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          {user ? (
-            <div>
-              <div className="text-base font-semibold text-[#111111]">
-                {user.nickname}
-              </div>
-              <div className="mt-1 text-sm text-[#666666]">{user.email}</div>
-            </div>
-          ) : (
-            <div className="text-sm text-[#666666]">
-              로그인 후 경험을 작성할 수 있습니다.
-            </div>
-          )}
-        </div>
-
+      <div className="flex w-full flex-col items-center gap-[20px] bg-[#FFFFFF] px-[16px] pb-[110px] pt-[20px]">
         <ProgressHeader step={step} progress={progress} />
+
+        <StepTitle
+          title={
+            step === 3
+              ? '부업을 진행하면서\n특히 어려웠던 점은 무엇이었나요?'
+              : step === 4
+                ? '경험을 자유롭게 정리해볼까요?'
+                : '어떤 상황에서 시작하셨나요?'
+          }
+          subtitle={
+            step === 1 || step === 2
+              ? '경험을 이해하는 데 필요한 정보들이에요'
+              : undefined
+          }
+          multiline={step === 3}
+        />
 
         {step === 1 ? (
           <StepBasicInfo
@@ -161,33 +163,13 @@ export default function Create() {
           />
         ) : null}
 
-        {step === 2 ? (
-          <StepSelectable
-            title="실패를 겪은 원인이 무엇인가요?"
-            explain="가장 가까운 이유를 하나 선택해 주세요."
-            options={causeOptions}
-            selected={form.causes}
-            onSelect={(value) =>
-              setForm((previous) => ({ ...previous, causes: [value] }))
-            }
-          />
-        ) : null}
+        {step === 2 ? <StepDetailInfo form={form} setForm={setForm} /> : null}
 
         {step === 3 ? (
           <StepSelectable
-            title="부업을 진행하면서 특히 어려웠던 점은 무엇이었나요?"
-            explain="복수 선택도 가능합니다."
             options={difficultyOptions}
             selected={form.difficulties}
             onSelect={(value) => toggleArray('difficulties', value)}
-            etcValue={form.difficultyEtc}
-            onEtcChange={(value) =>
-              setForm((previous) => ({ ...previous, difficultyEtc: value }))
-            }
-            extraValue={form.difficultyExtra}
-            onExtraChange={(value) =>
-              setForm((previous) => ({ ...previous, difficultyExtra: value }))
-            }
           />
         ) : null}
 
@@ -201,16 +183,14 @@ export default function Create() {
         ) : null}
 
         {submitError ? (
-          <div className="mt-4 text-sm text-[#D33B3B]">{submitError}</div>
+          <div className="w-full font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#D33B3B]">
+            {submitError}
+          </div>
         ) : null}
 
         <BottomButton
           label={
-            step === 4
-              ? submitting
-                ? '등록 중...'
-                : '작성 완료'
-              : '다음 단계'
+            step === 4 ? (submitting ? '등록 중...' : '작성 완료') : '다음 단계'
           }
           disabled={!isValid || submitting || categoryLoading}
           onClick={step === 4 ? () => void handleSubmit() : next}
@@ -220,54 +200,86 @@ export default function Create() {
   );
 }
 
+function StepTitle({
+  title,
+  subtitle,
+  multiline = false,
+}: {
+  title: string;
+  subtitle?: string;
+  multiline?: boolean;
+}) {
+  return (
+    <div
+      className={`flex w-full flex-col items-center ${
+        subtitle ? 'gap-[5px]' : 'gap-0'
+      }`}
+    >
+      <h2
+        className={`whitespace-pre-line text-center font-['Pretendard'] text-[20px] font-[600] leading-[24px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1] ${
+          multiline ? 'w-[267px]' : 'w-full'
+        }`}
+      >
+        {title}
+      </h2>
+      {subtitle ? (
+        <p className="text-center font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+          {subtitle}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 function parseNumber(value: string) {
   const onlyDigits = value.replace(/[^\d]/g, '');
   return onlyDigits ? Number(onlyDigits) : undefined;
 }
 
 function mapPeriodToMonths(value: string) {
-  switch (value) {
-    case '1개월 미만':
-      return 1;
-    case '1~3개월':
-      return 3;
-    case '3~6개월':
-      return 6;
-    case '6개월~1년':
-      return 12;
-    case '1년 이상':
-      return 12;
-    default:
-      return undefined;
+  if (value === '1개월 미만') {
+    return 1;
   }
+
+  if (value === '1년 이상') {
+    return 12;
+  }
+
+  const months = Number(value.replace(/[^\d]/g, ''));
+  return Number.isFinite(months) && months > 0 ? months : undefined;
 }
 
 function mapDailyHours(value: string) {
-  switch (value) {
-    case '1시간 미만':
-      return 'UNDER_1_HOUR';
-    case '1~3시간':
-      return 'ONE_TO_THREE_HOURS';
-    case '3~5시간':
-      return 'THREE_TO_FIVE_HOURS';
-    case '5시간 이상':
-      return 'OVER_FIVE_HOURS';
-    default:
-      return undefined;
+  if (value === '1시간 미만') {
+    return 'UNDER_1_HOUR';
   }
+
+  const hours = Number(value.replace(/[^\d]/g, ''));
+
+  if (!hours) {
+    return undefined;
+  }
+
+  if (hours <= 3) {
+    return 'ONE_TO_THREE_HOURS';
+  }
+
+  if (hours <= 5) {
+    return 'THREE_TO_FIVE_HOURS';
+  }
+
+  return 'OVER_FIVE_HOURS';
 }
 
 function mapDailyHoursToWeeklyHours(value: string) {
-  switch (value) {
-    case '1시간 미만':
-      return 3;
-    case '1~3시간':
-      return 14;
-    case '3~5시간':
-      return 28;
-    case '5시간 이상':
-      return 40;
-    default:
-      return undefined;
+  if (value === '1시간 미만') {
+    return 3;
   }
+
+  if (value === '8시간 이상') {
+    return 40;
+  }
+
+  const hours = Number(value.replace(/[^\d]/g, ''));
+  return Number.isFinite(hours) && hours > 0 ? Math.min(hours * 7, 40) : undefined;
 }

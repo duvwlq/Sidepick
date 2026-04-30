@@ -59,19 +59,12 @@ export function useExperienceWrite() {
   const isValid = useMemo(() => {
     switch (step) {
       case 1:
-        return (
-          form.categories.length > 0 &&
-          Boolean(form.totalPeriod) &&
-          Boolean(form.dailyHours) &&
-          Boolean(form.isConcurrentWithMainJob)
-        );
+        return form.categories.length > 0;
       case 2:
-        return form.causes.length > 0;
+        return Boolean(form.totalPeriod) && Boolean(form.isConcurrentWithMainJob);
       case 3:
         return form.difficulties.length > 0;
       case 4:
-        // 자유서술 최소 글자 수 기준입니다.
-        // 현재는 10자 이상일 때만 "작성 완료"가 활성화됩니다.
         return form.content.trim().length >= 10;
       default:
         return false;

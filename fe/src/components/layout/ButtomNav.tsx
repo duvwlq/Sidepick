@@ -51,7 +51,7 @@ export default function BottomNav() {
             }`}
           >
             <img src={menu.icon} alt="" className="h-[24px] w-[24px]" />
-            <span className="whitespace-nowrap text-center text-[10px] font-[400] leading-[10px] tracking-[0px] text-[#000000]">
+            <span className="whitespace-nowrap text-center font-['Pretendard'] text-[10px] font-[400] leading-[10px] tracking-[0px] text-[#000000]">
               {menu.name}
             </span>
           </button>

@@ -9,7 +9,7 @@ type Props = {
   title?: string;
   leftType?: HeaderLeftType;
   showRightIcon?: boolean;
-  rightIcon?: 'bell' | 'search' | 'none';
+  rightIcon?: 'bell' | 'search' | 'menu' | 'none';
   showHeader?: boolean;
   showBottomNav?: boolean;
   onBack?: () => void;

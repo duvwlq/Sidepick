@@ -47,22 +47,22 @@ function getKeywordLabels(experience: Experience) {
 
 export default function ExperienceFeed({ experiences, loading, error }: Props) {
   return (
-    <div className="flex w-full flex-col gap-[2px] bg-[#EEE] pb-[110px]">
+    <div className="flex w-full flex-col items-start gap-[2px] bg-[#EEEEEE] pb-[110px]">
       {loading ? (
-        <div className="bg-white px-5 py-12 text-center text-sm text-[#666666]">
+        <div className="w-full bg-[#FFFFFF] px-[20px] py-[48px] text-center font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#666666] [font-feature-settings:'case'_1]">
           사례 목록을 불러오는 중입니다.
         </div>
       ) : error ? (
-        <div className="bg-white px-5 py-12 text-center text-sm text-[#D33B3B]">
+        <div className="w-full bg-[#FFFFFF] px-[20px] py-[48px] text-center font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B] [font-feature-settings:'case'_1]">
           {error}
         </div>
       ) : experiences.length === 0 ? (
-        <div className="bg-white px-5 py-12 text-center text-sm text-[#666666]">
+        <div className="w-full bg-[#FFFFFF] px-[20px] py-[48px] text-center font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#666666] [font-feature-settings:'case'_1]">
           아직 등록된 사례가 없습니다.
         </div>
       ) : (
         experiences.map((item) => (
-          <Link key={item.id} to={`/experiences/${item.id}`} className="block">
+          <Link key={item.id} to={`/experiences/${item.id}`} className="block w-full">
             <Card
               title={item.title}
               tags={getKeywordLabels(item)}

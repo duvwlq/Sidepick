@@ -36,7 +36,7 @@ function FilterIcon() {
   return (
     <svg
       aria-hidden="true"
-      className="h-6 w-6"
+      className="h-[24px] w-[24px]"
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -77,9 +77,15 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[33px] items-center gap-1 rounded-full bg-[#F4F5F7] px-3 text-[12px] font-normal leading-[1.2] text-[#757575]"
+      className={`flex h-[33px] shrink-0 appearance-none items-center justify-center gap-[2px] rounded-[999px] px-[12px] py-[8px] ${
+        onRemove
+          ? 'border-[1px] border-solid border-[#D8D8D8] bg-[#FFFFFF]'
+          : 'border-0 bg-[#F8F8F8]'
+      }`}
     >
-      <span>{label}</span>
+      <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[1.2] tracking-[0px] text-[#5E5E5E] [font-feature-settings:'case'_1]">
+        {label}
+      </span>
       {onRemove ? (
         <span
           role="button"
@@ -88,7 +94,7 @@ function Chip({
             event.stopPropagation();
             onRemove();
           }}
-          className="text-[#BABABA]"
+          className="flex h-[16px] w-[16px] items-center justify-center text-[16px] leading-[16px] text-[#BABABA]"
         >
           ×
         </span>
@@ -173,8 +179,8 @@ export default function Explore() {
         rightIcon="bell"
         onBack={() => setIsSearchMode(false)}
       >
-        <div className="bg-white">
-          <section className="px-4 pb-3">
+        <div className="flex w-full flex-col items-center gap-[12px] bg-[#FFFFFF]">
+          <section className="flex w-full flex-col items-start bg-[#FFFFFF] px-[16px]">
             <SearchBar
               value={draftKeyword}
               onChange={(event) => setDraftKeyword(event.target.value)}
@@ -182,21 +188,21 @@ export default function Explore() {
             />
           </section>
 
-          <section className="px-4 py-4">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-[16px] font-semibold leading-[1.2] text-[#131416]">
-                최근 검색어
-              </h2>
+          <section className="flex w-full flex-col items-start gap-[16px] p-[16px]">
+            <div className="flex w-full items-center justify-between whitespace-nowrap leading-[0]">
+              <div className="flex shrink-0 flex-col justify-center overflow-hidden text-ellipsis font-['Pretendard'] text-[16px] font-[600] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+                <h2 className="overflow-hidden text-ellipsis leading-[1.2]">최근 검색어</h2>
+              </div>
               <button
                 type="button"
                 onClick={() => persistRecentKeywords([])}
-                className="text-[12px] font-normal leading-[1.2] text-[#757575]"
+                className="flex shrink-0 flex-col justify-center overflow-hidden border-0 bg-transparent p-[0px] text-ellipsis font-['Pretendard'] text-[12px] font-[400] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]"
               >
-                전체 삭제
+                <span className="overflow-hidden text-ellipsis leading-[1.2]">전체 삭제</span>
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-1">
+            <div className="flex items-start gap-[4px]">
               {recentKeywords.map((item) => (
                 <Chip
                   key={item}
@@ -208,26 +214,18 @@ export default function Explore() {
             </div>
           </section>
 
-          <section className="px-4 py-4">
-            <h2 className="mb-4 text-[16px] font-semibold leading-[1.2] text-[#131416]">
-              추천 키워드
-            </h2>
-            <div className="flex flex-wrap gap-1">
+          <section className="flex w-full flex-col items-start gap-[16px] p-[16px]">
+            <div className="flex w-full items-center">
+              <div className="flex shrink-0 flex-col justify-center overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[16px] font-[600] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+                <h2 className="overflow-hidden text-ellipsis leading-[1.2]">추천 키워드</h2>
+              </div>
+            </div>
+            <div className="flex w-full flex-wrap content-start items-start gap-[4px]">
               {recommendedKeywords.map((item) => (
                 <Chip key={item} label={item} onClick={() => submitKeyword(item)} />
               ))}
             </div>
           </section>
-
-          <div className="px-4 pt-4">
-            <button
-              type="button"
-              onClick={() => submitKeyword(draftKeyword)}
-              className="h-12 w-full rounded-[8px] bg-black text-[14px] font-semibold leading-[1.2] text-white"
-            >
-              검색하기
-            </button>
-          </div>
         </div>
       </Layout>
     );

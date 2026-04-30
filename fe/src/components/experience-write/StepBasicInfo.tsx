@@ -2,8 +2,6 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { FormState } from '../../hooks/useExperienceWrite';
 import type { Category } from '../../lib/api';
 import FieldLabel from './FieldLabal';
-import MoneyField from './MoneyField';
-import SelectField from './SelectField';
 
 type Props = {
   categories: Category[];
@@ -13,21 +11,6 @@ type Props = {
   error?: string;
 };
 
-const periodOptions = [
-  '1개월 미만',
-  '1~3개월',
-  '3~6개월',
-  '6개월~1년',
-  '1년 이상',
-];
-
-const hourOptions = [
-  '1시간 미만',
-  '1~3시간',
-  '3~5시간',
-  '5시간 이상',
-];
-
 export default function StepBasicInfo({
   categories,
   form,
@@ -36,134 +19,68 @@ export default function StepBasicInfo({
   error = '',
 }: Props) {
   const toggleCategory = (value: string) => {
-    setForm((previous) => {
-      const exists = previous.categories.includes(value);
-
-      return {
-        ...previous,
-        categories: exists ? [] : [value],
-      };
-    });
+    setForm((previous) => ({
+      ...previous,
+      categories: previous.categories.includes(value) ? [] : [value],
+    }));
   };
 
-  return (
-    <div className="rounded-[24px] bg-white px-5 pb-6 pt-7 shadow-[0_6px_20px_rgba(15,23,42,0.06)]">
-      <div className="mb-7">
-        <h2 className="text-[20px] font-semibold leading-[1.45] text-[#111111]">
-          어떤 상황에서 시작하셨나요?
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-[#666666]">
-          경험을 이해하는 데 필요한 기본 정보예요.
-        </p>
-      </div>
-
-      <FieldLabel label="경험 분야 카테고리" required />
-
-      {loading ? (
-        <div className="mt-3 rounded-[18px] border border-dashed border-[#D9DEE8] bg-[#FBFBFC] p-4 text-sm text-[#666666]">
+  if (loading) {
+    return (
+      <div className="flex w-full flex-col gap-[10px]">
+        <FieldLabel label="경험 부업 카테고리" required />
+        <div className="flex h-[98px] w-full items-center justify-center rounded-[16px] border border-dashed border-[#E6E6E6] bg-[#FFFFFF] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#757575]">
           카테고리를 불러오는 중입니다.
         </div>
-      ) : error ? (
-        <div className="mt-3 rounded-[18px] border border-[#F6C9C9] bg-[#FFF5F5] p-4 text-sm text-[#D33B3B]">
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex w-full flex-col gap-[10px]">
+        <FieldLabel label="경험 부업 카테고리" required />
+        <div className="flex min-h-[98px] w-full items-center rounded-[16px] border border-[#F6C9C9] bg-[#FFF5F5] p-[16px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#D33B3B]">
           {error}
         </div>
-      ) : (
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          {categories.map((item) => {
-            const active = form.categories.includes(item.name);
+      </div>
+    );
+  }
 
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => toggleCategory(item.name)}
-                className={`min-h-[116px] rounded-[18px] border px-4 py-4 text-left transition ${
-                  active
-                    ? 'border-[#111111] bg-[#FAFAFA] shadow-[0_4px_12px_rgba(17,17,17,0.06)]'
-                    : 'border-[#E4E7EC] bg-white'
-                }`}
+  const visibleCategories = categories.slice(0, 7);
+
+  return (
+    <div className="flex w-full flex-col items-start gap-[10px]">
+      <FieldLabel label="경험 부업 카테고리" required />
+
+      <div className="grid w-full grid-cols-2 gap-[10px]">
+        {visibleCategories.map((item, index) => {
+          const active = form.categories.includes(item.name);
+          const isFull = index === 6;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => toggleCategory(item.name)}
+              className={`flex h-[98px] ${isFull ? 'col-span-2' : ''} flex-col items-center justify-center gap-[10px] rounded-[16px] border-[1.108px] p-[16px] ${
+                active
+                  ? 'border-[#131416] bg-[#F8F8F8]'
+                  : 'border-[#E6E6E6] bg-[#FFFFFF]'
+              }`}
+            >
+              <span
+                className="flex h-[36px] w-[36px] items-center justify-center overflow-hidden rounded-[2px] text-[20px]"
+                style={{ backgroundColor: `${item.color}18`, color: item.color }}
               >
-                <div className="mb-2 flex items-center gap-2">
-                  <span
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full text-lg"
-                    style={{ backgroundColor: `${item.color}18`, color: item.color }}
-                  >
-                    {item.icon}
-                  </span>
-                  <span className="text-[15px] font-semibold text-[#111111]">
-                    {item.name}
-                  </span>
-                </div>
-                <div className="line-clamp-3 text-xs leading-5 text-[#666666]">
-                  {item.description}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      <div className="mt-6 space-y-5">
-        <SelectField
-          label="총 진행 기간"
-          value={form.totalPeriod}
-          placeholder="선택해 주세요"
-          options={periodOptions}
-          onChange={(value) =>
-            setForm((previous) => ({ ...previous, totalPeriod: value }))
-          }
-        />
-
-        <SelectField
-          label="평균 하루 할애 시간"
-          value={form.dailyHours}
-          placeholder="선택해 주세요"
-          options={hourOptions}
-          onChange={(value) =>
-            setForm((previous) => ({ ...previous, dailyHours: value }))
-          }
-        />
-
-        <MoneyField
-          label="투자 금액"
-          value={form.expense}
-          onChange={(value) =>
-            setForm((previous) => ({ ...previous, expense: value }))
-          }
-        />
-
-        <MoneyField
-          label="수익"
-          value={form.revenue}
-          onChange={(value) =>
-            setForm((previous) => ({ ...previous, revenue: value }))
-          }
-        />
-
-        <div>
-          <FieldLabel label="본업 병행 여부" required />
-          <div className="mt-3 space-y-2.5">
-            {(['예', '아니오'] as const).map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() =>
-                  setForm((previous) => ({
-                    ...previous,
-                    isConcurrentWithMainJob: item,
-                  }))
-                }
-                className={`flex h-12 w-full items-center justify-center rounded-[16px] border text-sm font-medium transition ${
-                  form.isConcurrentWithMainJob === item
-                    ? 'border-[#111111] bg-[#FAFAFA] text-[#111111]'
-                    : 'border-[#E4E7EC] bg-white text-[#666666]'
-                }`}
-              >
-                {item}
-              </button>
-            ))}
-          </div>
-        </div>
+                {item.icon}
+              </span>
+              <span className="w-full truncate text-center font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
+                {item.name}
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
