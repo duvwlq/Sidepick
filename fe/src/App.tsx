@@ -7,6 +7,7 @@ import AiAnalysisResultPage from './pages/AiAnalysisResultPage';
 import ExperienceDetail from './pages/ExperienceDetail';
 import { AuthFlowProvider } from './context/AuthFlowContext';
 import AuthEntryPage from './pages/auth/AuthEntryPage';
+import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import KakaoCallbackPage from './pages/auth/KakaoCallbackPage';
 import SignupEmailPage from './pages/auth/SignupEmailPage';
 import SignupVerifyPage from './pages/auth/SignupVerifyPage';
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/auth" element={<AuthEntryPage />} />
           <Route path="/login" element={<AuthEntryPage />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
+          <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/signup/email" element={<SignupEmailPage />} />
           <Route path="/signup/verify" element={<SignupVerifyPage />} />
           <Route path="/signup/password" element={<SignupPasswordPage />} />

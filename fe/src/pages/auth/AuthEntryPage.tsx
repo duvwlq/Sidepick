@@ -13,6 +13,7 @@ export default function AuthEntryPage() {
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [kakaoError, setKakaoError] = useState('');
+  const [googleError, setGoogleError] = useState('');
 
   const nextPath = useMemo(() => {
     const params = new URLSearchParams(location.search);
@@ -67,6 +68,25 @@ export default function AuthEntryPage() {
       `&state=${encodeURIComponent(nextPath)}`;
 
     window.location.href = kakaoAuthUrl;
+  }
+
+  function handleGoogleLogin() {
+    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/auth/google/callback`;
+
+    if (!googleClientId) {
+      setGoogleError('援ш? 濡쒓렇???ㅼ젙???뺤씤?????놁뒿?덈떎.');
+      return;
+    }
+
+    const googleAuthUrl =
+      `https://accounts.google.com/o/oauth2/v2/auth?response_type=code` +
+      `&client_id=${encodeURIComponent(googleClientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&scope=${encodeURIComponent('openid email profile')}` +
+      `&state=${encodeURIComponent(nextPath)}`;
+
+    window.location.href = googleAuthUrl;
   }
 
   return (
@@ -143,8 +163,8 @@ export default function AuthEntryPage() {
 
             <button
               type="button"
-              disabled
-              className="flex h-14 w-full items-center justify-center rounded-[16px] border border-[#E4E4E4] bg-white text-base font-medium text-[#C0C0C0]"
+              onClick={handleGoogleLogin}
+              className="flex h-14 w-full items-center justify-center rounded-[16px] border border-[#E4E4E4] bg-white text-base font-medium text-[#202124]"
             >
               구글 로그인
             </button>
@@ -155,6 +175,9 @@ export default function AuthEntryPage() {
           </p>
           {kakaoError ? (
             <p className="mt-3 text-center text-sm text-[#D33B3B]">{kakaoError}</p>
+          ) : null}
+          {googleError ? (
+            <p className="mt-3 text-center text-sm text-[#D33B3B]">{googleError}</p>
           ) : null}
         </div>
       </section>
