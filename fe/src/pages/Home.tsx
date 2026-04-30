@@ -304,7 +304,7 @@ export default function Home() {
         </section>
 
         <section className="flex w-full flex-col items-center gap-[16px] px-[16px] py-[12px]">
-          <h2 className="w-full text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
+          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
             인기 카테고리
           </h2>
 
@@ -365,7 +365,7 @@ export default function Home() {
               className="flex h-[40px] w-full appearance-none items-center justify-between rounded-[8px] border-0 bg-[#FFFFFF] px-[12px] py-[5px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#000000]"
             >
               <span className="flex shrink-0 flex-col justify-center leading-[0]">
-                <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+                <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[1.2] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
                   나의 경험 분석하러 가기
                 </span>
               </span>
@@ -389,7 +389,7 @@ export default function Home() {
         </section>
 
         <section className="flex w-full flex-col items-start justify-center gap-[10px] bg-[#FFFFFF] px-[16px] py-[12px]">
-          <h2 className="w-full text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
+          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
             탐색
           </h2>
 
@@ -436,9 +436,13 @@ export default function Home() {
             <button
               type="button"
               onClick={() => navigate('/explore')}
-              className="whitespace-nowrap text-center text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5D5D5D] underline"
+              className="appearance-none border-0 bg-transparent p-[0px]"
             >
-              모든 사례 보기
+              <span className="flex flex-col justify-center whitespace-nowrap text-center font-['Pretendard'] text-[0px] font-[400] leading-[0] tracking-[0px] text-[#5D5D5D] [font-feature-settings:'case'_1]">
+                <span className="text-[12px] leading-[1.2] underline [font-feature-settings:'case'_1]">
+                  모든 사례 보기
+                </span>
+              </span>
             </button>
           </div>
         </section>

@@ -55,9 +55,11 @@ function FilterTag({ label }: { label: string }) {
   return (
     <button
       type="button"
-      className="flex shrink-0 items-center justify-center rounded-full bg-[#EEE] px-[10px] py-1 text-[12px] font-normal leading-[1.2] text-[#757575]"
+      className="flex shrink-0 appearance-none flex-col items-center justify-center rounded-[999px] border-0 bg-[#EEEEEE] px-[10px] py-[4px]"
     >
-      {label}
+      <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#757575] [font-feature-settings:'case'_1]">
+        {label}
+      </span>
     </button>
   );
 }
@@ -239,16 +241,16 @@ export default function Explore() {
       onBack={() => navigate(-1)}
       onRightIconClick={() => setIsSearchMode(true)}
     >
-      <div className="flex flex-col gap-[2px] bg-[#EEE]">
-        <section className="flex w-full cursor-pointer items-center gap-2 bg-white px-4 py-[10px]">
+      <div className="flex w-full flex-col gap-[2px] bg-[#EEEEEE]">
+        <section className="flex h-[44px] w-full cursor-pointer items-center gap-[8px] bg-[#FFFFFF] px-[16px] py-[10px]">
           <button
             type="button"
-            className="flex h-6 w-6 shrink-0 items-center justify-center"
+            className="relative block h-[24px] w-[24px] shrink-0 appearance-none border-0 bg-transparent p-[0px]"
             aria-label="필터 열기"
           >
             <FilterIcon />
           </button>
-          <div className="-mr-4 flex min-w-0 flex-1 items-center gap-2 overflow-x-auto pr-4">
+          <div className="-mr-[16px] flex min-w-0 flex-1 items-center gap-[8px] overflow-x-auto pr-[16px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {FILTER_TAGS.map((tag, index) => (
               <FilterTag key={`${tag}-${index}`} label={tag} />
             ))}

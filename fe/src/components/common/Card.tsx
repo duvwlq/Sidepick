@@ -29,38 +29,52 @@ export default function Card({
     : [category, failureReason].filter(Boolean)) as string[];
 
   return (
-    <article className="flex w-full flex-col items-start gap-[10px] bg-white p-5">
-      <div className="flex w-full flex-col items-start gap-1">
+    <article className="flex h-[146px] w-full flex-col items-start gap-[10px] bg-[#FFFFFF] p-[20px]">
+      <div className="flex w-full flex-col items-start gap-[4px]">
         <div className="flex w-full items-center">
-          <div className="flex flex-wrap items-start gap-1">
+          <div className="flex shrink-0 items-start gap-[4px]">
             {chips.slice(0, 3).map((chip) => (
               <span
                 key={chip}
-                className="flex items-center justify-center rounded-[8px] bg-[#EEE] px-2 py-[2px] text-[12px] font-light leading-4 text-[#494949]"
+                className="flex shrink-0 items-center justify-center rounded-[8px] bg-[#EEEEEE] px-[8px] py-[2px]"
               >
-                {chip}
+                <span className="whitespace-nowrap font-['Pretendard'] text-[12px] font-[300] leading-[16px] tracking-[0px] text-[#494949]">
+                  {chip}
+                </span>
               </span>
             ))}
           </div>
         </div>
 
-        <h2 className="w-full text-[18px] font-semibold leading-7 text-black">{title}</h2>
+        <h2 className="w-full font-['Pretendard'] text-[18px] font-[600] leading-[28px] tracking-[0px] text-[#000000]">
+          {title}
+        </h2>
       </div>
 
-      <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-1">
-        <div className="flex items-center gap-1 text-[14px] font-normal leading-5 text-[#8A8A8A]">
-          <img src={durationIcon} alt="" className="h-4 w-4 shrink-0" />
-          <span>{duration}</span>
+      <div className="grid w-full grid-cols-[repeat(2,minmax(0,1fr))] grid-rows-[repeat(2,fit-content(100%))] gap-x-[10px] gap-y-[4px]">
+        <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
+          <img src={durationIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
+          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+            {duration}
+          </span>
         </div>
-        <div className="flex items-center gap-1 text-[14px] font-normal leading-5 text-[#8A8A8A]">
-          <img src={amountIcon} alt="" className="h-4 w-4 shrink-0" />
-          <span>{amount.toLocaleString()}원</span>
+        <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
+          <img src={amountIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
+          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+            {amount.toLocaleString()}원
+          </span>
         </div>
-        <div className="flex items-center gap-1 text-[14px] font-normal leading-5 text-[#8A8A8A]">
-          <img src={viewsIcon} alt="" className="h-4 w-4 shrink-0" />
-          <span>{views.toLocaleString()}</span>
+        <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
+          <img src={viewsIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
+          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+            {views.toLocaleString()}
+          </span>
         </div>
-        <div className="text-[14px] font-normal leading-5 text-[#8A8A8A]">{date}</div>
+        <div className="flex shrink-0 items-center justify-center justify-self-start">
+          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+            {date}
+          </span>
+        </div>
       </div>
     </article>
   );

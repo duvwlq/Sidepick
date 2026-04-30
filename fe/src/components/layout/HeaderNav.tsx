@@ -94,7 +94,7 @@ export default function HeaderNav({
         <div className="flex h-[24px] w-[24px] items-center justify-start">
           {renderLeftButton()}
         </div>
-        <h1 className="whitespace-nowrap text-center text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000]">
+        <h1 className="whitespace-nowrap text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
           {title}
         </h1>
         <div className="flex h-[24px] w-[24px] items-center justify-end">
