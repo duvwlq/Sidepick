@@ -1,10 +1,12 @@
-import Layout from '../components/layout/Layout';
-import AiAnalysisResult from '../components/ai-analysis/AiAnalysisResult';
+import { Navigate, useSearchParams } from 'react-router-dom';
 
 export default function AiAnalysisResultPage() {
-  return (
-    <Layout title="AI 분석 완료" leftType="back" showRightIcon={false}>
-      <AiAnalysisResult />
-    </Layout>
-  );
+  const [searchParams] = useSearchParams();
+  const experienceId = searchParams.get('experienceId');
+
+  if (!experienceId) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Navigate to={`/experiences/${experienceId}`} replace />;
 }

@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Explore from './pages/Explore';
 import Create from './pages/Create';
 import MyPage from './pages/MyPage';
+import ExperienceDetail from './pages/ExperienceDetail';
 import AiAnalysisResultPage from './pages/AiAnalysisResultPage';
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/create" element={<Create />} />
+        <Route path="/experiences/:id" element={<ExperienceDetail />} />
         <Route path="/analysis-result" element={<AiAnalysisResultPage />} />
         <Route path="/mypage" element={<MyPage />} />
       </Routes>
