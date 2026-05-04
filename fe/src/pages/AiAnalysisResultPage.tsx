@@ -17,11 +17,7 @@ export default function AiAnalysisResultPage() {
   const timeoutRef = useRef<number | null>(null);
   const [nickname, setNickname] = useState(storedUser?.nickname ?? '사용자');
   const [error, setError] = useState('');
-
-  const moveToDetail = (targetExperienceId: string) => {
-    navigate(`/experiences/${targetExperienceId}`, { replace: true });
-    window.location.replace(`/experiences/${targetExperienceId}`);
-  };
+  const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
 
   const cleanupTimers = () => {
     if (intervalRef.current != null) {
@@ -100,7 +96,7 @@ export default function AiAnalysisResultPage() {
         if (mounted) {
           setError('분석 시간이 예상보다 오래 걸리고 있어요. 잠시 후 다시 확인해주세요.');
         }
-        moveToDetail(targetExperienceId);
+        setRedirectTarget(targetExperienceId);
       }, 15000);
     }
 
@@ -109,7 +105,7 @@ export default function AiAnalysisResultPage() {
         const report = await getReport(targetExperienceId);
         if (report.reportStatus === 'READY') {
           cleanupTimers();
-          moveToDetail(targetExperienceId);
+          setRedirectTarget(targetExperienceId);
           return true;
         }
       } catch (reportError) {
@@ -136,6 +132,10 @@ export default function AiAnalysisResultPage() {
 
   if (!experienceId) {
     return <Navigate to="/" replace />;
+  }
+
+  if (redirectTarget) {
+    return <Navigate to={`/experiences/${redirectTarget}`} replace />;
   }
 
   return (
