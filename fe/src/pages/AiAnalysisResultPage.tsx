@@ -60,6 +60,10 @@ export default function AiAnalysisResultPage() {
         startedRef.current = true;
         try {
           await createAnalysis(token, targetExperienceId);
+          const readyAfterCreate = await checkReportStatus();
+          if (readyAfterCreate) {
+            return;
+          }
         } catch (requestError) {
           if (requestError instanceof ApiError) {
             if (
@@ -90,7 +94,7 @@ export default function AiAnalysisResultPage() {
 
       intervalRef.current = window.setInterval(() => {
         void checkReportStatus();
-      }, 2500);
+      }, 1000);
 
       timeoutRef.current = window.setTimeout(() => {
         if (mounted) {
