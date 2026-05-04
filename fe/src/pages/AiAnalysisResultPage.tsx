@@ -18,6 +18,11 @@ export default function AiAnalysisResultPage() {
   const [nickname, setNickname] = useState(storedUser?.nickname ?? '사용자');
   const [error, setError] = useState('');
 
+  const moveToDetail = (targetExperienceId: string) => {
+    navigate(`/experiences/${targetExperienceId}`, { replace: true });
+    window.location.replace(`/experiences/${targetExperienceId}`);
+  };
+
   const cleanupTimers = () => {
     if (intervalRef.current != null) {
       window.clearInterval(intervalRef.current);
@@ -50,7 +55,10 @@ export default function AiAnalysisResultPage() {
         }
       }
 
-      await checkReportStatus();
+      const isReady = await checkReportStatus();
+      if (isReady) {
+        return;
+      }
 
       if (!startedRef.current && token) {
         startedRef.current = true;
@@ -92,6 +100,7 @@ export default function AiAnalysisResultPage() {
         if (mounted) {
           setError('분석 시간이 예상보다 오래 걸리고 있어요. 잠시 후 다시 확인해주세요.');
         }
+        moveToDetail(targetExperienceId);
       }, 15000);
     }
 
@@ -100,7 +109,8 @@ export default function AiAnalysisResultPage() {
         const report = await getReport(targetExperienceId);
         if (report.reportStatus === 'READY') {
           cleanupTimers();
-          navigate(`/experiences/${targetExperienceId}`, { replace: true });
+          moveToDetail(targetExperienceId);
+          return true;
         }
       } catch (reportError) {
         if (mounted) {
@@ -112,6 +122,8 @@ export default function AiAnalysisResultPage() {
           );
         }
       }
+
+      return false;
     }
 
     void bootstrap();
