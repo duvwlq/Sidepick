@@ -1,132 +1,179 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import AiAnalysisResult from '../components/ai-analysis/AiAnalysisResult';
-import BottomNav from '../components/layout/ButtomNav';
-
-function BackIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
-      <path
-        d="M15 6L9 12L15 18"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function HeartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
-      <path
-        d="M20.25 8.75C20.25 13.5 12 18.25 12 18.25S3.75 13.5 3.75 8.75C3.75 6.4 5.65 4.5 8 4.5C9.36 4.5 10.58 5.14 11.35 6.14L12 6.98L12.65 6.14C13.42 5.14 14.64 4.5 16 4.5C18.35 4.5 20.25 6.4 20.25 8.75Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function BookmarkIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
-      <path
-        d="M7 5.75C7 5.33579 7.33579 5 7.75 5H16.25C16.6642 5 17 5.33579 17 5.75V19L12 15.5L7 19V5.75Z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
-      <path
-        d="M6.75 12C6.75 12.6904 6.19036 13.25 5.5 13.25C4.80964 13.25 4.25 12.6904 4.25 12C4.25 11.3096 4.80964 10.75 5.5 10.75C6.19036 10.75 6.75 11.3096 6.75 12Z"
-        fill="currentColor"
-      />
-      <path
-        d="M13.25 12C13.25 12.6904 12.6904 13.25 12 13.25C11.3096 13.25 10.75 12.6904 10.75 12C10.75 11.3096 11.3096 10.75 12 10.75C12.6904 10.75 13.25 11.3096 13.25 12Z"
-        fill="currentColor"
-      />
-      <path
-        d="M19.75 12C19.75 12.6904 19.1904 13.25 18.5 13.25C17.8096 13.25 17.25 12.6904 17.25 12C17.25 11.3096 17.8096 10.75 18.5 10.75C19.1904 10.75 19.75 11.3096 19.75 12Z"
-        fill="currentColor"
-      />
-    </svg>
-  );
-}
+import { BatteryFull, LoaderCircle, Signal, Wifi } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { ApiError, createAnalysis, getExperience, getReport } from '../lib/api';
+import { ERROR_CODES } from '../lib/error-codes';
+import { resolveErrorMessage } from '../lib/resolve-error-message';
+import { getAccessToken, getStoredUser } from '../lib/session';
 
 export default function AiAnalysisResultPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const experienceId = Number(searchParams.get('experienceId'));
+  const experienceId = searchParams.get('experienceId');
+  const token = getAccessToken();
+  const storedUser = getStoredUser();
+  const startedRef = useRef(false);
+  const intervalRef = useRef<number | null>(null);
+  const timeoutRef = useRef<number | null>(null);
+  const [nickname, setNickname] = useState(storedUser?.nickname ?? '사용자');
+  const [error, setError] = useState('');
+
+  const cleanupTimers = () => {
+    if (intervalRef.current != null) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    if (timeoutRef.current != null) {
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!experienceId) {
+      return;
+    }
+
+    const targetExperienceId = experienceId;
+    let mounted = true;
+
+    async function bootstrap() {
+      try {
+        const experience = await getExperience(targetExperienceId);
+        if (mounted) {
+          setNickname(experience.author.nickname || storedUser?.nickname || '사용자');
+        }
+      } catch {
+        if (mounted) {
+          setNickname(storedUser?.nickname ?? '사용자');
+        }
+      }
+
+      await checkReportStatus();
+
+      if (!startedRef.current && token) {
+        startedRef.current = true;
+        try {
+          await createAnalysis(token, targetExperienceId);
+        } catch (requestError) {
+          if (requestError instanceof ApiError) {
+            if (
+              requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
+              requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR
+            ) {
+              if (mounted) {
+                setError(resolveErrorMessage(requestError));
+              }
+              return;
+            }
+          }
+
+          if (mounted) {
+            setError(
+              resolveErrorMessage(
+                requestError,
+                '분석 요청 처리 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+              ),
+            );
+          }
+        }
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      intervalRef.current = window.setInterval(() => {
+        void checkReportStatus();
+      }, 2500);
+
+      timeoutRef.current = window.setTimeout(() => {
+        if (mounted) {
+          setError('분석 시간이 예상보다 오래 걸리고 있어요. 잠시 후 다시 확인해주세요.');
+        }
+      }, 15000);
+    }
+
+    async function checkReportStatus() {
+      try {
+        const report = await getReport(targetExperienceId);
+        if (report.reportStatus === 'READY') {
+          cleanupTimers();
+          navigate(`/experiences/${targetExperienceId}`, { replace: true });
+        }
+      } catch (reportError) {
+        if (mounted) {
+          setError(
+            resolveErrorMessage(
+              reportError,
+              '분석 결과를 확인하지 못했어요. 잠시 후 다시 시도해주세요.',
+            ),
+          );
+        }
+      }
+    }
+
+    void bootstrap();
+
+    return () => {
+      mounted = false;
+      cleanupTimers();
+    };
+  }, [experienceId, navigate, storedUser?.nickname, token]);
+
+  if (!experienceId) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-[375px] bg-[#EEE]">
-      <header className="fixed left-1/2 top-0 z-50 w-full max-w-[375px] -translate-x-1/2 bg-white">
-        <div className="flex h-[59px] items-center justify-between px-6 pb-[19px] pt-[21px] text-[17px] font-semibold text-black">
-          <span>9:41</span>
-          <div className="flex items-center gap-[7px]">
-            <div className="h-[12px] w-[19px] rounded-full bg-black/90" />
-            <div className="h-[12px] w-[17px] rounded-full bg-black/80" />
-            <div className="h-[13px] w-[27px] rounded-[4px] border border-black/80" />
+    <div className="mx-auto flex min-h-screen w-full max-w-[375px] flex-col items-center gap-[2px] bg-[#FFFFFF]">
+      <div className="flex w-full flex-col items-start">
+        <div className="flex h-[59px] w-full items-center justify-center gap-[154px] bg-[#FFFFFF] px-[24px] pb-[19px] pt-[21px]">
+          <div className="flex min-w-px flex-[1_0_0] items-center justify-center pt-[1.5px]">
+            <p className="text-center text-[17px] font-[600] leading-[22px] tracking-[0px] text-[#000000]">
+              9:41
+            </p>
+          </div>
+          <div className="flex min-w-px flex-[1_0_0] items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
+            <Signal size={16} className="text-[#000000]" strokeWidth={2.1} />
+            <Wifi size={16} className="text-[#000000]" strokeWidth={2.1} />
+            <BatteryFull size={18} className="text-[#000000]" strokeWidth={2.1} />
           </div>
         </div>
+      </div>
 
-        <div className="flex h-16 items-center justify-between px-4 py-5">
-          <div className="flex w-[52px] items-center gap-1 text-[#131416]">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="flex h-6 w-6 items-center justify-center"
-              aria-label="뒤로 가기"
-            >
-              <BackIcon />
-            </button>
-            <button
-              type="button"
-              className="flex h-6 w-6 items-center justify-center"
-              aria-label="좋아요"
-            >
-              <HeartIcon />
-            </button>
-          </div>
-          <h1 className="text-base font-semibold leading-[1.2] text-[#131416]">
-            분석 결과
-          </h1>
-          <div className="flex w-[52px] items-center gap-1 text-[#131416]">
-            <button
-              type="button"
-              className="flex h-6 w-6 items-center justify-center"
-              aria-label="북마크"
-            >
-              <BookmarkIcon />
-            </button>
-            <button
-              type="button"
-              className="flex h-6 w-6 items-center justify-center"
-              aria-label="더보기"
-            >
-              <MoreIcon />
-            </button>
-          </div>
+      <div className="isolate flex h-[688px] w-full flex-col items-center justify-center gap-[20px] rounded-[10px] bg-[#FFFFFF] px-[16px] pb-[110px] pt-[20px]">
+        <div className="min-w-full text-center text-[24px] font-[400] leading-[28.8px] tracking-[0px] text-[#131416]">
+          <p className="mb-0 text-[24px] font-[400] leading-[28.8px] tracking-[0px] text-[#131416]">
+            <span className="text-[24px] font-[600] leading-[28.8px] tracking-[0px] text-[#131416]">
+              {nickname}
+            </span>
+            <span className="text-[24px] font-[400] leading-[28.8px] tracking-[0px] text-[#131416]">
+              님의
+            </span>
+          </p>
+          <p className="text-[24px] font-[400] leading-[28.8px] tracking-[0px] text-[#131416]">
+            경험을 분석하고 있어요!
+          </p>
         </div>
-      </header>
 
-      <main className="pb-[110px] pt-[123px]">
-        <AiAnalysisResult
-          experienceId={Number.isFinite(experienceId) ? experienceId : null}
-        />
-      </main>
-
-      <BottomNav />
+        <div className="flex flex-col items-center gap-[20px]">
+          <LoaderCircle
+            size={24}
+            strokeWidth={2.2}
+            className="animate-spin text-[#5E5E5E]"
+          />
+          <p className="text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+            잠시만 기다려주세요.
+          </p>
+          {error ? (
+            <p className="w-[220px] text-center text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+              {error}
+            </p>
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }
