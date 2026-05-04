@@ -174,17 +174,20 @@ function getPatternSource(report: AnalysisReport | null) {
     return [];
   }
 
+  const dedupe = (items: Array<string | null | undefined>) =>
+    Array.from(new Set(items.filter(Boolean) as string[]));
+
   if (report.failureCategory) {
-    return [report.failureCategory, ...report.extractedPatterns];
+    return dedupe([report.failureCategory, ...report.extractedPatterns]);
   }
   if (report.extractedPatterns.length) {
-    return report.extractedPatterns;
+    return dedupe(report.extractedPatterns);
   }
   if (report.keywords?.length) {
-    return report.keywords;
+    return dedupe(report.keywords);
   }
 
-  return report.riskFactors;
+  return dedupe(report.riskFactors);
 }
 
 function buildPatternItems(report: AnalysisReport | null): PatternItem[] {
