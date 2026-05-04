@@ -11,6 +11,10 @@ frontend:
     build:
       commands:
         - npm run build
+    postBuild:
+      commands:
+        - cp dist/index.html dist/404.html
+        - cp dist/index.html dist/200.html
   artifacts:
     baseDirectory: fe/dist
     files:
