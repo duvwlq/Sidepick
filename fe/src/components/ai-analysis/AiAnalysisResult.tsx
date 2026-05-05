@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bookmark, ChevronLeft, Heart, MoreHorizontal } from 'lucide-react';
+import {
+  Bookmark,
+  ChevronLeft,
+  Heart,
+  MoreHorizontal,
+  Trash2,
+} from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import amountIcon from '../../assets/images/amount.svg';
 import createIcon from '../../assets/images/plus-circle.svg';
@@ -10,6 +16,7 @@ import userIcon from '../../assets/images/user.svg';
 import {
   ApiError,
   createAnalysis,
+  deleteExperience,
   getExperience,
   getReport,
   type AnalysisReport,
@@ -18,7 +25,7 @@ import {
 } from '../../lib/api';
 import { ERROR_CODES } from '../../lib/error-codes';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
-import { getAccessToken } from '../../lib/session';
+import { getAccessToken, getStoredUser } from '../../lib/session';
 
 type Props = {
   experienceId: number | null;
@@ -420,6 +427,17 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   const [report, setReport] = useState<AnalysisReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const viewer = getStoredUser();
+  const isOwner = useMemo(() => {
+    if (!viewer || !experience) {
+      return false;
+    }
+
+    return viewer.id === experience.author.id;
+  }, [experience, viewer]);
 
   useEffect(() => {
     if (!experienceId) {
@@ -476,6 +494,40 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       );
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!experience) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      setError('삭제하려면 로그인이 필요합니다.');
+      return;
+    }
+
+    const confirmed = window.confirm('이 사례를 삭제하시겠습니까?');
+    if (!confirmed) {
+      return;
+    }
+
+    setDeleting(true);
+    setActionMenuOpen(false);
+    setError('');
+
+    try {
+      await deleteExperience(token, experience.id);
+      navigate('/', { replace: true });
+    } catch (requestError) {
+      setError(
+        resolveErrorMessage(
+          requestError,
+          '사례를 삭제하지 못했어요. 잠시 후 다시 시도해주세요.',
+        ),
+      );
+      setDeleting(false);
     }
   }
 
@@ -560,11 +612,36 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
   return (
     <div className="mx-auto min-h-screen w-[375px] bg-[#FFFFFF]">
+      {actionMenuOpen && (
+        <button
+          type="button"
+          aria-label="오버레이 닫기"
+          onClick={() => {
+            setActionMenuOpen(false);
+          }}
+          className="fixed inset-0 z-40 bg-black/20"
+        />
+      )}
+
+      {isOwner && actionMenuOpen ? (
+        <div className="fixed left-1/2 top-[106px] z-50 w-[148px] -translate-x-[-112px] rounded-[14px] border border-[#E6E6E6] bg-white p-[6px] shadow-[0_12px_30px_rgba(0,0,0,0.14)]">
+          <button
+            type="button"
+            onClick={() => void handleDelete()}
+            disabled={deleting}
+            className="flex w-full items-center gap-[8px] rounded-[10px] px-[12px] py-[10px] text-left font-['Pretendard'] text-[13px] font-[500] leading-[16px] tracking-[0px] text-[#D33B3B] hover:bg-[#FFF4F2] disabled:opacity-60"
+          >
+            <Trash2 size={16} />
+            {deleting ? '삭제 중...' : '삭제하기'}
+          </button>
+        </div>
+      ) : null}
+
       <div className="relative flex w-[375px] flex-col bg-[#FFFFFF]">
         <div className="flex w-[375px] flex-col">
           <StatusBar />
 
-          <div className="flex w-[375px] items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
+          <div className="relative flex w-[375px] items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
             <div className="flex items-center gap-[8px]">
               <button
                 type="button"
@@ -591,18 +668,29 @@ export default function AiAnalysisResult({ experienceId }: Props) {
               >
                 <Bookmark size={24} strokeWidth={1.75} />
               </button>
-              <button
-                type="button"
-                aria-label="더보기"
-                className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
-              >
-                <MoreHorizontal size={24} strokeWidth={1.75} />
-              </button>
+              {isOwner ? (
+                <button
+                  type="button"
+                  aria-label="더보기"
+                  onClick={() => setActionMenuOpen((current) => !current)}
+                  className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
+                >
+                  <MoreHorizontal size={24} strokeWidth={1.75} />
+                </button>
+              ) : (
+                <div className="h-[24px] w-[24px]" />
+              )}
             </div>
           </div>
         </div>
 
         <div className="flex w-[375px] flex-col gap-[36px] px-[16px] pb-[100px]">
+          {error ? (
+            <div className="rounded-[10px] border border-[#F2D1CD] bg-[#FFF4F2] px-[16px] py-[12px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#D33B3B]">
+              {error}
+            </div>
+          ) : null}
+
           <section className="flex w-full flex-col gap-[24px] bg-[#FFFFFF]">
             <div className="flex w-full items-center gap-[8px]">
               {experience.author.profileImage ? (

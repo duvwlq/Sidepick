@@ -1,11 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import SearchBar from '../components/common/SearchBar';
 import CardList from '../components/common/CardList';
 import Layout from '../components/layout/Layout';
+import { difficultyOptions } from '../constants/experienceOptions';
 import { getExperiences, type Experience } from '../lib/api';
 
 type SortKey = 'latest' | 'popular';
+type FilterTagOption = {
+  label: string;
+  value: string | null;
+};
 
 const RECENT_SEARCHES_KEY = 'sidepick.recentSearches';
 const DEFAULT_RECOMMENDED_KEYWORDS = [
@@ -16,8 +21,6 @@ const DEFAULT_RECOMMENDED_KEYWORDS = [
   '광고',
   'SNS 광고',
 ];
-const FILTER_TAGS = ['tag', 'tag', 'tag', 'tag', 'tag', 'tag', 'tag', 'tag'];
-
 function readRecentSearches() {
   const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
   if (!raw) {
@@ -51,13 +54,31 @@ function FilterIcon() {
   );
 }
 
-function FilterTag({ label }: { label: string }) {
+function FilterTag({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
-      className="flex shrink-0 appearance-none flex-col items-center justify-center rounded-[999px] border-0 bg-[#EEEEEE] px-[10px] py-[4px]"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex shrink-0 appearance-none flex-col items-center justify-center rounded-[999px] px-[10px] py-[4px] ${
+        active
+          ? 'border border-[#1F1F1F] bg-[#1F1F1F]'
+          : 'border-0 bg-[#EEEEEE]'
+      }`}
     >
-      <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#757575] [font-feature-settings:'case'_1]">
+      <span
+        className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] [font-feature-settings:'case'_1] ${
+          active ? 'text-[#FFFFFF]' : 'text-[#757575]'
+        }`}
+      >
         {label}
       </span>
     </button>
@@ -105,9 +126,13 @@ function Chip({
 
 export default function Explore() {
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState('');
-  const [draftKeyword, setDraftKeyword] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialKeyword = searchParams.get('q') ?? '';
+  const initialTag = searchParams.get('tag');
+  const [keyword, setKeyword] = useState(initialKeyword);
+  const [draftKeyword, setDraftKeyword] = useState(initialKeyword);
   const [sort] = useState<SortKey>('latest');
+  const [selectedTag, setSelectedTag] = useState<string | null>(initialTag);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -117,10 +142,26 @@ export default function Explore() {
   );
 
   useEffect(() => {
-    void loadExperiences(keyword, sort);
-  }, [keyword, sort]);
+    void loadExperiences(keyword, sort, selectedTag);
+  }, [keyword, sort, selectedTag]);
 
-  async function loadExperiences(searchKeyword: string, sortKey: SortKey) {
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+    if (keyword.trim()) {
+      nextParams.set('q', keyword.trim());
+    }
+    if (selectedTag) {
+      nextParams.set('tag', selectedTag);
+    }
+
+    setSearchParams(nextParams, { replace: true });
+  }, [keyword, selectedTag, setSearchParams]);
+
+  async function loadExperiences(
+    searchKeyword: string,
+    sortKey: SortKey,
+    failureReason: string | null,
+  ) {
     setLoading(true);
     setError('');
 
@@ -129,6 +170,7 @@ export default function Explore() {
         page: 0,
         size: 50,
         q: searchKeyword.trim() || undefined,
+        failureReason: failureReason ?? undefined,
         sort: sortKey,
       });
       setExperiences(payload.experiences);
@@ -169,7 +211,31 @@ export default function Explore() {
     persistRecentKeywords(recentKeywords.filter((item) => item !== target));
   }
 
+  function toggleTag(tagValue: string | null) {
+    setSelectedTag((current) => (current === tagValue ? null : tagValue));
+  }
+
   const recommendedKeywords = useMemo(() => DEFAULT_RECOMMENDED_KEYWORDS, []);
+  const filterTags = useMemo<FilterTagOption[]>(
+    () => [
+      { label: '전체', value: null },
+      ...difficultyOptions
+        .filter((item) => item && item !== '기타')
+        .slice(0, 7)
+        .map((item) => ({ label: item, value: item })),
+    ],
+    [],
+  );
+  const activeFilters = useMemo(() => {
+    const items: Array<{ key: 'q' | 'tag'; label: string }> = [];
+    if (keyword.trim()) {
+      items.push({ key: 'q', label: `검색어: ${keyword.trim()}` });
+    }
+    if (selectedTag) {
+      items.push({ key: 'tag', label: `태그: ${selectedTag}` });
+    }
+    return items;
+  }, [keyword, selectedTag]);
 
   if (isSearchMode) {
     return (
@@ -249,10 +315,64 @@ export default function Explore() {
             <FilterIcon />
           </button>
           <div className="-mr-[16px] flex min-w-0 flex-1 items-center gap-[8px] overflow-x-auto pr-[16px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {FILTER_TAGS.map((tag, index) => (
-              <FilterTag key={`${tag}-${index}`} label={tag} />
+            {filterTags.map((tag) => (
+              <FilterTag
+                key={tag.label}
+                label={tag.label}
+                active={selectedTag === tag.value}
+                onClick={() => toggleTag(tag.value)}
+              />
             ))}
           </div>
+        </section>
+
+        <section className="flex w-full flex-col gap-[12px] bg-[#FFFFFF] px-[16px] py-[14px]">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <p className="font-['Pretendard'] text-[15px] font-[600] leading-[18px] text-[#111111]">
+                {loading ? '사례를 불러오는 중' : `총 ${experiences.length}개의 사례`}
+              </p>
+              <p className="mt-[4px] font-['Pretendard'] text-[12px] font-[400] leading-[16px] text-[#7A7A7A]">
+                {activeFilters.length
+                  ? '선택한 조건에 맞는 사례만 모아보고 있어요.'
+                  : '태그나 검색어로 원하는 사례를 빠르게 좁혀보세요.'}
+              </p>
+            </div>
+
+            {activeFilters.length ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setKeyword('');
+                  setDraftKeyword('');
+                  setSelectedTag(null);
+                }}
+                className="rounded-[999px] bg-[#F3F3F3] px-[10px] py-[6px] font-['Pretendard'] text-[12px] font-[500] leading-[14px] text-[#5E5E5E]"
+              >
+                필터 초기화
+              </button>
+            ) : null}
+          </div>
+
+          {activeFilters.length ? (
+            <div className="flex flex-wrap gap-[6px]">
+              {activeFilters.map((item) => (
+                <Chip
+                  key={`${item.key}-${item.label}`}
+                  label={item.label}
+                  onClick={() => undefined}
+                  onRemove={
+                    item.key === 'q'
+                      ? () => {
+                          setKeyword('');
+                          setDraftKeyword('');
+                        }
+                      : () => setSelectedTag(null)
+                  }
+                />
+              ))}
+            </div>
+          ) : null}
         </section>
 
         <CardList experiences={experiences} loading={loading} error={error} />
