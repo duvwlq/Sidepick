@@ -5,6 +5,7 @@ import Create from './pages/Create';
 import MyPage from './pages/MyPage';
 import AiAnalysisResultPage from './pages/AiAnalysisResultPage';
 import ExperienceDetail from './pages/ExperienceDetail';
+import FaqPage from './pages/FaqPage';
 import { AuthFlowProvider } from './context/AuthFlowContext';
 import AuthEntryPage from './pages/auth/AuthEntryPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/experiences/:id" element={<ExperienceDetail />} />
           <Route path="/analysis-result" element={<AiAnalysisResultPage />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/mypage/faq" element={<FaqPage />} />
         </Routes>
       </AuthFlowProvider>
     </BrowserRouter>

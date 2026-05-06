@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronRight, CircleHelp, LogOut, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import { getMe, type UserSummary } from '../lib/api';
@@ -36,24 +37,41 @@ export default function MyPage() {
   }, [token]);
 
   return (
-    <Layout title="마이페이지" leftType="menu" showRightIcon>
-      <div className="space-y-4 p-4">
+    <Layout title="마이페이지" leftType="menu" showRightIcon={false}>
+      <div className="space-y-4 bg-[#FAFAFA] p-4">
         {loading ? (
-          <div className="rounded-[10px] bg-white p-5 text-sm text-gray-500">
-            사용자 정보를 불러오는 중입니다.
-          </div>
+          <section className="rounded-[20px] bg-white p-5 shadow-sm">
+            <p className="text-sm text-[#757575]">
+              사용자 정보를 불러오는 중입니다.
+            </p>
+          </section>
         ) : user ? (
-          <div className="rounded-[10px] bg-white p-5 shadow-sm">
-            <div className="mb-1 text-lg font-semibold text-gray-900">
-              {user.nickname}
+          <section className="rounded-[24px] bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#111111] text-white">
+                <UserRound className="h-6 w-6" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-[20px] font-semibold leading-6 text-[#111111]">
+                  {user.nickname}
+                </p>
+                <p className="mt-1 truncate text-sm text-[#757575]">{user.email}</p>
+              </div>
             </div>
-            <div className="mb-3 text-sm text-gray-500">{user.email}</div>
-            <div className="space-y-2 text-sm text-gray-700">
-              <div>연령대: {user.ageGroup}</div>
-              <div>가입일: {user.createdAt.slice(0, 10)}</div>
-              <div>로그인 방식: {user.authProvider}</div>
-              <div>이메일 인증: {user.emailVerified ? '완료' : '미완료'}</div>
+
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <InfoCard label="연령대" value={user.ageGroup} />
+              <InfoCard
+                label="가입일"
+                value={new Date(user.createdAt).toLocaleDateString('ko-KR')}
+              />
+              <InfoCard label="로그인 방식" value={user.authProvider} />
+              <InfoCard
+                label="이메일 인증"
+                value={user.emailVerified ? '완료' : '미완료'}
+              />
             </div>
+
             <button
               type="button"
               onClick={() => {
@@ -61,36 +79,79 @@ export default function MyPage() {
                 setUser(null);
                 navigate('/');
               }}
-              className="mt-4 h-11 w-full rounded-xl border border-gray-300 text-sm font-medium text-gray-700"
+              className="mt-5 flex h-12 w-full items-center justify-center gap-2 rounded-[14px] border border-[#E5E5E5] text-sm font-medium text-[#444444]"
             >
+              <LogOut className="h-4 w-4" />
               로그아웃
             </button>
-          </div>
+          </section>
         ) : (
-          <div className="rounded-[10px] bg-white p-5 text-sm text-gray-600">
-            로그인한 사용자가 없습니다.
+          <section className="rounded-[24px] bg-white p-5 shadow-sm">
+            <p className="text-base font-semibold text-[#111111]">
+              로그인한 사용자가 없습니다.
+            </p>
+            <p className="mt-2 text-sm leading-5 text-[#757575]">
+              마이페이지를 이용하려면 로그인 또는 회원가입이 필요합니다.
+            </p>
             <button
               type="button"
               onClick={() =>
                 navigate(
                   `/auth?next=${encodeURIComponent('/mypage')}&reason=${encodeURIComponent(
-                    '마이페이지는 로그인 후 이용할 수 있어요.',
+                    '마이페이지는 로그인이 필요합니다.',
                   )}`,
                 )
               }
-              className="mt-4 h-11 w-full rounded-xl bg-black text-sm font-medium text-white"
+              className="mt-4 h-12 w-full rounded-[14px] bg-[#111111] text-sm font-semibold text-white"
             >
               로그인 / 회원가입
             </button>
-          </div>
+          </section>
         )}
 
+        <section className="rounded-[24px] bg-white p-5 shadow-sm">
+          <div className="mb-4">
+            <p className="text-base font-semibold text-[#111111]">도움말</p>
+            <p className="mt-1 text-sm text-[#757575]">
+              자주 묻는 질문과 이용 가이드를 확인할 수 있습니다.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => navigate('/mypage/faq')}
+            className="flex w-full items-center justify-between rounded-[18px] bg-[#F8F8F8] px-4 py-4 text-left"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#111111]">
+                <CircleHelp className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[#111111]">FAQ</p>
+                <p className="mt-1 text-xs text-[#757575]">
+                  서비스 이용 중 자주 묻는 질문
+                </p>
+              </div>
+            </div>
+            <ChevronRight className="h-5 w-5 text-[#757575]" />
+          </button>
+        </section>
+
         {error ? (
-          <div className="rounded-[10px] bg-white p-4 text-sm text-red-600">
+          <div className="rounded-[16px] bg-[#FFF4F2] px-4 py-3 text-sm text-[#D33B3B]">
             {error}
           </div>
         ) : null}
       </div>
     </Layout>
+  );
+}
+
+function InfoCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-[16px] bg-[#F8F8F8] px-4 py-3">
+      <p className="text-xs text-[#8A8A8A]">{label}</p>
+      <p className="mt-2 text-sm font-semibold text-[#111111]">{value}</p>
+    </div>
   );
 }
