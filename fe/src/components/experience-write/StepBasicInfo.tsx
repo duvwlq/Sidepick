@@ -81,7 +81,7 @@ export default function StepBasicInfo({
                 active ? 'border-[#131416] bg-[#F8F8F8]' : 'border-[#E6E6E6] bg-[#FFFFFF]'
               }`}
             >
-              <div className="shrink-0">{visual.icon}</div>
+              <div className="flex h-[40px] items-center shrink-0">{visual.icon}</div>
               <div className="flex w-full flex-col items-start gap-[4px] text-left">
                 <p className="w-full font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
                   {visual.label}
