@@ -32,9 +32,9 @@ DURATION_TO_INT = {
 }
 
 # daily_hours: "X시간 미만" / "X~Y시간" / "X시간 이상" -> 정수 시간
-# NOTE: "5시간 이상"의 INT 값은 BE 결정 대기 중. 옵션 A(=5) 기본값.
-#       BE가 옵션 B로 결정하면 아래 한 줄만 수정.
-DAILY_HOURS_OPEN_TOP = 5  # "5시간 이상"의 정수 표현 (옵션 A)
+# 신규 입력 폼이 "8시간 이상"이 max이고, 픽플리 원본 "5시간 이상"도 동일하게
+# "max 옵션" 의미라 둘 다 INT 8로 통일 (옵션 B). PD 와이어프레임 v2 기준.
+DAILY_HOURS_OPEN_TOP = 8  # "5시간 이상" / "8시간 이상" 공통 max 값 (옵션 B)
 DAILY_HOURS_TO_INT = {
     "1시간 미만": 0,
     "1~3시간": 2,
