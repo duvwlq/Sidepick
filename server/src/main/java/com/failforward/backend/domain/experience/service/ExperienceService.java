@@ -11,11 +11,7 @@ import com.failforward.backend.domain.experience.dto.ExperienceDtos;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
 import com.failforward.backend.domain.user.entity.User;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
@@ -32,7 +28,8 @@ public class ExperienceService {
     private final AIAnalysisService aiAnalysisService;
     private final CurrentUserProvider currentUserProvider;
     private final CategoryService categoryService;
-    private final ObjectMapper objectMapper;
+    private final ExperienceRequestSupport requestSupport;
+    private final ExperienceComparisonSupport comparisonSupport;
 
     @Transactional
     public ExperienceDtos.ExperienceResponse create(ExperienceDtos.ExperienceCreateRequest request) {
@@ -148,22 +145,19 @@ public class ExperienceService {
                 investmentAmountMax
         );
 
-        int safePage = Math.max(page, 0);
-        int safeSize = size <= 0 ? 20 : size;
-        int fromIndex = Math.min(safePage * safeSize, filtered.size());
-        int toIndex = Math.min(fromIndex + safeSize, filtered.size());
-
-        List<ExperienceDtos.ExperienceResponse> experiences = filtered.subList(fromIndex, toIndex).stream()
-                .map(experience -> ExperienceDtos.ExperienceResponse.from(
-                        experience,
-                        aiAnalysisService.findByExperience(experience).orElse(null)
-                ))
-                .toList();
-
-        int totalPages = filtered.isEmpty() ? 0 : (int) Math.ceil((double) filtered.size() / safeSize);
+        PaginationWindow pagination = buildPagination(page, size, filtered.size());
+        List<ExperienceDtos.ExperienceResponse> experiences = mapExperienceResponses(
+                filtered.subList(pagination.fromIndex(), pagination.toIndex())
+        );
         return new ExperienceDtos.ExperienceListPayload(
                 experiences,
-                new PageInfo(safePage, safeSize, filtered.size(), totalPages, toIndex < filtered.size())
+                new PageInfo(
+                        pagination.page(),
+                        pagination.size(),
+                        filtered.size(),
+                        pagination.totalPages(),
+                        pagination.hasNext()
+                )
         );
     }
 
@@ -202,21 +196,9 @@ public class ExperienceService {
                 ))
                 .toList();
 
-        List<String> commonPatterns = experiences.stream()
-                .map(FailureExperience::getFailureReason)
-                .filter(reason -> reason != null && !reason.isBlank())
-                .distinct()
-                .limit(3)
-                .map(reason -> "Shared failure reason: " + reason)
-                .toList();
+        List<String> commonPatterns = comparisonSupport.buildCommonPatterns(experiences);
 
-        List<String> differences = experiences.stream()
-                .map(FailureExperience::getBusinessType)
-                .filter(type -> type != null && !type.isBlank())
-                .distinct()
-                .limit(3)
-                .map(type -> "Different business type: " + type)
-                .toList();
+        List<String> differences = comparisonSupport.buildDifferences(experiences);
 
         return new ExperienceDtos.CompareResponse(
                 payload,
@@ -232,6 +214,25 @@ public class ExperienceService {
     public FailureExperience getExperienceEntity(Long experienceId) {
         return experienceRepository.findWithUserAndCategoryById(experienceId)
                 .orElseThrow(() -> new NotFoundException("Experience not found."));
+    }
+
+    private List<ExperienceDtos.ExperienceResponse> mapExperienceResponses(List<FailureExperience> experiences) {
+        return experiences.stream()
+                .map(experience -> ExperienceDtos.ExperienceResponse.from(
+                        experience,
+                        aiAnalysisService.findByExperience(experience).orElse(null)
+                ))
+                .toList();
+    }
+
+    private PaginationWindow buildPagination(int page, int size, int totalElements) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size <= 0 ? 20 : size;
+        int fromIndex = Math.min(safePage * safeSize, totalElements);
+        int toIndex = Math.min(fromIndex + safeSize, totalElements);
+        int totalPages = totalElements == 0 ? 0 : (int) Math.ceil((double) totalElements / safeSize);
+        boolean hasNext = toIndex < totalElements;
+        return new PaginationWindow(safePage, safeSize, fromIndex, toIndex, totalPages, hasNext);
     }
 
     private ExperiencePayload buildPayload(ExperienceDtos.ExperienceCreateRequest request) {
@@ -304,38 +305,39 @@ public class ExperienceService {
             Boolean wouldRetry
     ) {
         BusinessCategory category = categoryService.getCategory(categoryId);
-        validateWriteRequest(content, investmentAmount, durationMonths, monthlyRevenue, failureReason, failureReasons);
-        String resolvedBusinessType = hasText(businessType) ? businessType : category.getName();
-        Integer resolvedDurationMonths = durationMonths != null && durationMonths > 0 ? durationMonths : 1;
-        Integer resolvedWeeklyHours = weeklyHours != null && weeklyHours > 0 ? weeklyHours : 1;
-        List<String> resolvedFailureReasons = failureReasons == null ? List.of() : failureReasons.stream()
-                .filter(this::hasText)
-                .toList();
-        List<String> resolvedDifficulties = difficulties == null ? List.of() : difficulties.stream()
-                .filter(this::hasText)
-                .toList();
-        String resolvedDifficultyEtc = hasText(difficultyEtc) ? difficultyEtc.trim() : "";
-        String resolvedDifficultyExtra = hasText(difficultyExtra) ? difficultyExtra.trim() : "";
-        String resolvedFailureReason = hasText(failureReason)
-                ? failureReason
-                : (resolvedFailureReasons.isEmpty() ? "UNSPECIFIED" : resolvedFailureReasons.get(0));
-        String resolvedTitle = hasText(title) ? title : resolvedBusinessType + " failure experience";
-        String resolvedLessons = hasText(lessonsLearned) ? lessonsLearned : content;
-
-        Map<String, Object> structured = new HashMap<>();
-        structured.put("categoryId", categoryId);
-        structured.put("categoryName", category.getName());
-        structured.put("durationMonths", resolvedDurationMonths);
-        structured.put("weeklyHours", resolvedWeeklyHours);
-        structured.put("averageDailyHours", averageDailyHours);
-        structured.put("isConcurrentWithMainJob", isConcurrentWithMainJob != null ? isConcurrentWithMainJob : Boolean.FALSE);
-        structured.put("monthlyRevenue", monthlyRevenue);
-        structured.put("failureReasons", resolvedFailureReasons);
-        structured.put("difficulties", resolvedDifficulties);
-        structured.put("difficultyEtc", resolvedDifficultyEtc);
-        structured.put("difficultyExtra", resolvedDifficultyExtra);
-        structured.put("targetMarket", targetMarket);
-        structured.put("wouldRetry", wouldRetry != null ? wouldRetry : Boolean.FALSE);
+        requestSupport.validateWriteRequest(
+                content,
+                investmentAmount,
+                durationMonths,
+                monthlyRevenue,
+                failureReason,
+                failureReasons
+        );
+        String resolvedBusinessType = requestSupport.resolveBusinessType(businessType, category.getName());
+        Integer resolvedDurationMonths = requestSupport.resolveDurationMonths(durationMonths);
+        Integer resolvedWeeklyHours = requestSupport.resolveWeeklyHours(weeklyHours);
+        List<String> resolvedFailureReasons = requestSupport.normalizeTextList(failureReasons);
+        List<String> resolvedDifficulties = requestSupport.normalizeTextList(difficulties);
+        String resolvedDifficultyEtc = requestSupport.normalizeOptionalText(difficultyEtc);
+        String resolvedDifficultyExtra = requestSupport.normalizeOptionalText(difficultyExtra);
+        String resolvedFailureReason = requestSupport.resolveFailureReason(failureReason, resolvedFailureReasons);
+        String resolvedTitle = requestSupport.resolveTitle(title, resolvedBusinessType);
+        String resolvedLessons = requestSupport.resolveLessons(lessonsLearned, content);
+        var structured = requestSupport.buildStructuredData(
+                categoryId,
+                category.getName(),
+                resolvedDurationMonths,
+                resolvedWeeklyHours,
+                averageDailyHours,
+                isConcurrentWithMainJob,
+                monthlyRevenue,
+                resolvedFailureReasons,
+                resolvedDifficulties,
+                resolvedDifficultyEtc,
+                resolvedDifficultyExtra,
+                targetMarket,
+                wouldRetry
+        );
 
         return new ExperiencePayload(
                 category,
@@ -349,56 +351,30 @@ public class ExperienceService {
                 isConcurrentWithMainJob,
                 monthlyRevenue,
                 resolvedFailureReason,
-                writeJson(resolvedFailureReasons),
-                writeJson(resolvedDifficulties),
+                requestSupport.writeJson(resolvedFailureReasons),
+                requestSupport.writeJson(resolvedDifficulties),
                 resolvedDifficultyEtc,
                 resolvedDifficultyExtra,
                 targetMarket,
                 marketingChannels == null ? List.of() : marketingChannels,
                 resolvedLessons,
                 wouldRetry != null ? wouldRetry : Boolean.FALSE,
-                writeJson(marketingChannels == null ? List.of() : marketingChannels),
-                writeJson(structured)
+                requestSupport.writeJson(marketingChannels == null ? List.of() : marketingChannels),
+                requestSupport.writeJson(structured)
         );
     }
 
     private ExperienceDtos.SimilarityMatchResponse toSimilarity(FailureExperience target, FailureExperience candidate) {
-        double score = 0.4;
-        List<String> matching = new ArrayList<>();
-        List<String> differences = new ArrayList<>();
-
-        if (target.getBusinessType().equals(candidate.getBusinessType())) {
-            score += 0.3;
-            matching.add("Same business type");
-        } else {
-            differences.add("Business type differs");
-        }
-
-        if (target.getFailureReason().equals(candidate.getFailureReason())) {
-            score += 0.2;
-            matching.add("Same failure reason");
-        } else {
-            differences.add("Failure reason differs");
-        }
-
-        if (target.getInvestmentAmount() != null && candidate.getInvestmentAmount() != null) {
-            int gap = Math.abs(target.getInvestmentAmount() - candidate.getInvestmentAmount());
-            if (gap <= 500000) {
-                score += 0.1;
-                matching.add("Similar investment amount");
-            } else {
-                differences.add("Investment amount differs");
-            }
-        }
+        ExperienceComparisonSupport.SimilarityDetails similarity = comparisonSupport.calculateSimilarity(target, candidate);
 
         return new ExperienceDtos.SimilarityMatchResponse(
                 ExperienceDtos.ExperienceResponse.from(
                         candidate,
                         aiAnalysisService.findByExperience(candidate).orElse(null)
                 ),
-                Math.min(score, 0.99),
-                matching,
-                differences
+                similarity.score(),
+                similarity.matching(),
+                similarity.differences()
         );
     }
 
@@ -413,18 +389,6 @@ public class ExperienceService {
         if (user.requiresEmailVerification()) {
             throw new AccessDeniedException("Email verification is required to write experiences.");
         }
-    }
-
-    private String writeJson(Object value) {
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (Exception exception) {
-            throw new BadRequestException("Failed to serialize JSON payload.");
-        }
-    }
-
-    private boolean hasText(String value) {
-        return value != null && !value.isBlank();
     }
 
     private String normalizeQuery(String value) {
@@ -469,32 +433,6 @@ public class ExperienceService {
         }
     }
 
-    private void validateWriteRequest(
-            String content,
-            Integer investmentAmount,
-            Integer durationMonths,
-            Integer monthlyRevenue,
-            String failureReason,
-            List<String> failureReasons
-    ) {
-        if (!hasText(content)) {
-            throw new BadRequestException("Experience content is required.");
-        }
-        if (investmentAmount != null && investmentAmount < 0) {
-            throw new BadRequestException("Investment amount must be zero or greater.");
-        }
-        if (durationMonths != null && durationMonths < 0) {
-            throw new BadRequestException("Duration must be zero or greater.");
-        }
-        if (monthlyRevenue != null && monthlyRevenue < 0) {
-            throw new BadRequestException("Monthly revenue must be zero or greater.");
-        }
-        boolean hasStructuredFailureReason = failureReasons != null && failureReasons.stream().anyMatch(this::hasText);
-        if (!hasText(failureReason) && !hasStructuredFailureReason) {
-            throw new BadRequestException("At least one failure reason is required.");
-        }
-    }
-
     private record ExperiencePayload(
             BusinessCategory category,
             String title,
@@ -517,6 +455,16 @@ public class ExperienceService {
             Boolean wouldRetry,
             String marketingChannelsJson,
             String structuredDataJson
+    ) {
+    }
+
+    private record PaginationWindow(
+            int page,
+            int size,
+            int fromIndex,
+            int toIndex,
+            int totalPages,
+            boolean hasNext
     ) {
     }
 }
