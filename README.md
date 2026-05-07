@@ -53,6 +53,8 @@ Sidepick은 사이드 프로젝트와 부업 실패 경험을 구조화해서 �
 - `docs/`: 프로젝트 문서와 정리 자료
 - `screenshots/`: 참고용 화면 캡처와 발표 자료
 
+현재 공식 문서 인덱스는 [docs/README.md](D:/Codex_Folder/Sidepick/docs/README.md)에서 확인할 수 있습니다.
+
 ## 백엔드 인증 상태
 
 현재 백엔드는 아래 기능을 지원합니다.
@@ -67,7 +69,7 @@ Sidepick은 사이드 프로젝트와 부업 실패 경험을 구조화해서 �
 
 - [백엔드 README](D:/Codex_Folder/Sidepick/server/README.md)
 - [인증 흐름 문서](D:/Codex_Folder/Sidepick/server/AUTH_FLOW_MVP.md)
-- [프론트 연동 메모](D:/Codex_Folder/Sidepick/docs/frontend-auth-handoff.md)
+- [공식 문서 인덱스](D:/Codex_Folder/Sidepick/docs/README.md)
 
 ## 로컬 프론트 실행
 
@@ -106,4 +108,5 @@ cd server
 
 참고 문서:
 
-- [정리 목록](D:/Codex_Folder/Sidepick/docs/repo-cleanup-inventory.md)
+- [공식 문서 인덱스](D:/Codex_Folder/Sidepick/docs/README.md)
+- [archive 정리 문서](D:/Codex_Folder/Sidepick/docs/archive/README.md)

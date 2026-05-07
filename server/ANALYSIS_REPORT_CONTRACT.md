@@ -1,29 +1,28 @@
-# 02. API Contract
+# Analysis Report Contract v1
 
-## Scope
+현재 Phase 2 기준에서 분석 리포트 계약의 source of truth는 `server` 구현입니다.
 
-이 문서는 현재 MVP 기준 **FE-BE 계약**을 설명합니다.
-특히 사례 상세 화면에서 사용하는 분석 리포트 계약을 고정합니다.
-
-## Official Report Endpoint
+## Endpoint
 
 - `GET /api/reports/{experienceId}`
 
-FE에서 `VITE_API_BASE_URL=/api`를 사용할 때 request path는 아래입니다.
+프론트에서 `VITE_API_BASE_URL=/api`를 사용하면 request path는 아래입니다.
 
 - `/reports/{experienceId}`
 
-아래 경로는 **현재 표준 endpoint가 아닙니다**.
+아래 경로는 현재 표준 endpoint가 아닙니다.
 
 - `/api/experiences/{id}/report`
 
 ## reportStatus
 
-- `READY`: 분석 결과가 존재하고 화면에 표시 가능
-- `NOT_READY`: 분석 결과가 없거나 생성 중
+- `READY`: 분석 결과가 존재하고 화면 표시 가능
+- `NOT_READY`: 분석 결과가 아직 없거나 생성 중
 - `ERROR`: 분석 실패
 
-## READY Example
+현재 구현상 `ERROR`는 후속 사용 예정 상태로 보고, FE는 분기만 준비합니다.
+
+## Response Shape
 
 ```json
 {
@@ -97,41 +96,30 @@ FE에서 `VITE_API_BASE_URL=/api`를 사용할 때 request path는 아래입니�
 }
 ```
 
-## Current Standard Fields
+## FE Mapping Rules
 
-- `experienceId`
-- `reportStatus`
-- `summary`
-- `keywords`
-- `failureCategory`
-- `riskLevel`
-- `advice`
-- `similarCases[].caseId`
-- `similarCases[].title`
-- `similarCases[].summary`
-- `similarCases[].keyLesson`
-- `similarCases[].matchRate`
-- `processedAt`
+- `advice[]` -> AI 가이드 문구
+- `similarCases[].matchRate` -> FE `similarity`
+- `similarCases[].summary` / `keyLesson` -> 유사 사례 카드 문구
+- `keywords` / `failureCategory` / `riskLevel` / `riskFactors`는 그대로 사용 가능
+- `actions`, `similarCases[].tags`, `similarCases[].durationMonths`, `similarCases[].monthlyRevenue`, `structuredSummary`는 현재 표준 응답 필드가 아닙니다.
 
-## Not in Current Required Contract
+## Non-Standard Fields
 
-아래 필드는 현재 필수 계약으로 보지 않습니다.
+이번 라운드에서 아래 필드는 표준 응답 필드가 아닙니다.
 
 - `actions`
 - `similarCases[].tags`
 - `similarCases[].durationMonths`
 - `similarCases[].monthlyRevenue`
+- `structuredSummary`
 
-위 필드는 후속 확장 후보입니다.
+FE는 위 필드를 실응답처럼 가정하지 말고 optional 또는 숨김 처리합니다.
 
-## Notes
+## Integration Notes
 
-- 현재 FE는 `advice`와 `matchRate`를 기준으로 mapper를 구성해야 합니다.
-- 상세 화면은 `READY`일 때만 실제 분석 결과를 렌더하고, `NOT_READY`와 `ERROR`는 상태로 분리해야 합니다.
-
-## Sources
-
-- `server/ANALYSIS_REPORT_CONTRACT.md`
-- `server/postman-examples.md`
-- `server/src/main/java/.../AnalysisController.java`
-- `server/src/main/java/.../AnalysisDtos.java`
+- FE 상세 화면은 `READY`일 때만 분석 결과를 실제 데이터로 렌더합니다.
+- `NOT_READY`는 준비중 상태로 표시합니다.
+- `ERROR`는 실패 상태로 표시합니다.
+- 실제 API 실패, 404, shape mismatch를 mock data로 숨기지 않습니다.
+- 작성 완료 후 이동 경로는 `/experiences/{id}`를 기준으로 합니다.
