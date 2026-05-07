@@ -121,6 +121,34 @@ export type MatchedCase = {
   createdAt: string;
 };
 
+export type ReportStatus = 'NOT_READY' | 'READY' | 'ERROR';
+
+export type ReportGuideStep = {
+  step: number;
+  checklist: string[];
+};
+
+export type ReportSimilarCase = {
+  caseId: number | string;
+  title: string;
+  similarity: number;
+  tags?: string[];
+  durationMonths?: number;
+  monthlyRevenue?: number;
+};
+
+export type AnalysisReport = {
+  experienceId: number;
+  reportStatus: ReportStatus;
+  keywords: string[];
+  failureCategory: string | null;
+  summary: string;
+  riskLevel?: 'low' | 'medium' | 'high';
+  actions: ReportGuideStep[];
+  similarCases: ReportSimilarCase[];
+  processedAt: string;
+};
+
 export type ExperienceUpsertInput = {
   title?: string;
   content: string;
@@ -293,6 +321,10 @@ export function deleteExperience(token: string, id: number | string) {
 
 export function getAnalysis(experienceId: number | string) {
   return request<PatternAnalysis>(`/experiences/${experienceId}/analysis`);
+}
+
+export function getReport(experienceId: number | string) {
+  return request<AnalysisReport>(`/experiences/${experienceId}/report`);
 }
 
 export function createAnalysis(token: string, experienceId: number | string) {

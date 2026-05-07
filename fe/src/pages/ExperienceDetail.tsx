@@ -5,9 +5,12 @@ import AiAnalysisResult from '../components/ai-analysis/AiAnalysisResult';
 import {
   deleteExperience,
   getExperience,
+  getReport,
   updateExperience,
   type Experience,
 } from '../lib/api';
+import { mapReportToViewModel } from '../lib/analysisMapper';
+import { type AnalysisMockData } from '../constants/mockAnalysisData';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
 function formatDate(iso: string) {
@@ -35,6 +38,7 @@ export default function ExperienceDetail() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showCompletedToast, setShowCompletedToast] = useState(false);
+  const [analysisData, setAnalysisData] = useState<AnalysisMockData | null>(null);
   const [form, setForm] = useState({
     title: '',
     content: '',
@@ -67,6 +71,40 @@ export default function ExperienceDetail() {
     loadedIdRef.current = id;
     void loadExperience(id);
   }, [id]);
+
+  useEffect(() => {
+    if (!experience || !experience.hasPatternAnalysis) {
+      setAnalysisData(null);
+      return;
+    }
+
+    let cancelled = false;
+    getReport(experience.id)
+      .then((report) => {
+        if (cancelled) {
+          return;
+        }
+        if (report.reportStatus === 'READY') {
+          setAnalysisData(mapReportToViewModel(report));
+        } else {
+          setAnalysisData(null);
+        }
+      })
+      .catch((reportError) => {
+        if (cancelled) {
+          return;
+        }
+        console.warn(
+          '[ExperienceDetail] getReport failed, falling back to mock',
+          reportError,
+        );
+        setAnalysisData(null);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [experience]);
 
   async function loadExperience(experienceId: string) {
     setLoading(true);
@@ -294,7 +332,7 @@ export default function ExperienceDetail() {
 
           <div className="px-4 pt-2">
             {isAnalysisReady ? (
-              <AiAnalysisResult />
+              <AiAnalysisResult data={analysisData} />
             ) : (
               <section className="flex flex-col items-center justify-center rounded-2xl bg-white px-6 py-16 text-center shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
                 <h2 className="text-xl font-semibold leading-7 text-neutral-950">

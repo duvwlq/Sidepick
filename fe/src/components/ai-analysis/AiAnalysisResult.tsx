@@ -1,9 +1,16 @@
-import { mockAnalysisData } from '../../constants/mockAnalysisData';
+import {
+  mockAnalysisData,
+  type AnalysisMockData,
+} from '../../constants/mockAnalysisData';
 import ActionCard from './ActionCard';
 import SimilarCaseCard from './SimilarCaseCard';
 
-export default function AiAnalysisResult() {
-  const data = mockAnalysisData;
+type Props = {
+  data?: AnalysisMockData | null;
+};
+
+export default function AiAnalysisResult({ data }: Props = {}) {
+  const resolved = data ?? mockAnalysisData;
 
   return (
     <div className="space-y-6">
@@ -15,7 +22,7 @@ export default function AiAnalysisResult() {
           AI가 추출한 이번 사례의 핵심 키워드입니다.
         </p>
         <div className="flex flex-wrap gap-2">
-          {data.keyIssues.map((issue, index) => (
+          {resolved.keyIssues.map((issue, index) => (
             <span
               key={`${issue}-${index}`}
               className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[#555555] shadow-[0_2px_6px_rgba(15,23,42,0.04)]"
@@ -34,7 +41,7 @@ export default function AiAnalysisResult() {
           분석 결과를 바탕으로 다음 단계에 무엇을 할 수 있는지 알려드려요.
         </p>
         <div className="space-y-2.5">
-          {data.aiGuides.map((guide, index) => (
+          {resolved.aiGuides.map((guide, index) => (
             <ActionCard
               key={`guide-${guide.step}-${index}`}
               step={guide.step}
@@ -52,7 +59,7 @@ export default function AiAnalysisResult() {
           이번 사례에서 분석된 주요 실패 패턴입니다.
         </p>
         <div className="flex flex-wrap gap-2">
-          {data.failurePatterns.map((pattern, index) => (
+          {resolved.failurePatterns.map((pattern, index) => (
             <span
               key={`${pattern}-${index}`}
               className="rounded-full bg-white px-3 py-1.5 text-xs font-medium text-[#555555] shadow-[0_2px_6px_rgba(15,23,42,0.04)]"
@@ -71,7 +78,7 @@ export default function AiAnalysisResult() {
           이 사례와 비슷한 다른 사례를 추천해드려요.
         </p>
         <div className="space-y-2.5">
-          {data.similarCases.map((c, index) => (
+          {resolved.similarCases.map((c, index) => (
             <SimilarCaseCard
               key={`case-${index}`}
               title={c.title}
