@@ -34,6 +34,7 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    encoding: UTF-8
     locations: classpath:db/migration
 
 management:
