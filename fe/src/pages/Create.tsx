@@ -157,14 +157,18 @@ export default function Create() {
             selected={form.difficulties}
             onSelect={(value) => toggleArray('difficulties', value)}
             otherValue={form.difficultyEtc}
-            onOtherChange={(value) => setForm((previous) => ({ ...previous, difficultyEtc: value }))}
+            onOtherChange={(value) =>
+              setForm((previous) => ({ ...previous, difficultyEtc: value }))
+            }
           />
         ) : null}
 
         {step === 4 ? (
           <StepFreeWrite
             value={form.content}
-            onChange={(value) => setForm((previous) => ({ ...previous, content: value }))}
+            onChange={(value) =>
+              setForm((previous) => ({ ...previous, content: value }))
+            }
           />
         ) : null}
 

@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { Category } from '../../lib/api';
-import { CATEGORY_VISUALS, getCategoryVisualById } from '../../lib/category-visuals';
+import { CATEGORY_VISUALS } from '../../lib/category-visuals';
 import type { FormState } from '../../hooks/useExperienceWrite';
 import FieldLabel from './FieldLabal';
 
@@ -48,13 +48,20 @@ export default function StepBasicInfo({
     );
   }
 
-  const displayCategories =
-    categories.length > 0
-      ? categories
-          .slice()
-          .sort((left, right) => left.id - right.id)
-          .map((item) => ({ id: item.id, visual: getCategoryVisualById(item.id) }))
-      : CATEGORY_VISUALS.map((item) => ({ id: item.id, visual: item }));
+  const categoryById = new Map(categories.map((item) => [item.id, item]));
+  const displayCategories = CATEGORY_VISUALS.map((visual) => {
+    const apiCategory = categoryById.get(visual.id);
+    return {
+      id: visual.id,
+      visual: apiCategory
+        ? {
+            ...visual,
+            label: apiCategory.name || visual.label,
+          }
+        : visual,
+      disabled: false,
+    };
+  });
 
   return (
     <div className="flex w-full flex-col items-start gap-[10px]">
@@ -62,10 +69,6 @@ export default function StepBasicInfo({
 
       <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-[10px]">
         {displayCategories.map(({ id, visual }) => {
-          if (!visual) {
-            return null;
-          }
-
           const selectedValue = String(id);
           const active = form.categories.includes(selectedValue);
 

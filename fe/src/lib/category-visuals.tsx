@@ -16,7 +16,7 @@ function IconWrapper({
 }) {
   return (
     <span
-      className={`flex h-[36px] w-[36px] items-center justify-center rounded-[2px] border border-[#F0F0F0] bg-[#FCFCFC] ${accentClass}`}
+      className={`flex h-[52px] w-[52px] items-center justify-center rounded-[4px] border border-[#F0F0F0] bg-[#FCFCFC] ${accentClass}`}
     >
       {children}
     </span>
@@ -26,7 +26,7 @@ function IconWrapper({
 function CommerceIcon() {
   return (
     <IconWrapper accentClass="text-[#2F6BFF]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <path d="M9 12H27L25.5 24H10.5L9 12Z" stroke="currentColor" strokeWidth="1.6" />
         <path
           d="M13 12V10.5C13 8.57 14.57 7 16.5 7H19.5C21.43 7 23 8.57 23 10.5V12"
@@ -42,7 +42,7 @@ function CommerceIcon() {
 function ContentIcon() {
   return (
     <IconWrapper accentClass="text-[#FF8A00]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <rect
           x="8.5"
           y="9.5"
@@ -66,7 +66,7 @@ function ContentIcon() {
 function DigitalGoodsIcon() {
   return (
     <IconWrapper accentClass="text-[#7A5CFF]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <path d="M12 9.5H22L25 12.5V26.5H12V9.5Z" stroke="currentColor" strokeWidth="1.6" />
         <path d="M22 9.5V13H25" stroke="currentColor" strokeWidth="1.6" />
         <path d="M15 17H22" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -79,7 +79,7 @@ function DigitalGoodsIcon() {
 function PlatformWorkIcon() {
   return (
     <IconWrapper accentClass="text-[#13A37F]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <path d="M11 14.5H25V24.5H11V14.5Z" stroke="currentColor" strokeWidth="1.6" />
         <path
           d="M14 14.5V12.5C14 11.12 15.12 10 16.5 10H19.5C20.88 10 22 11.12 22 12.5V14.5"
@@ -95,7 +95,7 @@ function PlatformWorkIcon() {
 function FreelanceIcon() {
   return (
     <IconWrapper accentClass="text-[#E64980]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <path
           d="M11 24.5L24.5 11L26.5 13L13 26.5H11V24.5Z"
           stroke="currentColor"
@@ -111,7 +111,7 @@ function FreelanceIcon() {
 function InvestmentIcon() {
   return (
     <IconWrapper accentClass="text-[#EF4444]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <path
           d="M11 24.5L16 19.5L19 22.5L25 15.5"
           stroke="currentColor"
@@ -134,7 +134,7 @@ function InvestmentIcon() {
 function OfflineIcon() {
   return (
     <IconWrapper accentClass="text-[#10B981]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <path d="M10.5 14L18 10L25.5 14V24.5H10.5V14Z" stroke="currentColor" strokeWidth="1.6" />
         <path d="M14 24.5V18H22V24.5" stroke="currentColor" strokeWidth="1.6" />
       </svg>
@@ -145,7 +145,7 @@ function OfflineIcon() {
 function EtcIcon() {
   return (
     <IconWrapper accentClass="text-[#8B5CF6]">
-      <svg viewBox="0 0 36 36" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <svg viewBox="0 0 36 36" className="h-[32px] w-[32px]" fill="none" aria-hidden="true">
         <circle cx="12.5" cy="18" r="1.5" fill="currentColor" />
         <circle cx="18" cy="18" r="1.5" fill="currentColor" />
         <circle cx="23.5" cy="18" r="1.5" fill="currentColor" />
