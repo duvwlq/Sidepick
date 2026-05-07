@@ -94,7 +94,7 @@ public class AIAnalysisService {
         }
         try {
             return Optional.of(requestAndPersistAnalysis(experience));
-        } catch (AiServerException exception) {
+        } catch (Exception exception) {
             log.warn("AI analysis skipped for experienceId={} because AI server call failed: {}",
                     experience.getId(), exception.getMessage());
             return Optional.empty();
@@ -106,7 +106,7 @@ public class AIAnalysisService {
         Optional<AiAnalysis> existing = aiAnalysisRepository.findByExperience(experience);
         try {
             return Optional.of(requestAndPersistAnalysis(experience, existing.orElse(null)));
-        } catch (AiServerException exception) {
+        } catch (Exception exception) {
             log.warn("AI re-analysis skipped for experienceId={} because AI server call failed: {}",
                     experience.getId(), exception.getMessage());
             return existing;
@@ -129,8 +129,8 @@ public class AIAnalysisService {
                     writeJson(response.keywords()),
                     buildAdviceJson(response),
                     response.summary(),
-                    response.failureCategory(),
-                    response.riskLevel(),
+                    truncate(response.failureCategory(), 50),
+                    normalizeRiskLevel(response.riskLevel()),
                     emptyRiskFactors,
                     toRiskScore(response.riskLevel())
             );
@@ -139,8 +139,8 @@ public class AIAnalysisService {
                     writeJson(response.keywords()),
                     buildAdviceJson(response),
                     response.summary(),
-                    response.failureCategory(),
-                    response.riskLevel(),
+                    truncate(response.failureCategory(), 50),
+                    normalizeRiskLevel(response.riskLevel()),
                     emptyRiskFactors,
                     toRiskScore(response.riskLevel())
             );
@@ -151,7 +151,7 @@ public class AIAnalysisService {
         matchedCaseRepository.save(MatchedCase.create(
                 analysis,
                 "CASE-" + experience.getId(),
-                experience.getBusinessType() + " similar case",
+                truncate(experience.getBusinessType() + " similar case", 200),
                 experience.getLessonsLearned(),
                 response.summary(),
                 defaultMatchRate(response.riskLevel())
@@ -239,6 +239,17 @@ public class AIAnalysisService {
             case "low" -> 60;
             default -> 70;
         };
+    }
+
+    private String normalizeRiskLevel(String riskLevel) {
+        return truncate(riskLevel, 20);
+    }
+
+    private String truncate(String value, int maxLength) {
+        if (value == null || value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength);
     }
 
     private Map<String, Object> buildAiLogFields(
