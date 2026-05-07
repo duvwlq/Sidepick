@@ -11,6 +11,7 @@ type Props = {
   showRightIcon?: boolean;
   rightIcon?: 'bell' | 'search' | 'menu' | 'none';
   showHeader?: boolean;
+  showStatusBar?: boolean;
   showBottomNav?: boolean;
   onBack?: () => void;
   onMenuClick?: () => void;
@@ -24,6 +25,7 @@ export default function Layout({
   showRightIcon = true,
   rightIcon = 'bell',
   showHeader = true,
+  showStatusBar = false,
   showBottomNav = true,
   onBack,
   onMenuClick,
@@ -37,6 +39,7 @@ export default function Layout({
           leftType={leftType}
           showRightIcon={showRightIcon}
           rightIcon={rightIcon}
+          showStatusBar={showStatusBar}
           onBack={onBack}
           onMenuClick={onMenuClick}
           onRightIconClick={onRightIconClick}
@@ -44,7 +47,7 @@ export default function Layout({
       ) : null}
 
       <main
-        className={`${showHeader ? 'pt-[64px]' : ''} ${
+        className={`${showHeader ? (showStatusBar ? 'pt-[123px]' : 'pt-[64px]') : ''} ${
           showBottomNav ? 'pb-[110px]' : ''
         }`}
       >

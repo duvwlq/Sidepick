@@ -73,7 +73,7 @@ export default function StepDetailInfo({ form, setForm }: Props) {
         />
 
         <SelectTrigger
-          label="평균 하루 할애 시간"
+          label="평균 하루 할애 기간"
           value={form.dailyHours}
           onClick={() => setOpenSheet('hours')}
         />
@@ -81,17 +81,13 @@ export default function StepDetailInfo({ form, setForm }: Props) {
         <MoneyBox
           label="투자 금액"
           value={form.expense}
-          onChange={(value) =>
-            setForm((previous) => ({ ...previous, expense: value }))
-          }
+          onChange={(value) => setForm((previous) => ({ ...previous, expense: value }))}
         />
 
         <MoneyBox
           label="수익 (월 단위로 작성해주세요)"
           value={form.revenue}
-          onChange={(value) =>
-            setForm((previous) => ({ ...previous, revenue: value }))
-          }
+          onChange={(value) => setForm((previous) => ({ ...previous, revenue: value }))}
         />
 
         <div className="flex w-full flex-col gap-[10px]">
@@ -130,7 +126,7 @@ export default function StepDetailInfo({ form, setForm }: Props) {
 
       <OptionBottomSheet
         open={openSheet === 'hours'}
-        title="평균 하루 할애 시간"
+        title="평균 하루 할애 기간"
         options={hourOptions}
         value={form.dailyHours}
         sheetHeight={455}
@@ -171,7 +167,7 @@ function SelectTrigger({
             value ? 'text-[#5D5D5D]' : 'text-[#BABABA]'
           }`}
         >
-          {value || '선택해 주세요'}
+          {value || '선택해주세요'}
         </span>
         <ChevronDown />
       </button>
@@ -198,12 +194,13 @@ function OptionBottomSheet({
   onClose: () => void;
   onSelect: (value: string) => void;
 }) {
-  if (!open) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-[70] bg-black/40">
+    <div
+      className={`fixed inset-0 z-[70] transition-opacity duration-300 ${
+        open ? 'pointer-events-auto bg-black/40 opacity-100' : 'pointer-events-none bg-black/0 opacity-0'
+      }`}
+      aria-hidden={!open}
+    >
       <button
         type="button"
         aria-label="닫기"
@@ -211,7 +208,9 @@ function OptionBottomSheet({
         onClick={onClose}
       />
       <div
-        className="absolute bottom-0 left-1/2 flex w-[375px] max-w-[375px] -translate-x-1/2 flex-col rounded-t-[24px] bg-[#FFFFFF] px-[24px] pb-[48px] pt-[24px]"
+        className={`absolute bottom-0 left-1/2 flex w-[375px] max-w-[375px] -translate-x-1/2 flex-col rounded-t-[24px] bg-[#FFFFFF] px-[24px] pb-[48px] pt-[24px] transition-transform duration-300 ease-out ${
+          open ? 'translate-y-0' : 'translate-y-full'
+        }`}
         style={{ height: `${sheetHeight}px` }}
       >
         <div className="pb-[24px] text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">

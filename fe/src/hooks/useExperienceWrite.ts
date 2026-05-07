@@ -49,9 +49,7 @@ export function useExperienceWrite() {
 
       return {
         ...previous,
-        [key]: exists
-          ? values.filter((item) => item !== value)
-          : [...values, value],
+        [key]: exists ? values.filter((item) => item !== value) : [...values, value],
       };
     });
   };
@@ -63,7 +61,10 @@ export function useExperienceWrite() {
       case 2:
         return Boolean(form.totalPeriod) && Boolean(form.isConcurrentWithMainJob);
       case 3:
-        return form.difficulties.length > 0;
+        return (
+          form.difficulties.length > 0 &&
+          (!form.difficulties.includes('기타') || form.difficultyEtc.trim().length > 0)
+        );
       case 4:
         return form.content.trim().length >= 10;
       default:

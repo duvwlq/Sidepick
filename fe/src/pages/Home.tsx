@@ -3,23 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import amountIcon from '../assets/images/amount.svg';
 import durationIcon from '../assets/images/duration.svg';
 import viewsIcon from '../assets/images/views.svg';
+import HorizontalScroll from '../components/common/HorizontalScroll';
 import SearchBar from '../components/common/SearchBar';
 import Layout from '../components/layout/Layout';
-import {
-  getExperiences,
-  getMe,
-  type Experience,
-  type UserSummary,
-} from '../lib/api';
+import { getExperiences, getMe, type Experience, type UserSummary } from '../lib/api';
+import { CATEGORY_TAG_LABELS } from '../lib/category-visuals';
+import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { clearSession, getAccessToken, getStoredUser } from '../lib/session';
 
 type SortKey = 'latest' | 'popular';
 
-const CATEGORY_TABS = ['유튜브', '쇼핑몰', '블로그', '주식'] as const;
+const CATEGORY_TABS = CATEGORY_TAG_LABELS.slice(0, 4) as string[];
 
 function formatDuration(months: number | null) {
   if (!months || months <= 0) {
-    return '소요 시간';
+    return '기간 미정';
   }
 
   if (months < 12) {
@@ -87,11 +85,7 @@ function HomeCard({
       }`}
     >
       <div className="flex w-full flex-col items-start gap-[8px]">
-        <div
-          className={`flex w-full items-start ${
-            compact ? 'gap-[4px]' : 'justify-between'
-          }`}
-        >
+        <div className={`flex w-full items-start ${compact ? 'gap-[4px]' : 'justify-between'}`}>
           <div className="flex shrink-0 items-start gap-[4px]">
             {tags.length ? (
               tags.map((tag) => (
@@ -107,14 +101,14 @@ function HomeCard({
             ) : (
               <span className="flex h-[20px] shrink-0 items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]">
                 <span className="whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
-                  키워드
+                  키워드 없음
                 </span>
               </span>
             )}
           </div>
           {!compact ? (
             <span className="shrink-0 whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#494949] underline [font-feature-settings:'case'_1]">
-              자세히보기
+              자세히 보기
             </span>
           ) : null}
         </div>
@@ -125,31 +119,27 @@ function HomeCard({
       </div>
 
       <div className="grid w-full grid-cols-[repeat(2,minmax(0,1fr))] gap-x-[10px] gap-y-[4px]">
-        <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
-          <img src={durationIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
-          <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-            {durationLabel}
-          </span>
-        </div>
-        <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
-          <img src={amountIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
-          <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-            {amountLabel}
-          </span>
-        </div>
-        <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
-          <img src={viewsIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-            {viewsLabel}
-          </span>
-        </div>
-        <div className="flex shrink-0 items-center justify-center justify-self-start">
+        <MetaItem icon={durationIcon} label={durationLabel} />
+        <MetaItem icon={amountIcon} label={amountLabel} />
+        <MetaItem icon={viewsIcon} label={viewsLabel} />
+        <div className="flex shrink-0 items-center justify-self-start">
           <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
             {dateLabel}
           </span>
         </div>
       </div>
     </button>
+  );
+}
+
+function MetaItem({ icon, label }: { icon: string; label: string }) {
+  return (
+    <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
+      <img src={icon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
+      <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
+        {label}
+      </span>
+    </div>
   );
 }
 
@@ -163,7 +153,11 @@ function CategoryTab({
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className="flex shrink-0 appearance-none items-start border-0 bg-transparent p-[0px]">
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex shrink-0 appearance-none items-start border-0 bg-transparent p-[0px]"
+    >
       <span
         className={`flex shrink-0 items-center justify-center px-[8px] py-[4px] ${
           active ? 'border-b-[1.5px] border-solid border-[#494949]' : ''
@@ -213,11 +207,9 @@ function SegmentButton({
 
 export default function Home() {
   const navigate = useNavigate();
-  const [keyword, setKeyword] = useState('');
+  const keyword = '';
   const [sort, setSort] = useState<SortKey>('latest');
-  const [selectedCategory, setSelectedCategory] = useState<(typeof CATEGORY_TABS)[number]>(
-    CATEGORY_TABS[0],
-  );
+  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_TABS[0]);
   const [user, setUser] = useState<UserSummary | null>(() => getStoredUser());
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [listLoading, setListLoading] = useState(true);
@@ -255,9 +247,10 @@ export default function Home() {
       setExperiences(payload.experiences);
     } catch (loadError) {
       setListError(
-        loadError instanceof Error
-          ? loadError.message
-          : '경험 목록을 불러오지 못했습니다.',
+        resolveErrorMessage(
+          loadError,
+          '경험 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.',
+        ),
       );
     } finally {
       setListLoading(false);
@@ -265,9 +258,7 @@ export default function Home() {
   }
 
   function moveToAuth(nextPath: string, reason: string) {
-    navigate(
-      `/auth?next=${encodeURIComponent(nextPath)}&reason=${encodeURIComponent(reason)}`,
-    );
+    navigate(`/auth?next=${encodeURIComponent(nextPath)}&reason=${encodeURIComponent(reason)}`);
   }
 
   function handlePrimaryAction() {
@@ -280,7 +271,7 @@ export default function Home() {
   }
 
   function handleExperienceClick(experienceId: number) {
-    navigate(`/analysis-result?experienceId=${experienceId}`);
+    navigate(`/experiences/${experienceId}`);
   }
 
   const featuredExperiences = useMemo(() => {
@@ -299,7 +290,8 @@ export default function Home() {
           <SearchBar
             placeholder="원하는 실패 사례를 검색해보세요!"
             value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
+            onClick={() => navigate('/explore')}
+            readOnly
           />
         </section>
 
@@ -308,7 +300,10 @@ export default function Home() {
             인기 카테고리
           </h2>
 
-          <div className="flex w-full items-center">
+          <HorizontalScroll
+            wrapperClassName="w-full"
+            contentClassName="horizontal-scroll-content--tags"
+          >
             {CATEGORY_TABS.map((tab) => (
               <CategoryTab
                 key={tab}
@@ -317,21 +312,22 @@ export default function Home() {
                 onClick={() => setSelectedCategory(tab)}
               />
             ))}
-          </div>
+          </HorizontalScroll>
 
           {featuredExperiences.length ? (
-            <div className="-mx-[16px] w-[375px] overflow-x-auto pl-[16px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              <div className="flex items-center gap-[16px] pr-[16px]">
-                {featuredExperiences.map((experience) => (
-                  <HomeCard
-                    key={experience.id}
-                    experience={experience}
-                    compact
-                    onClick={() => handleExperienceClick(experience.id)}
-                  />
-                ))}
-              </div>
-            </div>
+            <HorizontalScroll
+              wrapperClassName="w-full"
+              contentClassName="horizontal-scroll-content--cards px-[16px]"
+            >
+              {featuredExperiences.map((experience) => (
+                <HomeCard
+                  key={experience.id}
+                  experience={experience}
+                  compact
+                  onClick={() => handleExperienceClick(experience.id)}
+                />
+              ))}
+            </HorizontalScroll>
           ) : (
             <div className="h-[127px] w-full rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[32px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#757575]">
               표시할 인기 사례가 없습니다.
@@ -342,20 +338,12 @@ export default function Home() {
         <section className="w-full bg-[#FFFFFF] p-[16px]">
           <div className="flex w-full flex-col items-start gap-[39px] rounded-[10px] bg-[#757575] p-[20px] text-[#FFFFFF]">
             <div className="flex w-full flex-col items-start gap-[8px]">
-              <div className="flex w-full items-center">
-                <div className="flex shrink-0 flex-col justify-center leading-[0]">
-                  <p className="whitespace-nowrap font-['Pretendard'] text-[20px] font-[600] leading-[24px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
-                    실패도 좋은 경험이예요!
-                  </p>
-                </div>
-              </div>
-              <div className="flex w-[314px] shrink-0 flex-col justify-center whitespace-nowrap font-['Pretendard'] text-[12px] font-[300] leading-[0] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
-                <p className="mb-[0px] leading-[16.8px]">
-                  경험을 등록하면 AI가 나의 실패 원인을 분석해주고,
-                </p>
-                <p className="leading-[16.8px]">
-                  나와 유사한 사례들을 보여주며 원하는 선택을 하도록 도와드릴게요!
-                </p>
+              <p className="font-['Pretendard'] text-[20px] font-[600] leading-[24px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+                실패도 좋은 경험이에요
+              </p>
+              <div className="w-[314px] font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+                <p>경험을 등록하면 AI가 실패 원인을 분석해주고</p>
+                <p>비슷한 사례들을 보여주며 원하는 선택을 돕습니다.</p>
               </div>
             </div>
 
@@ -364,10 +352,8 @@ export default function Home() {
               onClick={handlePrimaryAction}
               className="flex h-[40px] w-full appearance-none items-center justify-between rounded-[8px] border-0 bg-[#FFFFFF] px-[12px] py-[5px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#000000]"
             >
-              <span className="flex shrink-0 flex-col justify-center leading-[0]">
-                <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[1.2] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
-                  나의 경험 분석하러 가기
-                </span>
+              <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+                내 경험 분석하러 가기
               </span>
               <span className="relative h-[16px] w-[16px] shrink-0 overflow-hidden" aria-hidden="true">
                 <svg
@@ -398,7 +384,7 @@ export default function Home() {
               <div className="flex w-full items-center justify-center">
                 <SegmentButton
                   active={sort === 'latest'}
-                  label="최근 등록된 사례"
+                  label="최신 등록 사례"
                   onClick={() => setSort('latest')}
                 />
                 <SegmentButton
@@ -438,10 +424,8 @@ export default function Home() {
               onClick={() => navigate('/explore')}
               className="appearance-none border-0 bg-transparent p-[0px]"
             >
-              <span className="flex flex-col justify-center whitespace-nowrap text-center font-['Pretendard'] text-[0px] font-[400] leading-[0] tracking-[0px] text-[#5D5D5D] [font-feature-settings:'case'_1]">
-                <span className="text-[12px] leading-[1.2] underline [font-feature-settings:'case'_1]">
-                  모든 사례 보기
-                </span>
+              <span className="text-[12px] leading-[14.4px] text-[#5D5D5D] underline [font-feature-settings:'case'_1]">
+                모든 사례 보기
               </span>
             </button>
           </div>

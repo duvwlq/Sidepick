@@ -4,7 +4,7 @@ import AuthButton from '../../components/auth/AuthButton';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
-import { useAuthFlow } from '../../context/AuthFlowContext';
+import { useAuthFlow } from '../../context/useAuthFlow';
 
 export default function SignupPasswordPage() {
   const navigate = useNavigate();

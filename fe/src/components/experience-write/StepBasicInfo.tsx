@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
-import type { FormState } from '../../hooks/useExperienceWrite';
 import type { Category } from '../../lib/api';
+import { CATEGORY_VISUALS, getCategoryVisualById } from '../../lib/category-visuals';
+import type { FormState } from '../../hooks/useExperienceWrite';
 import FieldLabel from './FieldLabal';
 
 type Props = {
@@ -28,8 +29,8 @@ export default function StepBasicInfo({
   if (loading) {
     return (
       <div className="flex w-full flex-col gap-[10px]">
-        <FieldLabel label="경험 부업 카테고리" required />
-        <div className="flex h-[98px] w-full items-center justify-center rounded-[16px] border border-dashed border-[#E6E6E6] bg-[#FFFFFF] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#757575]">
+        <FieldLabel label="어떠한 부업을 경험했었나요?" required />
+        <div className="flex h-[147px] w-full items-center justify-center rounded-[16px] border border-dashed border-[#E6E6E6] bg-[#FFFFFF] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#757575] [font-feature-settings:'case'_1]">
           카테고리를 불러오는 중입니다.
         </div>
       </div>
@@ -39,45 +40,55 @@ export default function StepBasicInfo({
   if (error) {
     return (
       <div className="flex w-full flex-col gap-[10px]">
-        <FieldLabel label="경험 부업 카테고리" required />
-        <div className="flex min-h-[98px] w-full items-center rounded-[16px] border border-[#F6C9C9] bg-[#FFF5F5] p-[16px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#D33B3B]">
+        <FieldLabel label="어떠한 부업을 경험했었나요?" required />
+        <div className="flex min-h-[147px] w-full items-center rounded-[16px] border border-[#F6C9C9] bg-[#FFF5F5] p-[16px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B] [font-feature-settings:'case'_1]">
           {error}
         </div>
       </div>
     );
   }
 
-  const visibleCategories = categories.slice(0, 7);
+  const displayCategories =
+    categories.length > 0
+      ? categories
+          .slice()
+          .sort((left, right) => left.id - right.id)
+          .map((item) => ({ id: item.id, visual: getCategoryVisualById(item.id) }))
+      : CATEGORY_VISUALS.map((item) => ({ id: item.id, visual: item }));
 
   return (
     <div className="flex w-full flex-col items-start gap-[10px]">
-      <FieldLabel label="경험 부업 카테고리" required />
+      <FieldLabel label="어떠한 부업을 경험했었나요?" required />
 
-      <div className="grid w-full grid-cols-2 gap-[10px]">
-        {visibleCategories.map((item, index) => {
-          const active = form.categories.includes(item.name);
-          const isFull = index === 6;
+      <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-[10px]">
+        {displayCategories.map(({ id, visual }) => {
+          if (!visual) {
+            return null;
+          }
+
+          const selectedValue = String(id);
+          const active = form.categories.includes(selectedValue);
 
           return (
             <button
-              key={item.id}
+              key={id}
               type="button"
-              onClick={() => toggleCategory(item.name)}
-              className={`flex h-[98px] ${isFull ? 'col-span-2' : ''} flex-col items-center justify-center gap-[10px] rounded-[16px] border-[1.108px] p-[16px] ${
-                active
-                  ? 'border-[#131416] bg-[#F8F8F8]'
-                  : 'border-[#E6E6E6] bg-[#FFFFFF]'
+              onClick={() => toggleCategory(selectedValue)}
+              className={`flex h-[147px] flex-col items-start justify-between rounded-[16px] border-[1.108px] border-solid p-[16px] ${
+                active ? 'border-[#131416] bg-[#F8F8F8]' : 'border-[#E6E6E6] bg-[#FFFFFF]'
               }`}
             >
-              <span
-                className="flex h-[36px] w-[36px] items-center justify-center overflow-hidden rounded-[2px] text-[20px]"
-                style={{ backgroundColor: `${item.color}18`, color: item.color }}
-              >
-                {item.icon}
-              </span>
-              <span className="w-full truncate text-center font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
-                {item.name}
-              </span>
+              <div className="shrink-0">{visual.icon}</div>
+              <div className="flex w-full flex-col items-start gap-[4px] text-left">
+                <p className="w-full font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
+                  {visual.label}
+                </p>
+                <div className="w-full font-['Pretendard'] text-[10px] font-[300] leading-[12px] tracking-[0px] text-[#BABABA] [font-feature-settings:'case'_1]">
+                  {visual.descriptionLines.map((line) => (
+                    <p key={line}>{line}</p>
+                  ))}
+                </div>
+              </div>
             </button>
           );
         })}

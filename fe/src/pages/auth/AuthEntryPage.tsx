@@ -4,6 +4,7 @@ import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
 import { login } from '../../lib/api';
+import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
 
 export default function AuthEntryPage() {
@@ -42,11 +43,7 @@ export default function AuthEntryPage() {
       saveSession(payload.accessToken, payload.refreshToken, payload.user);
       window.location.href = nextPath;
     } catch (error) {
-      setLoginError(
-        error instanceof Error
-          ? error.message
-          : '로그인에 실패했습니다. 다시 시도해주세요.',
-      );
+      setLoginError(resolveErrorMessage(error, '로그인에 실패했어요. 다시 시도해주세요.'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +54,7 @@ export default function AuthEntryPage() {
     const redirectUri = `${window.location.origin}/auth/kakao/callback`;
 
     if (!kakaoClientId) {
-      setKakaoError('카카오 로그인 설정을 확인할 수 없습니다.');
+      setKakaoError('카카오 로그인 설정을 확인할 수 없어요.');
       return;
     }
 
@@ -75,7 +72,7 @@ export default function AuthEntryPage() {
     const redirectUri = `${window.location.origin}/auth/google/callback`;
 
     if (!googleClientId) {
-      setGoogleError('구글 로그인 설정을 확인할 수 없습니다.');
+      setGoogleError('구글 로그인 설정을 확인할 수 없어요.');
       return;
     }
 
@@ -117,9 +114,7 @@ export default function AuthEntryPage() {
           />
         </div>
 
-        {loginError ? (
-          <p className="mt-4 text-sm text-[#D33B3B]">{loginError}</p>
-        ) : null}
+        {loginError ? <p className="mt-4 text-sm text-[#D33B3B]">{loginError}</p> : null}
 
         <button
           type="button"
@@ -138,19 +133,13 @@ export default function AuthEntryPage() {
             회원가입
           </Link>
           <span className="text-[#D4D4D4]">|</span>
-          <button
-            type="button"
-            disabled
-            className="cursor-not-allowed text-[#B7B7B7]"
-          >
+          <button type="button" disabled className="cursor-not-allowed text-[#B7B7B7]">
             ID/PW 찾기
           </button>
         </div>
 
         <div className="mt-10">
-          <p className="text-center text-sm font-medium text-[#6A6A6A]">
-            소셜 로그인
-          </p>
+          <p className="text-center text-sm font-medium text-[#6A6A6A]">소셜 로그인</p>
 
           <div className="mt-4 space-y-3">
             <button
@@ -173,12 +162,8 @@ export default function AuthEntryPage() {
           <p className="mt-4 text-center text-xs leading-5 text-[#8C8C8C]">
             이메일 로그인과 소셜 로그인을 모두 사용할 수 있습니다.
           </p>
-          {kakaoError ? (
-            <p className="mt-3 text-center text-sm text-[#D33B3B]">{kakaoError}</p>
-          ) : null}
-          {googleError ? (
-            <p className="mt-3 text-center text-sm text-[#D33B3B]">{googleError}</p>
-          ) : null}
+          {kakaoError ? <p className="mt-3 text-center text-sm text-[#D33B3B]">{kakaoError}</p> : null}
+          {googleError ? <p className="mt-3 text-center text-sm text-[#D33B3B]">{googleError}</p> : null}
         </div>
       </section>
     </AuthLayout>

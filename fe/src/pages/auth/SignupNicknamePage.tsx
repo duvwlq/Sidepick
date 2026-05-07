@@ -4,8 +4,9 @@ import AuthButton from '../../components/auth/AuthButton';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
-import { useAuthFlow } from '../../context/AuthFlowContext';
+import { useAuthFlow } from '../../context/useAuthFlow';
 import { register } from '../../lib/api';
+import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
 
 export default function SignupNicknamePage() {
@@ -40,11 +41,7 @@ export default function SignupNicknamePage() {
       reset();
       navigate(nextPath, { replace: true });
     } catch (registerError) {
-      setError(
-        registerError instanceof Error
-          ? registerError.message
-          : '회원가입에 실패했습니다.',
-      );
+      setError(resolveErrorMessage(registerError, '회원가입에 실패했어요. 다시 시도해주세요.'));
     } finally {
       setLoading(false);
     }

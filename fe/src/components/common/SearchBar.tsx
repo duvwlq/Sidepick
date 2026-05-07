@@ -1,4 +1,4 @@
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
 import searchIcon from '../../assets/images/search.svg';
 
 type SearchBarProps = {
@@ -6,6 +6,7 @@ type SearchBarProps = {
   value?: string;
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   onClick?: () => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   readOnly?: boolean;
   className?: string;
 };
@@ -15,6 +16,7 @@ export default function SearchBar({
   value,
   onChange,
   onClick,
+  onKeyDown,
   readOnly = false,
   className = '',
 }: SearchBarProps) {
@@ -48,6 +50,7 @@ export default function SearchBar({
         type="text"
         value={value}
         onChange={onChange}
+        onKeyDown={onKeyDown}
         readOnly={readOnly}
         aria-label={placeholder}
         className="absolute inset-0 h-full w-full bg-transparent px-[16px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-transparent caret-[#000000] outline-none [font-feature-settings:'case'_1]"

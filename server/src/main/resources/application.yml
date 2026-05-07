@@ -56,6 +56,24 @@ logging:
 app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
+  experience-import:
+    enabled: ${APP_EXPERIENCE_IMPORT_ENABLED:false}
+    csv-path: ${APP_EXPERIENCE_IMPORT_CSV_PATH:}
+    preserve-ids: ${APP_EXPERIENCE_IMPORT_PRESERVE_IDS:true}
+    overwrite-existing: ${APP_EXPERIENCE_IMPORT_OVERWRITE_EXISTING:true}
+    import-analysis: ${APP_EXPERIENCE_IMPORT_ANALYSIS:true}
+    author-mode: ${APP_EXPERIENCE_IMPORT_AUTHOR_MODE:SYSTEM}
+    system-email: ${APP_EXPERIENCE_IMPORT_SYSTEM_EMAIL:imported-cases@sidepick.local}
+    system-nickname: ${APP_EXPERIENCE_IMPORT_SYSTEM_NICKNAME:sidepick-import}
+    pseudo-email-domain: ${APP_EXPERIENCE_IMPORT_PSEUDO_EMAIL_DOMAIN:sidepick.local}
+    title-mode: ${APP_EXPERIENCE_IMPORT_TITLE_MODE:SUMMARY}
+    created-at-mode: ${APP_EXPERIENCE_IMPORT_CREATED_AT_MODE:RANDOM_DISTRIBUTED}
+    created-at-start: ${APP_EXPERIENCE_IMPORT_CREATED_AT_START:2025-01-01T00:00:00}
+    created-at-end: ${APP_EXPERIENCE_IMPORT_CREATED_AT_END:2026-04-30T23:59:59}
+    default-age-group: ${APP_EXPERIENCE_IMPORT_DEFAULT_AGE_GROUP:30s}
+    default-risk-level: ${APP_EXPERIENCE_IMPORT_DEFAULT_RISK_LEVEL:MEDIUM}
+    default-category-id: ${APP_EXPERIENCE_IMPORT_DEFAULT_CATEGORY_ID:5}
+    category-map: {}
   mail:
     enabled: ${APP_MAIL_ENABLED:false}
     from-address: ${APP_MAIL_FROM_ADDRESS:no-reply@side-pick.app}

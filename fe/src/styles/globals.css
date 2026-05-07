@@ -36,6 +36,44 @@ body {
   width: 100%;
 }
 
+.horizontal-scroll-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+.horizontal-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  touch-action: none;
+}
+
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.horizontal-scroll-content {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  min-width: 100%;
+}
+
+.horizontal-scroll-content > * {
+  flex: 0 0 auto;
+}
+
+.horizontal-scroll-content--cards {
+  gap: 16px;
+}
+
+.horizontal-scroll-content--tags {
+  gap: 8px;
+}
+
 button,
 input,
 select,

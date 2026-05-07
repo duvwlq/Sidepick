@@ -4,8 +4,9 @@ import AuthButton from '../../components/auth/AuthButton';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
-import { useAuthFlow } from '../../context/AuthFlowContext';
+import { useAuthFlow } from '../../context/useAuthFlow';
 import { requestEmailVerification } from '../../lib/api';
+import { resolveErrorMessage } from '../../lib/resolve-error-message';
 
 export default function SignupEmailPage() {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ export default function SignupEmailPage() {
 
   async function handleNext() {
     if (!form.email.trim()) {
-      setError('이메일을 입력해 주세요.');
+      setError('이메일을 입력해주세요.');
       return;
     }
 
@@ -35,15 +36,11 @@ export default function SignupEmailPage() {
         'verificationMessage',
         payload.verificationCode
           ? `개발용 인증 코드: ${payload.verificationCode}`
-          : '인증 메일을 발송했습니다.',
+          : '인증 메일을 발송했어요.',
       );
       navigate(`/signup/verify?next=${encodeURIComponent(nextPath)}`);
     } catch (requestError) {
-      setError(
-        requestError instanceof Error
-          ? requestError.message
-          : '인증 메일 발송에 실패했습니다.',
-      );
+      setError(resolveErrorMessage(requestError, '인증 메일 발송에 실패했어요. 다시 시도해주세요.'));
     } finally {
       setLoading(false);
     }
@@ -71,7 +68,7 @@ export default function SignupEmailPage() {
           <AuthInput
             label="이메일"
             type="email"
-            placeholder="이메일을 입력해 주세요"
+            placeholder="이메일을 입력해주세요"
             value={form.email}
             onChange={(event) => updateField('email', event.target.value)}
           />

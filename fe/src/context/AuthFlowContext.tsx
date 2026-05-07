@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useMemo, useState, type ReactNode } from 'react';
 
 type AuthFlowData = {
   email: string;
@@ -60,10 +54,4 @@ export function AuthFlowProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuthFlow() {
-  const context = useContext(AuthFlowContext);
-  if (!context) {
-    throw new Error('useAuthFlow must be used within AuthFlowProvider');
-  }
-  return context;
-}
+export { AuthFlowContext };
