@@ -1,69 +1,73 @@
-export const mockAnalysisData = {
-  nickname: 'Goorm',
-  title: '실패 경험 분석 리포트',
-  summaryTitle: 'AI 요약',
-  summaryText:
-    '이커머스 분야에서 300만원을 투자하여 3~6개월간 운영한 사례입니다.\n\n주요 실패 원인은 시장 경쟁 과다로 분석되며, 유사한 조건의 유사례 비교 분석을 결과입니다.',
-  tags: [
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-    '키워드',
-  ],
-  patterns: [
-    { label: '실패 원인 분류', percent: 0 },
-    { label: '실패 요인 종합', percent: 0 },
-    { label: '실패 원인 종합', percent: 0 },
-    { label: '실패 원인 종합', percent: 0 },
-  ],
-  actions: [
+export type AnalysisGuide = {
+  step: number;
+  checklist: string[];
+};
+
+export type AnalysisSimilarCase = {
+  title: string;
+  tags: string[];
+  similarity: number;
+  durationMonths?: number;
+  monthlyRevenue?: number;
+};
+
+export type AnalysisMockData = {
+  keyIssues: string[];
+  aiGuides: AnalysisGuide[];
+  failurePatterns: string[];
+  similarCases: AnalysisSimilarCase[];
+};
+
+export const mockAnalysisData: AnalysisMockData = {
+  keyIssues: ['실행 경험 부족', '마케팅 부족', '낮은 자본력'],
+  aiGuides: [
     {
-      title: '추천 행동 타이틀',
-      scoreLabel: '우선순위 높음',
-      description:
-        '추천 행동 상세 내용입니다. 추천 행동 상세 내용입니다. 추천 행동 상세 내용입니다. 추천 행동 상세 내용입니다.',
+      step: 1,
+      checklist: [
+        '경쟁사 3곳의 가격대와 마케팅 채널 파악하기',
+        '타겟 고객 5명 이상 인터뷰',
+        '월별 매출 목표 명확히 설정',
+      ],
     },
     {
-      title: '추천 행동 타이틀',
-      scoreLabel: '우선순위 높음',
-      description:
-        '유사 사례 중 75%가 시장 조사 부족을 지적했습니다. 향후 사례는 최소 2~3개월 시장 분석 기간을 기준입니다.',
+      step: 2,
+      checklist: [
+        '초기 자본 3개월치 운영비 확보',
+        '예상 외 비용 20% 버퍼 확보',
+        '수익 분기점까지 6개월 견딜 자금 마련',
+      ],
     },
     {
-      title: '추천 행동 타이틀',
-      scoreLabel: '우선순위 높음',
-      description:
-        '유사 사례 중 75%가 시장 조사 부족을 지적했습니다. 향후 사례는 최소 2~3개월 시장 분석 기간을 기준입니다.',
+      step: 3,
+      checklist: [
+        '주력 마케팅 채널 1~2개로 압축',
+        '고객 후기 수집 및 활용',
+        '리텐션 지표 주간 단위로 점검',
+      ],
     },
   ],
+  failurePatterns: ['자금 부족', '시장 조사 부족', '마케팅 약함'],
   similarCases: [
     {
-      title: '메인 제목',
-      tags: ['키워드', '키워드'],
-      similarity: 0,
+      title: '온라인 식품몰 6개월 운영기',
+      tags: ['이커머스', '식품'],
+      similarity: 87,
+      durationMonths: 6,
+      monthlyRevenue: 800000,
     },
     {
-      title: '메인 제목',
-      tags: ['키워드', '키워드'],
-      similarity: 0,
+      title: '소품 셀프 브랜드 창업 기록',
+      tags: ['이커머스', '브랜드'],
+      similarity: 82,
+      durationMonths: 4,
+      monthlyRevenue: 500000,
     },
     {
-      title: '메인 제목',
-      tags: ['키워드', '키워드'],
-      similarity: 0,
-    },
-    {
-      title: '메인 제목',
-      tags: ['키워드', '키워드'],
-      similarity: 0,
+      title: '핸드메이드 캔들 부업 시도',
+      tags: ['이커머스', '핸드메이드'],
+      similarity: 75,
+      durationMonths: 3,
+      monthlyRevenue: 300000,
     },
   ],
 };
