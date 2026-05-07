@@ -1,4 +1,4 @@
-import FieldLabel from './FieldLabal';
+import FieldLabel from './FieldLabel';
 
 type Props = {
   value: string;

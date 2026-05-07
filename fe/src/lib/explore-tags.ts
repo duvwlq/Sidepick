@@ -1,4 +1,5 @@
 import type { Experience } from './api';
+import { getCategoryVisualById } from './category-visuals';
 
 export type ExploreTag = {
   key: string;
@@ -26,10 +27,26 @@ export function formatExploreTagLabel(value: string) {
   return value.trim().replaceAll('_', ' ').replace(/\s+/g, ' ');
 }
 
+function resolveExploreCategoryLabel(experience: Experience) {
+  const visual = getCategoryVisualById(experience.category.id);
+  return formatExploreTagLabel(visual?.label ?? experience.category.name);
+}
+
 export function extractExperienceTagLabels(experience: Experience) {
-  const tags = [
-    experience.category.name,
+  const categoryTag = resolveExploreCategoryLabel(experience);
+  const reasonTags = [
     ...experience.failureReasons,
+    experience.failureReason ?? '',
+  ]
+    .map(formatExploreTagLabel)
+    .filter(Boolean);
+
+  if (reasonTags.length > 0) {
+    return Array.from(new Set([categoryTag, ...reasonTags].filter(Boolean)));
+  }
+
+  const fallbackTags = [
+    categoryTag,
     ...experience.difficulties,
     ...(experience.analysis?.keywords ?? []),
     experience.analysis?.failureCategory ?? '',
@@ -37,7 +54,7 @@ export function extractExperienceTagLabels(experience: Experience) {
     .map(formatExploreTagLabel)
     .filter(Boolean);
 
-  return Array.from(new Set(tags));
+  return Array.from(new Set(fallbackTags));
 }
 
 export function extractExperienceTagKeys(experience: Experience) {

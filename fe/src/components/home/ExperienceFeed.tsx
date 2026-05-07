@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { Experience } from '../../lib/api';
+import { extractExperienceTagLabels } from '../../lib/explore-tags';
 import Card from '../common/Card';
 
 type Props = {
@@ -34,17 +35,6 @@ function formatDate(value: string) {
   ).padStart(2, '0')}`;
 }
 
-function getKeywordLabels(experience: Experience) {
-  const merged = [
-    ...experience.failureReasons,
-    ...experience.difficulties,
-    experience.failureReason ?? '',
-    experience.category.name,
-  ].filter(Boolean);
-
-  return Array.from(new Set(merged)).slice(0, 3);
-}
-
 export default function ExperienceFeed({ experiences, loading, error }: Props) {
   return (
     <div className="flex w-full flex-col items-start gap-[2px] bg-[#EEEEEE] pb-[110px]">
@@ -65,7 +55,7 @@ export default function ExperienceFeed({ experiences, loading, error }: Props) {
           <Link key={item.id} to={`/experiences/${item.id}`} className="block w-full">
             <Card
               title={item.title}
-              tags={getKeywordLabels(item)}
+              tags={extractExperienceTagLabels(item).slice(0, 3)}
               duration={formatDuration(item.durationMonths)}
               views={item.viewCount}
               amount={item.investmentAmount ?? 0}

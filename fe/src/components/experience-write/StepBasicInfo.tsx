@@ -2,7 +2,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Category } from '../../lib/api';
 import { CATEGORY_VISUALS } from '../../lib/category-visuals';
 import type { FormState } from '../../hooks/useExperienceWrite';
-import FieldLabel from './FieldLabal';
+import FieldLabel from './FieldLabel';
 
 type Props = {
   categories: Category[];

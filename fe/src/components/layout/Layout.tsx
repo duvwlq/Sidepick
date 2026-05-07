@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import BottomNav from './ButtomNav';
+import BottomNav from './BottomNav';
 import HeaderNav from './HeaderNav';
 
 type HeaderLeftType = 'menu' | 'back' | 'none';

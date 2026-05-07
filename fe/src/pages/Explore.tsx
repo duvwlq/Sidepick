@@ -5,12 +5,12 @@ import HorizontalScroll from '../components/common/HorizontalScroll';
 import SearchBar from '../components/common/SearchBar';
 import Layout from '../components/layout/Layout';
 import { getExperiences, type Experience } from '../lib/api';
-import { CATEGORY_TAG_LABELS } from '../lib/category-visuals';
+import { CATEGORY_TAG_LABELS, CATEGORY_VISUALS } from '../lib/category-visuals';
 
 type SortKey = 'latest' | 'popular';
 type FilterTagOption = {
   label: string;
-  value: string | null;
+  value: number | null;
 };
 
 const RECENT_SEARCHES_KEY = 'sidepick.recentSearches';
@@ -114,10 +114,13 @@ export default function Explore() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialKeyword = searchParams.get('q') ?? '';
   const initialTag = searchParams.get('tag');
+  const initialCategoryId = initialTag ? Number(initialTag) : null;
   const [keyword, setKeyword] = useState(initialKeyword);
   const [draftKeyword, setDraftKeyword] = useState(initialKeyword);
   const [sort] = useState<SortKey>('latest');
-  const [selectedTag, setSelectedTag] = useState<string | null>(initialTag);
+  const [selectedTag, setSelectedTag] = useState<number | null>(
+    Number.isFinite(initialCategoryId) ? initialCategoryId : null,
+  );
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -133,8 +136,8 @@ export default function Explore() {
     if (keyword.trim()) {
       nextParams.set('q', keyword.trim());
     }
-    if (selectedTag) {
-      nextParams.set('tag', selectedTag);
+    if (selectedTag !== null) {
+      nextParams.set('tag', String(selectedTag));
     }
 
     setSearchParams(nextParams, { replace: true });
@@ -143,7 +146,7 @@ export default function Explore() {
   async function loadExperiences(
     searchKeyword: string,
     sortKey: SortKey,
-    failureReason: string | null,
+    categoryId: number | null,
   ) {
     setLoading(true);
     setError('');
@@ -153,7 +156,7 @@ export default function Explore() {
         page: 0,
         size: 50,
         q: searchKeyword.trim() || undefined,
-        failureReason: failureReason ?? undefined,
+        categoryId: categoryId ?? undefined,
         sort: sortKey,
       });
       setExperiences(payload.experiences);
@@ -187,13 +190,16 @@ export default function Explore() {
     persistRecentKeywords(recentKeywords.filter((item) => item !== target));
   }
 
-  function toggleTag(tagValue: string | null) {
+  function toggleTag(tagValue: number | null) {
     setSelectedTag((current) => (current === tagValue ? null : tagValue));
   }
 
   const recommendedKeywords = useMemo(() => DEFAULT_RECOMMENDED_KEYWORDS, []);
   const filterTags = useMemo<FilterTagOption[]>(
-    () => [{ label: '전체', value: null }, ...CATEGORY_TAG_LABELS.map((item) => ({ label: item, value: item }))],
+    () => [
+      { label: '전체', value: null },
+      ...CATEGORY_VISUALS.map((item) => ({ label: item.label, value: item.id })),
+    ],
     [],
   );
   const activeFilters = useMemo(() => {
@@ -201,8 +207,11 @@ export default function Explore() {
     if (keyword.trim()) {
       items.push({ key: 'q', label: keyword.trim() });
     }
-    if (selectedTag) {
-      items.push({ key: 'tag', label: selectedTag });
+    if (selectedTag !== null) {
+      const selectedCategory = CATEGORY_VISUALS.find((item) => item.id === selectedTag);
+      if (selectedCategory) {
+        items.push({ key: 'tag', label: selectedCategory.label });
+      }
     }
     return items;
   }, [keyword, selectedTag]);
@@ -301,7 +310,7 @@ export default function Explore() {
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <p className="font-['Pretendard'] text-[15px] font-[600] leading-[18px] text-[#111111]">
-                {loading ? '사례를 불러오는 중' : `총 ${experiences.length}개의 사례`}
+                {loading ? '사례를 불러오는 중' : '사례 탐색'}
               </p>
               <p className="mt-[4px] font-['Pretendard'] text-[12px] font-[400] leading-[16px] text-[#7A7A7A]">
                 {activeFilters.length

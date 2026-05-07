@@ -10,6 +10,12 @@ import Layout from '../components/layout/Layout';
 import { difficultyOptions } from '../constants/experienceOptions';
 import { useExperienceWrite } from '../hooks/useExperienceWrite';
 import { createExperience, getCategories, type Category } from '../lib/api';
+import {
+  mapDailyHours,
+  mapDailyHoursToWeeklyHours,
+  mapPeriodToMonths,
+  parseNumber,
+} from '../lib/experience-write';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
@@ -30,7 +36,7 @@ export default function Create() {
     if (!token) {
       navigate(
         `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
-          '경험 등록은 로그인 후 이용할 수 있어요.',
+          '경험 등록은 로그인이 필요해요',
         )}`,
         { replace: true },
       );
@@ -70,7 +76,7 @@ export default function Create() {
 
   const handleSubmit = async () => {
     if (!token) {
-      setSubmitError('로그인 정보가 없어요.');
+      setSubmitError('로그인 정보가 없어요');
       return;
     }
 
@@ -114,7 +120,7 @@ export default function Create() {
         wouldRetry: true,
       });
 
-      navigate(`/analysis-result?experienceId=${created.id}`);
+      navigate(`/experiences/${created.id}`);
     } catch (createError) {
       setSubmitError(
         resolveErrorMessage(
@@ -198,7 +204,7 @@ function StepTitle({
 }) {
   const title =
     step === 3
-      ? ['부업을 진행하면서', '특히 어려웠던 점은 무엇이었나요?']
+      ? ['부업을 진행하면서,', '가장 어려웠던 점이 무엇이었나요?']
       : step === 4
         ? ['경험을 자유롭게', '정리해볼까요?']
         : ['어떤 상황에서 시작하셨나요?'];
@@ -226,52 +232,4 @@ function StepTitle({
       ) : null}
     </div>
   );
-}
-
-function parseNumber(value: string) {
-  const onlyDigits = value.replace(/[^\d]/g, '');
-  return onlyDigits ? Number(onlyDigits) : undefined;
-}
-
-function mapPeriodToMonths(value: string) {
-  if (value === '1개월 미만') {
-    return 1;
-  }
-  if (value === '1년 이상') {
-    return 12;
-  }
-
-  const months = Number(value.replace(/[^\d]/g, ''));
-  return Number.isFinite(months) && months > 0 ? months : undefined;
-}
-
-function mapDailyHours(value: string) {
-  if (value === '1시간 미만') {
-    return 'UNDER_1_HOUR';
-  }
-
-  const hours = Number(value.replace(/[^\d]/g, ''));
-  if (!hours) {
-    return undefined;
-  }
-  if (hours <= 3) {
-    return '1_TO_3_HOURS';
-  }
-  if (hours <= 5) {
-    return '3_TO_5_HOURS';
-  }
-
-  return 'OVER_FIVE_HOURS';
-}
-
-function mapDailyHoursToWeeklyHours(value: string) {
-  if (value === '1시간 미만') {
-    return 3;
-  }
-  if (value === '8시간 이상') {
-    return 40;
-  }
-
-  const hours = Number(value.replace(/[^\d]/g, ''));
-  return Number.isFinite(hours) && hours > 0 ? Math.min(hours * 7, 40) : undefined;
 }

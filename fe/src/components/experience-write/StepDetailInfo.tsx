@@ -1,6 +1,6 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import type { FormState } from '../../hooks/useExperienceWrite';
-import FieldLabel from './FieldLabal';
+import FieldLabel from './FieldLabel';
 
 type Props = {
   form: FormState;
