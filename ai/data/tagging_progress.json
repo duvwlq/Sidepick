@@ -1,0 +1,1002 @@
+{
+  "1": {
+    "keywords": [
+      "프리랜서",
+      "제안부족",
+      "고객확보"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "재능 프리랜서로 1년 운영했으나 주기적 제안 부족으로 고객 확보 실패",
+    "risk_level": "medium"
+  },
+  "2": {
+    "keywords": [
+      "유튜브",
+      "수익화실패",
+      "실행력부족"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "유튜브 콘텐츠 제작, 수익화 방법 이해 부족과 마케팅 전략 없이 실패",
+    "risk_level": "low"
+  },
+  "3": {
+    "keywords": [
+      "주식투자",
+      "원금반토막",
+      "투자실패"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "주식 투자로 원금 50% 손실, 시장 조사 부족이 주요 원인",
+    "risk_level": "high"
+  },
+  "4": {
+    "keywords": [
+      "시장조사부족",
+      "원가측정",
+      "판매가책정"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "이커머스 시작했으나 시장조사와 가격 책정 실패로 수익 못냄",
+    "risk_level": "low"
+  },
+  "5": {
+    "keywords": [
+      "주식투자",
+      "전쟁",
+      "환경변화"
+    ],
+    "failure_category": "기타",
+    "summary": "주식투자 중 전쟁 등 예측 불가능한 환경변화로 1억원 손실",
+    "risk_level": "high"
+  },
+  "6": {
+    "keywords": [
+      "시작방법불명",
+      "고객확보",
+      "방향성부족"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "프리랜서 부업 시작 단계에서 방향 설정 및 고객 확보 실패",
+    "risk_level": "low"
+  },
+  "7": {
+    "keywords": [
+      "카카오T퀵",
+      "유지비",
+      "기름값"
+    ],
+    "failure_category": "자금부족",
+    "summary": "카카오T 퀵 배달, 기름값·유지비로 실질 수익 미미",
+    "risk_level": "low"
+  },
+  "8": {
+    "keywords": [
+      "AI툴",
+      "직장병행",
+      "시간부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "AI 툴 활용 콘텐츠 부업, 직장 병행으로 시간 부족 실패",
+    "risk_level": "low"
+  },
+  "9": {
+    "keywords": [
+      "블로그체험단",
+      "애드포스트",
+      "수익화실패"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "쿠팡·블로그 체험단으로 3년간 10만원 수익, 수익화 능력 부족",
+    "risk_level": "low"
+  },
+  "10": {
+    "keywords": [
+      "탁송플랫폼",
+      "가격경쟁",
+      "단가하락"
+    ],
+    "failure_category": "경쟁분석부족",
+    "summary": "플랫폼 탁송업, 과다경쟁으로 적정단가 유지 불가능",
+    "risk_level": "medium"
+  },
+  "11": {
+    "keywords": [
+      "악세사리",
+      "자본부족",
+      "경쟁심화"
+    ],
+    "failure_category": "자금부족",
+    "summary": "악세사리 스토어 사업, 확장 단계에서 자본 부족과 경쟁 심화로 실패",
+    "risk_level": "medium"
+  },
+  "12": {
+    "keywords": [
+      "플랫폼노동",
+      "과로",
+      "건강악화"
+    ],
+    "failure_category": "시간관리",
+    "summary": "과도한 플랫폼노동으로 건강 악화, 의료비 지출로 실익 감소",
+    "risk_level": "medium"
+  },
+  "13": {
+    "keywords": [
+      "퍼스널브랜딩",
+      "수익화실패",
+      "SNS운영"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "퍼스널브랜딩 SNS 1년 운영했으나 수익화 방법 부재로 실패",
+    "risk_level": "low"
+  },
+  "14": {
+    "keywords": [
+      "투자재테크",
+      "소극적투자",
+      "정보부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "친구 추천으로 시작한 투자, 지식 부족으로 소극적 투자만 반복",
+    "risk_level": "medium"
+  },
+  "15": {
+    "keywords": [
+      "주식투자",
+      "타이밍실패",
+      "실행력부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "주식 투자 시 실행력 부족으로 매수 타이밍 놓쳐 손실 발생",
+    "risk_level": "low"
+  },
+  "16": {
+    "keywords": [
+      "앱테크",
+      "낮은시급",
+      "설문중단"
+    ],
+    "failure_category": "시간관리",
+    "summary": "앱테크 설문조사로 1년간 3만원 수익, 시간대비 낮은 보상",
+    "risk_level": "low"
+  },
+  "17": {
+    "keywords": [
+      "중국도매",
+      "플랫폼수수료",
+      "마케팅실패"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "중국 도매 사이트 활용한 이커머스, 마케팅 부족과 플랫폼 수수료로 수익화 실패",
+    "risk_level": "low"
+  },
+  "18": {
+    "keywords": [
+      "이커머스",
+      "마케팅부족",
+      "시간부족"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "이커머스 6개월 운영, 고객 확보 실패로 손실 67만원 발생",
+    "risk_level": "medium"
+  },
+  "19": {
+    "keywords": [
+      "지인소개",
+      "경험부족",
+      "이커머스"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "지인 소개로 시작한 이커머스, 경험 부족으로 마케팅 실패",
+    "risk_level": "high"
+  },
+  "20": {
+    "keywords": [
+      "플랫폼노동",
+      "지속성부족",
+      "습관화실패"
+    ],
+    "failure_category": "시간관리",
+    "summary": "플랫폼노동, 귀찮음과 망각으로 매일 실행 실패해 수익 미미",
+    "risk_level": "low"
+  },
+  "21": {
+    "keywords": [
+      "배달대행",
+      "피크타임",
+      "체력소진"
+    ],
+    "failure_category": "시간관리",
+    "summary": "배달 플랫폼 노동, 저녁 피크타임 집중했으나 체력 한계로 지속 어려움",
+    "risk_level": "low"
+  },
+  "22": {
+    "keywords": [
+      "여유자본",
+      "시간부족",
+      "정보부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "투자재테크 1년, 6천만원 투자 후 50만원 수익. 정보·시간 부족",
+    "risk_level": "high"
+  },
+  "23": {
+    "keywords": [
+      "재테크",
+      "투자",
+      "정보부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "재테크 투자에서 난해한 정보와 경쟁으로 5000만원 투자 대비 15만원 수익",
+    "risk_level": "high"
+  },
+  "24": {
+    "keywords": [
+      "체력소진",
+      "퇴근후",
+      "지속성"
+    ],
+    "failure_category": "시간관리",
+    "summary": "이커머스 부업, 본업 후 체력 소진으로 지속 어려움",
+    "risk_level": "low"
+  },
+  "25": {
+    "keywords": [
+      "시간부족",
+      "지속성",
+      "실행력"
+    ],
+    "failure_category": "시간관리",
+    "summary": "프리랜서 부업 시작했으나 예상보다 시간 소요 많아 지속 실패",
+    "risk_level": "low"
+  },
+  "26": {
+    "keywords": [
+      "블로그",
+      "애드포스트",
+      "포스팅대행"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "블로그 수익화 성공 후 포스팅대행 의뢰로 악성블로그 판정받아 채널 손실",
+    "risk_level": "high"
+  },
+  "27": {
+    "keywords": [
+      "플랫폼노동",
+      "체력소진",
+      "수면부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "플랫폼노동 하루 5시간 이상 투입, 수면부족으로 체력적 한계",
+    "risk_level": "medium"
+  },
+  "28": {
+    "keywords": [
+      "플랫폼노동",
+      "수익구조",
+      "방치"
+    ],
+    "failure_category": "시간관리",
+    "summary": "플랫폼노동 시작 후 수익구조 파악 어려움과 조언 부재로 장기 방치",
+    "risk_level": "low"
+  },
+  "29": {
+    "keywords": [
+      "체험단",
+      "제품홍보",
+      "수익화실패"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "체험단·제품홍보 SNS 운영, 노력 대비 낮은 수익으로 포기",
+    "risk_level": "low"
+  },
+  "30": {
+    "keywords": [
+      "플랫폼노동",
+      "시장조사부족",
+      "준비부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "플랫폼노동 시작 시 시장여건 파악 없이 준비 안된 상태로 시작해 시행착오",
+    "risk_level": "low"
+  },
+  "31": {
+    "keywords": [
+      "의지부족",
+      "자료부족",
+      "실행력"
+    ],
+    "failure_category": "기타",
+    "summary": "온라인판매 시작했으나 의지와 자료 부족으로 실행 어려움",
+    "risk_level": "low"
+  },
+  "32": {
+    "keywords": [
+      "웹소설",
+      "독자층불일치",
+      "스타일부적합"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "웹소설 작가 도전, 독자 선호와 작품 스타일 불일치로 실패",
+    "risk_level": "low"
+  },
+  "33": {
+    "keywords": [
+      "색칠부업",
+      "디테일요구",
+      "시간소요"
+    ],
+    "failure_category": "시간관리",
+    "summary": "색칠 부업, 과도한 디테일 요구와 긴 작업시간으로 수익화 실패",
+    "risk_level": "low"
+  },
+  "34": {
+    "keywords": [
+      "음악창작",
+      "유튜브홍보",
+      "마케팅부족"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "유튜브 음악 채널 운영, 좋은 평가에도 홍보 부족으로 수익화 실패",
+    "risk_level": "medium"
+  },
+  "35": {
+    "keywords": [
+      "플랫폼노동",
+      "수익성부족",
+      "부정기작업"
+    ],
+    "failure_category": "시간관리",
+    "summary": "패널조사·단순작업 부업, 부정기성과 낮은 시급으로 지속 어려움",
+    "risk_level": "low"
+  },
+  "36": {
+    "keywords": [
+      "온라인판매",
+      "마케팅실패",
+      "고객확보"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "이커머스 1년 운영, 마케팅 부족으로 고객 확보 실패",
+    "risk_level": "low"
+  },
+  "37": {
+    "keywords": [
+      "취미창업",
+      "판매부진",
+      "낮은단가"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "취미 기반 오프라인 판매, 낮은 판매량과 단가로 800만원 투자 대비 손실",
+    "risk_level": "medium"
+  },
+  "38": {
+    "keywords": [
+      "앱테크",
+      "시간효율",
+      "병행어려움"
+    ],
+    "failure_category": "시간관리",
+    "summary": "앱테크 부업, 시간 대비 효율 낮아 지속 어려움",
+    "risk_level": "low"
+  },
+  "39": {
+    "keywords": [
+      "투자재테크",
+      "실행력부족",
+      "정보부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "투자재테크 부업, 실행력·시간 부족으로 수익 없이 종료",
+    "risk_level": "low"
+  },
+  "40": {
+    "keywords": [
+      "온라인클래스",
+      "사업자등록",
+      "상품선정"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "SNS 클래스 구매 후 이커머스 시작했으나 고객 니즈 파악 실패로 포기",
+    "risk_level": "low"
+  },
+  "41": {
+    "keywords": [
+      "블로그광고",
+      "알고리즘저평가",
+      "검색노출감소"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "블로그 광고 부업, 기계적 광고글로 알고리즘 저평가 받아 검색 노출 감소",
+    "risk_level": "low"
+  },
+  "42": {
+    "keywords": [
+      "플랫폼노동",
+      "경력단절",
+      "시간소요"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "경력단절 후 플랫폼노동 시작, 사전조사 부족으로 시간과 체력 소모만",
+    "risk_level": "medium"
+  },
+  "43": {
+    "keywords": [
+      "쇼핑몰앱개발",
+      "전문인력채용",
+      "정책자금실패"
+    ],
+    "failure_category": "자금부족",
+    "summary": "쇼핑몰 앱 개발 중 전문인력 채용 후 자금부족으로 중단",
+    "risk_level": "high"
+  },
+  "44": {
+    "keywords": [
+      "배달",
+      "자동차",
+      "기동성부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "자동차 배달 부업, 기동성 부족으로 시간대비 수익 낮음",
+    "risk_level": "low"
+  },
+  "45": {
+    "keywords": [
+      "주식투자",
+      "시장흐름",
+      "분석부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "주식투자로 경제적 자유 추구했으나 시장흐름 파악 실패로 손실",
+    "risk_level": "high"
+  },
+  "46": {
+    "keywords": [
+      "배달",
+      "체력부족",
+      "시간관리"
+    ],
+    "failure_category": "시간관리",
+    "summary": "배달 부업 1년, 체력 한계와 시간 관리 어려움으로 힘듦",
+    "risk_level": "low"
+  },
+  "47": {
+    "keywords": [
+      "취미수익화",
+      "사전조사부족",
+      "혼자운영"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "취미 기반 오프라인 부업, 시장조사 없이 시작해 수익화 실패",
+    "risk_level": "low"
+  },
+  "48": {
+    "keywords": [
+      "투자타이밍",
+      "정보취합",
+      "소액투자"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "투자재테크 부업, 타이밍 예측 어려움과 수익구조 이해 부족으로 저수익",
+    "risk_level": "medium"
+  },
+  "49": {
+    "keywords": [
+      "플랫폼노동",
+      "시간부족",
+      "정보부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "플랫폼노동 부업, 예상보다 많은 시간 소요로 지속 어려움",
+    "risk_level": "low"
+  },
+  "50": {
+    "keywords": [
+      "투자재테크",
+      "시장조사부족",
+      "정보부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "주변 추천으로 투자재테크 시작했으나 시장조사·정보 부족으로 3천만원 손실",
+    "risk_level": "high"
+  },
+  "51": {
+    "keywords": [
+      "팔로워모으기",
+      "SNS수익화",
+      "콘텐츠제작"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "SNS 콘텐츠 부업 시도했으나 팔로워 확보 실패로 수익화 어려움",
+    "risk_level": "low"
+  },
+  "52": {
+    "keywords": [
+      "SNS콘텐츠",
+      "실행력부족",
+      "시간관리"
+    ],
+    "failure_category": "시간관리",
+    "summary": "SNS 콘텐츠 부업, 본업 병행하며 실행력과 시간관리 실패",
+    "risk_level": "low"
+  },
+  "53": {
+    "keywords": [
+      "유튜브",
+      "알고리즘",
+      "노출부족"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "유튜브 영상 콘텐츠 제작했으나 알고리즘 노출 실패로 수익화 난항",
+    "risk_level": "high"
+  },
+  "54": {
+    "keywords": [
+      "유튜브창업",
+      "2년준비",
+      "온라인판매"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "2년 공부 후 시작한 이커머스, 마케팅 실패로 투자금 대비 저조한 수익",
+    "risk_level": "high"
+  },
+  "55": {
+    "keywords": [
+      "배달",
+      "작사",
+      "스마트스토어"
+    ],
+    "failure_category": "경쟁분석부족",
+    "summary": "배달·작사·스마트스토어 3가지 동시 시도, 체력소진과 레드오션으로 실패",
+    "risk_level": "medium"
+  },
+  "56": {
+    "keywords": [
+      "온라인판매",
+      "재고관리",
+      "트렌드변화"
+    ],
+    "failure_category": "시간관리",
+    "summary": "이커머스 도매 판매, 트렌드 변화와 낮은 시간당 수익으로 실패",
+    "risk_level": "high"
+  },
+  "57": {
+    "keywords": [
+      "SNS광고",
+      "무료강의",
+      "월정액"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "무료 SNS 강의 유입 후 유료 전환 유도, 혼자 진행하다 실패",
+    "risk_level": "low"
+  },
+  "58": {
+    "keywords": [
+      "레버리지",
+      "해외주식",
+      "정보부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "레버리지 투자로 초기 수익 후 큰 손실, 정보·공부 부족이 원인",
+    "risk_level": "high"
+  },
+  "59": {
+    "keywords": [
+      "수익화어려움",
+      "취미활동",
+      "SNS콘텐츠"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "SNS 콘텐츠 부업 시작했으나 수익화 방법 몰라 실패",
+    "risk_level": "low"
+  },
+  "60": {
+    "keywords": [
+      "실행력부족",
+      "시간관리",
+      "소액수익"
+    ],
+    "failure_category": "시간관리",
+    "summary": "1년 이상 부업 시도했으나 하루 1시간 미만 투자로 소액 수익에 그침",
+    "risk_level": "low"
+  },
+  "61": {
+    "keywords": [
+      "정보과다",
+      "시행착오",
+      "투자방향성"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "투자재테크 부업, 정보 과다로 방향성 상실해 시행착오 반복",
+    "risk_level": "medium"
+  },
+  "62": {
+    "keywords": [
+      "AI툴",
+      "마케팅비용",
+      "상단진입"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "AI툴 활용 프리랜서 부업, 광고비 지속 투자했으나 유입 부족으로 수익화 실패",
+    "risk_level": "medium"
+  },
+  "63": {
+    "keywords": [
+      "플랫폼노동",
+      "저수익",
+      "시간대비효율"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "플랫폼노동 1년 이상 했으나 활동 대비 수입이 너무 적어 포기",
+    "risk_level": "low"
+  },
+  "64": {
+    "keywords": [
+      "시간부족",
+      "정보부족",
+      "시행착오"
+    ],
+    "failure_category": "시간관리",
+    "summary": "SNS 콘텐츠 부업, 시간과 정보 부족으로 확장 실패",
+    "risk_level": "low"
+  },
+  "65": {
+    "keywords": [
+      "고객유치",
+      "수익구조",
+      "체력소진"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "SNS로 고객 50건 유치 성공했으나 저가 전략으로 수익 없이 체력만 소진",
+    "risk_level": "medium"
+  },
+  "66": {
+    "keywords": [
+      "코인투자",
+      "손절익절타이밍",
+      "이벤트참여"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "코인 이벤트로 시작했으나 손절·익절 타이밍 판단 실패",
+    "risk_level": "medium"
+  },
+  "67": {
+    "keywords": [
+      "플랫폼노동",
+      "시간부족",
+      "마케팅"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "플랫폼노동 부업, 본업 병행 중 시간·마케팅 역량 부족으로 실패",
+    "risk_level": "low"
+  },
+  "68": {
+    "keywords": [
+      "블로그",
+      "노출부족",
+      "방문자확보"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "블로그 부업, 게시글 노출 부족으로 방문자 확보 실패",
+    "risk_level": "low"
+  },
+  "69": {
+    "keywords": [
+      "시드머니부족",
+      "장기투자",
+      "수익률한계"
+    ],
+    "failure_category": "자금부족",
+    "summary": "시드머니 부족으로 장기투자 수익 실현 어려움",
+    "risk_level": "medium"
+  },
+  "70": {
+    "keywords": [
+      "네이버애드포스트",
+      "금융블로그",
+      "정보피로도"
+    ],
+    "failure_category": "시간관리",
+    "summary": "금융 블로그 운영, 정보 업데이트 속도를 따라가지 못해 주1회로 축소",
+    "risk_level": "low"
+  },
+  "71": {
+    "keywords": [
+      "시간부족",
+      "꾸준함부족",
+      "경쟁력부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "본업 병행으로 SNS 콘텐츠 제작 시간 부족, 꾸준함 유지 실패",
+    "risk_level": "low"
+  },
+  "72": {
+    "keywords": [
+      "온라인판매",
+      "시장조사부족",
+      "본업병행어려움"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "온라인판매 시작했으나 시장조사와 고객확보 실패, 본업 병행 어려움",
+    "risk_level": "low"
+  },
+  "73": {
+    "keywords": [
+      "시간부족",
+      "수익방법",
+      "본업병행"
+    ],
+    "failure_category": "시간관리",
+    "summary": "프리랜서 부업, 본업과 병행하며 시간 부족으로 수익 방법 찾지 못함",
+    "risk_level": "low"
+  },
+  "74": {
+    "keywords": [
+      "플랫폼노동",
+      "시간부족",
+      "낮은수익"
+    ],
+    "failure_category": "시간관리",
+    "summary": "1년간 하루 3~5시간 플랫폼노동 투자했으나 7만원 수익에 그침",
+    "risk_level": "high"
+  },
+  "75": {
+    "keywords": [
+      "핸드메이드",
+      "판매부진",
+      "고객흥미부족"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "핸드메이드 폰줄·키링 제작했으나 고객 흥미 유도 실패로 판매 부진",
+    "risk_level": "low"
+  },
+  "76": {
+    "keywords": [
+      "주식투자",
+      "배달부업",
+      "시간불규칙"
+    ],
+    "failure_category": "시간관리",
+    "summary": "불규칙한 본업 종료시간으로 배달 어렵고, 정보부족과 끈기부족으로 주식 손실",
+    "risk_level": "medium"
+  },
+  "77": {
+    "keywords": [
+      "24시간거래",
+      "대응어려움",
+      "시장조사부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "24시간 열린 투자 시장 대응 어려워 30만원 손실",
+    "risk_level": "medium"
+  },
+  "78": {
+    "keywords": [
+      "주식투자",
+      "지인추천",
+      "손실매도"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "친구 추천 주식 투자, 초반 수익 후 큰 손실로 손절매",
+    "risk_level": "high"
+  },
+  "79": {
+    "keywords": [
+      "용돈벌이",
+      "지속성부족",
+      "동기저하"
+    ],
+    "failure_category": "시간관리",
+    "summary": "투자재테크 부업을 용돈벌이로 시작했으나 동기부여 약화로 중단",
+    "risk_level": "low"
+  },
+  "80": {
+    "keywords": [
+      "마케팅부족",
+      "시간투자",
+      "꾸준함부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "재능 프리랜서 부업, 마케팅과 꾸준한 시간 투자 실패로 중도 포기",
+    "risk_level": "low"
+  },
+  "81": {
+    "keywords": [
+      "투자욕심",
+      "손절타이밍",
+      "시장조사부족"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "투자재테크 부업에서 욕심으로 규모 확대 후 손절 시기 놓쳐 1천만원 손실",
+    "risk_level": "high"
+  },
+  "82": {
+    "keywords": [
+      "고객확보",
+      "시간대비수익",
+      "지속성부족"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "SNS 콘텐츠 부업, 고객 확보 실패와 낮은 시간 효율로 중단",
+    "risk_level": "low"
+  },
+  "83": {
+    "keywords": [
+      "SNS부업",
+      "시간부족",
+      "수익구조"
+    ],
+    "failure_category": "시간관리",
+    "summary": "SNS 콘텐츠 부업, 정보 부족과 체력 한계로 3~6개월 만에 중단",
+    "risk_level": "low"
+  },
+  "84": {
+    "keywords": [
+      "플랫폼노동",
+      "시간관리",
+      "고액투자"
+    ],
+    "failure_category": "시간관리",
+    "summary": "플랫폼노동에 3천만원 투자 후 1년간 하루 3~5시간 투입했으나 300만원만 회수",
+    "risk_level": "high"
+  },
+  "85": {
+    "keywords": [
+      "블로그",
+      "타겟불명",
+      "수익화전략"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "블로그 운영 시 독자 니즈 파악 실패 및 수익화 방법 부재",
+    "risk_level": "low"
+  },
+  "86": {
+    "keywords": [
+      "앱테크",
+      "보상감소",
+      "시간대비효율"
+    ],
+    "failure_category": "시간관리",
+    "summary": "앱테크 시작했으나 보상 감소와 낮은 시간대비 효율로 지속 어려움",
+    "risk_level": "low"
+  },
+  "87": {
+    "keywords": [
+      "앱테크",
+      "경쟁심화",
+      "포인트감소"
+    ],
+    "failure_category": "경쟁분석부족",
+    "summary": "앱테크 부업, 지원자 증가로 포인트 감소 및 일감 확보 어려움",
+    "risk_level": "low"
+  },
+  "88": {
+    "keywords": [
+      "인스타그램",
+      "환불불가",
+      "과대광고"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "인스타 과대광고 강의 구매 후 실행 어려움으로 포기, 환불 불가",
+    "risk_level": "medium"
+  },
+  "89": {
+    "keywords": [
+      "투자",
+      "성격불일치",
+      "심리적스트레스"
+    ],
+    "failure_category": "기타",
+    "summary": "투자 부업 시작했으나 성격과 맞지 않아 심한 스트레스 경험",
+    "risk_level": "medium"
+  },
+  "90": {
+    "keywords": [
+      "블로그",
+      "육아",
+      "시간부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "육아로 시간 부족한 상황에서 블로그 시작, 수익 없이 포기",
+    "risk_level": "low"
+  },
+  "91": {
+    "keywords": [
+      "배달서비스",
+      "시간관리",
+      "수익부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "배달 부업 1년간 월 30만원 수익, 시간관리 어려움",
+    "risk_level": "low"
+  },
+  "92": {
+    "keywords": [
+      "프리랜서",
+      "실행력부족",
+      "지속어려움"
+    ],
+    "failure_category": "시간관리",
+    "summary": "재능 프리랜서 부업, 꾸준한 실행력 부족으로 지속 어려움",
+    "risk_level": "low"
+  },
+  "93": {
+    "keywords": [
+      "투자재테크",
+      "수익불안정",
+      "지속성부족"
+    ],
+    "failure_category": "시간관리",
+    "summary": "투자재테크 부업, 1년간 불안정한 수익으로 지속 의지 상실",
+    "risk_level": "high"
+  },
+  "94": {
+    "keywords": [
+      "유튜브부업",
+      "수익한계",
+      "적성맞음"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "유튜브 콘텐츠 부업, 적성은 맞으나 수익 확장 전략 부족으로 한계",
+    "risk_level": "low"
+  },
+  "95": {
+    "keywords": [
+      "주식투자",
+      "정보격차",
+      "손실경험"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "주식 투자로 자산 증식 시도했으나 정보 해석 실패로 손실",
+    "risk_level": "high"
+  },
+  "96": {
+    "keywords": [
+      "SNS",
+      "마케팅부족",
+      "운영지속성"
+    ],
+    "failure_category": "마케팅부족",
+    "summary": "SNS 콘텐츠 부업, 1년 이상 운영했으나 마케팅 부족과 운영 지속의 어려움으로 실패",
+    "risk_level": "low"
+  },
+  "97": {
+    "keywords": [
+      "자본부족",
+      "정보부족",
+      "수익화연결"
+    ],
+    "failure_category": "자금부족",
+    "summary": "SNS 콘텐츠 부업, 초기 자본 없이 시작해 수익화 연결 실패",
+    "risk_level": "low"
+  },
+  "98": {
+    "keywords": [
+      "투자재테크",
+      "시장조사부족",
+      "친구추천"
+    ],
+    "failure_category": "타겟분석실패",
+    "summary": "친구 추천으로 시작한 투자, 시장조사 없이 5천만원 투입 후 실패",
+    "risk_level": "high"
+  },
+  "99": {
+    "keywords": [
+      "앱테크",
+      "시간대비수익",
+      "플랫폼노동"
+    ],
+    "failure_category": "시간관리",
+    "summary": "앱테크로 1년간 투자한 시간 대비 수익성이 낮아 실패",
+    "risk_level": "low"
+  },
+  "100": {
+    "keywords": [
+      "이커머스",
+      "경쟁심화",
+      "타이밍"
+    ],
+    "failure_category": "경쟁분석부족",
+    "summary": "유튜브 알고리즘으로 접한 이커머스, 시장 포화로 실패",
+    "risk_level": "medium"
+  }
+}
