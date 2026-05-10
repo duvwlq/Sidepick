@@ -16,6 +16,7 @@ import com.failforward.backend.domain.analysis.repository.AiAnalysisRepository;
 import com.failforward.backend.domain.analysis.repository.MatchedCaseRepository;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class AIAnalysisService {
     private final RestTemplate aiRestTemplate;
     private final AiServerProperties aiServerProperties;
     private final AIAnalysisSupport analysisSupport;
+    private final DemoScenarioSupport demoScenarioSupport;
 
     public Optional<AiAnalysis> findByExperience(FailureExperience experience) {
         return aiAnalysisRepository.findByExperience(experience);
@@ -88,6 +90,10 @@ public class AIAnalysisService {
         if (existing.isPresent()) {
             return existing;
         }
+        Optional<AiAnalysis> demoAnalysis = persistDemoScenarioAnalysisIfMatched(experience, null);
+        if (demoAnalysis.isPresent()) {
+            return demoAnalysis;
+        }
         try {
             return Optional.of(requestAndPersistAnalysis(experience));
         } catch (Exception exception) {
@@ -100,6 +106,10 @@ public class AIAnalysisService {
     @Transactional
     public Optional<AiAnalysis> reanalyzeAfterExperienceUpdate(FailureExperience experience) {
         Optional<AiAnalysis> existing = aiAnalysisRepository.findByExperience(experience);
+        Optional<AiAnalysis> demoAnalysis = persistDemoScenarioAnalysisIfMatched(experience, existing.orElse(null));
+        if (demoAnalysis.isPresent()) {
+            return demoAnalysis;
+        }
         try {
             return Optional.of(requestAndPersistAnalysis(experience, existing.orElse(null)));
         } catch (Exception exception) {
@@ -149,6 +159,81 @@ public class AIAnalysisService {
         log.info("ai_analysis_response_stored {}",
                 analysisSupport.buildAiLogFields(experience.getId(), analysis.getId(), null, null));
         return analysis;
+    }
+
+    private Optional<AiAnalysis> persistDemoScenarioAnalysisIfMatched(
+            FailureExperience experience,
+            AiAnalysis existingAnalysis
+    ) {
+        Optional<DemoScenarioSupport.DemoScenario> scenario = demoScenarioSupport.match(experience);
+        if (scenario.isEmpty()) {
+            return Optional.empty();
+        }
+
+        experience.updateStructuredData(demoScenarioSupport.mergeStructuredData(experience, scenario.get()));
+        FailureExperience savedExperience = experienceRepository.save(experience);
+
+        AiAnalysis analysis = existingAnalysis;
+        if (analysis == null) {
+            analysis = AiAnalysis.create(
+                    savedExperience,
+                    analysisSupport.writeJson(scenario.get().keywords()),
+                    analysisSupport.writeJson(scenario.get().advice()),
+                    scenario.get().summary(),
+                    analysisSupport.truncate(scenario.get().failureCategory(), 50),
+                    analysisSupport.normalizeRiskLevel(scenario.get().riskLevel()),
+                    analysisSupport.writeJson(scenario.get().riskFactors()),
+                    scenario.get().riskScore()
+            );
+        } else {
+            analysis.updateFromAiResult(
+                    analysisSupport.writeJson(scenario.get().keywords()),
+                    analysisSupport.writeJson(scenario.get().advice()),
+                    scenario.get().summary(),
+                    analysisSupport.truncate(scenario.get().failureCategory(), 50),
+                    analysisSupport.normalizeRiskLevel(scenario.get().riskLevel()),
+                    analysisSupport.writeJson(scenario.get().riskFactors()),
+                    scenario.get().riskScore()
+            );
+            matchedCaseRepository.deleteByAnalysis(analysis);
+        }
+
+        analysis = aiAnalysisRepository.save(analysis);
+        matchedCaseRepository.saveAll(buildDemoMatchedCases(analysis, scenario.get()));
+        log.info("demo_scenario_analysis_stored experienceId={} scenario={}",
+                savedExperience.getId(), scenario.get().code());
+        return Optional.of(analysis);
+    }
+
+    private List<MatchedCase> buildDemoMatchedCases(
+            AiAnalysis analysis,
+            DemoScenarioSupport.DemoScenario scenario
+    ) {
+        List<MatchedCase> matchedCases = new ArrayList<>();
+        for (int index = 0; index < scenario.similarCaseIds().size(); index++) {
+            Long similarCaseId = scenario.similarCaseIds().get(index);
+            FailureExperience similarExperience = experienceRepository.findWithUserAndCategoryById(similarCaseId)
+                    .orElseThrow(() -> new NotFoundException("Demo similar case not found."));
+            Optional<AiAnalysis> similarAnalysis = aiAnalysisRepository.findByExperience(similarExperience);
+
+            String summary = similarAnalysis.map(AiAnalysis::getStructuredSummary)
+                    .filter(value -> value != null && !value.isBlank())
+                    .orElse(similarExperience.getContent());
+            String keyLesson = similarExperience.getLessonsLearned() != null
+                    && !similarExperience.getLessonsLearned().isBlank()
+                    ? similarExperience.getLessonsLearned()
+                    : similarExperience.getContent();
+
+            matchedCases.add(MatchedCase.create(
+                    analysis,
+                    String.valueOf(similarCaseId),
+                    similarExperience.getTitle(),
+                    summary,
+                    keyLesson,
+                    scenario.matchRates().get(index)
+            ));
+        }
+        return matchedCases;
     }
 
     private AiAnalysisResponse requestAnalysis(FailureExperience experience) {

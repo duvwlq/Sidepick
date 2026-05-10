@@ -71,6 +71,7 @@ function HomeCard({
   onClick: () => void;
 }) {
   const tags = getKeywordLabels(experience);
+  const visibleTags = tags.slice(0, compact ? 1 : 3);
   const amountLabel = `${(experience.investmentAmount ?? 0).toLocaleString()}원`;
   const durationLabel = formatDuration(experience.durationMonths);
   const viewsLabel = experience.viewCount.toLocaleString();
@@ -80,27 +81,27 @@ function HomeCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[127px] appearance-none flex-col items-start gap-[10px] rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left ${
+      className={`flex h-[127px] min-w-0 appearance-none flex-col items-start gap-[10px] overflow-hidden rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left ${
         compact ? 'w-[240px] shrink-0' : 'w-full'
       }`}
     >
-      <div className="flex w-full flex-col items-start gap-[8px]">
-        <div className={`flex w-full items-start ${compact ? 'gap-[4px]' : 'justify-between'}`}>
-          <div className="flex shrink-0 items-start gap-[4px]">
-            {tags.length ? (
-              tags.map((tag) => (
+      <div className="flex w-full min-w-0 flex-col items-start gap-[8px]">
+        <div className={`flex w-full min-w-0 items-start ${compact ? 'gap-[4px]' : 'justify-between'}`}>
+          <div className="flex min-w-0 flex-wrap items-start gap-[4px] overflow-hidden">
+            {visibleTags.length ? (
+              visibleTags.map((tag) => (
                 <span
                   key={`${experience.id}-${tag}`}
-                  className="flex h-[20px] shrink-0 items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]"
+                  className="flex h-[20px] max-w-full items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]"
                 >
-                  <span className="whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+                  <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
                     {tag}
                   </span>
                 </span>
               ))
             ) : (
-              <span className="flex h-[20px] shrink-0 items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]">
-                <span className="whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+              <span className="flex h-[20px] max-w-full items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]">
+                <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
                   키워드 없음
                 </span>
               </span>
@@ -249,7 +250,7 @@ export default function Home() {
       setListError(
         resolveErrorMessage(
           loadError,
-          '경험 목록을 불러오지 못했어요. 잠시 후 다시 시도해주세요.',
+          '경험 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
         ),
       );
     } finally {
@@ -263,7 +264,7 @@ export default function Home() {
 
   function handlePrimaryAction() {
     if (!user) {
-      moveToAuth('/create', '경험 등록과 분석은 로그인 후 이용할 수 있어요.');
+      moveToAuth('/create', '경험 등록과 분석은 로그인이 필요한 서비스입니다.');
       return;
     }
 
@@ -290,7 +291,7 @@ export default function Home() {
           <SearchBar
             placeholder="원하는 실패 사례를 검색해보세요!"
             value={keyword}
-            onClick={() => navigate('/explore')}
+            onClick={() => navigate('/explore?mode=search')}
             readOnly
           />
         </section>
@@ -330,7 +331,7 @@ export default function Home() {
             </HorizontalScroll>
           ) : (
             <div className="h-[127px] w-full rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[32px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#757575]">
-              표시할 인기 사례가 없습니다.
+              표시할 경험이 없습니다.
             </div>
           )}
         </section>
@@ -343,7 +344,7 @@ export default function Home() {
               </p>
               <div className="w-[314px] font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
                 <p>경험을 등록하면 AI가 실패 원인을 분석해주고</p>
-                <p>비슷한 사례들을 보여주며 원하는 선택을 돕습니다.</p>
+                <p>비슷한 사례를 보여주며 원하는 선택을 돕습니다.</p>
               </div>
             </div>
 

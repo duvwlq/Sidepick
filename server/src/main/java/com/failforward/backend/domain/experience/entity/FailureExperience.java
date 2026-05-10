@@ -244,4 +244,8 @@ public class FailureExperience extends BaseTimeEntity {
         this.wouldRetry = wouldRetry;
         this.structuredData = structuredData;
     }
+
+    public void updateStructuredData(String structuredData) {
+        this.structuredData = structuredData;
+    }
 }

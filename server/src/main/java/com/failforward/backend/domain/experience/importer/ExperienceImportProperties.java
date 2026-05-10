@@ -15,6 +15,7 @@ public class ExperienceImportProperties {
     private boolean preserveIds = true;
     private boolean overwriteExisting = true;
     private boolean importAnalysis = true;
+    private ReplaceMode replaceMode = ReplaceMode.UPSERT_ONLY;
     private AuthorMode authorMode = AuthorMode.SYSTEM;
     private String systemEmail = "imported-cases@sidepick.local";
     private String systemNickname = "sidepick-import";
@@ -31,6 +32,11 @@ public class ExperienceImportProperties {
     public enum AuthorMode {
         SYSTEM,
         PSEUDO_RANDOM
+    }
+
+    public enum ReplaceMode {
+        UPSERT_ONLY,
+        DELETE_IMPORTED_THEN_IMPORT
     }
 
     public enum TitleMode {
@@ -85,6 +91,14 @@ public class ExperienceImportProperties {
 
     public void setImportAnalysis(boolean importAnalysis) {
         this.importAnalysis = importAnalysis;
+    }
+
+    public ReplaceMode getReplaceMode() {
+        return replaceMode;
+    }
+
+    public void setReplaceMode(ReplaceMode replaceMode) {
+        this.replaceMode = replaceMode;
     }
 
     public AuthorMode getAuthorMode() {

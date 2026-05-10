@@ -120,7 +120,7 @@ export default function Create() {
         wouldRetry: true,
       });
 
-      navigate(`/experiences/${created.id}`);
+      navigate(`/analysis-result?experienceId=${created.id}`);
     } catch (createError) {
       setSubmitError(
         resolveErrorMessage(

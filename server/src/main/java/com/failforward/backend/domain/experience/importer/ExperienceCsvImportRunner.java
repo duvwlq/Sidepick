@@ -64,6 +64,11 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
             log.warn("Experience CSV import skipped because the file is empty: {}", csvPath);
             return;
         }
+        String importSource = csvPath.getFileName().toString();
+
+        if (properties.getReplaceMode() == ExperienceImportProperties.ReplaceMode.DELETE_IMPORTED_THEN_IMPORT) {
+            deleteImportedData();
+        }
 
         long systemUserId = properties.getAuthorMode() == ExperienceImportProperties.AuthorMode.SYSTEM
                 ? ensureSystemUser()
@@ -75,7 +80,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
             long userId = properties.getAuthorMode() == ExperienceImportProperties.AuthorMode.SYSTEM
                     ? systemUserId
                     : ensurePseudoUser(index + 1);
-            long experienceId = upsertExperience(row, userId, index, records.size());
+            long experienceId = upsertExperience(row, userId, index, records.size(), importSource);
             if (properties.isImportAnalysis()) {
                 upsertAnalysis(row, experienceId, index, records.size());
             }
@@ -89,6 +94,46 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                 properties.getAuthorMode(),
                 properties.getTitleMode(),
                 properties.getCreatedAtMode()
+        );
+    }
+
+    private void deleteImportedData() {
+        String pseudoEmailPattern = "imported+%@"
+                + properties.getPseudoEmailDomain();
+
+        int deletedExperiences = jdbcTemplate.update(
+                """
+                DELETE FROM failure_experiences
+                WHERE JSON_EXTRACT(structured_data, '$.importRowId') IS NOT NULL
+                   OR user_id IN (
+                        SELECT id
+                        FROM users
+                        WHERE email = ?
+                           OR email LIKE ?
+                   )
+                """,
+                properties.getSystemEmail(),
+                pseudoEmailPattern
+        );
+
+        int deletedUsers = jdbcTemplate.update(
+                """
+                DELETE FROM users
+                WHERE (email = ? OR email LIKE ?)
+                  AND NOT EXISTS (
+                        SELECT 1
+                        FROM failure_experiences
+                        WHERE failure_experiences.user_id = users.id
+                  )
+                """,
+                properties.getSystemEmail(),
+                pseudoEmailPattern
+        );
+
+        log.info(
+                "Existing imported experience data cleared before CSV import. deletedExperiences={}, deletedUsers={}",
+                deletedExperiences,
+                deletedUsers
         );
     }
 
@@ -186,7 +231,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         }
     }
 
-    private long upsertExperience(ImportedRow row, long userId, int index, int totalCount) {
+    private long upsertExperience(ImportedRow row, long userId, int index, int totalCount, String importSource) {
         long categoryId = resolveCategoryId(row.category());
         LocalDateTime createdAt = resolveCreatedAt(row.id(), index, totalCount);
         LocalDateTime updatedAt = createdAt;
@@ -207,7 +252,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         Boolean concurrentWithMainJob = parseBoolean(row.hasMainJob());
 
         Map<String, Object> structuredData = new LinkedHashMap<>();
-        structuredData.put("importSource", "failure_cases_100_tagged.csv");
+        structuredData.put("importSource", importSource);
         structuredData.put("importRowId", row.id());
         structuredData.put("rawCategory", row.category());
         structuredData.put("rawDuration", row.duration());
@@ -448,6 +493,24 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
 
         if (normalized.matches("\\d+")) {
             return validateCategoryId(Long.parseLong(normalized));
+        }
+        if (normalized.contains("\uC7AC\uB2A5") || normalized.contains("\uD504\uB9AC\uB79C\uC11C")) {
+            return validateCategoryId(5L);
+        }
+        if (normalized.contains("\uCF58\uD150\uCE20") || normalized.contains("sns")) {
+            return validateCategoryId(2L);
+        }
+        if (normalized.contains("\uB514\uC9C0\uD138") || normalized.contains("\uC9C0\uC2DD\uD310\uB9E4")) {
+            return validateCategoryId(3L);
+        }
+        if (normalized.contains("\uD50C\uB7AB\uD3FC") || normalized.contains("\uB178\uB3D9")) {
+            return validateCategoryId(4L);
+        }
+        if (normalized.contains("\uD22C\uC790") || normalized.contains("\uC7AC\uD14C\uD06C")) {
+            return validateCategoryId(6L);
+        }
+        if (normalized.contains("\uC624\uD504\uB77C\uC778") || normalized.contains("\uBD80\uC5C5")) {
+            return validateCategoryId(7L);
         }
         if (normalized.contains("online") || normalized.contains("digital") || normalized.contains("sns")
                 || normalized.contains("smartstore") || normalized.contains("ecommerce") || normalized.contains("e-commerce")

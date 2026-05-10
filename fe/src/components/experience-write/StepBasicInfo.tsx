@@ -83,10 +83,18 @@ export default function StepBasicInfo({
             >
               <div className="flex h-[40px] items-center shrink-0">{visual.icon}</div>
               <div className="flex w-full flex-col items-start gap-[4px] text-left">
-                <p className="w-full font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
+                <p
+                  className={`w-full font-['Pretendard'] text-[14px] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+                    active ? 'font-[600] text-[#131416]' : 'font-[500] text-[#494949]'
+                  }`}
+                >
                   {visual.label}
                 </p>
-                <div className="w-full font-['Pretendard'] text-[10px] font-[300] leading-[12px] tracking-[0px] text-[#BABABA] [font-feature-settings:'case'_1]">
+                <div
+                  className={`w-full font-['Pretendard'] text-[10px] leading-[12px] tracking-[0px] [font-feature-settings:'case'_1] ${
+                    active ? 'font-[500] text-[#494949]' : 'font-[400] text-[#757575]'
+                  }`}
+                >
                   {visual.descriptionLines.map((line) => (
                     <p key={line}>{line}</p>
                   ))}

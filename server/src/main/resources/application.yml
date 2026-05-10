@@ -63,6 +63,7 @@ app:
     preserve-ids: ${APP_EXPERIENCE_IMPORT_PRESERVE_IDS:true}
     overwrite-existing: ${APP_EXPERIENCE_IMPORT_OVERWRITE_EXISTING:true}
     import-analysis: ${APP_EXPERIENCE_IMPORT_ANALYSIS:true}
+    replace-mode: ${APP_EXPERIENCE_IMPORT_REPLACE_MODE:UPSERT_ONLY}
     author-mode: ${APP_EXPERIENCE_IMPORT_AUTHOR_MODE:SYSTEM}
     system-email: ${APP_EXPERIENCE_IMPORT_SYSTEM_EMAIL:imported-cases@sidepick.local}
     system-nickname: ${APP_EXPERIENCE_IMPORT_SYSTEM_NICKNAME:sidepick-import}
@@ -74,7 +75,16 @@ app:
     default-age-group: ${APP_EXPERIENCE_IMPORT_DEFAULT_AGE_GROUP:30s}
     default-risk-level: ${APP_EXPERIENCE_IMPORT_DEFAULT_RISK_LEVEL:MEDIUM}
     default-category-id: ${APP_EXPERIENCE_IMPORT_DEFAULT_CATEGORY_ID:5}
-    category-map: {}
+    category-map:
+      온라인판매_이커머스: 1
+      콘텐츠_SNS: 2
+      디지털상품_지식판매: 3
+      플랫폼노동: 4
+      재능_프리랜서: 5
+      투자_재테크: 6
+      오프라인부업: 7
+  demo-seed:
+    enabled: ${APP_DEMO_SEED_ENABLED:false}
   mail:
     enabled: ${APP_MAIL_ENABLED:false}
     from-address: ${APP_MAIL_FROM_ADDRESS:no-reply@side-pick.app}

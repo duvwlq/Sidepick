@@ -27,18 +27,19 @@ export default function Card({
   const chips = (tags && tags.length > 0
     ? tags
     : [category, failureReason].filter(Boolean)) as string[];
+  const visibleChips = chips.slice(0, 2);
 
   return (
-    <article className="flex h-[146px] w-full flex-col items-start gap-[10px] bg-[#FFFFFF] p-[20px]">
-      <div className="flex w-full flex-col items-start gap-[4px]">
+    <article className="flex h-[146px] w-full flex-col items-start gap-[10px] overflow-hidden bg-[#FFFFFF] p-[20px]">
+      <div className="flex w-full min-w-0 flex-col items-start gap-[4px]">
         <div className="flex w-full items-center">
-          <div className="flex shrink-0 items-start gap-[4px]">
-            {chips.slice(0, 3).map((chip) => (
+          <div className="flex min-w-0 flex-wrap items-start gap-[4px] overflow-hidden">
+            {visibleChips.map((chip) => (
               <span
                 key={chip}
-                className="flex shrink-0 items-center justify-center rounded-[8px] bg-[#EEEEEE] px-[8px] py-[2px]"
+                className="flex max-w-full items-center justify-center rounded-[8px] bg-[#EEEEEE] px-[8px] py-[2px]"
               >
-                <span className="whitespace-nowrap font-['Pretendard'] text-[12px] font-[300] leading-[16px] tracking-[0px] text-[#494949]">
+                <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[300] leading-[16px] tracking-[0px] text-[#494949]">
                   {chip}
                 </span>
               </span>
@@ -46,7 +47,7 @@ export default function Card({
           </div>
         </div>
 
-        <h2 className="w-full font-['Pretendard'] text-[18px] font-[600] leading-[28px] tracking-[0px] text-[#000000]">
+        <h2 className="w-full overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[18px] font-[600] leading-[28px] tracking-[0px] text-[#000000]">
           {title}
         </h2>
       </div>
@@ -70,7 +71,7 @@ export default function Card({
             {views.toLocaleString()}
           </span>
         </div>
-        <div className="flex shrink-0 items-center justify-center justify-self-start">
+        <div className="flex shrink-0 items-center justify-self-start">
           <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
             {date}
           </span>

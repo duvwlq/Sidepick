@@ -19,14 +19,14 @@ const DEFAULT_RECOMMENDED_KEYWORDS = CATEGORY_TAG_LABELS.slice(0, 6);
 function readRecentSearches() {
   const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
   if (!raw) {
-    return ['온라인 판매 · 이커머스', '콘텐츠·SNS 기반', '투자·재테크'];
+    return ['온라인 판매 · 이커머스', '콘텐츠·SNS 기반', '디지털 상품'];
   }
 
   try {
     const parsed = JSON.parse(raw) as string[];
     return parsed.filter(Boolean).slice(0, 6);
   } catch {
-    return ['온라인 판매 · 이커머스', '콘텐츠·SNS 기반', '투자·재테크'];
+    return ['온라인 판매 · 이커머스', '콘텐츠·SNS 기반', '디지털 상품'];
   }
 }
 
@@ -86,7 +86,7 @@ function Chip({
       type="button"
       onClick={onClick}
       className={`flex h-[33px] shrink-0 appearance-none items-center justify-center gap-[2px] rounded-[999px] px-[12px] py-[8px] ${
-        onRemove ? 'border-[1px] border-solid border-[#D8D8D8] bg-[#FFFFFF]' : 'border-0 bg-[#F8F8F8]'
+        onRemove ? 'border border-[#D8D8D8] bg-[#FFFFFF]' : 'border-0 bg-[#F8F8F8]'
       }`}
     >
       <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E] [font-feature-settings:'case'_1]">
@@ -95,7 +95,7 @@ function Chip({
       {onRemove ? (
         <span
           role="button"
-          aria-label={`${label} 제거`}
+          aria-label={`${label} 최근 검색 삭제`}
           onClick={(event) => {
             event.stopPropagation();
             onRemove();
@@ -114,6 +114,7 @@ export default function Explore() {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialKeyword = searchParams.get('q') ?? '';
   const initialTag = searchParams.get('tag');
+  const initialMode = searchParams.get('mode') === 'search';
   const initialCategoryId = initialTag ? Number(initialTag) : null;
   const [keyword, setKeyword] = useState(initialKeyword);
   const [draftKeyword, setDraftKeyword] = useState(initialKeyword);
@@ -124,7 +125,7 @@ export default function Explore() {
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [isSearchMode, setIsSearchMode] = useState(initialMode);
   const [recentKeywords, setRecentKeywords] = useState<string[]>(() => readRecentSearches());
 
   useEffect(() => {
@@ -196,12 +197,10 @@ export default function Explore() {
 
   const recommendedKeywords = useMemo(() => DEFAULT_RECOMMENDED_KEYWORDS, []);
   const filterTags = useMemo<FilterTagOption[]>(
-    () => [
-      { label: '전체', value: null },
-      ...CATEGORY_VISUALS.map((item) => ({ label: item.label, value: item.id })),
-    ],
+    () => [{ label: '전체', value: null }, ...CATEGORY_VISUALS.map((item) => ({ label: item.label, value: item.id }))],
     [],
   );
+
   const activeFilters = useMemo(() => {
     const items: Array<{ key: 'q' | 'tag'; label: string }> = [];
     if (keyword.trim()) {
@@ -218,7 +217,18 @@ export default function Explore() {
 
   if (isSearchMode) {
     return (
-      <Layout title="검색" leftType="back" rightIcon="none" onBack={() => setIsSearchMode(false)}>
+      <Layout
+        title="검색"
+        leftType="back"
+        rightIcon="none"
+        onBack={() => {
+          if (initialMode) {
+            navigate(-1);
+            return;
+          }
+          setIsSearchMode(false);
+        }}
+      >
         <div className="flex w-full flex-col items-center gap-[12px] bg-[#FFFFFF]">
           <section className="flex w-full flex-col items-start bg-[#FFFFFF] px-[16px]">
             <SearchBar

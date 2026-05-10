@@ -383,7 +383,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
       <div className="relative flex w-[375px] flex-col bg-[#FFFFFF]">
         <div className="relative flex w-[375px] items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
-          <div className="flex items-center gap-[8px]">
+          <div className="flex min-w-[24px] items-center gap-[8px]">
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -394,11 +394,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             </button>
           </div>
 
-          <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000]">
+          <p className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000]">
             사례 상세
           </p>
 
-          <div className="flex items-center gap-[8px]">
+          <div className="flex min-w-[56px] items-center justify-end gap-[8px]">
             <button
               type="button"
               aria-label="북마크"

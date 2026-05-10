@@ -1,10 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  type ReactNode,
-  type TouchEvent,
-  type WheelEvent,
-} from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 type Props = {
   children: ReactNode;
@@ -13,161 +7,115 @@ type Props = {
   contentClassName?: string;
 };
 
+type DragState = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  scrollLeft: number;
+  dragging: boolean;
+};
+
 export default function HorizontalScroll({
   children,
   wrapperClassName = '',
   scrollerClassName = '',
   contentClassName = '',
 }: Props) {
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const touchStateRef = useRef<{
-    startX: number;
-    startY: number;
-    scrollLeft: number;
-    dragging: boolean;
-  } | null>(null);
 
   useEffect(() => {
-    const wrapper = wrapperRef.current;
-    const scroller = scrollerRef.current;
-    if (!wrapper || !scroller) {
-      return undefined;
+    const element = scrollerRef.current;
+    if (!element) {
+      return;
+    }
+    const scroller = element;
+
+    let dragState: DragState | undefined;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (event.pointerType === 'mouse' && event.button !== 0) {
+        return;
+      }
+
+      dragState = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        scrollLeft: scroller.scrollLeft,
+        dragging: false,
+      };
     }
 
-    const nativeWheelHandler = (event: globalThis.WheelEvent) => {
+    function handlePointerMove(event: PointerEvent) {
+      if (!dragState || event.pointerId !== dragState.pointerId) {
+        return;
+      }
+
+      const deltaX = event.clientX - dragState.startX;
+      const deltaY = event.clientY - dragState.startY;
+
+      if (!dragState.dragging) {
+        if (Math.abs(deltaX) < 6 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+          return;
+        }
+        dragState.dragging = true;
+        scroller.setPointerCapture(event.pointerId);
+      }
+
+      event.preventDefault();
+      scroller.scrollLeft = dragState.scrollLeft - deltaX;
+    }
+
+    function resetPointer(event?: PointerEvent) {
+      if (event && dragState?.dragging && scroller.hasPointerCapture(event.pointerId)) {
+        scroller.releasePointerCapture(event.pointerId);
+      }
+      dragState = undefined;
+    }
+
+    function handleWheel(event: WheelEvent) {
+      const hasHorizontalOverflow = scroller.scrollWidth > scroller.clientWidth;
+      if (!hasHorizontalOverflow) {
+        return;
+      }
+
       const absX = Math.abs(event.deltaX);
       const absY = Math.abs(event.deltaY);
       const nextDelta = absX > absY ? event.deltaX : event.deltaY;
 
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (nextDelta !== 0) {
-        scroller.scrollLeft += nextDelta;
-      }
-    };
-
-    const nativeTouchMoveHandler = (event: globalThis.TouchEvent) => {
-      const touch = event.touches[0];
-      const state = touchStateRef.current;
-      if (!touch || !state) {
+      if (nextDelta === 0) {
         return;
       }
 
-      const deltaX = touch.clientX - state.startX;
-      const deltaY = touch.clientY - state.startY;
+      const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+      const nextScrollLeft = Math.min(maxScrollLeft, Math.max(0, scroller.scrollLeft + nextDelta));
 
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (!state.dragging) {
-        if (Math.abs(deltaX) <= Math.abs(deltaY)) {
-          scroller.scrollLeft = state.scrollLeft;
-          return;
-        }
-        state.dragging = true;
+      if (nextScrollLeft === scroller.scrollLeft) {
+        return;
       }
 
-      scroller.scrollLeft = state.scrollLeft - deltaX;
-    };
+      event.preventDefault();
+      scroller.scrollLeft = nextScrollLeft;
+    }
 
-    wrapper.addEventListener('wheel', nativeWheelHandler, {
-      passive: false,
-      capture: true,
-    });
-    wrapper.addEventListener('touchmove', nativeTouchMoveHandler, {
-      passive: false,
-      capture: true,
-    });
+    scroller.addEventListener('pointerdown', handlePointerDown);
+    scroller.addEventListener('pointermove', handlePointerMove);
+    scroller.addEventListener('pointerup', resetPointer);
+    scroller.addEventListener('pointercancel', resetPointer);
+    scroller.addEventListener('wheel', handleWheel, { passive: false });
 
     return () => {
-      wrapper.removeEventListener('wheel', nativeWheelHandler, true);
-      wrapper.removeEventListener('touchmove', nativeTouchMoveHandler, true);
+      scroller.removeEventListener('pointerdown', handlePointerDown);
+      scroller.removeEventListener('pointermove', handlePointerMove);
+      scroller.removeEventListener('pointerup', resetPointer);
+      scroller.removeEventListener('pointercancel', resetPointer);
+      scroller.removeEventListener('wheel', handleWheel);
     };
   }, []);
 
-  function handleWheel(event: WheelEvent<HTMLDivElement>) {
-    const scroller = scrollerRef.current;
-    if (!scroller) {
-      return;
-    }
-
-    const hasHorizontalOverflow = scroller.scrollWidth > scroller.clientWidth;
-    if (!hasHorizontalOverflow) {
-      return;
-    }
-
-    const absX = Math.abs(event.deltaX);
-    const absY = Math.abs(event.deltaY);
-    const nextDelta = absX > absY ? event.deltaX : event.deltaY;
-
-    if (nextDelta === 0) {
-      return;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    scroller.scrollLeft += nextDelta;
-  }
-
-  function handleTouchStart(event: TouchEvent<HTMLDivElement>) {
-    const scroller = scrollerRef.current;
-    const touch = event.touches[0];
-    if (!scroller || !touch) {
-      return;
-    }
-
-    touchStateRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      scrollLeft: scroller.scrollLeft,
-      dragging: false,
-    };
-  }
-
-  function handleTouchMove(event: TouchEvent<HTMLDivElement>) {
-    const scroller = scrollerRef.current;
-    const touch = event.touches[0];
-    const state = touchStateRef.current;
-    if (!scroller || !touch || !state) {
-      return;
-    }
-
-    const deltaX = touch.clientX - state.startX;
-    const deltaY = touch.clientY - state.startY;
-
-    if (!state.dragging) {
-      if (Math.abs(deltaX) <= Math.abs(deltaY)) {
-        return;
-      }
-      state.dragging = true;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-    scroller.scrollLeft = state.scrollLeft - deltaX;
-  }
-
-  function handleTouchEnd() {
-    touchStateRef.current = null;
-  }
-
   return (
-    <div
-      ref={wrapperRef}
-      className={`horizontal-scroll-wrapper ${wrapperClassName}`.trim()}
-    >
-      <div
-        ref={scrollerRef}
-        className={`horizontal-scroll ${scrollerClassName}`.trim()}
-        onWheelCapture={handleWheel}
-        onWheel={handleWheel}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        onTouchCancel={handleTouchEnd}
-      >
+    <div className={`horizontal-scroll-wrapper ${wrapperClassName}`.trim()}>
+      <div ref={scrollerRef} className={`horizontal-scroll ${scrollerClassName}`.trim()}>
         <div className={`horizontal-scroll-content ${contentClassName}`.trim()}>{children}</div>
       </div>
     </div>

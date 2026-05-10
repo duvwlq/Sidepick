@@ -9,6 +9,7 @@ FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 COPY --from=build /workspace/target/failforward-backend-0.0.1-SNAPSHOT.jar app.jar
+COPY import-data ./import-data
 
 EXPOSE 8081
 

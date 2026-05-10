@@ -30,7 +30,7 @@ export default function StepSelectable({
               key={item}
               className={`flex w-full flex-col rounded-[16px] border border-solid ${
                 expanded
-                  ? 'border-[#131416] bg-[#FFFFFF] px-[16px] pb-[16px] pt-[14px]'
+                  ? 'border-[#131416] bg-[#FFFFFF]'
                   : active
                     ? 'border-[#131416] bg-[#F8F8F8]'
                     : 'border-[#E6E6E6] bg-[#FFFFFF]'
@@ -39,25 +39,23 @@ export default function StepSelectable({
               <button
                 type="button"
                 onClick={() => onSelect(item)}
-                className={`flex w-full items-center gap-[4px] ${
-                  expanded ? 'h-[24px] px-0 py-0' : 'h-[40px] px-[16px] py-[10px]'
-                }`}
+                className="flex h-[40px] w-full items-center gap-[4px] px-[16px] py-[10px]"
               >
                 <CheckIcon active={active} />
                 <div
-                  className={`flex min-w-px flex-[1_0_0] flex-col justify-center overflow-hidden text-left font-['Pretendard'] tracking-[0px] [font-feature-settings:'case'_1] ${
-                    expanded
-                      ? 'text-[16px] font-[600] leading-[19.2px] text-[#131416]'
-                      : active
-                        ? 'text-[14px] font-[400] leading-[16.8px] text-[#131416]'
-                        : 'text-[14px] font-[400] leading-[16.8px] text-[#757575]'
+                  className={`flex min-w-px flex-[1_0_0] flex-col justify-center overflow-hidden text-left font-['Pretendard'] text-[14px] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+                    active ? 'font-[600] text-[#131416]' : 'font-[400] text-[#757575]'
                   }`}
-                >
-                  <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item}</p>
-                </div>
-              </button>
+              >
+                <p className="overflow-hidden text-ellipsis whitespace-nowrap">{item}</p>
+              </div>
+            </button>
 
-              {expanded ? <OtherDetailField value={otherValue} onChange={onOtherChange} /> : null}
+              {expanded ? (
+                <div className="px-[16px] pb-[16px] pt-[4px]">
+                  <OtherDetailField value={otherValue} onChange={onOtherChange} />
+                </div>
+              ) : null}
             </div>
           );
         })}
@@ -77,7 +75,7 @@ function OtherDetailField({
   const visibleText = hasValue ? value : '기타 의견을 작성해주세요';
 
   return (
-    <div className="relative mt-[12px] h-[40px] w-full rounded-[14px] bg-[#F8F8F8]">
+    <div className="relative mt-[6px] h-[40px] w-full rounded-[14px] bg-[#F8F8F8]">
       <div className="pointer-events-none absolute inset-0 flex items-center px-[16px]">
         <span
           className={`font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] [font-feature-settings:'case'_1] ${
