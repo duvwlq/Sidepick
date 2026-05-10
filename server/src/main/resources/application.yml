@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/failforward?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul}
-    username: ${SPRING_DATASOURCE_USERNAME:failforward}
-    password: ${SPRING_DATASOURCE_PASSWORD:failforward}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   mail:
     host: ${SPRING_MAIL_HOST:}
@@ -104,7 +104,7 @@ app:
       client-id: ${APP_OAUTH_GOOGLE_CLIENT_ID:}
       client-secret: ${APP_OAUTH_GOOGLE_CLIENT_SECRET:}
   jwt:
-    secret: ${APP_JWT_SECRET:sidepick-development-jwt-secret-key-must-be-32-bytes}
+    secret: ${APP_JWT_SECRET}
     access-token-expiration-seconds: ${APP_JWT_ACCESS_EXPIRES:3600}
     refresh-token-expiration-seconds: ${APP_JWT_REFRESH_EXPIRES:1209600}
 
