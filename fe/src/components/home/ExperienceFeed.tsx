@@ -12,17 +12,17 @@ type Props = {
 
 function formatDuration(months: number | null) {
   if (!months) {
-    return '?뚯슂 ?쒓컙';
+    return '소요 시간';
   }
 
   if (months >= 12) {
     if (months % 12 === 0) {
-      return `${months / 12}??`;
+      return `${months / 12}년`;
     }
-    return `${months}媛쒖썡`;
+    return `${months}개월`;
   }
 
-  return `${months}媛쒖썡`;
+  return `${months}개월`;
 }
 
 function formatDate(value: string) {
@@ -47,7 +47,7 @@ export default function ExperienceFeed({ experiences, loading, error }: Props) {
         </div>
       ) : experiences.length === 0 ? (
         <div className="w-full bg-[#FFFFFF] px-[16px] py-[12px]">
-          <PageMessage message="?꾩쭅 ?깅줉???щ?媛 ?놁뒿?덈떎." />
+          <PageMessage message="아직 등록된 경험이 없습니다." />
         </div>
       ) : (
         experiences.map((item) => (
