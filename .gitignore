@@ -23,3 +23,6 @@ __pycache__/
 # Claude Code
 .claude/
 
+# AI handoff (개인 작업 인수인계, 로컬 보관)
+ai/handoff/
+
