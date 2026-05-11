@@ -32,6 +32,7 @@ export default function App() {
           <Route path="/signup/password" element={<SignupPasswordPage />} />
           <Route path="/signup/nickname" element={<SignupNicknamePage />} />
           <Route path="/explore" element={<Explore />} />
+          <Route path="/faq" element={<FaqPage />} />
           <Route path="/create" element={<Create />} />
           <Route path="/experiences/:id" element={<ExperienceDetail />} />
           <Route path="/analysis-result" element={<AiAnalysisResultPage />} />

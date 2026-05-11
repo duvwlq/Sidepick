@@ -104,7 +104,7 @@ export default function MyPage() {
 
           <button
             type="button"
-            onClick={() => navigate('/mypage/faq')}
+            onClick={() => navigate('/faq')}
             className="flex w-full items-center justify-between rounded-[18px] bg-[#F8F8F8] px-4 py-4 text-left"
           >
             <div className="flex items-center gap-3">
