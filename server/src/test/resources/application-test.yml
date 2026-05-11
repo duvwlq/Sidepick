@@ -22,6 +22,8 @@ app:
   auth:
     email-verification:
       expose-code: true
+  security:
+    admin-emails: admin@sidepick.dev
   jwt:
     secret: sidepick-test-jwt-secret-key-must-be-32bytes
     access-token-expiration-seconds: 3600

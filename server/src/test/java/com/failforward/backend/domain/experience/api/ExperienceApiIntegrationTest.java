@@ -342,6 +342,38 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.code").value("FORBIDDEN"));
     }
 
+    @Test
+    void adminCanDeleteAnyExperience() throws Exception {
+        String ownerToken = registerAndLogin("owner3@sidepick.dev", "password123", "ownerUser3", "20s");
+        String adminToken = registerAndLogin("admin@sidepick.dev", "password123", "adminUser", "30s");
+
+        MvcResult createResult = mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(ownerToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Admin removable experience",
+                                  "content": "An admin should be able to delete this post.",
+                                  "categoryId": 1,
+                                  "failureReason": "Moderation",
+                                  "failureReasons": ["Moderation"]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long experienceId = readId(createResult);
+
+        mockMvc.perform(delete("/api/experiences/{experienceId}", experienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(adminToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true));
+
+        mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.data.code").value("NOT_FOUND"));
+    }
+
     private long createExperienceWithPayload(String token, String payload) throws Exception {
         MvcResult createResult = mockMvc.perform(post("/api/experiences")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token))

@@ -20,15 +20,18 @@ public class JwtTokenProvider {
     private final SecretKey secretKey;
     private final long accessTokenExpirationSeconds;
     private final long refreshTokenExpirationSeconds;
+    private final AdminAccessPolicy adminAccessPolicy;
 
     public JwtTokenProvider(
             @Value("${app.jwt.secret}") String secret,
             @Value("${app.jwt.access-token-expiration-seconds:3600}") long accessTokenExpirationSeconds,
-            @Value("${app.jwt.refresh-token-expiration-seconds:1209600}") long refreshTokenExpirationSeconds
+            @Value("${app.jwt.refresh-token-expiration-seconds:1209600}") long refreshTokenExpirationSeconds,
+            AdminAccessPolicy adminAccessPolicy
     ) {
         this.secretKey = createSecretKey(secret);
         this.accessTokenExpirationSeconds = accessTokenExpirationSeconds;
         this.refreshTokenExpirationSeconds = refreshTokenExpirationSeconds;
+        this.adminAccessPolicy = adminAccessPolicy;
     }
 
     public String generateAccessToken(User user) {
@@ -44,7 +47,8 @@ public class JwtTokenProvider {
         return new AuthenticatedUser(
                 Long.parseLong(claims.getSubject()),
                 claims.get("email", String.class),
-                claims.get("nickname", String.class)
+                claims.get("nickname", String.class),
+                Boolean.TRUE.equals(claims.get("admin", Boolean.class))
         );
     }
 
@@ -63,6 +67,7 @@ public class JwtTokenProvider {
                 .subject(String.valueOf(user.getId()))
                 .claim("email", user.getEmail())
                 .claim("nickname", user.getNickname())
+                .claim("admin", adminAccessPolicy.isAdmin(user))
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(now.plusSeconds(expirationSeconds)))
                 .signWith(secretKey)

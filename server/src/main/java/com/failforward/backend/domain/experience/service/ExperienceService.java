@@ -3,6 +3,7 @@ package com.failforward.backend.domain.experience.service;
 import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.api.PageInfo;
+import com.failforward.backend.common.security.AdminAccessPolicy;
 import com.failforward.backend.common.security.CurrentUserProvider;
 import com.failforward.backend.domain.analysis.service.AIAnalysisService;
 import com.failforward.backend.domain.category.entity.BusinessCategory;
@@ -27,6 +28,7 @@ public class ExperienceService {
     private final FailureExperienceRepository experienceRepository;
     private final AIAnalysisService aiAnalysisService;
     private final CurrentUserProvider currentUserProvider;
+    private final AdminAccessPolicy adminAccessPolicy;
     private final CategoryService categoryService;
     private final ExperienceRequestSupport requestSupport;
     private final ExperienceComparisonSupport comparisonSupport;
@@ -104,7 +106,7 @@ public class ExperienceService {
     @Transactional
     public void delete(Long experienceId) {
         FailureExperience experience = getExperienceEntity(experienceId);
-        validateOwner(experience);
+        validateOwnerOrAdmin(experience);
         validateVerifiedWriter(currentUserProvider.getCurrentUserEntity());
         experienceRepository.delete(experience);
     }
@@ -383,6 +385,17 @@ public class ExperienceService {
         if (!experience.getUser().getId().equals(currentUser.getId())) {
             throw new AccessDeniedException("You can only modify your own experience.");
         }
+    }
+
+    private void validateOwnerOrAdmin(FailureExperience experience) {
+        User currentUser = currentUserProvider.getCurrentUserEntity();
+        if (experience.getUser().getId().equals(currentUser.getId())) {
+            return;
+        }
+        if (adminAccessPolicy.isAdmin(currentUser)) {
+            return;
+        }
+        throw new AccessDeniedException("You can only delete your own experience unless you are an admin.");
     }
 
     private void validateVerifiedWriter(User user) {

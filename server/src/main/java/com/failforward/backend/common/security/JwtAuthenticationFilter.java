@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,9 +18,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final AdminAccessPolicy adminAccessPolicy;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, AdminAccessPolicy adminAccessPolicy) {
         this.jwtTokenProvider = jwtTokenProvider;
+        this.adminAccessPolicy = adminAccessPolicy;
     }
 
     @Override
@@ -33,10 +36,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String token = authorization.substring(7);
             if (jwtTokenProvider.isValidToken(token)) {
                 AuthenticatedUser authenticatedUser = jwtTokenProvider.getAuthenticatedUser(token);
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+                if (adminAccessPolicy.isAdmin(authenticatedUser)) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+                }
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         authenticatedUser,
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_USER"))
+                        authorities
                 );
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }

@@ -96,6 +96,8 @@ app:
     email-verification:
       expiration-minutes: ${APP_EMAIL_VERIFICATION_EXPIRATION_MINUTES:10}
       expose-code: ${APP_EMAIL_VERIFICATION_EXPOSE_CODE:false}
+  security:
+    admin-emails: ${APP_SECURITY_ADMIN_EMAILS:}
   oauth:
     kakao:
       client-id: ${APP_OAUTH_KAKAO_CLIENT_ID:}
