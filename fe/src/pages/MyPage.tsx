@@ -14,7 +14,6 @@ export default function MyPage() {
 
   useEffect(() => {
     if (!token) {
-      setLoading(false);
       return;
     }
 

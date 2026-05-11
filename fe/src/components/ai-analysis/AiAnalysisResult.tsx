@@ -583,29 +583,19 @@ export default function AiAnalysisResult({ experienceId }: Props) {
               <section className="flex w-full flex-col gap-[12px]">
                 <SectionTitle
                   title="실패 패턴"
-                  description="유사 카테고리 내 실패 원인 분포를 요약한 그래프입니다."
+                  description="이번 사례에서 분석된 주요 실패 패턴입니다."
                 />
 
-                <div className="flex w-full flex-col gap-[16px] rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] p-[16px]">
+                <div className="flex w-full flex-wrap gap-[8px]">
                   {patternItems.length ? (
                     patternItems.map((item) => (
-                      <div key={item.label} className="flex w-[311px] flex-col gap-[4px]">
-                        <div className="flex w-full items-start justify-between">
-                          <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-                            {item.label}
-                          </p>
-
-                          <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-                            {String(item.percent).padStart(2, '0')}%
-                          </p>
-                        </div>
-
-                        <div className="relative h-[10px] w-[311px] overflow-hidden rounded-[999px] bg-[#D8D8D8]">
-                          <div
-                            className="absolute left-0 top-0 h-[10px] rounded-[999px] bg-[#000000]"
-                            style={{ width: `${item.percent}%` }}
-                          />
-                        </div>
+                      <div
+                        key={item.label}
+                        className="flex min-h-[41px] items-center rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[12px]"
+                      >
+                        <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#131416]">
+                          {item.label}
+                        </p>
                       </div>
                     ))
                   ) : (
