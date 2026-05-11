@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthLayout from '../../components/auth/AuthLayout';
+import { ErrorState, LoadingState } from '../../components/common/Skeleton';
 import { loginWithKakao } from '../../lib/api';
+import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
 
@@ -45,6 +47,7 @@ export default function KakaoCallbackPage() {
         }
 
         saveSession(payload.accessToken, payload.refreshToken, payload.user);
+        setFlashToast(`환영해요, ${payload.user.nickname}님!`);
         navigate(callbackParams.state, { replace: true });
       } catch (callbackError) {
         if (!cancelled) {
@@ -70,16 +73,16 @@ export default function KakaoCallbackPage() {
       <AuthHeader title="카카오 로그인" onBack={() => navigate('/auth')} />
 
       <section className="flex min-h-[calc(100vh-150px)] flex-col justify-center">
-        <div className="rounded-2xl border border-[#EAEAEA] bg-white px-5 py-6 text-center">
+        <div className="space-y-4 rounded-2xl border border-[#EAEAEA] bg-white px-4 py-6 text-center">
           {immediateError || error ? (
             <>
               <p className="text-base font-medium text-black">로그인에 실패했어요.</p>
-              <p className="mt-3 text-sm text-red-500">{immediateError || error}</p>
+              <ErrorState message={immediateError || error} />
             </>
           ) : (
             <>
               <p className="text-base font-medium text-black">카카오 로그인 처리 중입니다.</p>
-              <p className="mt-3 text-sm text-[#777777]">잠시만 기다려주세요.</p>
+              <LoadingState message="잠시만 기다려주세요." />
             </>
           )}
         </div>

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Experience } from '../../lib/api';
 import { extractExperienceTagLabels } from '../../lib/explore-tags';
+import { ErrorState, ListSkeleton, PageMessage } from '../common/Skeleton';
 import Card from '../common/Card';
 
 type Props = {
@@ -11,17 +12,17 @@ type Props = {
 
 function formatDuration(months: number | null) {
   if (!months) {
-    return '소요 시간';
+    return '?뚯슂 ?쒓컙';
   }
 
   if (months >= 12) {
     if (months % 12 === 0) {
-      return `${months / 12}년`;
+      return `${months / 12}??`;
     }
-    return `${months}개월`;
+    return `${months}媛쒖썡`;
   }
 
-  return `${months}개월`;
+  return `${months}媛쒖썡`;
 }
 
 function formatDate(value: string) {
@@ -39,16 +40,14 @@ export default function ExperienceFeed({ experiences, loading, error }: Props) {
   return (
     <div className="flex w-full flex-col items-start gap-[2px] bg-[#EEEEEE] pb-[110px]">
       {loading ? (
-        <div className="w-full bg-[#FFFFFF] px-[20px] py-[48px] text-center font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#666666] [font-feature-settings:'case'_1]">
-          사례 목록을 불러오는 중입니다.
-        </div>
+        <ListSkeleton />
       ) : error ? (
-        <div className="w-full bg-[#FFFFFF] px-[20px] py-[48px] text-center font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B] [font-feature-settings:'case'_1]">
-          {error}
+        <div className="w-full bg-[#FFFFFF] px-[16px] py-[12px]">
+          <ErrorState message={error} />
         </div>
       ) : experiences.length === 0 ? (
-        <div className="w-full bg-[#FFFFFF] px-[20px] py-[48px] text-center font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#666666] [font-feature-settings:'case'_1]">
-          아직 등록된 사례가 없습니다.
+        <div className="w-full bg-[#FFFFFF] px-[16px] py-[12px]">
+          <PageMessage message="?꾩쭅 ?깅줉???щ?媛 ?놁뒿?덈떎." />
         </div>
       ) : (
         experiences.map((item) => (

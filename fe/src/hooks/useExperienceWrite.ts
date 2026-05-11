@@ -66,7 +66,7 @@ export function useExperienceWrite() {
           (!form.difficulties.includes('기타') || form.difficultyEtc.trim().length > 0)
         );
       case 4:
-        return form.content.trim().length >= 10;
+        return form.content.trim().length >= 10 && form.content.length <= 2000;
       default:
         return false;
     }

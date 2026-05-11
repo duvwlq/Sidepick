@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import amountIcon from '../../assets/images/amount.svg';
 import durationIcon from '../../assets/images/duration.svg';
+import { ErrorState, LoadingState } from '../common/Skeleton';
 import {
   ApiError,
   createAnalysis,
@@ -13,6 +14,7 @@ import {
 } from '../../lib/api';
 import { mapAnalysisReport } from '../../lib/analysisMapper';
 import { ERROR_CODES } from '../../lib/error-codes';
+import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../../lib/session';
 import {
@@ -253,6 +255,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
     try {
       await deleteExperience(token, experience.id);
+      setFlashToast('삭제되었어요');
       navigate('/', { replace: true });
     } catch (requestError) {
       setError(
@@ -334,11 +337,9 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
   if (loading) {
     return (
-      <div className="mx-auto min-h-screen w-[375px] bg-[#FFFFFF]">
+      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
         <div className="px-[16px] py-[40px]">
-          <div className="rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[20px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#494949]">
-            경험을 불러오는 중입니다.
-          </div>
+          <LoadingState message="경험을 불러오는 중입니다." />
         </div>
       </div>
     );
@@ -346,18 +347,16 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
   if (error || !experience) {
     return (
-      <div className="mx-auto min-h-screen w-[375px] bg-[#FFFFFF]">
+      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
         <div className="px-[16px] py-[40px]">
-          <div className="rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[20px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B]">
-            {error || '분석 결과를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'}
-          </div>
+          <ErrorState message={error || '분석 결과를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto min-h-screen w-[375px] bg-[#FFFFFF]">
+    <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
       {actionMenuOpen ? (
         <button
           type="button"
@@ -381,8 +380,8 @@ export default function AiAnalysisResult({ experienceId }: Props) {
         </div>
       ) : null}
 
-      <div className="relative flex w-[375px] flex-col bg-[#FFFFFF]">
-        <div className="relative flex w-[375px] items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
+      <div className="relative flex w-full flex-col bg-[#FFFFFF]">
+        <div className="relative flex w-full items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
           <div className="flex min-w-[24px] items-center gap-[8px]">
             <button
               type="button"
@@ -421,7 +420,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
           </div>
         </div>
 
-        <div className="flex w-[375px] flex-col gap-[36px] px-[16px] pb-[100px]">
+        <div className="flex w-full flex-col gap-[36px] px-[16px] pb-[100px]">
           <section className="flex w-full flex-col gap-[24px] bg-[#FFFFFF]">
             <div className="flex w-full items-center gap-[8px]">
               {experience.author.profileImage ? (
@@ -480,13 +479,14 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             <section className="flex w-full flex-col gap-[12px]">
               <SectionTitle
                 title="분석 준비 중"
-                description="AI가 이 경험을 분석하고 있어요. 잠시 후 다시 확인해주세요."
+                description="AI가 이 경험을 분석하고 있습니다. 잠시 후 다시 확인해주세요."
               />
-              <div className="flex w-full items-center gap-[12px] rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[18px]">
+              <div className="flex w-full items-center gap-[12px]">
                 <LoaderCircle size={18} strokeWidth={2.2} className="animate-spin text-[#5E5E5E]" />
-                <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-                  분석이 완료되면 이 화면에서 바로 결과를 볼 수 있어요.
-                </p>
+                <LoadingState
+                  message="분석이 완료되면 이 화면에서 바로 결과를 볼 수 있습니다."
+                  className="text-left"
+                />
               </div>
             </section>
           ) : null}
@@ -495,11 +495,9 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             <section className="flex w-full flex-col gap-[12px]">
               <SectionTitle
                 title="분석 실패"
-                description="분석 결과를 준비하지 못했어요."
+                description="분석 결과를 준비하지 못했습니다."
               />
-              <div className="rounded-[10px] border border-[#F2D1CD] bg-[#FFF4F2] px-[16px] py-[12px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#D33B3B]">
-                잠시 후 다시 시도해주세요.
-              </div>
+              <ErrorState message="잠시 후 다시 시도해주세요." />
             </section>
           ) : null}
 

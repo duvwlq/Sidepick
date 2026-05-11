@@ -27,14 +27,14 @@ export default function SearchBar({
     <label className={`relative block h-[40px] w-full cursor-text ${className}`} onClick={onClick}>
       <span className="absolute inset-0 flex items-center justify-between rounded-[999px] bg-[#F8F8F8] px-[16px] py-[10px]">
         <span
-          className={`pointer-events-none flex shrink-0 flex-col justify-center whitespace-nowrap text-center font-['Pretendard'] text-[14px] font-[400] leading-[0] tracking-[0px] ${
+          className={`pointer-events-none flex min-w-0 flex-1 flex-col justify-center overflow-hidden text-left font-['Pretendard'] text-[14px] font-[400] leading-[0] tracking-[0px] ${
             hasValue ? 'text-[#131416]' : 'text-[#BABABA]'
           } [font-feature-settings:'case'_1]`}
         >
-          <span className="leading-[1.4]">{visibleText}</span>
+          <span className="truncate leading-[1.4]">{visibleText}</span>
         </span>
         <span
-          className="pointer-events-none relative h-[20px] w-[20px] shrink-0 overflow-hidden"
+          className="pointer-events-none relative ml-[8px] h-[20px] w-[20px] shrink-0 overflow-hidden"
           aria-hidden="true"
         >
           <span className="absolute inset-[12.5%]">

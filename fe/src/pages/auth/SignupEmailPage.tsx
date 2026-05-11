@@ -4,6 +4,8 @@ import AuthButton from '../../components/auth/AuthButton';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
+import { ErrorState } from '../../components/common/Skeleton';
+import { useToast } from '../../components/common/useToast';
 import { useAuthFlow } from '../../context/useAuthFlow';
 import { requestEmailVerification } from '../../lib/api';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
@@ -11,6 +13,7 @@ import { resolveErrorMessage } from '../../lib/resolve-error-message';
 export default function SignupEmailPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { showToast } = useToast();
   const { form, updateField } = useAuthFlow();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -21,8 +24,8 @@ export default function SignupEmailPage() {
   }, [location.search]);
 
   async function handleNext() {
-    if (!form.email.trim()) {
-      setError('이메일을 입력해주세요.');
+    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      setError('이메일 형식에 맞게 다시 작성해주세요');
       return;
     }
 
@@ -36,11 +39,13 @@ export default function SignupEmailPage() {
         'verificationMessage',
         payload.verificationCode
           ? `개발용 인증 코드: ${payload.verificationCode}`
-          : '인증 메일을 발송했어요.',
+          : '이메일 인증이 완료되었어요',
       );
       navigate(`/signup/verify?next=${encodeURIComponent(nextPath)}`);
     } catch (requestError) {
-      setError(resolveErrorMessage(requestError, '인증 메일 발송에 실패했어요. 다시 시도해주세요.'));
+      const message = resolveErrorMessage(requestError, '이메일 형식에 맞게 다시 작성해주세요');
+      setError(message);
+      showToast(message);
     } finally {
       setLoading(false);
     }
@@ -68,15 +73,15 @@ export default function SignupEmailPage() {
           <AuthInput
             label="이메일"
             type="email"
-            placeholder="이메일을 입력해주세요"
+            placeholder="이메일 형식에 맞게 다시 작성해주세요"
             value={form.email}
             onChange={(event) => updateField('email', event.target.value)}
           />
 
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
+          {error ? <ErrorState message={error} /> : null}
 
-          <AuthButton onClick={() => void handleNext()}>
-            {loading ? '인증 요청 중...' : '인증번호 받기'}
+          <AuthButton onClick={() => void handleNext()} disabled={loading}>
+            {loading ? '잠시만 기다려주세요' : '인증번호 받기'}
           </AuthButton>
         </div>
       </section>

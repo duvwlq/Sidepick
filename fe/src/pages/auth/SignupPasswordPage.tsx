@@ -4,6 +4,7 @@ import AuthButton from '../../components/auth/AuthButton';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
+import { ErrorState } from '../../components/common/Skeleton';
 import { useAuthFlow } from '../../context/useAuthFlow';
 
 export default function SignupPasswordPage() {
@@ -70,7 +71,7 @@ export default function SignupPasswordPage() {
             }
           />
 
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
+          {error ? <ErrorState message={error} /> : null}
 
           <AuthButton onClick={handleNext}>다음으로</AuthButton>
         </div>

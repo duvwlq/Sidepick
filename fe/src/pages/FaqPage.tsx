@@ -1,61 +1,75 @@
+import { Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HorizontalScroll from '../components/common/HorizontalScroll';
 import Layout from '../components/layout/Layout';
+import { FAQ_CATEGORIES, FAQ_INTRO } from './faqData';
 
-const FAQ_TAGS = ['전체', '계정', '경험 등록', '분석', '탐색', 'MY', '신고', '기타'] as const;
-type FaqTag = (typeof FAQ_TAGS)[number];
+const ALL_TAG = '전체';
 
-const FAQ_ITEMS: Array<{
-  id: number;
-  tag: FaqTag;
-  question: string;
-  answer: string;
-}> = [
-  {
-    id: 1,
-    tag: '경험 등록',
-    question: '경험 등록은 어떻게 하나요?',
-    answer:
-      '하단 등록 탭에서 단계별 정보를 입력하고 작성 완료를 누르면 경험 등록과 분석 요청이 함께 진행됩니다.',
-  },
-  {
-    id: 2,
-    tag: '분석',
-    question: '분석 결과는 어디서 확인하나요?',
-    answer:
-      '등록이 완료되면 분석 중 화면을 거쳐 사례 상세 페이지로 이동하며, 그곳에서 AI 가이드와 유사 사례를 확인할 수 있습니다.',
-  },
-  {
-    id: 3,
-    tag: '탐색',
-    question: '검색은 어떤 방식으로 동작하나요?',
-    answer:
-      '탐색 페이지에서 키워드와 태그를 함께 사용하면 원하는 실패 사례를 더 빠르게 찾을 수 있습니다.',
-  },
-];
+type SelectedTag = typeof ALL_TAG | (typeof FAQ_CATEGORIES)[number]['label'];
 
 export default function FaqPage() {
   const navigate = useNavigate();
-  const [expandedId, setExpandedId] = useState<number | null>(1);
-  const [selectedTag, setSelectedTag] = useState<FaqTag>('전체');
+  const [expandedKey, setExpandedKey] = useState<string | null>(`${FAQ_CATEGORIES[0]?.id}-1`);
+  const [selectedTag, setSelectedTag] = useState<SelectedTag>(ALL_TAG);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const visibleItems = useMemo(() => {
-    if (selectedTag === '전체') {
-      return FAQ_ITEMS;
+  const tags = useMemo(() => [ALL_TAG, ...FAQ_CATEGORIES.map((category) => category.label)], []);
+
+  const visibleCategories = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+    const scopedCategories =
+      selectedTag === ALL_TAG
+        ? FAQ_CATEGORIES
+        : FAQ_CATEGORIES.filter((category) => category.label === selectedTag);
+
+    if (!normalizedQuery) {
+      return scopedCategories;
     }
 
-    return FAQ_ITEMS.filter((item) => item.tag === selectedTag);
-  }, [selectedTag]);
+    return scopedCategories
+      .map((category) => ({
+        ...category,
+        items: category.items.filter((item) => {
+          const haystack = `${category.label} ${item.question} ${item.answer}`.toLowerCase();
+          return haystack.includes(normalizedQuery);
+        }),
+      }))
+      .filter((category) => category.items.length > 0);
+  }, [searchQuery, selectedTag]);
 
   return (
     <Layout title="FAQ" leftType="back" rightIcon="none" onBack={() => navigate(-1)}>
       <div className="flex w-full flex-col bg-[#FFFFFF]">
+        <section className="border-b border-[#EEEEEE] bg-[#FFFFFF] px-4 py-6">
+          <p className="text-sm font-semibold text-[#555555]">{FAQ_INTRO.eyebrow}</p>
+          <h1 className="mt-2 whitespace-pre-line text-[24px] font-bold leading-[1.35] text-[#111111]">
+            {FAQ_INTRO.title}
+          </h1>
+          <p className="mt-4 text-xs leading-5 text-[#666666]">{FAQ_INTRO.disclaimer}</p>
+          <p className="mt-4 text-xs font-medium text-[#888888]">
+            총 {FAQ_CATEGORIES.length}개 카테고리로 정리했습니다.
+          </p>
+        </section>
+
+        <section className="border-b border-[#F0F0F0] px-4 py-3">
+          <label className="flex items-center gap-3 rounded-[16px] border border-[#E8E8E8] bg-[#FAFAFA] px-4 py-3">
+            <Search className="h-4 w-4 shrink-0 text-[#777777]" />
+            <input
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="질문이나 키워드로 검색해보세요"
+              className="w-full bg-transparent text-sm text-[#111111] outline-none placeholder:text-[#9A9A9A]"
+            />
+          </label>
+        </section>
+
         <HorizontalScroll
-          wrapperClassName="h-[42px] w-full px-[16px] py-[10px]"
-          contentClassName="horizontal-scroll-content--tags pr-[16px]"
+          wrapperClassName="h-[54px] w-full border-b border-[#F0F0F0] px-4 py-3"
+          contentClassName="horizontal-scroll-content--tags pr-4"
         >
-          {FAQ_TAGS.map((tag) => {
+          {tags.map((tag) => {
             const active = tag === selectedTag;
 
             return (
@@ -63,66 +77,67 @@ export default function FaqPage() {
                 key={tag}
                 type="button"
                 onClick={() => setSelectedTag(tag)}
-                className={`flex shrink-0 items-center justify-center rounded-[999px] px-[10px] py-[4px] ${
-                  active ? 'border border-[#1F1F1F] bg-[#1F1F1F]' : 'border-0 bg-[#EEEEEE]'
+                className={`flex shrink-0 items-center justify-center rounded-full border px-3 py-2 ${
+                  active
+                    ? 'border-[#111111] bg-[#111111] text-[#FFFFFF]'
+                    : 'border-[#E4E4E4] bg-[#FFFFFF] text-[#666666]'
                 }`}
               >
-                <span
-                  className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] [font-feature-settings:'case'_1] ${
-                    active ? 'text-[#FFFFFF]' : 'text-[#757575]'
-                  }`}
-                >
-                  {tag}
-                </span>
+                <span className="whitespace-nowrap text-sm font-medium">{tag}</span>
               </button>
             );
           })}
         </HorizontalScroll>
 
-        <section className="flex w-full flex-col items-start pb-[110px]">
-          {visibleItems.length ? (
-            visibleItems.map((item) => {
-              const expanded = expandedId === item.id;
+        <section className="flex w-full flex-col pb-[110px]">
+          {visibleCategories.length ? (
+            visibleCategories.map((category) => (
+              <div key={category.id} className="border-b border-[#F2F2F2]">
+                <div className="sticky top-0 z-[1] flex items-center justify-between bg-[#FFFFFF] px-4 py-4">
+                  <h2 className="text-base font-semibold text-[#111111]">{category.label}</h2>
+                  <span className="text-xs font-medium text-[#7A7A7A]">{category.items.length}개</span>
+                </div>
 
-              return (
-                <article key={item.id} className="flex w-full flex-col items-start">
-                  <button
-                    type="button"
-                    onClick={() => setExpandedId((current) => (current === item.id ? null : item.id))}
-                    className="flex min-h-[60px] w-full items-center justify-between bg-[#FFFFFF] p-[20px]"
-                  >
-                    <div className="flex items-start gap-[8px]">
-                      <span className="text-left font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
-                        Q.
-                      </span>
-                      <span className="text-left font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
-                        {item.question}
-                      </span>
-                    </div>
-                    {expanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                  </button>
+                {category.items.map((item) => {
+                  const itemKey = `${category.id}-${item.id}`;
+                  const expanded = expandedKey === itemKey;
 
-                  {expanded ? (
-                    <div className="flex w-full items-start gap-[4px] bg-[#F8F8F8] p-[20px]">
-                      <span className="shrink-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
-                        A.
-                      </span>
-                      <div className="flex min-w-px flex-[1_0_0] flex-col items-start gap-[10px] text-[#5E5E5E]">
-                        <p className="w-full font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1]">
-                          안녕하세요. 사이드픽입니다.
-                        </p>
-                        <p className="w-full font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1]">
-                          {item.answer}
-                        </p>
-                      </div>
-                    </div>
-                  ) : null}
-                </article>
-              );
-            })
+                  return (
+                    <article key={itemKey} className="border-t border-[#F5F5F5]">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedKey((current) => (current === itemKey ? null : itemKey))
+                        }
+                        className="flex w-full items-start justify-between gap-3 px-4 py-4 text-left"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold tracking-[0.08em] text-[#444444]">Q</p>
+                          <p className="mt-2 break-words text-[15px] font-semibold leading-6 text-[#111111]">
+                            {item.question}
+                          </p>
+                        </div>
+                        {expanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                      </button>
+
+                      {expanded ? (
+                        <div className="bg-[#FAFAFA] px-4 pb-5 pt-1">
+                          <div className="rounded-[18px] border border-[#EFEFEF] bg-[#FFFFFF] px-4 py-4">
+                            <p className="text-xs font-semibold tracking-[0.08em] text-[#666666]">A</p>
+                            <p className="mt-3 whitespace-pre-line break-words text-[14px] leading-6 text-[#5E5E5E]">
+                              {item.answer}
+                            </p>
+                          </div>
+                        </div>
+                      ) : null}
+                    </article>
+                  );
+                })}
+              </div>
+            ))
           ) : (
-            <div className="flex w-full items-center justify-center px-[20px] py-[40px] text-center font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#757575]">
-              해당 탭에 등록된 FAQ가 없습니다.
+            <div className="px-4 py-12 text-center text-sm leading-6 text-[#7A7A7A]">
+              검색 결과가 없습니다.
             </div>
           )}
         </section>
@@ -133,7 +148,7 @@ export default function FaqPage() {
 
 function ChevronDownIcon() {
   return (
-    <svg viewBox="0 0 20 20" className="h-[20px] w-[20px] shrink-0" fill="none" aria-hidden="true">
+    <svg viewBox="0 0 20 20" className="mt-1 h-5 w-5 shrink-0" fill="none" aria-hidden="true">
       <path
         d="M5 8L10 13L15 8"
         stroke="#111111"
@@ -147,7 +162,7 @@ function ChevronDownIcon() {
 
 function ChevronUpIcon() {
   return (
-    <svg viewBox="0 0 20 20" className="h-[20px] w-[20px] shrink-0" fill="none" aria-hidden="true">
+    <svg viewBox="0 0 20 20" className="mt-1 h-5 w-5 shrink-0" fill="none" aria-hidden="true">
       <path
         d="M5 12L10 7L15 12"
         stroke="#111111"

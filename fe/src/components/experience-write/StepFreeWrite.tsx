@@ -6,13 +6,22 @@ type Props = {
 };
 
 export default function StepFreeWrite({ value, onChange }: Props) {
+  const trimmedLength = value.trim().length;
+  const isTooShort = trimmedLength > 0 && trimmedLength < 10;
+  const isTooLong = value.length > 2000;
+  const helperMessage = isTooLong
+    ? '글이 너무 길어 분석에 어려움이 있을 수 있어요. 조금 요약해주시겠어요?'
+    : isTooShort
+      ? '최소 글자수보다 부족해요. 조금 더 자세히 적어주시겠어요?'
+      : null;
+
   return (
     <div className="flex w-full flex-col items-start gap-[10px]">
       <FieldLabel label="최소 10자 이상 작성해주세요" required />
       <div className="relative h-[299px] w-full overflow-hidden rounded-[10px] bg-[#F8F8F8]">
         {!value ? (
-          <p className="pointer-events-none absolute left-[16px] top-[10px] z-10 w-[311px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#BABABA] [font-feature-settings:'case'_1]">
-            어떤 계기로 시작했고, 진행하면서 어디서 어려움을 겪으셨는지 편하게 적어주세요.
+          <p className="pointer-events-none absolute left-[16px] top-[10px] z-10 w-[calc(100%-32px)] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#BABABA] [font-feature-settings:'case'_1]">
+            어떤 계기로 시작했고, 진행하면서 어디에서 어려움을 느꼈는지 자세히 적어주세요.
           </p>
         ) : null}
 
@@ -27,12 +36,14 @@ export default function StepFreeWrite({ value, onChange }: Props) {
 
         <textarea
           value={value}
-          maxLength={2000}
           onChange={(event) => onChange(event.target.value)}
           className="absolute inset-0 z-0 h-full w-full resize-none whitespace-pre-wrap break-words bg-transparent px-[16px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#111111] outline-none [font-feature-settings:'case'_1] [overflow-wrap:anywhere]"
           aria-label="자유 서술"
         />
       </div>
+      {helperMessage ? (
+        <p className="text-sm leading-5 text-[#D33B3B]">{helperMessage}</p>
+      ) : null}
     </div>
   );
 }

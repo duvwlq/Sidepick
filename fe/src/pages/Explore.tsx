@@ -3,9 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import CardList from '../components/common/CardList';
 import HorizontalScroll from '../components/common/HorizontalScroll';
 import SearchBar from '../components/common/SearchBar';
+import { useToast } from '../components/common/useToast';
 import Layout from '../components/layout/Layout';
 import { getExperiences, type Experience } from '../lib/api';
 import { CATEGORY_TAG_LABELS, CATEGORY_VISUALS } from '../lib/category-visuals';
+import { resolveErrorMessage } from '../lib/resolve-error-message';
 
 type SortKey = 'latest' | 'popular';
 type FilterTagOption = {
@@ -19,14 +21,14 @@ const DEFAULT_RECOMMENDED_KEYWORDS = CATEGORY_TAG_LABELS.slice(0, 6);
 function readRecentSearches() {
   const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
   if (!raw) {
-    return ['온라인 판매 · 이커머스', '콘텐츠·SNS 기반', '디지털 상품'];
+    return ['온라인 판매', '콘텐츠/SNS 기반', '수공예 상품'];
   }
 
   try {
     const parsed = JSON.parse(raw) as string[];
     return parsed.filter(Boolean).slice(0, 6);
   } catch {
-    return ['온라인 판매 · 이커머스', '콘텐츠·SNS 기반', '디지털 상품'];
+    return ['온라인 판매', '콘텐츠/SNS 기반', '수공예 상품'];
   }
 }
 
@@ -62,7 +64,7 @@ function FilterTag({
       }`}
     >
       <span
-        className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] [font-feature-settings:'case'_1] ${
+        className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] ${
           active ? 'text-[#FFFFFF]' : 'text-[#757575]'
         }`}
       >
@@ -85,17 +87,17 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[33px] shrink-0 appearance-none items-center justify-center gap-[2px] rounded-[999px] px-[12px] py-[8px] ${
+      className={`flex min-h-[33px] shrink-0 appearance-none items-center justify-center gap-[2px] rounded-[999px] px-[12px] py-[8px] ${
         onRemove ? 'border border-[#D8D8D8] bg-[#FFFFFF]' : 'border-0 bg-[#F8F8F8]'
       }`}
     >
-      <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E] [font-feature-settings:'case'_1]">
+      <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-[#5E5E5E]">
         {label}
       </span>
       {onRemove ? (
         <span
           role="button"
-          aria-label={`${label} 최근 검색 삭제`}
+          aria-label={`${label} 최근 검색어 제거`}
           onClick={(event) => {
             event.stopPropagation();
             onRemove();
@@ -111,6 +113,7 @@ function Chip({
 
 export default function Explore() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialKeyword = searchParams.get('q') ?? '';
   const initialTag = searchParams.get('tag');
@@ -131,6 +134,12 @@ export default function Explore() {
   useEffect(() => {
     void loadExperiences(keyword, sort, selectedTag);
   }, [keyword, sort, selectedTag]);
+
+  useEffect(() => {
+    if (error) {
+      showToast(error);
+    }
+  }, [error, showToast]);
 
   useEffect(() => {
     const nextParams = new URLSearchParams();
@@ -162,7 +171,7 @@ export default function Explore() {
       });
       setExperiences(payload.experiences);
     } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : '사례 목록을 불러오지 못했습니다.');
+      setError(resolveErrorMessage(loadError, '데이터를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'));
     } finally {
       setLoading(false);
     }
@@ -197,7 +206,10 @@ export default function Explore() {
 
   const recommendedKeywords = useMemo(() => DEFAULT_RECOMMENDED_KEYWORDS, []);
   const filterTags = useMemo<FilterTagOption[]>(
-    () => [{ label: '전체', value: null }, ...CATEGORY_VISUALS.map((item) => ({ label: item.label, value: item.id }))],
+    () => [
+      { label: '전체', value: null },
+      ...CATEGORY_VISUALS.map((item) => ({ label: item.label, value: item.id })),
+    ],
     [],
   );
 
@@ -244,20 +256,20 @@ export default function Explore() {
           </section>
 
           <section className="flex w-full flex-col items-start gap-[16px] p-[16px]">
-            <div className="flex w-full items-center justify-between">
-              <h2 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+            <div className="flex w-full items-center justify-between gap-[12px]">
+              <h2 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#000000]">
                 최근 검색어
               </h2>
               <button
                 type="button"
                 onClick={() => persistRecentKeywords([])}
-                className="border-0 bg-transparent p-[0px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]"
+                className="border-0 bg-transparent p-[0px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#8A8A8A]"
               >
                 전체 삭제
               </button>
             </div>
 
-            <div className="flex flex-wrap items-start gap-[4px]">
+            <div className="flex w-full flex-wrap items-start gap-[4px]">
               {recentKeywords.map((item) => (
                 <Chip
                   key={item}
@@ -270,7 +282,7 @@ export default function Explore() {
           </section>
 
           <section className="flex w-full flex-col items-start gap-[16px] p-[16px]">
-            <h2 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+            <h2 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#000000]">
               추천 키워드
             </h2>
             <div className="flex w-full flex-wrap content-start items-start gap-[4px]">
@@ -286,7 +298,7 @@ export default function Explore() {
 
   return (
     <Layout
-      title="사례 탐색"
+      title="경험 탐색"
       leftType="back"
       rightIcon="search"
       onBack={() => navigate(-1)}
@@ -317,15 +329,15 @@ export default function Explore() {
         </section>
 
         <section className="flex w-full flex-col gap-[12px] bg-[#FFFFFF] px-[16px] py-[14px]">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-col">
+          <div className="flex flex-wrap items-start justify-between gap-[12px]">
+            <div className="flex min-w-0 flex-1 flex-col">
               <p className="font-['Pretendard'] text-[15px] font-[600] leading-[18px] text-[#111111]">
-                {loading ? '사례를 불러오는 중' : '사례 탐색'}
+                {loading ? '경험을 불러오는 중' : '경험 탐색'}
               </p>
-              <p className="mt-[4px] font-['Pretendard'] text-[12px] font-[400] leading-[16px] text-[#7A7A7A]">
+              <p className="mt-[4px] break-words font-['Pretendard'] text-[12px] font-[400] leading-[16px] text-[#7A7A7A]">
                 {activeFilters.length
-                  ? '선택한 조건에 맞는 사례만 모아보고 있어요.'
-                  : '태그와 검색어로 원하는 실패 사례를 빠르게 찾아보세요.'}
+                  ? '선택한 조건에 맞는 경험만 모아보고 있어요.'
+                  : '태그와 검색어로 원하는 실패 경험을 빠르게 찾아보세요.'}
               </p>
             </div>
 

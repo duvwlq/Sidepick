@@ -208,7 +208,7 @@ function OptionBottomSheet({
         onClick={onClose}
       />
       <div
-        className={`absolute bottom-0 left-1/2 flex w-[375px] max-w-[375px] -translate-x-1/2 flex-col rounded-t-[24px] bg-[#FFFFFF] px-[24px] pb-[48px] pt-[24px] transition-transform duration-300 ease-out ${
+        className={`absolute bottom-0 left-1/2 flex w-full max-w-[430px] -translate-x-1/2 flex-col rounded-t-[24px] bg-[#FFFFFF] px-[24px] pb-[48px] pt-[24px] transition-transform duration-300 ease-out ${
           open ? 'translate-y-0' : 'translate-y-full'
         }`}
         style={{ height: `${sheetHeight}px` }}
@@ -217,7 +217,7 @@ function OptionBottomSheet({
           {title}
         </div>
         <div
-          className="flex w-[327px] flex-col gap-[20px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          className="flex w-full flex-col gap-[20px] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           style={{ height: `${listHeight}px` }}
         >
           {options.map((option) => {

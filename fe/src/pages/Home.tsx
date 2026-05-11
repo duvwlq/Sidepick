@@ -4,7 +4,9 @@ import amountIcon from '../assets/images/amount.svg';
 import durationIcon from '../assets/images/duration.svg';
 import viewsIcon from '../assets/images/views.svg';
 import HorizontalScroll from '../components/common/HorizontalScroll';
+import { CardSkeleton, PageMessage } from '../components/common/Skeleton';
 import SearchBar from '../components/common/SearchBar';
+import { useToast } from '../components/common/useToast';
 import Layout from '../components/layout/Layout';
 import { getExperiences, getMe, type Experience, type UserSummary } from '../lib/api';
 import { CATEGORY_TAG_LABELS } from '../lib/category-visuals';
@@ -81,12 +83,14 @@ function HomeCard({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[127px] min-w-0 appearance-none flex-col items-start gap-[10px] overflow-hidden rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left ${
+      className={`flex min-h-[127px] min-w-0 appearance-none flex-col items-start gap-[10px] overflow-hidden rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left ${
         compact ? 'w-[240px] shrink-0' : 'w-full'
       }`}
     >
       <div className="flex w-full min-w-0 flex-col items-start gap-[8px]">
-        <div className={`flex w-full min-w-0 items-start ${compact ? 'gap-[4px]' : 'justify-between'}`}>
+        <div
+          className={`flex w-full min-w-0 items-start ${compact ? 'gap-[4px]' : 'justify-between gap-[8px]'}`}
+        >
           <div className="flex min-w-0 flex-wrap items-start gap-[4px] overflow-hidden">
             {visibleTags.length ? (
               visibleTags.map((tag) => (
@@ -94,27 +98,27 @@ function HomeCard({
                   key={`${experience.id}-${tag}`}
                   className="flex h-[20px] max-w-full items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]"
                 >
-                  <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+                  <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#FFFFFF]">
                     {tag}
                   </span>
                 </span>
               ))
             ) : (
               <span className="flex h-[20px] max-w-full items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]">
-                <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+                <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#FFFFFF]">
                   키워드 없음
                 </span>
               </span>
             )}
           </div>
           {!compact ? (
-            <span className="shrink-0 whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#494949] underline [font-feature-settings:'case'_1]">
+            <span className="shrink-0 whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#494949] underline">
               자세히 보기
             </span>
           ) : null}
         </div>
 
-        <h3 className="w-full truncate font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+        <h3 className="w-full truncate font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#000000]">
           {experience.title}
         </h3>
       </div>
@@ -123,8 +127,8 @@ function HomeCard({
         <MetaItem icon={durationIcon} label={durationLabel} />
         <MetaItem icon={amountIcon} label={amountLabel} />
         <MetaItem icon={viewsIcon} label={viewsLabel} />
-        <div className="flex shrink-0 items-center justify-self-start">
-          <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
+        <div className="flex min-w-0 items-center justify-self-start">
+          <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
             {dateLabel}
           </span>
         </div>
@@ -135,9 +139,9 @@ function HomeCard({
 
 function MetaItem({ icon, label }: { icon: string; label: string }) {
   return (
-    <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
-      <img src={icon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
-      <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
+    <div className="flex min-w-0 items-center gap-[4px] justify-self-start">
+      <img src={icon} alt="" className="h-[16px] w-[16px] shrink-0" />
+      <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
         {label}
       </span>
     </div>
@@ -161,11 +165,11 @@ function CategoryTab({
     >
       <span
         className={`flex shrink-0 items-center justify-center px-[8px] py-[4px] ${
-          active ? 'border-b-[1.5px] border-solid border-[#494949]' : ''
+          active ? 'border-b-[1.5px] border-[#494949]' : ''
         }`}
       >
         <span
-          className={`whitespace-nowrap text-center font-['Pretendard'] text-[14px] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+          className={`whitespace-nowrap text-center font-['Pretendard'] text-[14px] leading-[16.8px] ${
             active ? 'font-[600] text-[#494949]' : 'font-[400] text-[#BABABA]'
           }`}
         >
@@ -191,12 +195,12 @@ function SegmentButton({
       onClick={onClick}
       className={`flex min-w-0 flex-1 appearance-none items-center justify-center border-0 py-[10px] ${
         active
-          ? 'rounded-[999px] border-[2px] border-solid border-[#E6E6E6] bg-[#FFFFFF]'
+          ? 'rounded-[999px] border-[2px] border-[#E6E6E6] bg-[#FFFFFF]'
           : 'rounded-[4px] bg-transparent'
       }`}
     >
       <span
-        className={`whitespace-nowrap text-center font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+        className={`whitespace-nowrap text-center font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] ${
           active ? 'text-[#131416]' : 'text-[#757575]'
         }`}
       >
@@ -208,6 +212,7 @@ function SegmentButton({
 
 export default function Home() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const keyword = '';
   const [sort, setSort] = useState<SortKey>('latest');
   const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_TABS[0]);
@@ -219,6 +224,12 @@ export default function Home() {
   useEffect(() => {
     void loadExperiences(keyword, sort);
   }, [keyword, sort]);
+
+  useEffect(() => {
+    if (listError) {
+      showToast(listError);
+    }
+  }, [listError, showToast]);
 
   useEffect(() => {
     const token = getAccessToken();
@@ -250,7 +261,7 @@ export default function Home() {
       setListError(
         resolveErrorMessage(
           loadError,
-          '경험 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.',
+          '경험 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
         ),
       );
     } finally {
@@ -287,9 +298,9 @@ export default function Home() {
   return (
     <Layout title="사이드픽" leftType="menu" showRightIcon>
       <div className="bg-[#FFFFFF]">
-        <section className="h-[52px] w-[375px] bg-[#FFFFFF] px-[16px] pb-[12px]">
+        <section className="h-[52px] w-full bg-[#FFFFFF] px-[16px] pb-[12px]">
           <SearchBar
-            placeholder="원하는 실패 사례를 검색해보세요!"
+            placeholder="원하는 실패 경험을 검색해보세요"
             value={keyword}
             onClick={() => navigate('/explore?mode=search')}
             readOnly
@@ -297,7 +308,7 @@ export default function Home() {
         </section>
 
         <section className="flex w-full flex-col items-center gap-[16px] px-[16px] py-[12px]">
-          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
+          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]">
             인기 카테고리
           </h2>
 
@@ -330,30 +341,28 @@ export default function Home() {
               ))}
             </HorizontalScroll>
           ) : (
-            <div className="h-[127px] w-full rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[32px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#757575]">
-              표시할 경험이 없습니다.
-            </div>
+            <PageMessage message="표시할 경험이 없습니다." />
           )}
         </section>
 
         <section className="w-full bg-[#FFFFFF] p-[16px]">
           <div className="flex w-full flex-col items-start gap-[39px] rounded-[10px] bg-[#757575] p-[20px] text-[#FFFFFF]">
             <div className="flex w-full flex-col items-start gap-[8px]">
-              <p className="font-['Pretendard'] text-[20px] font-[600] leading-[24px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+              <p className="font-['Pretendard'] text-[20px] font-[600] leading-[24px] text-[#FFFFFF]">
                 실패도 좋은 경험이에요
               </p>
-              <div className="w-[314px] font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]">
+              <div className="w-full max-w-[314px] break-words font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#FFFFFF]">
                 <p>경험을 등록하면 AI가 실패 원인을 분석해주고</p>
-                <p>비슷한 사례를 보여주며 원하는 선택을 돕습니다.</p>
+                <p>비슷한 사례를 보여주며 다음 선택을 돕습니다.</p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={handlePrimaryAction}
-              className="flex h-[40px] w-full appearance-none items-center justify-between rounded-[8px] border-0 bg-[#FFFFFF] px-[12px] py-[5px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#000000]"
+              className="flex min-h-[44px] w-full appearance-none items-center justify-between rounded-[8px] border-0 bg-[#FFFFFF] px-[12px] py-[8px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#000000]"
             >
-              <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+              <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#000000]">
                 내 경험 분석하러 가기
               </span>
               <span className="relative h-[16px] w-[16px] shrink-0 overflow-hidden" aria-hidden="true">
@@ -376,21 +385,21 @@ export default function Home() {
         </section>
 
         <section className="flex w-full flex-col items-start justify-center gap-[10px] bg-[#FFFFFF] px-[16px] py-[12px]">
-          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
+          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]">
             탐색
           </h2>
 
-          <div className="flex h-[616px] w-full flex-col items-center gap-[12px]">
+          <div className="flex min-h-[616px] w-full flex-col items-center gap-[12px]">
             <div className="w-full rounded-[999px] bg-[#E6E6E6]">
               <div className="flex w-full items-center justify-center">
                 <SegmentButton
                   active={sort === 'latest'}
-                  label="최신 등록 사례"
+                  label="최신 등록 경험"
                   onClick={() => setSort('latest')}
                 />
                 <SegmentButton
                   active={sort === 'popular'}
-                  label="인기 사례"
+                  label="인기 경험"
                   onClick={() => setSort('popular')}
                 />
               </div>
@@ -398,13 +407,13 @@ export default function Home() {
 
             <div className="flex w-full flex-col items-start gap-[10px]">
               {listLoading ? (
-                <div className="h-[127px] w-full rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[32px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#757575]">
-                  사례를 불러오는 중입니다.
-                </div>
+                <>
+                  <CardSkeleton />
+                  <CardSkeleton />
+                  <CardSkeleton />
+                </>
               ) : listError ? (
-                <div className="h-[127px] w-full rounded-[10px] border-[1px] border-solid border-[#F5D3D3] bg-[#FFF5F5] px-[16px] py-[32px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B]">
-                  {listError}
-                </div>
+                <PageMessage message={listError} tone="error" />
               ) : exploreExperiences.length ? (
                 exploreExperiences.map((experience) => (
                   <HomeCard
@@ -414,9 +423,7 @@ export default function Home() {
                   />
                 ))
               ) : (
-                <div className="h-[127px] w-full rounded-[10px] border-[1px] border-solid border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[32px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#757575]">
-                  아직 등록된 사례가 없습니다.
-                </div>
+                <PageMessage message="아직 등록된 경험이 없습니다." />
               )}
             </div>
 
@@ -425,8 +432,8 @@ export default function Home() {
               onClick={() => navigate('/explore')}
               className="appearance-none border-0 bg-transparent p-[0px]"
             >
-              <span className="text-[12px] leading-[14.4px] text-[#5D5D5D] underline [font-feature-settings:'case'_1]">
-                모든 사례 보기
+              <span className="text-[12px] leading-[14.4px] text-[#5D5D5D] underline">
+                모든 경험 보기
               </span>
             </button>
           </div>

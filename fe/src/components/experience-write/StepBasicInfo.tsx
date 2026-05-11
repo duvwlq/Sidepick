@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from 'react';
+import type { FormState } from '../../hooks/useExperienceWrite';
 import type { Category } from '../../lib/api';
 import { CATEGORY_VISUALS } from '../../lib/category-visuals';
-import type { FormState } from '../../hooks/useExperienceWrite';
+import { ErrorState, LoadingState } from '../common/Skeleton';
 import FieldLabel from './FieldLabel';
 
 type Props = {
@@ -29,10 +30,8 @@ export default function StepBasicInfo({
   if (loading) {
     return (
       <div className="flex w-full flex-col gap-[10px]">
-        <FieldLabel label="어떠한 부업을 경험했었나요?" required />
-        <div className="flex h-[147px] w-full items-center justify-center rounded-[16px] border border-dashed border-[#E6E6E6] bg-[#FFFFFF] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#757575] [font-feature-settings:'case'_1]">
-          카테고리를 불러오는 중입니다.
-        </div>
+        <FieldLabel label="어떤 부업을 경험했나요?" required />
+        <LoadingState message="카테고리를 불러오는 중입니다." className="min-h-[147px] content-center" />
       </div>
     );
   }
@@ -40,9 +39,9 @@ export default function StepBasicInfo({
   if (error) {
     return (
       <div className="flex w-full flex-col gap-[10px]">
-        <FieldLabel label="어떠한 부업을 경험했었나요?" required />
-        <div className="flex min-h-[147px] w-full items-center rounded-[16px] border border-[#F6C9C9] bg-[#FFF5F5] p-[16px] font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B] [font-feature-settings:'case'_1]">
-          {error}
+        <FieldLabel label="어떤 부업을 경험했나요?" required />
+        <div className="min-h-[147px]">
+          <ErrorState message={error} />
         </div>
       </div>
     );
@@ -59,13 +58,12 @@ export default function StepBasicInfo({
             label: apiCategory.name || visual.label,
           }
         : visual,
-      disabled: false,
     };
   });
 
   return (
     <div className="flex w-full flex-col items-start gap-[10px]">
-      <FieldLabel label="어떠한 부업을 경험했었나요?" required />
+      <FieldLabel label="어떤 부업을 경험했나요?" required />
 
       <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-[10px]">
         {displayCategories.map(({ id, visual }) => {
@@ -77,22 +75,22 @@ export default function StepBasicInfo({
               key={id}
               type="button"
               onClick={() => toggleCategory(selectedValue)}
-              className={`flex h-[147px] flex-col items-start justify-between rounded-[16px] border-[1.108px] border-solid p-[16px] ${
+              className={`flex min-h-[147px] flex-col items-start justify-between rounded-[16px] border p-[16px] ${
                 active ? 'border-[#131416] bg-[#F8F8F8]' : 'border-[#E6E6E6] bg-[#FFFFFF]'
               }`}
             >
-              <div className="flex h-[40px] items-center shrink-0">{visual.icon}</div>
-              <div className="flex w-full flex-col items-start gap-[4px] text-left">
+              <div className="flex h-[40px] shrink-0 items-center">{visual.icon}</div>
+              <div className="flex w-full min-w-0 flex-col items-start gap-[4px] text-left">
                 <p
-                  className={`w-full font-['Pretendard'] text-[14px] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
-                    active ? 'font-[600] text-[#131416]' : 'font-[500] text-[#494949]'
+                  className={`w-full break-words text-[14px] leading-[16.8px] ${
+                    active ? 'font-semibold text-[#131416]' : 'font-medium text-[#494949]'
                   }`}
                 >
                   {visual.label}
                 </p>
                 <div
-                  className={`w-full font-['Pretendard'] text-[10px] leading-[12px] tracking-[0px] [font-feature-settings:'case'_1] ${
-                    active ? 'font-[500] text-[#494949]' : 'font-[400] text-[#757575]'
+                  className={`w-full break-words text-[10px] leading-[12px] ${
+                    active ? 'font-medium text-[#494949]' : 'font-normal text-[#757575]'
                   }`}
                 >
                   {visual.descriptionLines.map((line) => (

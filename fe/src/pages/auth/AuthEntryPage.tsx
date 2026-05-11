@@ -3,12 +3,16 @@ import { Link, useLocation } from 'react-router-dom';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
+import { ErrorState } from '../../components/common/Skeleton';
+import { useToast } from '../../components/common/useToast';
 import { login } from '../../lib/api';
+import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
 
 export default function AuthEntryPage() {
   const location = useLocation();
+  const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -28,7 +32,7 @@ export default function AuthEntryPage() {
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
-      setLoginError('이메일과 비밀번호를 모두 입력해주세요.');
+      setLoginError('이메일 혹은 비밀번호를 다시 확인해주세요');
       return;
     }
 
@@ -41,9 +45,12 @@ export default function AuthEntryPage() {
         password,
       });
       saveSession(payload.accessToken, payload.refreshToken, payload.user);
+      setFlashToast(`환영해요, ${payload.user.nickname}님!`);
       window.location.href = nextPath;
     } catch (error) {
-      setLoginError(resolveErrorMessage(error, '로그인에 실패했어요. 다시 시도해주세요.'));
+      const message = resolveErrorMessage(error, '이메일 혹은 비밀번호를 다시 확인해주세요');
+      setLoginError(message);
+      showToast(message);
     } finally {
       setLoading(false);
     }
@@ -54,7 +61,7 @@ export default function AuthEntryPage() {
     const redirectUri = `${window.location.origin}/auth/kakao/callback`;
 
     if (!kakaoClientId) {
-      setKakaoError('카카오 로그인 설정을 확인할 수 없어요.');
+      setKakaoError('잠시 연결이 불안정해요. 다시 시도해주세요.');
       return;
     }
 
@@ -72,7 +79,7 @@ export default function AuthEntryPage() {
     const redirectUri = `${window.location.origin}/auth/google/callback`;
 
     if (!googleClientId) {
-      setGoogleError('구글 로그인 설정을 확인할 수 없어요.');
+      setGoogleError('잠시 연결이 불안정해요. 다시 시도해주세요.');
       return;
     }
 
@@ -101,7 +108,7 @@ export default function AuthEntryPage() {
           <AuthInput
             label="이메일"
             type="email"
-            placeholder="이메일을 입력해주세요"
+            placeholder="이메일 형식으로 입력해주세요"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
@@ -114,7 +121,7 @@ export default function AuthEntryPage() {
           />
         </div>
 
-        {loginError ? <p className="mt-4 text-sm text-[#D33B3B]">{loginError}</p> : null}
+        {loginError ? <div className="mt-4"><ErrorState message={loginError} /></div> : null}
 
         <button
           type="button"
@@ -122,7 +129,7 @@ export default function AuthEntryPage() {
           disabled={loading}
           className="mt-6 h-14 w-full rounded-[16px] bg-[#111111] text-base font-semibold text-white disabled:bg-[#D8D8D8]"
         >
-          {loading ? '로그인 중...' : '로그인'}
+          {loading ? '잠시만 기다려주세요' : '로그인'}
         </button>
 
         <div className="mt-4 flex items-center justify-center gap-3 text-sm text-[#7D7D7D]">
@@ -162,8 +169,8 @@ export default function AuthEntryPage() {
           <p className="mt-4 text-center text-xs leading-5 text-[#8C8C8C]">
             이메일 로그인과 소셜 로그인을 모두 사용할 수 있습니다.
           </p>
-          {kakaoError ? <p className="mt-3 text-center text-sm text-[#D33B3B]">{kakaoError}</p> : null}
-          {googleError ? <p className="mt-3 text-center text-sm text-[#D33B3B]">{googleError}</p> : null}
+          {kakaoError ? <div className="mt-3"><ErrorState message={kakaoError} /></div> : null}
+          {googleError ? <div className="mt-3"><ErrorState message={googleError} /></div> : null}
         </div>
       </section>
     </AuthLayout>

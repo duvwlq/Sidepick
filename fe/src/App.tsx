@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import FlashToastListener from './components/common/FlashToastListener';
 import Home from './pages/Home';
 import Explore from './pages/Explore';
 import Create from './pages/Create';
@@ -19,6 +20,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthFlowProvider>
+        <FlashToastListener />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<AuthEntryPage />} />

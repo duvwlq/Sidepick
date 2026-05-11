@@ -37,7 +37,7 @@ export default function TermsAgreementSheet({
         className="absolute inset-0"
         onClick={onClose}
       />
-      <div className="absolute bottom-0 left-1/2 w-full max-w-[430px] -translate-x-1/2 rounded-t-[28px] bg-white px-5 pb-8 pt-4">
+      <div className="absolute bottom-0 left-1/2 w-full max-w-[430px] -translate-x-1/2 rounded-t-[28px] bg-white px-4 pb-8 pt-4">
         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#D9D9D9]" />
         <h2 className="mb-5 text-center text-base font-semibold text-black">
           서비스 이용에 필요한

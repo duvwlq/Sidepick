@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '../components/common/useToast';
 import BottomButton from '../components/experience-write/BottomButton';
 import ProgressHeader from '../components/experience-write/ProgressHeader';
 import StepBasicInfo from '../components/experience-write/StepBasicInfo';
@@ -9,7 +10,7 @@ import StepSelectable from '../components/experience-write/StepSelectable';
 import Layout from '../components/layout/Layout';
 import { difficultyOptions } from '../constants/experienceOptions';
 import { useExperienceWrite } from '../hooks/useExperienceWrite';
-import { createExperience, getCategories, type Category } from '../lib/api';
+import { getCategories, type Category } from '../lib/api';
 import {
   mapDailyHours,
   mapDailyHoursToWeeklyHours,
@@ -19,8 +20,11 @@ import {
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
+const PENDING_EXPERIENCE_CREATE_KEY = 'pendingExperienceCreate';
+
 export default function Create() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const user = getStoredUser();
   const token = getAccessToken();
   const [submitError, setSubmitError] = useState('');
@@ -45,6 +49,18 @@ export default function Create() {
 
     void loadCategories();
   }, [navigate, token]);
+
+  useEffect(() => {
+    if (categoryError) {
+      showToast(categoryError);
+    }
+  }, [categoryError, showToast]);
+
+  useEffect(() => {
+    if (submitError) {
+      showToast(submitError);
+    }
+  }, [showToast, submitError]);
 
   async function loadCategories() {
     setCategoryLoading(true);
@@ -74,7 +90,7 @@ export default function Create() {
     prev();
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!token) {
       setSubmitError('로그인 정보가 없어요');
       return;
@@ -94,33 +110,37 @@ export default function Create() {
     setSubmitting(true);
     setSubmitError('');
 
-    try {
-      const created = await createExperience(token, {
-        title: `${selectedCategory.name} 경험`,
-        content: form.content,
-        categoryId: selectedCategory.id,
-        businessType: selectedCategory.name,
-        investmentAmount: parseNumber(form.expense),
-        durationMonths: mapPeriodToMonths(form.totalPeriod),
-        weeklyHours: mapDailyHoursToWeeklyHours(form.dailyHours),
-        averageDailyHours: mapDailyHours(form.dailyHours),
-        isConcurrentWithMainJob:
-          form.isConcurrentWithMainJob === '예'
-            ? true
-            : form.isConcurrentWithMainJob === '아니오'
-              ? false
-              : undefined,
-        monthlyRevenue: parseNumber(form.revenue),
-        failureReason: form.difficulties[0] ?? '기타',
-        failureReasons: form.difficulties,
-        difficulties: form.difficulties,
-        difficultyEtc: form.difficultyEtc.trim(),
-        difficultyExtra: form.difficultyExtra.trim(),
-        lessonsLearned: form.content,
-        wouldRetry: true,
-      });
+    const pendingPayload = {
+      title: `${selectedCategory.name} 경험`,
+      content: form.content,
+      categoryId: selectedCategory.id,
+      businessType: selectedCategory.name,
+      investmentAmount: parseNumber(form.expense),
+      durationMonths: mapPeriodToMonths(form.totalPeriod),
+      weeklyHours: mapDailyHoursToWeeklyHours(form.dailyHours),
+      averageDailyHours: mapDailyHours(form.dailyHours),
+      isConcurrentWithMainJob:
+        form.isConcurrentWithMainJob === '예'
+          ? true
+          : form.isConcurrentWithMainJob === '아니오'
+            ? false
+            : undefined,
+      monthlyRevenue: parseNumber(form.revenue),
+      failureReason: form.difficulties[0] ?? '기타',
+      failureReasons: form.difficulties,
+      difficulties: form.difficulties,
+      difficultyEtc: form.difficultyEtc.trim(),
+      difficultyExtra: form.difficultyExtra.trim(),
+      lessonsLearned: form.content,
+      wouldRetry: true,
+    };
 
-      navigate(`/analysis-result?experienceId=${created.id}`);
+    try {
+      window.sessionStorage.setItem(
+        PENDING_EXPERIENCE_CREATE_KEY,
+        JSON.stringify({ payload: pendingPayload }),
+      );
+      navigate('/analysis-result?pendingCreate=1');
     } catch (createError) {
       setSubmitError(
         resolveErrorMessage(
@@ -128,14 +148,13 @@ export default function Create() {
           '경험 등록 중 문제가 발생했어요. 다시 시도해주세요.',
         ),
       );
-    } finally {
       setSubmitting(false);
     }
   };
 
   return (
     <Layout title="경험 등록" leftType="back" rightIcon="menu" onBack={handleBack}>
-      <div className="flex w-full flex-col items-center gap-[32px] bg-[#FFFFFF] px-[16px] pb-[110px] pt-[20px]">
+      <div className="flex w-full flex-col items-center gap-[32px] overflow-x-clip bg-[#FFFFFF] px-[16px] pb-[110px] pt-[20px]">
         <ProgressHeader step={step} progress={progress} />
 
         <StepTitle
@@ -179,7 +198,7 @@ export default function Create() {
         ) : null}
 
         {submitError ? (
-          <div className="w-full font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B] [font-feature-settings:'case'_1]">
+          <div className="w-full break-words font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B] [font-feature-settings:'case'_1]">
             {submitError}
           </div>
         ) : null}
@@ -213,7 +232,7 @@ function StepTitle({
     <div className={`flex w-full flex-col items-center ${subtitle ? 'gap-[5px]' : 'gap-0'}`}>
       <div
         className={`flex flex-col items-center ${
-          step === 3 ? 'w-[267px] gap-0' : 'w-[228px] gap-0'
+          step === 3 ? 'w-full max-w-[267px] gap-0' : 'w-full max-w-[228px] gap-0'
         }`}
       >
         {title.map((line) => (

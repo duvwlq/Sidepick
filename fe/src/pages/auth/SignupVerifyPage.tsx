@@ -4,13 +4,17 @@ import AuthButton from '../../components/auth/AuthButton';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthInput from '../../components/auth/AuthInput';
 import AuthLayout from '../../components/auth/AuthLayout';
+import { ErrorState } from '../../components/common/Skeleton';
+import { useToast } from '../../components/common/useToast';
 import { useAuthFlow } from '../../context/useAuthFlow';
 import { confirmEmailVerification, requestEmailVerification } from '../../lib/api';
+import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 
 export default function SignupVerifyPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { showToast } = useToast();
   const { form, updateField } = useAuthFlow();
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -23,7 +27,7 @@ export default function SignupVerifyPage() {
 
   async function handleNext() {
     if (!form.verificationCode.trim()) {
-      setError('인증번호를 입력해주세요.');
+      setError('인증 번호가 일치하지 않습니다. 다시 확인해주세요');
       return;
     }
 
@@ -36,9 +40,13 @@ export default function SignupVerifyPage() {
         code: form.verificationCode,
       });
       updateField('verificationConfirmed', true);
+      updateField('verificationMessage', '이메일 인증이 완료되었어요');
+      setFlashToast('이메일 인증이 완료되었어요');
       navigate(`/signup/password?next=${encodeURIComponent(nextPath)}`);
     } catch (confirmError) {
-      setError(resolveErrorMessage(confirmError, '인증 확인에 실패했어요. 다시 시도해주세요.'));
+      const message = resolveErrorMessage(confirmError, '인증 번호가 일치하지 않습니다. 다시 확인해주세요');
+      setError(message);
+      showToast(message);
     } finally {
       setLoading(false);
     }
@@ -46,7 +54,7 @@ export default function SignupVerifyPage() {
 
   async function handleResend() {
     if (!form.email.trim()) {
-      setError('이메일을 다시 입력해주세요.');
+      setError('이메일 형식에 맞게 다시 작성해주세요');
       return;
     }
 
@@ -59,10 +67,12 @@ export default function SignupVerifyPage() {
         'verificationMessage',
         payload.verificationCode
           ? `개발용 인증 코드: ${payload.verificationCode}`
-          : '인증 메일을 다시 발송했어요.',
+          : '이메일 인증이 완료되었어요',
       );
     } catch (requestError) {
-      setError(resolveErrorMessage(requestError, '인증 메일 재발송에 실패했어요. 다시 시도해주세요.'));
+      const message = resolveErrorMessage(requestError, '잠시 연결이 불안정해요. 다시 시도해주세요.');
+      setError(message);
+      showToast(message);
     } finally {
       setResending(false);
     }
@@ -80,9 +90,9 @@ export default function SignupVerifyPage() {
           <h2 className="whitespace-pre-line text-[22px] font-semibold leading-8 text-black">
             이메일로 발송된{'\n'}인증번호를 입력해주세요
           </h2>
-          <p className="mt-3 text-sm text-[#777777]">{form.email}</p>
+          <p className="mt-3 break-words text-sm text-[#777777]">{form.email}</p>
           {form.verificationMessage ? (
-            <p className="mt-2 text-sm text-[#666666]">{form.verificationMessage}</p>
+            <p className="mt-2 break-words text-sm text-[#666666]">{form.verificationMessage}</p>
           ) : null}
         </div>
 
@@ -99,18 +109,19 @@ export default function SignupVerifyPage() {
             }
           />
 
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
+          {error ? <ErrorState message={error} /> : null}
 
-          <AuthButton onClick={() => void handleNext()}>
-            {loading ? '확인 중...' : '다음으로'}
+          <AuthButton onClick={() => void handleNext()} disabled={loading}>
+            {loading ? '잠시만 기다려주세요' : '다음으로'}
           </AuthButton>
 
           <button
             type="button"
             onClick={() => void handleResend()}
-            className="text-sm text-[#666666]"
+            disabled={resending}
+            className="min-h-[44px] text-sm text-[#666666] disabled:opacity-60"
           >
-            {resending ? '재발송 중...' : '인증번호가 오지 않았나요? 재발송'}
+            {resending ? '잠시만 기다려주세요' : '인증번호가 오지 않았나요? 재발송'}
           </button>
         </div>
       </section>

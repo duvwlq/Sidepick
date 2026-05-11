@@ -96,9 +96,9 @@ export default function MyPage() {
 
         <section className="rounded-[24px] bg-white p-5 shadow-sm">
           <div className="mb-4">
-            <p className="text-base font-semibold text-[#111111]">고객센터</p>
+            <p className="text-base font-semibold text-[#111111]">FAQ</p>
             <p className="mt-1 text-sm text-[#757575]">
-              자주 묻는 질문과 이용 가이드를 확인할 수 있습니다.
+              부업 시작 전 가이드와 카테고리별 문답을 확인할 수 있습니다.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ export default function MyPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#111111]">FAQ</p>
-                <p className="mt-1 text-xs text-[#757575]">서비스 이용 중 자주 묻는 질문</p>
+                <p className="mt-1 text-xs text-[#757575]">부업 시작 전 가이드와 카테고리별 문답</p>
               </div>
             </div>
             <ChevronRight className="h-5 w-5 text-[#757575]" />

@@ -32,7 +32,7 @@ export default function Layout({
   onRightIconClick,
 }: Props) {
   return (
-    <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
+    <div className="mx-auto min-h-screen w-full max-w-[430px] overflow-x-clip bg-white">
       {showHeader ? (
         <HeaderNav
           title={title}
@@ -47,7 +47,7 @@ export default function Layout({
       ) : null}
 
       <main
-        className={`${showHeader ? (showStatusBar ? 'pt-[123px]' : 'pt-[64px]') : ''} ${
+        className={`overflow-x-clip ${showHeader ? (showStatusBar ? 'pt-[123px]' : 'pt-[64px]') : ''} ${
           showBottomNav ? 'pb-[110px]' : ''
         }`}
       >

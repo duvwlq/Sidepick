@@ -92,7 +92,7 @@ export default function HeaderNav({
   };
 
   return (
-    <header className="fixed top-0 z-50 w-full max-w-[375px] bg-[#FFFFFF]">
+    <header className="fixed top-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2 bg-[#FFFFFF]">
       {showStatusBar ? <StatusBar /> : null}
       <div className="flex h-[64px] w-full items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
         <div className="flex h-[24px] w-[24px] items-center justify-start">{renderLeftButton()}</div>
