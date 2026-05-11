@@ -158,6 +158,53 @@ function SimilarCaseCard({
   );
 }
 
+function FaqShortcutCard({ onClick }: { onClick: () => void }) {
+  return (
+    <section className="flex w-full flex-col gap-[10px]">
+      <div className="flex items-center gap-[4px]">
+        <div className="flex h-[16px] w-[16px] items-center justify-center rounded-[999px] border border-[#E1E4E6]">
+          <span className="text-[10px] leading-none text-[#E5E8EB]">?</span>
+        </div>
+        <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
+          비슷한 업종의 사람들은 어떤 고민을 할까요?
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex w-full items-center justify-between rounded-[10px] bg-[#131416] px-[16px] py-[12px] text-left"
+      >
+        <div className="flex items-center gap-[4px]">
+          <div className="flex items-center justify-center rounded-[999px] bg-white px-[8px] py-[2px]">
+            <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-black">
+              FAQ
+            </span>
+          </div>
+          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#F8F8F8]">
+            사용자 가이드 게시판 바로 가기
+          </span>
+        </div>
+
+        <svg
+          viewBox="0 0 16 16"
+          className="h-[16px] w-[16px] shrink-0"
+          fill="none"
+          aria-hidden="true"
+        >
+          <path
+            d="M6 4L10 8L6 12"
+            stroke="#FFFFFF"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+    </section>
+  );
+}
+
 export default function AiAnalysisResult({ experienceId }: Props) {
   const navigate = useNavigate();
   const [experience, setExperience] = useState<Experience | null>(null);
@@ -438,7 +485,10 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] tracking-[0px] text-[#131416]">
                     {experience.author.nickname}
                   </p>
-                  <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#BABABA]">
+                  <p
+                    translate="no"
+                    className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#BABABA]"
+                  >
                     {formatDate(experience.createdAt)}
                   </p>
                 </div>
@@ -646,6 +696,8 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   </button>
                 </div>
               </section>
+
+              <FaqShortcutCard onClick={() => navigate('/faq')} />
             </>
           ) : null}
         </div>

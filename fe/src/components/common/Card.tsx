@@ -30,7 +30,10 @@ export default function Card({
   const visibleChips = chips.slice(0, 2);
 
   return (
-    <article className="flex h-[146px] w-full flex-col items-start gap-[10px] overflow-hidden bg-[#FFFFFF] p-[20px]">
+    <article
+      className="flex h-[146px] w-full flex-col items-start gap-[10px] overflow-hidden bg-[#FFFFFF] p-[20px]"
+      translate="no"
+    >
       <div className="flex w-full min-w-0 flex-col items-start gap-[4px]">
         <div className="flex w-full items-center">
           <div className="flex min-w-0 flex-wrap items-start gap-[4px] overflow-hidden">
@@ -55,24 +58,36 @@ export default function Card({
       <div className="grid w-full grid-cols-[repeat(2,minmax(0,1fr))] grid-rows-[repeat(2,fit-content(100%))] gap-x-[10px] gap-y-[4px]">
         <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
           <img src={durationIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
-          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+          <span
+            translate="no"
+            className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]"
+          >
             {duration}
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
           <img src={amountIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
-          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+          <span
+            translate="no"
+            className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]"
+          >
             {amount.toLocaleString()}원
           </span>
         </div>
         <div className="flex shrink-0 items-center gap-[4px] justify-self-start">
           <img src={viewsIcon} alt="" className="h-[15.993px] w-[15.993px] shrink-0" />
-          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+          <span
+            translate="no"
+            className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]"
+          >
             {views.toLocaleString()}
           </span>
         </div>
         <div className="flex shrink-0 items-center justify-self-start">
-          <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]">
+          <span
+            translate="no"
+            className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[20px] tracking-[0px] text-[#8A8A8A]"
+          >
             {date}
           </span>
         </div>

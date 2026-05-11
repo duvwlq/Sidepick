@@ -130,7 +130,7 @@ function InfoCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-[16px] bg-[#F8F8F8] px-4 py-3">
       <p className="text-xs text-[#8A8A8A]">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-[#111111]">{value}</p>
+      <p translate="no" className="mt-2 text-sm font-semibold text-[#111111]">{value}</p>
     </div>
   );
 }

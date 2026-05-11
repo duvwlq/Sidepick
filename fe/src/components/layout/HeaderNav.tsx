@@ -92,11 +92,17 @@ export default function HeaderNav({
   };
 
   return (
-    <header className="fixed top-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2 bg-[#FFFFFF]">
+    <header
+      className="fixed top-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2 bg-[#FFFFFF] notranslate"
+      translate="no"
+    >
       {showStatusBar ? <StatusBar /> : null}
       <div className="flex h-[64px] w-full items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
         <div className="flex h-[24px] w-[24px] items-center justify-start">{renderLeftButton()}</div>
-        <h1 className="whitespace-nowrap text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
+        <h1
+          translate="no"
+          className="whitespace-nowrap text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]"
+        >
           {title}
         </h1>
         <div className="flex h-[24px] w-[24px] items-center justify-end">{renderRightButton()}</div>
@@ -109,7 +115,10 @@ function StatusBar() {
   return (
     <div className="flex h-[59px] w-full items-center justify-center gap-[154px] bg-[#FFFFFF] px-[24px] pb-[19px] pt-[21px]">
       <div className="flex h-[22px] min-w-px flex-[1_0_0] items-center justify-center pt-[1.5px]">
-        <p className="text-center font-['SF_Pro'] text-[17px] font-[600] leading-[22px] tracking-[0px] text-[#000000]">
+        <p
+          translate="no"
+          className="text-center font-['SF_Pro'] text-[17px] font-[600] leading-[22px] tracking-[0px] text-[#000000]"
+        >
           9:41
         </p>
       </div>

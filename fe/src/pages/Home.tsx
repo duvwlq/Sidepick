@@ -128,7 +128,10 @@ function HomeCard({
         <MetaItem icon={amountIcon} label={amountLabel} />
         <MetaItem icon={viewsIcon} label={viewsLabel} />
         <div className="flex min-w-0 items-center justify-self-start">
-          <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+          <span
+            translate="no"
+            className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]"
+          >
             {dateLabel}
           </span>
         </div>
@@ -141,7 +144,10 @@ function MetaItem({ icon, label }: { icon: string; label: string }) {
   return (
     <div className="flex min-w-0 items-center gap-[4px] justify-self-start">
       <img src={icon} alt="" className="h-[16px] w-[16px] shrink-0" />
-      <span className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+      <span
+        translate="no"
+        className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]"
+      >
         {label}
       </span>
     </div>

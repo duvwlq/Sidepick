@@ -69,7 +69,10 @@ export default function BottomNav() {
   }
 
   return (
-    <nav className="fixed bottom-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-between rounded-tl-[20px] rounded-tr-[20px] bg-[#FFFFFF] px-6 pb-[24px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)] sm:px-8">
+    <nav
+      className="fixed bottom-0 left-1/2 z-50 flex w-full max-w-[430px] -translate-x-1/2 items-center justify-between rounded-tl-[20px] rounded-tr-[20px] bg-[#FFFFFF] px-6 pb-[24px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)] sm:px-8 notranslate"
+      translate="no"
+    >
       {menus.map((menu) => {
         const isActive = menu.matches(location.pathname);
 
@@ -84,7 +87,10 @@ export default function BottomNav() {
             aria-current={isActive ? 'page' : undefined}
           >
             <img src={menu.icon} alt="" className="h-[24px] w-[24px]" />
-            <span className="whitespace-nowrap text-center font-['Pretendard'] text-[10px] font-[400] leading-[10px] tracking-[0px] text-[#000000]">
+            <span
+              translate="no"
+              className="whitespace-nowrap text-center font-['Pretendard'] text-[10px] font-[400] leading-[10px] tracking-[0px] text-[#000000]"
+            >
               {menu.name}
             </span>
           </button>
