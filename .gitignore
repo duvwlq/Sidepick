@@ -9,10 +9,21 @@ out/
 
 .env
 application-local.yml
-
 docker-compose.override.yml
+
 *.log
 Thumbs.db
 .tmp/
 .tmp_feedback.pdf
 worktrees/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Claude Code
+.claude/
+
+# AI handoff (개인 작업 인수인계, 로컬 보관)
+ai/handoff/
