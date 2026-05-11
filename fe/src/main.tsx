@@ -3,6 +3,8 @@ import './styles/globals.css';
 import App from './App.tsx';
 import { ToastProvider } from './components/common/ToastProvider.tsx';
 
+document.documentElement.lang = 'ko';
+
 createRoot(document.getElementById('root')!).render(
   <ToastProvider>
     <App />
