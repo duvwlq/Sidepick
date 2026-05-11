@@ -55,7 +55,7 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
         mockMvc.perform(get("/api/experiences/{experienceId}/analysis", experienceId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.data.code").value("NOT_FOUND"));
+                .andExpect(jsonPath("$.errorCode").value("REPORT_NOT_FOUND"));
 
         mockServer.verify();
     }

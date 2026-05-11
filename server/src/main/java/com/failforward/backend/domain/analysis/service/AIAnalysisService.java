@@ -133,7 +133,7 @@ public class AIAnalysisService {
             analysis = AiAnalysis.create(
                     experience,
                     analysisSupport.writeJson(response.keywords()),
-                    analysisSupport.buildAdviceJson(response),
+                    analysisSupport.buildAdviceJson(experience, response),
                     response.summary(),
                     analysisSupport.truncate(response.failureCategory(), 50),
                     analysisSupport.normalizeRiskLevel(response.riskLevel()),
@@ -143,7 +143,7 @@ public class AIAnalysisService {
         } else {
             analysis.updateFromAiResult(
                     analysisSupport.writeJson(response.keywords()),
-                    analysisSupport.buildAdviceJson(response),
+                    analysisSupport.buildAdviceJson(experience, response),
                     response.summary(),
                     analysisSupport.truncate(response.failureCategory(), 50),
                     analysisSupport.normalizeRiskLevel(response.riskLevel()),
