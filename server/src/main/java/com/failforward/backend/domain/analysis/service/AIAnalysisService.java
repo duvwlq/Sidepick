@@ -22,6 +22,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -154,11 +155,43 @@ public class AIAnalysisService {
         }
         analysis = aiAnalysisRepository.save(analysis);
 
-        matchedCaseRepository.save(analysisSupport.createDefaultMatchedCase(analysis, experience, response));
+        List<FailureExperience> similarExperiences = findSimilarExperiences(experience);
+        List<MatchedCase> matchedCases = analysisSupport.createMatchedCasesFromExperiences(
+                analysis,
+                experience,
+                similarExperiences,
+                response
+        );
+        if (!matchedCases.isEmpty()) {
+            matchedCaseRepository.saveAll(matchedCases);
+        }
 
         log.info("ai_analysis_response_stored {}",
                 analysisSupport.buildAiLogFields(experience.getId(), analysis.getId(), null, null));
         return analysis;
+    }
+
+    private List<FailureExperience> findSimilarExperiences(FailureExperience experience) {
+        if (experience.getId() == null || experience.getCategory() == null || experience.getCategory().getId() == null) {
+            return List.of();
+        }
+
+        PageRequest topThree = PageRequest.of(0, 3);
+        List<FailureExperience> exactMatches = experienceRepository.findPublicSimilarByCategoryAndFailureReason(
+                experience.getId(),
+                experience.getCategory().getId(),
+                experience.getFailureReason(),
+                topThree
+        );
+        if (!exactMatches.isEmpty()) {
+            return exactMatches;
+        }
+
+        return experienceRepository.findPublicSimilarByCategory(
+                experience.getId(),
+                experience.getCategory().getId(),
+                topThree
+        );
     }
 
     private Optional<AiAnalysis> persistDemoScenarioAnalysisIfMatched(

@@ -81,7 +81,13 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
     void createAnalysisAndLoadMatchedCasesWorksForAuthenticatedUser() throws Exception {
         String token = registerAndLogin("analysis_create@sidepick.dev", "password123", "analysisCreate", "20s");
         expectAiFailure();
+        expectAiFailure();
         expectAiAnalysis();
+        long similarExperienceId = createExperience(
+                token,
+                "Similar public case",
+                "This seeded public experience should be used as a similar case."
+        );
         long experienceId = createExperience(token, "Analysis target", "This experience triggers AI analysis creation.");
 
         MvcResult createResult = mockMvc.perform(post("/api/experiences/{experienceId}/analysis", experienceId)
@@ -102,9 +108,10 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].id").exists())
-                .andExpect(jsonPath("$.data[0].caseId").isNotEmpty())
+                .andExpect(jsonPath("$.data[0].caseId").value(String.valueOf(similarExperienceId)))
                 .andExpect(jsonPath("$.data[0].caseTitle").isNotEmpty())
-                .andExpect(jsonPath("$.data[0].matchRate").isNumber());
+                .andExpect(jsonPath("$.data[0].matchRate").isNumber())
+                .andExpect(jsonPath("$.data[0].caseId").value(org.hamcrest.Matchers.not(String.valueOf(experienceId))));
 
         mockServer.verify();
     }
@@ -112,7 +119,13 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
     @Test
     void getReportReturnsSummaryAndSimilarCasesWhenAnalysisExists() throws Exception {
         String token = registerAndLogin("report_ready@sidepick.dev", "password123", "reportReady", "20s");
+        expectAiFailure();
         expectAiAnalysis();
+        long similarExperienceId = createExperience(
+                token,
+                "Seeded similar report case",
+                "This report seed should appear as a similar case instead of a self match."
+        );
         long experienceId = createExperience(token, "Report target", "This experience should expose a ready report.");
 
         mockMvc.perform(get("/api/reports/{experienceId}", experienceId))
@@ -123,9 +136,10 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.summary").value(SUMMARY))
                 .andExpect(jsonPath("$.data.extractedPatterns[0]").value("market research gap"))
                 .andExpect(jsonPath("$.data.riskFactors.length()").value(0))
-                .andExpect(jsonPath("$.data.similarCases[0].caseId").isNotEmpty())
+                .andExpect(jsonPath("$.data.similarCases[0].caseId").value(String.valueOf(similarExperienceId)))
                 .andExpect(jsonPath("$.data.similarCases[0].title").isNotEmpty())
-                .andExpect(jsonPath("$.data.similarCases[0].matchRate").isNumber());
+                .andExpect(jsonPath("$.data.similarCases[0].matchRate").isNumber())
+                .andExpect(jsonPath("$.data.similarCases[0].caseId").value(org.hamcrest.Matchers.not(String.valueOf(experienceId))));
 
         mockServer.verify();
     }

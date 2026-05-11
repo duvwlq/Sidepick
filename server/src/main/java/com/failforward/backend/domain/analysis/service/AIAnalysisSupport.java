@@ -320,6 +320,39 @@ class AIAnalysisSupport {
         );
     }
 
+    List<MatchedCase> createMatchedCasesFromExperiences(
+            AiAnalysis analysis,
+            FailureExperience sourceExperience,
+            List<FailureExperience> candidates,
+            AiAnalysisResponse response
+    ) {
+        if (candidates == null || candidates.isEmpty()) {
+            return List.of();
+        }
+
+        return candidates.stream()
+                .filter(candidate -> candidate.getId() != null)
+                .filter(candidate -> !candidate.getId().equals(sourceExperience.getId()))
+                .map(candidate -> MatchedCase.create(
+                        analysis,
+                        String.valueOf(candidate.getId()),
+                        truncate(candidate.getTitle(), 200),
+                        firstNonBlank(candidate.getLessonsLearned(), candidate.getContent()),
+                        firstNonBlank(candidate.getLessonsLearned(), response.summary(), candidate.getContent()),
+                        defaultMatchRate(response.riskLevel())
+                ))
+                .toList();
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) {
+                return value;
+            }
+        }
+        return null;
+    }
+
     Map<String, Object> buildAiLogFields(
             Long experienceId,
             Long analysisId,

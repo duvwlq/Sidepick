@@ -3,6 +3,7 @@ package com.failforward.backend.domain.experience.repository;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
@@ -79,5 +80,37 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
             @Param("durationMonthsMax") Integer durationMonthsMax,
             @Param("investmentAmountMin") Integer investmentAmountMin,
             @Param("investmentAmountMax") Integer investmentAmountMax
+    );
+
+    @EntityGraph(attributePaths = {"user", "category"})
+    @Query("""
+            select e
+            from FailureExperience e
+            where e.isPublic = true
+              and e.id <> :experienceId
+              and e.category.id = :categoryId
+              and (:failureReason is null or :failureReason = '' or lower(coalesce(e.failureReason, '')) = lower(:failureReason))
+            order by e.viewCount desc, e.likeCount desc, e.createdAt desc
+            """)
+    List<FailureExperience> findPublicSimilarByCategoryAndFailureReason(
+            @Param("experienceId") Long experienceId,
+            @Param("categoryId") Long categoryId,
+            @Param("failureReason") String failureReason,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "category"})
+    @Query("""
+            select e
+            from FailureExperience e
+            where e.isPublic = true
+              and e.id <> :experienceId
+              and e.category.id = :categoryId
+            order by e.viewCount desc, e.likeCount desc, e.createdAt desc
+            """)
+    List<FailureExperience> findPublicSimilarByCategory(
+            @Param("experienceId") Long experienceId,
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
     );
 }
