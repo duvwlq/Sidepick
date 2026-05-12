@@ -1,32 +1,71 @@
-# 06. Demo Seed And Scenario
+﻿# 06. Demo Seed and Scenario
+
+## Purpose
+
+이 문서는 MVP 시연과 QA 확인에 사용할 **데모 진입 시나리오**를 정리합니다.
+실시간 분석 전체를 매번 보여주기보다, 검증된 사례 상세 화면 중심으로 시연하는 것을 기본 전략으로 둡니다.
+
+---
 
 ## Recommended Demo Flow
 
-현재 시연은 실시간 AI 분석 전체 흐름보다 아래 방식이 더 안전합니다.
+1. `/experiences/{id}`로 직접 진입합니다.
+2. `READY` 상태의 분석 리포트를 확인합니다.
+3. 유사 사례와 가이드를 함께 확인합니다.
+4. 필요하면 탐색 / FAQ 화면으로 확장합니다.
 
-1. `/experiences/{id}` 직접 진입
-2. `READY` 상태의 분석 리포트 확인
-3. 유사 사례와 가이드 확인
+이 방식은 네트워크나 AI 응답 시간 변동에 덜 민감합니다.
 
-실시간 AI 분석은 보조 시연으로 분리합니다.
+---
 
-## Scenario 1: 스마트스토어
+## Demo Strategy
 
-- `similar_case_ids`: `[18, 19, 100]`
-- `success_guide_key`: `online_sales__revenue_structure`
+### Primary Demo
 
-## Scenario 2: 배달대행
+- 이미 분석이 준비된 사례 상세 화면 사용
+- 사례 본문 → AI 리포트 → 유사 사례 → CTA 흐름 설명
 
-- `similar_case_ids`: `[7, 10, 12]`
-- `success_guide_key`: `platform_work__competition`
+### Secondary Demo
+
+- 실패 경험 작성 흐름 소개
+- 분석 생성은 보조 시연으로 처리
+- 실시간 생성은 네트워크 상황에 따라 가변 요소로 봄
+
+---
+
+## Example Scenarios
+
+### Scenario 1: 온라인 판매 / 이커머스
+
+- 사례 상세 진입
+- 유사 사례 비교
+- FAQ 연결
+
+### Scenario 2: 플랫폼 노동 / 배달
+
+- 다른 카테고리 사례 비교
+- 분석 결과의 패턴 차이 설명
+
+---
 
 ## Notes
 
-- `success_guide_key`는 자동 매칭이 아니라 시연용 고정값으로 다루는 전제가 있습니다.
-- seed 데이터 실제 삽입 여부는 **확인 필요**입니다.
-- FE는 시연 시 `/analysis-result` 직접 진입보다 `/experiences/{id}` 기준 흐름을 우선 사용합니다.
+- `/analysis-result` 직접 진입보다 `/experiences/{id}` 기준 흐름을 우선 사용합니다.
+- demo/local 시드와 운영 데이터는 분리해 관리합니다.
+- 시연용 ID 목록은 실제 배포 데이터 상태에 맞춰 별도로 점검해야 합니다.
 
-## TODO
+---
 
-- seed SQL 또는 운영 입력 절차를 별도 문서로 보강
-- 실제 시연용 experience id 목록 확정
+## Operational Caution
+
+- 운영 DB 반영 전후로 사례 ID가 달라질 수 있습니다.
+- CSV import 직후에는 실제 시연 ID를 다시 확인해야 합니다.
+- 데모 시에는 `READY` 상태 사례를 먼저 검증한 후 사용합니다.
+
+---
+
+## Related Docs
+
+- [07_deployment.md](./07_deployment.md)
+- [../server/README.md](../server/README.md)
+- [README.md](./README.md)

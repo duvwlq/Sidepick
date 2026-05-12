@@ -1,165 +1,168 @@
-# Sidepick Backend
+﻿# Sidepick Backend
 
-## 현재 운영 구조
+Spring Boot 기반 API 서버입니다.  
+인증, 실패 경험 등록/조회, 분석 결과 조회, 카테고리 API를 담당합니다.
 
-- 런타임: Java 17
-- 프레임워크: Spring Boot 3.2.12
-- 데이터베이스: AWS RDS MySQL
-- 운영 서버: AWS EC2
-- 리버스 프록시: Nginx
-- 백엔드 실행 방식: Docker Compose
-- 공개 API 주소: `https://api.side-pick.app/api`
+---
 
-## 로컬 실행
+## Runtime Overview
 
-로컬에서는 [D:\Codex_Folder\Sidepick\infra\docker-compose.yml](D:/Codex_Folder/Sidepick/infra/docker-compose.yml)을 사용합니다.
+| 항목 | 현재 기준 |
+| --- | --- |
+| Language | Java 17 |
+| Framework | Spring Boot 3.2.12 |
+| Database | AWS RDS MySQL |
+| Migration | Flyway |
+| Runtime | Docker Compose |
+| Reverse Proxy | Nginx container |
+| Public API | [https://api.side-pick.app/api](https://api.side-pick.app/api) |
+
+---
+
+## Local Run
+
+로컬에서는 루트 `.env`와 [infra/docker-compose.yml](../infra/docker-compose.yml)을 기준으로 실행합니다.
 
 ```powershell
 cd D:\Codex_Folder\Sidepick\infra
 docker compose up -d --build
 ```
 
-로컬 기본 포트:
-
-- MySQL: 컨테이너 내부 `3306`
+기본 포트:
 - Backend: `http://localhost:8081`
+- AI Server: `http://localhost:8001`
+- MySQL: `3306`
 
-## 운영 실행
+개별 Maven 실행이 필요하다면:
 
-운영 서버에서는 [D:\Codex_Folder\Sidepick\infra\docker-compose.prod.yml](D:/Codex_Folder/Sidepick/infra/docker-compose.prod.yml)을 사용합니다.
+```powershell
+cd D:\Codex_Folder\Sidepick\server
+..\mvnw.cmd spring-boot:run
+```
 
-### 1. 운영 환경변수 파일 준비
+---
 
-EC2 서버에 `~/backend.env` 파일을 만듭니다.
+## Production Run
 
-예시:
+### Current Production Paths
+
+- Project root: `/home/ubuntu/sidepick-docker`
+- Compose directory: `/home/ubuntu/sidepick-docker/infra`
+- Compose file: `/home/ubuntu/sidepick-docker/infra/docker-compose.prod.yml`
+- Primary env file: `/home/ubuntu/sidepick-docker/.env`
+
+보조 env 파일이 남아 있을 수 있지만, 현재 활성 배포 기준은 `../.env`입니다.
+
+### Key Production Rules
 
 ```env
-SPRING_PROFILES_ACTIVE='prod'
-SERVER_PORT='8081'
-SPRING_DATASOURCE_URL='jdbc:mysql://<RDS-ENDPOINT>:3306/failforward?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul'
-SPRING_DATASOURCE_USERNAME='<RDS-USERNAME>'
-SPRING_DATASOURCE_PASSWORD='<RDS-PASSWORD>'
-SPRING_JPA_HIBERNATE_DDL_AUTO='validate'
-APP_JWT_SECRET='<LONG-RANDOM-SECRET>'
-APP_CORS_ALLOWED_ORIGINS='https://side-pick.app,https://www.side-pick.app'
-AI_SERVER_URL='http://localhost:8001'
-APP_EMAIL_VERIFICATION_EXPIRATION_MINUTES='10'
-APP_EMAIL_VERIFICATION_EXPOSE_CODE='false'
-APP_AUTH_LOCAL_ENABLED='false'
-APP_AUTH_KAKAO_ENABLED='true'
-APP_AUTH_GOOGLE_ENABLED='false'
-APP_MAIL_ENABLED='false'
-APP_MAIL_FROM_ADDRESS='no-reply@side-pick.app'
-APP_MAIL_FROM_NAME='Sidepick'
-SPRING_MAIL_HOST='<SMTP-HOST>'
-SPRING_MAIL_PORT='587'
-SPRING_MAIL_USERNAME='<SMTP-USERNAME>'
-SPRING_MAIL_PASSWORD='<SMTP-PASSWORD>'
-SPRING_MAIL_SMTP_AUTH='true'
-SPRING_MAIL_SMTP_STARTTLS_ENABLE='true'
-SPRING_MAIL_SMTP_STARTTLS_REQUIRED='false'
-SPRING_MAIL_SMTP_CONNECTION_TIMEOUT='5000'
-SPRING_MAIL_SMTP_TIMEOUT='5000'
-SPRING_MAIL_SMTP_WRITE_TIMEOUT='5000'
-APP_OAUTH_KAKAO_CLIENT_ID='<KAKAO-REST-API-KEY>'
-APP_OAUTH_KAKAO_CLIENT_SECRET='<KAKAO-CLIENT-SECRET-OPTIONAL>'
-APP_OAUTH_GOOGLE_CLIENT_ID='<GOOGLE-OAUTH-CLIENT-ID>'
-APP_OAUTH_GOOGLE_CLIENT_SECRET='<GOOGLE-OAUTH-CLIENT-SECRET>'
+SPRING_PROFILES_ACTIVE=prod
+SERVER_PORT=8081
+SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+AI_SERVER_URL=http://ai-server:8001
+APP_DEMO_SEED_ENABLED=false
 ```
 
-### 2. 운영 서버에서 Docker 배포
+주의:
+- 운영 기준 `AI_SERVER_URL`은 내부 네트워크 주소 `http://ai-server:8001`입니다.
+- 운영 데이터에는 demo/local 시드를 섞지 않습니다.
+- CSV import는 상시 설정이 아니라 필요 시점에만 켭니다.
+
+### Deploy Commands
+
+전체 배포:
 
 ```bash
-cd ~/Sidepick/infra
-docker compose --env-file ~/backend.env -f docker-compose.prod.yml up -d --build
+cd /home/ubuntu/sidepick-docker/infra
+sudo docker compose --env-file ../.env -f docker-compose.prod.yml up -d --build
 ```
 
-재배포:
+백엔드만 재배포:
 
 ```bash
-cd ~/Sidepick/infra
-docker compose --env-file ~/backend.env -f docker-compose.prod.yml up -d --build backend
+cd /home/ubuntu/sidepick-docker/infra
+sudo docker compose --env-file ../.env -f docker-compose.prod.yml up -d --build backend
 ```
 
 중지:
 
 ```bash
-cd ~/Sidepick/infra
-docker compose --env-file ~/backend.env -f docker-compose.prod.yml down
+cd /home/ubuntu/sidepick-docker/infra
+sudo docker compose --env-file ../.env -f docker-compose.prod.yml down
+```
+
+상태 확인:
+
+```bash
+cd /home/ubuntu/sidepick-docker/infra
+sudo docker compose --env-file ../.env -f docker-compose.prod.yml ps
 ```
 
 로그 확인:
 
 ```bash
-cd ~/Sidepick/infra
-docker compose --env-file ~/backend.env -f docker-compose.prod.yml logs -f backend
+cd /home/ubuntu/sidepick-docker/infra
+sudo docker compose --env-file ../.env -f docker-compose.prod.yml logs -f backend
 ```
 
-## 헬스체크
+---
+
+## Health Check
+
+외부:
 
 ```bash
 curl https://api.side-pick.app/api/health
 ```
 
-## Nginx 프록시 예시
-
-운영 서버에서는 Nginx가 호스트에서 실행되고, Docker 컨테이너의 `127.0.0.1:8081`로 프록시합니다.
-
-```nginx
-server {
-    listen 80;
-    server_name api.side-pick.app;
-
-    location / {
-        proxy_pass http://127.0.0.1:8081;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-HTTPS 발급:
+서버 내부:
 
 ```bash
-sudo certbot --nginx -d api.side-pick.app
+curl http://127.0.0.1:8081/api/health
 ```
 
-## 주요 공개 엔드포인트
+---
 
-- `POST /api/auth/register`
-- `POST /api/auth/login`
-- `POST /api/auth/email-verifications`
-- `POST /api/auth/email-verifications/confirm`
-- `POST /api/auth/oauth/kakao`
-- `POST /api/auth/oauth/google`
-- `GET /api/experiences`
-- `GET /api/experiences/{id}`
-- `GET /api/categories`
-- `GET /api/health`
+## Infra Notes
 
-인증 필요:
+- 운영 환경에서는 Nginx 컨테이너가 `80/443`을 수신합니다.
+- 백엔드 컨테이너는 `127.0.0.1:8081` 기준으로 프록시됩니다.
+- SSL 경로는 `NGINX_SSL_DIR` 또는 `infra/nginx/ssl` 기준으로 관리합니다.
 
-- `GET /api/users/me`
-- `PATCH /api/users/me`
-- `POST /api/experiences`
-- `PATCH /api/experiences/{id}`
-- `DELETE /api/experiences/{id}`
+관련 파일:
+- [../infra/docker-compose.prod.yml](../infra/docker-compose.prod.yml)
+- [../infra/nginx/nginx.prod.conf](../infra/nginx/nginx.prod.conf)
 
-## 인증 정책 메모
+---
 
-- 운영 기준 로그인은 카카오 중심입니다.
-- 운영 환경에서는 `APP_AUTH_LOCAL_ENABLED`, `APP_AUTH_KAKAO_ENABLED`, `APP_AUTH_GOOGLE_ENABLED`로 인증 수단을 제어합니다.
-- 현재 운영 권장값:
-  - `APP_AUTH_LOCAL_ENABLED='false'`
-  - `APP_AUTH_KAKAO_ENABLED='true'`
-  - `APP_AUTH_GOOGLE_ENABLED='false'`
+## Authentication Notes
 
-## 메일 발송 메모
+운영 권장값:
 
-- 실제 이메일 인증을 운영에서 열려면 SMTP 또는 AWS SES 자격증명이 필요합니다.
-- SMTP 설정이 없는데 `APP_MAIL_ENABLED='true'`이면 메일 발송이 실패합니다.
-- 운영에서 메일을 다시 열기 전까지는 카카오 로그인만 노출하는 구조를 권장합니다.
+```env
+APP_AUTH_LOCAL_ENABLED=false
+APP_AUTH_KAKAO_ENABLED=true
+APP_AUTH_GOOGLE_ENABLED=false
+```
+
+현재 구조상 카카오/구글 OAuth를 지원하며, 로컬 로그인은 운영에서 비활성화하는 구성을 권장합니다.
+
+---
+
+## Data Import Notes
+
+운영 DB에 CSV 100건을 반영할 때는 아래 원칙을 따릅니다.
+
+- `APP_DEMO_SEED_ENABLED=false` 유지
+- `APP_EXPERIENCE_IMPORT_ENABLED=true`는 import 작업 시점에만 사용
+- demo/local 사용자 데이터는 운영에 반영하지 않음
+- 필요 시 `failure_experiences`, `ai_analysis`, `comments`, `matched_cases` 정합성을 함께 확인
+
+---
+
+## Related Docs
+
+- [Root README](../README.md)
+- [Deployment Guide](../docs/07_deployment.md)
+- [DB Schema](../docs/db-schema.md)
+- [AI Integration Contract](../docs/05_ai_integration_contract.md)

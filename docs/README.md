@@ -1,34 +1,58 @@
-# SidePick Docs
+﻿# Sidepick Docs
 
-이 폴더는 **현재 MVP 기준으로 믿고 볼 수 있는 문서**만 모아둔 공식 문서 인덱스입니다.
+Sidepick의 공식 문서 허브입니다.  
+루트 README가 프로젝트 개요와 브랜딩을 담당한다면, 이 문서는 실제 개발·운영에 필요한 세부 문서로 연결되는 인덱스 역할을 합니다.
 
-최신 구현 판단은 아래 문서 기준으로만 합니다.
+---
 
-- [00_project_overview.md](./00_project_overview.md)
-- [01_current_architecture.md](./01_current_architecture.md)
-- [02_api_contract.md](./02_api_contract.md)
-- [03_frontend_structure.md](./03_frontend_structure.md)
-- [04_backend_structure.md](./04_backend_structure.md)
-- [05_ai_integration_contract.md](./05_ai_integration_contract.md)
-- [06_demo_seed_and_scenario.md](./06_demo_seed_and_scenario.md)
-- [07_deployment.md](./07_deployment.md)
+## Recommended Reading Order
 
-## Reading Order
+1. [Project Overview](./00_project_overview.md)
+2. [Current Architecture](./01_current_architecture.md)
+3. [API Contract](./02_api_contract.md)
+4. [Frontend Structure](./03_frontend_structure.md)
+5. [Backend Structure](./04_backend_structure.md)
+6. [AI Integration Contract](./05_ai_integration_contract.md)
+7. [Deployment Guide](./07_deployment.md)
 
-1. 프로젝트 전체를 이해하려면 [00_project_overview.md](./00_project_overview.md)
-2. 현재 시스템 구조를 보려면 [01_current_architecture.md](./01_current_architecture.md)
-3. FE-BE 계약을 확인하려면 [02_api_contract.md](./02_api_contract.md)
-4. 시연 기준을 보려면 [06_demo_seed_and_scenario.md](./06_demo_seed_and_scenario.md)
+---
+
+## Core Documents
+
+| 문서 | 설명 |
+| --- | --- |
+| [00_project_overview.md](./00_project_overview.md) | MVP 범위와 핵심 사용자 흐름 |
+| [01_current_architecture.md](./01_current_architecture.md) | 현재 서비스 아키텍처와 런타임 구조 |
+| [02_api_contract.md](./02_api_contract.md) | 프론트-백엔드 API 계약 |
+| [03_frontend_structure.md](./03_frontend_structure.md) | 프론트엔드 구조와 화면 책임 |
+| [04_backend_structure.md](./04_backend_structure.md) | 백엔드 모듈 구조와 도메인 책임 |
+| [05_ai_integration_contract.md](./05_ai_integration_contract.md) | 백엔드-AI 서버 연동 방식 |
+| [06_demo_seed_and_scenario.md](./06_demo_seed_and_scenario.md) | 데모/시드 데이터 운영 메모 |
+| [07_deployment.md](./07_deployment.md) | 실제 운영 배포 경로와 배포 절차 |
+| [db-schema.md](./db-schema.md) | DB 스키마와 마이그레이션 기준 |
+
+---
+
+## Operation Docs
+
+| 문서 | 설명 |
+| --- | --- |
+| [../server/README.md](../server/README.md) | 백엔드 실행/운영 기준 문서 |
+| [AWS-재배포-정리-체크리스트.md](./AWS-재배포-정리-체크리스트.md) | 운영 서버 재배포 체크리스트 |
+| [../배포_준비_전체_가이드.md](../배포_준비_전체_가이드.md) | 배포 준비 전체 가이드 |
+
+---
+
+## Notes
+
+- 현재 운영 기준은 `infra/docker-compose.prod.yml`과 서버의 `/home/ubuntu/sidepick-docker/.env`를 중심으로 봅니다.
+- 문서 간 내용이 충돌할 경우, 운영 경로와 Compose 기준이 명시된 최신 문서를 우선합니다.
+- `archive/` 아래 문서는 과거 참고용이며 현재 운영 구조와 다를 수 있습니다.
+
+---
 
 ## Archive
 
 - [archive/README.md](./archive/README.md)
 
-`archive/` 아래 문서는 **과거 참고용**입니다.
-현재 구현과 다를 수 있으므로, 최신 동작 판단 기준으로 사용하면 안 됩니다.
-
-## Notes
-
-- 현재 공식 분석 리포트 endpoint는 `GET /api/reports/{experienceId}` 기준입니다.
-- `reportStatus`는 `READY`, `NOT_READY`, `ERROR`를 기준으로 문서화합니다.
-- 일부 운영/시연 정보는 실제 배포 환경과 대조가 더 필요하므로 각 문서에 `TODO` 또는 `확인 필요`로 표시했습니다.
+아카이브 문서는 과거 실험, 이전 운영 방식, 폐기된 설계 메모를 보관합니다.

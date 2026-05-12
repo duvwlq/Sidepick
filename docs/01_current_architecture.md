@@ -1,43 +1,78 @@
-# 01. Current Architecture
+﻿# 01. Current Architecture
 
 ## High Level
 
-- Frontend: React + TypeScript + Vite
-- Backend: Spring Boot
-- AI Server: FastAPI 별도 서버
-- Database: MySQL / RDS
-- Deployment: AWS Amplify + EC2 + Nginx + Docker Compose
+| Layer | Stack | Responsibility |
+| --- | --- | --- |
+| Frontend | React + TypeScript + Vite | 사용자 화면, 탐색 UX, 인증 진입 |
+| Backend | Spring Boot | 인증, 경험 API, 분석 API, 카테고리 API |
+| AI Server | FastAPI | 분석 생성, AI 응답 처리 |
+| Database | MySQL | 사용자 / 경험 / 분석 데이터 저장 |
+| Infra | Amplify + EC2 + Docker Compose + Nginx + RDS | 운영 배포와 네트워크 진입점 |
 
-## Current Runtime Shape
+---
+
+## Runtime Shape
 
 ### Frontend
 
-- `fe/`
-- 브라우저에서 사용자 화면과 API 호출을 담당
+- 경로: `fe/`
+- AWS Amplify에 배포
+- 브라우저에서 사용자 인터페이스와 API 호출을 담당
 
 ### Backend
 
-- `server/`
-- 인증, 경험, 분석, 카테고리 API 제공
-- 분석 리포트 endpoint는 현재 `GET /api/reports/{experienceId}`
+- 경로: `server/`
+- Spring Boot API 서버
+- 인증, 경험, 분석, 카테고리, 사용자 관련 요청 처리
 
 ### AI Server
 
-- `ai/`
-- 백엔드가 별도 분석 요청을 보내는 외부 서비스 역할
-- 내부 구현 상세는 이 문서보다 [05_ai_integration_contract.md](./05_ai_integration_contract.md)에서 연동 관점으로 설명
+- 경로: `ai/`
+- FastAPI 서버
+- 백엔드가 호출하는 별도 분석 레이어
 
-### Data / Infra
+### Infra
 
-- DB는 MySQL 계열 기준
-- 운영 환경은 EC2 + Nginx + Spring Boot + FastAPI 조합
-- 로컬/운영 실행은 Docker Compose 기반 메모가 존재함
+- 로컬: `infra/docker-compose.yml`
+- 운영: `infra/docker-compose.prod.yml`
+- 운영 서버 경로: `/home/ubuntu/sidepick-docker`
+- 외부 진입점: Nginx container
+- 운영 DB: AWS RDS MySQL
 
-## Notes
+---
 
-- 이 문서는 과거 계획이 아니라 현재 저장소 구조 기준으로만 작성합니다.
-- `ai/` 내부의 데이터셋/인덱스/실험 자산은 별도 운영 동기화 이슈가 있을 수 있습니다.
+## Request Flow
 
-## TODO
+1. 사용자가 Amplify에 배포된 프론트엔드에 접속합니다.
+2. 프론트는 Spring Boot API로 요청을 보냅니다.
+3. 백엔드는 MySQL(RDS)에 서비스 데이터를 저장합니다.
+4. 분석이 필요한 경우 FastAPI 서버에 요청을 전달합니다.
+5. AI 서버는 Claude API와 추천 자산을 사용해 결과를 생성합니다.
+6. 결과는 다시 백엔드와 프론트로 전달됩니다.
 
-- 실제 운영 compose 구성과 최신 인프라 다이어그램은 배포 문서 정리 2차에서 보강 필요
+---
+
+## Design Notes
+
+### 왜 FE / BE / AI를 분리했는가
+
+- 프론트는 사용자 경험에 집중
+- 백엔드는 API 안정성과 데이터 무결성에 집중
+- AI 서버는 프롬프트와 분석 생성에 집중
+
+이 분리 덕분에 변경 영향 범위를 줄일 수 있습니다.
+
+### 왜 운영 문서 기준을 명확히 해야 하는가
+
+이 저장소는 로컬 개발 구조와 운영 배포 구조가 모두 존재합니다.
+문서는 반드시 현재 운영 경로와 Compose 기준을 따라야 합니다.
+
+---
+
+## Related Docs
+
+- [00_project_overview.md](./00_project_overview.md)
+- [02_api_contract.md](./02_api_contract.md)
+- [07_deployment.md](./07_deployment.md)
+- [../server/README.md](../server/README.md)

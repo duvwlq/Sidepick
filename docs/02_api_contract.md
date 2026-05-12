@@ -1,36 +1,63 @@
-# 02. API Contract
+﻿# 02. API Contract
 
 ## Scope
 
-이 문서는 현재 MVP 기준 **FE-BE 계약**을 설명합니다.
-특히 사례 상세 화면에서 사용하는 분석 리포트 계약을 고정합니다.
+이 문서는 **프론트엔드와 백엔드 사이의 현재 MVP API 계약**을 요약합니다.
+분석 리포트 화면에서 의존하는 핵심 응답 구조를 중심으로 정리합니다.
 
-## Official Report Endpoint
+---
+
+## Base Rule
+
+프론트는 `VITE_API_BASE_URL=/api` 기준으로 동작합니다.
+따라서 브라우저 요청 경로는 `/api/...` 기준으로 이해하면 됩니다.
+
+---
+
+## Core Endpoints
+
+| 목적 | Method | Path |
+| --- | --- | --- |
+| 경험 목록 조회 | `GET` | `/api/experiences` |
+| 경험 작성 | `POST` | `/api/experiences` |
+| 경험 상세 조회 | `GET` | `/api/experiences/{experienceId}` |
+| 경험 수정 | `PUT` | `/api/experiences/{experienceId}` |
+| 경험 삭제 | `DELETE` | `/api/experiences/{experienceId}` |
+| 유사 경험 조회 | `GET` | `/api/experiences/{experienceId}/similar` |
+| 분석 리포트 조회 | `GET` | `/api/reports/{experienceId}` |
+| 분석 조회 | `GET` | `/api/experiences/{experienceId}/analysis` |
+| 분석 생성 | `POST` | `/api/experiences/{experienceId}/analysis` |
+| 카테고리 조회 | `GET` | `/api/categories` |
+| 내 정보 조회 | `GET` | `/api/users/me` |
+| 로그인 | `POST` | `/api/auth/login` |
+| 회원가입 | `POST` | `/api/auth/register` or `/api/auth/signup` |
+| 카카오 OAuth 로그인 | `POST` | `/api/auth/oauth/kakao` |
+| 구글 OAuth 로그인 | `POST` | `/api/auth/oauth/google` |
+
+---
+
+## Analysis Report Contract
+
+### Endpoint
 
 - `GET /api/reports/{experienceId}`
 
-FE에서 `VITE_API_BASE_URL=/api`를 사용할 때 request path는 아래입니다.
+### `reportStatus`
 
-- `/reports/{experienceId}`
+- `READY`: 분석 결과가 존재하고 화면에 즉시 노출 가능
+- `NOT_READY`: 분석 결과가 아직 없거나 생성 중
+- `ERROR`: 분석 처리 실패
 
-아래 경로는 **현재 표준 endpoint가 아닙니다**.
+---
 
-- `/api/experiences/{id}/report`
-
-## reportStatus
-
-- `READY`: 분석 결과가 존재하고 화면에 표시 가능
-- `NOT_READY`: 분석 결과가 없거나 생성 중
-- `ERROR`: 분석 실패
-
-## READY Example
+## Report Response Shape
 
 ```json
 {
   "experienceId": 123,
   "analysisId": 456,
   "reportStatus": "READY",
-  "title": "사례 분석 리포트",
+  "title": "실패 분석 리포트",
   "summary": "초기 검증과 홍보 전략이 부족했던 사례입니다.",
   "extractedPatterns": ["시장 조사 부족"],
   "keywords": ["시장 조사 부족", "마케팅 약함"],
@@ -39,7 +66,7 @@ FE에서 `VITE_API_BASE_URL=/api`를 사용할 때 request path는 아래입니�
   "riskFactors": ["고객 검증 부족", "유입 전략 부족"],
   "advice": [
     "타겟 고객 인터뷰를 먼저 진행하세요.",
-    "광고비를 쓰기 전에 소규모 테스트를 하세요."
+    "광고비를 쓰기 전에 소규모 테스트를 해보세요."
   ],
   "confidenceScore": 0.82,
   "processedAt": "2026-05-07T10:00:00",
@@ -55,83 +82,39 @@ FE에서 `VITE_API_BASE_URL=/api`를 사용할 때 request path는 아래입니�
 }
 ```
 
-## NOT_READY Example
+---
 
-```json
-{
-  "experienceId": 123,
-  "analysisId": null,
-  "reportStatus": "NOT_READY",
-  "title": "사례 분석 리포트",
-  "summary": null,
-  "extractedPatterns": [],
-  "keywords": [],
-  "failureCategory": null,
-  "riskLevel": null,
-  "riskFactors": [],
-  "advice": [],
-  "confidenceScore": null,
-  "processedAt": null,
-  "similarCases": []
-}
-```
+## Frontend Mapping Rules
 
-## ERROR Example
+- `advice[]` → AI 가이드 문구
+- `similarCases[].matchRate` → 유사도
+- `similarCases[].summary`, `keyLesson` → 유사 사례 카드 설명
+- `keywords`, `failureCategory`, `riskLevel`, `riskFactors` → 상세 화면 직접 사용
 
-```json
-{
-  "experienceId": 123,
-  "analysisId": null,
-  "reportStatus": "ERROR",
-  "title": "사례 분석 리포트",
-  "summary": null,
-  "extractedPatterns": [],
-  "keywords": [],
-  "failureCategory": null,
-  "riskLevel": null,
-  "riskFactors": [],
-  "advice": [],
-  "confidenceScore": null,
-  "processedAt": null,
-  "similarCases": []
-}
-```
+### Not Required in Current FE Contract
 
-## Current Standard Fields
-
-- `experienceId`
-- `reportStatus`
-- `summary`
-- `keywords`
-- `failureCategory`
-- `riskLevel`
-- `advice`
-- `similarCases[].caseId`
-- `similarCases[].title`
-- `similarCases[].summary`
-- `similarCases[].keyLesson`
-- `similarCases[].matchRate`
-- `processedAt`
-
-## Not in Current Required Contract
-
-아래 필드는 현재 필수 계약으로 보지 않습니다.
+아래 필드는 현재 프론트 필수 계약으로 보지 않습니다.
 
 - `actions`
 - `similarCases[].tags`
 - `similarCases[].durationMonths`
 - `similarCases[].monthlyRevenue`
+- `structuredSummary`
 
-위 필드는 후속 확장 후보입니다.
+---
 
-## Notes
+## Integration Notes
 
-- 현재 FE는 `advice`와 `matchRate`를 기준으로 mapper를 구성해야 합니다.
-- 상세 화면은 `READY`일 때만 실제 분석 결과를 렌더하고, `NOT_READY`와 `ERROR`는 상태로 분리해야 합니다.
+- 프론트는 `READY`일 때만 실제 분석 결과를 노출합니다.
+- `NOT_READY`는 준비 중 UI로 분기합니다.
+- `ERROR`는 실패 상태 UI로 분기합니다.
+- API 실패를 mock 데이터로 숨기지 않고 상태를 분리해 처리합니다.
+
+---
 
 ## Sources
 
-- `server/ANALYSIS_REPORT_CONTRACT.md`
-- `server/postman-examples.md`
+- [../server/ANALYSIS_REPORT_CONTRACT.md](../server/ANALYSIS_REPORT_CONTRACT.md)
 - `server/src/main/java/.../AnalysisController.java`
 - `server/src/main/java/.../AnalysisDtos.java`
+- `server/src/main/java/.../ExperienceController.java`
