@@ -1,19 +1,26 @@
-# 실패 공유 플랫폼
+# Sidepick Frontend
 
-사용자들이 자신의 실패 경험을 공유하고 공감할 수 있는 서비스입니다.
+## 개요
 
-## 주요 기능
+`fe/`는 Sidepick 프론트엔드 애플리케이션입니다.
+현재 React 19, TypeScript, Vite 기반으로 동작하며 백엔드 API와 연동되어 있습니다.
 
-- ✍️ 4단계 작성 폼
-- 📄 카드 리스트 조회
-- 👤 마이페이지
+주요 화면:
+
+- 홈 `/`
+- 로그인/회원가입 `/auth`, `/signup/*`
+- 탐색 `/explore`
+- 경험 작성 `/create`
+- 분석 결과 `/analysis-result`
+- 경험 상세 `/experiences/:id`
+- 마이페이지 `/mypage`
 
 ## 기술 스택
 
-- React + TypeScript
+- React 19
+- TypeScript
 - Vite
-- Tailwind CSS
-- React Router
+- React Router 7
 
 ## 실행 방법
 
@@ -22,97 +29,33 @@ npm install
 npm run dev
 ```
 
-## 폴더 구조
+기본 개발 서버는 Vite 기본값을 따릅니다.
 
-src/
-├── components/
-├── pages/
-├── layout/
-├── assets/
-└── App.tsx
+## 프론트 작업 규칙
 
-## 향후 개선
+- 사용자에게 보이는 한국어 문구는 절대 깨진 상태로 두지 않습니다.
+- `濡쒓`, `寃쏀`, `遺꾩`, `?ㅽ`, `??` 같은 문자열은 한글 인코딩 깨짐으로 보고 바로 수정합니다.
+- 화면 작업 중 이런 문자열이 발견되면 해당 기능 범위 밖이어도 함께 복구합니다.
+- 검색 placeholder, 탭 라벨, CTA 버튼, 에러/토스트 문구, 빈 상태 문구는 우선 점검 대상입니다.
+- 공통 컴포넌트(`SearchBar`, `Layout`, `BottomNav`, `api-client`, `error-messages`)의 문구도 항상 같이 확인합니다.
 
-- 백엔드 연동
-- 2주차 작업 주말~월 회의 이전 추가
+## API 연동
 
-## 기타
+프론트는 백엔드 API를 직접 호출합니다.
 
-- 모바일 기준 작동으로 w:375로 맞추고 보시면 됩니다.
-- f12 누르고 Dimensions: Iphone SE 설정 추천
+- 기본 API base URL: `http://localhost:8081/api`
+- 환경변수 우선순위: `VITE_API_BASE_URL`
+- API 클라이언트: `fe/src/lib/api-client.ts`
+- 주요 API 정의: `fe/src/lib/api.ts`
 
----
+분석 리포트 엔드포인트 기준:
 
-# React + TypeScript + Vite
+- `GET /api/reports/{experienceId}`
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+상세 계약은 [API_INTEGRATION_GUIDE.md](/D:/Codex_Folder/Sidepick/fe/API_INTEGRATION_GUIDE.md) 와 [02_api_contract.md](/D:/Codex_Folder/Sidepick/docs/02_api_contract.md) 를 따릅니다.
 
-Currently, two official plugins are available:
+## 참고
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
-```
+- 로컬 백엔드 기본 주소: `http://localhost:8081`
+- 로컬 AI 서버 기본 주소: `http://localhost:8001`
+- 레이아웃은 모바일 우선으로 구성되어 있습니다.
