@@ -2,9 +2,12 @@
 
 Sidepick은 사이드 프로젝트와 부업 실패 경험을 구조화해서 기록하고, 유사 사례 탐색과 AI 분석을 통해 더 나은 판단 기준을 만드는 것을 목표로 하는 MVP 프로젝트입니다.
 
-## 현재 작업 원칙
+## 배포 링크
 
-다음 규칙을 기본으로 사용합니다.
+- 서비스: `https://side-pick.app`
+- API: `https://api.side-pick.app/api`
+
+## 현재 작업 원칙
 
 - `main` 브랜치에는 직접 작업하거나 직접 push하지 않습니다.
 - 모든 작업은 별도 브랜치에서 진행한 뒤 병합합니다.
@@ -41,7 +44,6 @@ Sidepick은 사이드 프로젝트와 부업 실패 경험을 구조화해서 �
 - 백엔드: `server/`의 Spring Boot
 - 데이터베이스: MySQL
 - 인프라: 로컬 Docker Compose, 운영 EC2 + Nginx
-- 공개 API 기준 주소: `https://api.side-pick.app/api`
 
 ## 저장소 구조
 
@@ -53,14 +55,15 @@ Sidepick은 사이드 프로젝트와 부업 실패 경험을 구조화해서 �
 - `docs/`: 프로젝트 문서와 정리 자료
 - `screenshots/`: 참고용 화면 캡처와 발표 자료
 
-현재 공식 문서 인덱스는 [docs/README.md](D:/Codex_Folder/Sidepick/docs/README.md)에서 확인할 수 있습니다.
+공식 문서 인덱스는 [docs/README.md](D:/Codex_Folder/Sidepick/docs/README.md)에서 확인할 수 있습니다.
 
-## 백엔드 인증 상태
+## 주요 기능 상태
 
-현재 백엔드는 아래 기능을 지원합니다.
+현재 기준으로 아래 기능이 포함되어 있습니다.
 
+- 실패 경험 작성 및 탐색
+- AI 분석 결과 조회 및 유사 사례 확인
 - 이메일/비밀번호 회원가입 및 로그인
-- 이메일 인증 상태 관리
 - 카카오 OAuth 로그인
 - 구글 OAuth 로그인
 - 이메일 미인증 로컬 계정의 쓰기 기능 제한
@@ -88,8 +91,6 @@ VITE_KAKAO_CLIENT_ID=<카카오 REST API 키>
 
 ## 로컬 백엔드 실행
 
-이 저장소는 Docker 기반 Maven wrapper 명령을 사용합니다.
-
 ```powershell
 cd server
 ../mvnw.cmd test
@@ -97,16 +98,9 @@ cd server
 
 운영 환경 관련 내용은 [server/README.md](D:/Codex_Folder/Sidepick/server/README.md)에서 확인할 수 있습니다.
 
-## 프론트 작업 대기 중 정리 항목
-
-프론트 작업이 진행되는 동안 우선적으로 관리할 항목은 아래와 같습니다.
-
-- 인증 및 배포 문서를 최신 상태로 유지
-- OAuth 환경 변수와 키값이 Git에 들어가지 않도록 점검
-- 사용자 메모나 스크린샷은 검토 전 삭제하지 않기
-- 느슨한 문서를 정리할 때는 정리 목록 문서를 먼저 확인
-
-참고 문서:
+## 참고 문서
 
 - [공식 문서 인덱스](D:/Codex_Folder/Sidepick/docs/README.md)
+- [배포 문서](D:/Codex_Folder/Sidepick/docs/07_deployment.md)
+- [시연 시나리오 문서](D:/Codex_Folder/Sidepick/docs/06_demo_seed_and_scenario.md)
 - [archive 정리 문서](D:/Codex_Folder/Sidepick/docs/archive/README.md)
