@@ -335,7 +335,7 @@ export default function Home() {
           {featuredExperiences.length ? (
             <HorizontalScroll
               wrapperClassName="w-full"
-              contentClassName="horizontal-scroll-content--cards px-[16px]"
+              contentClassName="horizontal-scroll-content--cards pr-[16px]"
             >
               {featuredExperiences.map((experience) => (
                 <HomeCard
@@ -439,7 +439,7 @@ export default function Home() {
               className="appearance-none border-0 bg-transparent p-[0px]"
             >
               <span className="text-[12px] leading-[14.4px] text-[#5D5D5D] underline">
-                모든 경험 보기
+                모든 사례 보기
               </span>
             </button>
           </div>

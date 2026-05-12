@@ -58,8 +58,8 @@ export default function BottomNav() {
     if (!token && menu.requiresAuth) {
       const reason =
         menu.path === '/create'
-          ? '경험 등록은 로그인 후 이용할 수 있어요.'
-          : '마이페이지는 로그인 후 이용할 수 있어요.';
+          ? '경험 등록은 로그인이 필요한 서비스입니다.'
+          : '마이페이지는 로그인이 필요한 서비스입니다.';
 
       navigate(`/auth?next=${encodeURIComponent(menu.path)}&reason=${encodeURIComponent(reason)}`);
       return;

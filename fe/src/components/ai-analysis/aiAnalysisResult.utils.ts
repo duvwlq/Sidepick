@@ -7,9 +7,9 @@ export type PatternItem = {
 };
 
 const ENCOURAGEMENT_MESSAGES = [
-  '이번 경험은 실패가 아니라 다음 선택을 더 단단하게 만드는 기록이에요.',
+  '이번 경험은 실패가 아니라 다음 선택을 더 단단하게 만들어 줄 기록이에요.',
   '실패를 정리한 것만으로도 다음 시도를 위한 중요한 데이터를 만든 거예요.',
-  '지금의 기록은 다음 선택에서 같은 실수를 줄이는 데 도움이 될 거예요.',
+  '지금의 기록은 다음 선택에서 같은 실수를 줄이는 데 분명 도움이 될 거예요.',
 ];
 
 export function shouldUseDevFallback(error: unknown) {

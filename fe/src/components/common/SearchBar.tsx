@@ -1,4 +1,4 @@
-import type { ChangeEvent, KeyboardEvent } from 'react';
+import { forwardRef, type ChangeEvent, type KeyboardEvent } from 'react';
 import searchIcon from '../../assets/images/search.svg';
 
 type SearchBarProps = {
@@ -11,15 +11,18 @@ type SearchBarProps = {
   className?: string;
 };
 
-export default function SearchBar({
-  placeholder = '원하는 실패 사례를 검색해보세요!',
-  value,
-  onChange,
-  onClick,
-  onKeyDown,
-  readOnly = false,
-  className = '',
-}: SearchBarProps) {
+const SearchBar = forwardRef<HTMLInputElement, SearchBarProps>(function SearchBar(
+  {
+    placeholder = '원하는 실패 경험을 검색해보세요',
+    value,
+    onChange,
+    onClick,
+    onKeyDown,
+    readOnly = false,
+    className = '',
+  },
+  ref,
+) {
   const visibleText = value || placeholder;
   const hasValue = Boolean(value);
 
@@ -47,6 +50,7 @@ export default function SearchBar({
         </span>
       </span>
       <input
+        ref={ref}
         type="text"
         value={value}
         onChange={onChange}
@@ -57,4 +61,6 @@ export default function SearchBar({
       />
     </label>
   );
-}
+});
+
+export default SearchBar;

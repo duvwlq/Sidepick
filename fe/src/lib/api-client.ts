@@ -50,7 +50,7 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
     });
   } catch (networkError) {
     throw new ApiError(
-      '?ㅽ듃?뚰겕 ?곌껐???뺤씤?????ㅼ떆 ?쒕룄?댁＜?몄슂.',
+      '네트워크 연결을 확인한 뒤 다시 시도해주세요.',
       0,
       ERROR_CODES.NETWORK_ERROR,
       networkError instanceof Error ? networkError.message : undefined,
@@ -74,7 +74,7 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
         : undefined;
 
     throw new ApiError(
-      json?.message ?? '?붿껌??泥섎━?섏? 紐삵뻽?댁슂. ?좎떆 ???ㅼ떆 ?쒕룄?댁＜?몄슂.',
+      json?.message ?? '요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.',
       response.status,
       json?.errorCode ?? fallbackErrorCode(response.status),
       detail ?? json?.message,

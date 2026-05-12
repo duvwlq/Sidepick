@@ -4,10 +4,10 @@ export function parseNumber(value: string) {
 }
 
 export function mapPeriodToMonths(value: string) {
-  if (value === '1媛쒖썡 誘몃쭔') {
+  if (value === '1개월 미만') {
     return 1;
   }
-  if (value === '1???댁긽') {
+  if (value === '1년 이상') {
     return 12;
   }
 
@@ -16,7 +16,7 @@ export function mapPeriodToMonths(value: string) {
 }
 
 export function mapDailyHours(value: string) {
-  if (value === '1?쒓컙 誘몃쭔') {
+  if (value === '1시간 미만') {
     return 'UNDER_1_HOUR';
   }
 
@@ -35,10 +35,10 @@ export function mapDailyHours(value: string) {
 }
 
 export function mapDailyHoursToWeeklyHours(value: string) {
-  if (value === '1?쒓컙 誘몃쭔') {
+  if (value === '1시간 미만') {
     return 3;
   }
-  if (value === '8?쒓컙 ?댁긽') {
+  if (value === '8시간 이상') {
     return 40;
   }
 

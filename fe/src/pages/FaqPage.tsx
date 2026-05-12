@@ -1,7 +1,7 @@
-import { Search } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import HorizontalScroll from '../components/common/HorizontalScroll';
+import SearchBar from '../components/common/SearchBar';
 import Layout from '../components/layout/Layout';
 import { FAQ_CATEGORIES, FAQ_INTRO } from './faqData';
 
@@ -16,8 +16,11 @@ type VisibleFaqItem = {
   key: string;
 };
 
-const FAQ_DISCLAIMER =
-  '본 콘텐츠는 일반적인 가이드 라인입니다. 개인 상황에 따라 결과가 다를 수 있으며,\n법률, 세금, 투자 관련 사항은 전문가 상담을 권장합니다.\n총 16개 카테고리로 정리했습니다.';
+const FAQ_DISCLAIMER_LINES = [
+  '본 콘텐츠는 일반적인 가이드라인입니다. 개인 상황에 따라 결과가 다를 수 있으며,',
+  '법률, 세금, 투자 관련 사항은 전문가 상담을 권장합니다.',
+  '총 16개 카테고리로 정리했습니다.',
+] as const;
 
 export default function FaqPage() {
   const navigate = useNavigate();
@@ -76,22 +79,20 @@ export default function FaqPage() {
               {FAQ_INTRO.title}
             </h1>
           </div>
-          <p className="whitespace-pre-line text-[10px] font-light leading-[1.4] text-[#5D5D5D]">
-            {FAQ_DISCLAIMER}
-          </p>
+          <div className="flex flex-col text-[10px] font-light leading-[1.4] text-[#5D5D5D]">
+            <p>{`※ ${FAQ_DISCLAIMER_LINES[0]}`}</p>
+            <p>{FAQ_DISCLAIMER_LINES[1]}</p>
+            <p>{FAQ_DISCLAIMER_LINES[2]}</p>
+          </div>
         </section>
 
         <section className="px-4 pb-4">
-          <label className="flex h-10 items-center justify-between rounded-full bg-[#F8F8F8] px-4">
-            <input
-              ref={searchInputRef}
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="질문이나 키워드로 검색해보세요!"
-              className="w-full bg-transparent text-[14px] leading-[1.4] text-[#131416] outline-none placeholder:text-[#BABABA]"
-            />
-            <Search className="h-5 w-5 shrink-0 text-[#8A8A8A]" />
-          </label>
+          <SearchBar
+            ref={searchInputRef}
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="질문이나 키워드로 검색해보세요!"
+          />
         </section>
 
         <section className="pb-4">

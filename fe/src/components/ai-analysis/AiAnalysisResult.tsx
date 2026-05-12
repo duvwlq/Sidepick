@@ -1,4 +1,4 @@
-import { Bookmark, ChevronLeft, LoaderCircle, MoreHorizontal, Trash2 } from 'lucide-react';
+﻿import { Bookmark, ChevronLeft, LoaderCircle, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import amountIcon from '../../assets/images/amount.svg';
@@ -34,9 +34,9 @@ type Props = {
 };
 
 const ENCOURAGEMENT_MESSAGES = [
-  '이번 경험은 실패가 아니라 다음 선택을 더 단단하게 만드는 기록이에요.',
+  '이번 경험은 실패가 아니라 다음 선택을 더 단단하게 만들어 줄 기록이에요.',
   '실패를 정리한 것만으로도 다음 시도를 위한 중요한 데이터를 만든 거예요.',
-  '지금의 기록은 다음 선택에서 같은 실수를 줄이는 데 도움이 될 거예요.',
+  '지금의 기록은 다음 선택에서 같은 실수를 줄이는 데 분명 도움이 될 거예요.',
 ];
 
 function SectionTitle({
@@ -75,6 +75,31 @@ function SecondaryBadge({ text }: { text: string }) {
         {text}
       </span>
     </div>
+  );
+}
+
+function MoreVerticalIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M10.0001 10.8335C10.4603 10.8335 10.8334 10.4604 10.8334 10.0002C10.8334 9.53993 10.4603 9.16683 10.0001 9.16683C9.53984 9.16683 9.16675 9.53993 9.16675 10.0002C9.16675 10.4604 9.53984 10.8335 10.0001 10.8335Z"
+        stroke="#1E1E1E"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.0001 5.00016C10.4603 5.00016 10.8334 4.62707 10.8334 4.16683C10.8334 3.70659 10.4603 3.3335C10.0001 3.3335C9.53984 3.3335 9.16675 3.70659 9.16675 4.16683C9.16675 4.62707 9.53984 5.00016 10.0001 5.00016Z"
+        stroke="#1E1E1E"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M10.0001 16.6668C10.4603 16.6668 10.8334 16.2937 10.8334 15.8335C10.8334 15.3733 10.4603 15.0002 10.0001 15.0002C9.53984 15.0002 9.16675 15.3733 9.16675 15.8335C9.16675 16.2937 9.53984 16.6668 10.0001 16.6668Z"
+        stroke="#1E1E1E"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 
@@ -163,10 +188,10 @@ function FaqShortcutCard({ onClick }: { onClick: () => void }) {
     <section className="flex w-full flex-col gap-[10px]">
       <div className="flex items-center gap-[4px]">
         <div className="flex h-[16px] w-[16px] items-center justify-center rounded-[999px] border border-[#E1E4E6]">
-          <span className="text-[10px] leading-none text-[#E5E8EB]">?</span>
+          <span className="text-[10px] leading-none text-[#E5E8EB]">i</span>
         </div>
         <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-          비슷한 업종의 사람들은 어떤 고민을 할까요?
+          비슷한 상황의 사람들은 어떤 질문을 가장 많이 했을까요?
         </p>
       </div>
 
@@ -226,7 +251,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   useEffect(() => {
     if (!experienceId) {
       setLoading(false);
-      setError('요청한 경험을 찾을 수 없어요.');
+      setError('요청한 경험을 찾을 수 없습니다.');
       return;
     }
 
@@ -265,7 +290,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       setReport(reportPayload);
     } catch (requestError) {
       if (shouldUseDevFallback(requestError)) {
-        setError('개발 환경에서 API 서버에 연결하지 못했어요.');
+        setError('개발 환경에서 API 서버에 연결하지 못했습니다.');
         return;
       }
 
@@ -302,7 +327,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
     try {
       await deleteExperience(token, experience.id);
-      setFlashToast('삭제되었어요');
+      setFlashToast('삭제했어요');
       navigate('/', { replace: true });
     } catch (requestError) {
       setError(
@@ -407,24 +432,10 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       {actionMenuOpen ? (
         <button
           type="button"
-          aria-label="메뉴 닫기"
+          aria-label="액션 메뉴 닫기"
           onClick={() => setActionMenuOpen(false)}
-          className="fixed inset-0 z-40 bg-black/20"
+          className="fixed inset-0 z-40 bg-transparent"
         />
-      ) : null}
-
-      {isOwner && actionMenuOpen ? (
-        <div className="fixed left-1/2 top-[78px] z-50 w-[148px] translate-x-[28px] rounded-[14px] border border-[#E6E6E6] bg-white p-[6px] shadow-[0_12px_30px_rgba(0,0,0,0.14)]">
-          <button
-            type="button"
-            onClick={() => void handleDelete()}
-            disabled={deleting}
-            className="flex w-full items-center gap-[8px] rounded-[10px] px-[12px] py-[10px] text-left font-['Pretendard'] text-[13px] font-[500] leading-[16px] tracking-[0px] text-[#D33B3B] hover:bg-[#FFF4F2] disabled:opacity-60"
-          >
-            <Trash2 size={16} />
-            {deleting ? '삭제 중...' : '삭제하기'}
-          </button>
-        </div>
       ) : null}
 
       <div className="relative flex w-full flex-col bg-[#FFFFFF]">
@@ -444,7 +455,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             사례 상세
           </p>
 
-          <div className="flex min-w-[56px] items-center justify-end gap-[8px]">
+          <div className="flex min-w-[24px] items-center justify-end">
             <button
               type="button"
               aria-label="북마크"
@@ -452,50 +463,68 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             >
               <Bookmark size={24} strokeWidth={1.75} />
             </button>
-            {isOwner ? (
-              <button
-                type="button"
-                aria-label="더보기"
-                onClick={() => setActionMenuOpen((current) => !current)}
-                className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
-              >
-                <MoreHorizontal size={24} strokeWidth={1.75} />
-              </button>
-            ) : (
-              <div className="h-[24px] w-[24px]" />
-            )}
           </div>
         </div>
 
         <div className="flex w-full flex-col gap-[36px] px-[16px] pb-[100px]">
           <section className="flex w-full flex-col gap-[24px] bg-[#FFFFFF]">
-            <div className="flex w-full items-center gap-[8px]">
-              {experience.author.profileImage ? (
-                <img
-                  src={experience.author.profileImage}
-                  alt=""
-                  className="h-[32px] w-[32px] rounded-[999px] object-cover"
-                />
-              ) : (
-                <div className="h-[32px] w-[32px] rounded-[999px] bg-[#EEEEEE]" />
-              )}
+            <div className="flex w-full items-center justify-between gap-[12px]">
+              <div className="flex min-w-0 items-center gap-[8px]">
+                {experience.author.profileImage ? (
+                  <img
+                    src={experience.author.profileImage}
+                    alt=""
+                    className="h-[32px] w-[32px] rounded-[999px] object-cover"
+                  />
+                ) : (
+                  <div className="h-[32px] w-[32px] rounded-[999px] bg-[#EEEEEE]" />
+                )}
 
-              <div className="flex flex-col items-start gap-[2px] text-[12px] leading-[16.8px]">
-                <div className="flex items-center gap-[4px] whitespace-nowrap">
-                  <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] tracking-[0px] text-[#131416]">
-                    {experience.author.nickname}
-                  </p>
-                  <p
-                    translate="no"
-                    className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#BABABA]"
-                  >
-                    {formatDate(experience.createdAt)}
+                <div className="flex min-w-0 flex-col items-start gap-[2px] text-[12px] leading-[16.8px]">
+                  <div className="flex items-center gap-[4px] whitespace-nowrap">
+                    <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] tracking-[0px] text-[#131416]">
+                      {experience.author.nickname}
+                    </p>
+                    <p
+                      translate="no"
+                      className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#BABABA]"
+                    >
+                      {formatDate(experience.createdAt)}
+                    </p>
+                  </div>
+                  <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
+                    {experience.category.name}
                   </p>
                 </div>
-                <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-                  {experience.category.name}
-                </p>
               </div>
+
+              {isOwner ? (
+                <div className="relative z-50 shrink-0">
+                  <button
+                    type="button"
+                    aria-label="더보기"
+                    onClick={() => setActionMenuOpen((current) => !current)}
+                    className="flex h-[24px] w-[24px] items-center justify-center"
+                  >
+                    <MoreVerticalIcon />
+                  </button>
+
+                  {actionMenuOpen ? (
+                    <div className="absolute right-0 top-[28px] flex w-[92px] flex-col rounded-[12px] border border-[#E6E6E6] bg-[#FFFFFF] p-[6px] shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
+                      <button
+                        type="button"
+                        onClick={() => void handleDelete()}
+                        disabled={deleting}
+                        aria-label="삭제하기"
+                        className="flex w-full items-center gap-[6px] rounded-[8px] px-[10px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] tracking-[0px] text-[#D33B3B] hover:bg-[#FFF4F2] disabled:opacity-60"
+                      >
+                        <Trash2 size={14} strokeWidth={1.9} />
+                        <span>{deleting ? '삭제 중...' : '삭제'}</span>
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
 
             <div className="flex w-full flex-col gap-[16px]">
@@ -555,8 +584,8 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             <>
               <section className="flex w-full flex-col gap-[12px]">
                 <SectionTitle
-                  title="핵심 이슈"
-                  description="이 경험에서 확인된 핵심 이슈입니다."
+                  title="문제 인식"
+                  description="이 경험에서 확인된 핵심 문제 인식입니다."
                 />
 
                 <div className="flex w-full flex-wrap items-start gap-[10px]">
@@ -574,7 +603,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   ) : (
                     <div className="flex flex-wrap items-start rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[12px]">
                       <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575]">
-                        아직 핵심 이슈를 추출하지 못했어요.
+                        아직 문제 인식을 추출하지 못했어요.
                       </p>
                     </div>
                   )}

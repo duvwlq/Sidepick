@@ -83,7 +83,7 @@ export default function MyPage() {
               onClick={() =>
                 navigate(
                   `/auth?next=${encodeURIComponent('/mypage')}&reason=${encodeURIComponent(
-                    '마이페이지는 로그인 후 이용할 수 있어요.',
+                    '마이페이지는 로그인이 필요한 서비스입니다.',
                   )}`,
                 )
               }
@@ -113,7 +113,7 @@ export default function MyPage() {
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#111111]">FAQ</p>
-                <p className="mt-1 text-xs text-[#757575]">부업 시작 전 가이드와 카테고리별 문답</p>
+                <p className="mt-1 text-xs text-[#757575]">부업 전 가이드와 카테고리별 문답</p>
               </div>
             </div>
             <ChevronRight className="h-5 w-5 text-[#757575]" />

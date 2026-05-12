@@ -21,14 +21,14 @@ const DEFAULT_RECOMMENDED_KEYWORDS = CATEGORY_TAG_LABELS.slice(0, 6);
 function readRecentSearches() {
   const raw = localStorage.getItem(RECENT_SEARCHES_KEY);
   if (!raw) {
-    return ['온라인 판매', '콘텐츠/SNS 기반', '수공예 상품'];
+    return ['온라인 판매', '콘텐츠 SNS 기반', '디지털 상품'];
   }
 
   try {
     const parsed = JSON.parse(raw) as string[];
     return parsed.filter(Boolean).slice(0, 6);
   } catch {
-    return ['온라인 판매', '콘텐츠/SNS 기반', '수공예 상품'];
+    return ['온라인 판매', '콘텐츠 SNS 기반', '디지털 상품'];
   }
 }
 
