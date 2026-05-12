@@ -16,6 +16,9 @@ type VisibleFaqItem = {
   key: string;
 };
 
+const FAQ_DISCLAIMER =
+  '본 콘텐츠는 일반적인 가이드 라인입니다. 개인 상황에 따라 결과가 다를 수 있으며,\n법률, 세금, 투자 관련 사항은 전문가 상담을 권장합니다.\n총 16개 카테고리로 정리했습니다.';
+
 export default function FaqPage() {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -51,11 +54,6 @@ export default function FaqPage() {
     );
   }, [searchQuery, selectedTag]);
 
-  const totalQuestionCount = useMemo(
-    () => FAQ_CATEGORIES.reduce((count, category) => count + category.items.length, 0),
-    [],
-  );
-
   useEffect(() => {
     setExpandedKey(null);
   }, [searchQuery, selectedTag]);
@@ -78,9 +76,8 @@ export default function FaqPage() {
               {FAQ_INTRO.title}
             </h1>
           </div>
-          <p className="text-[10px] font-light leading-[1.4] text-[#5D5D5D]">
-            * {FAQ_INTRO.disclaimer} 총 {FAQ_CATEGORIES.length}개 카테고리, {totalQuestionCount}개
-            질문으로 정리했습니다.
+          <p className="whitespace-pre-line text-[10px] font-light leading-[1.4] text-[#5D5D5D]">
+            {FAQ_DISCLAIMER}
           </p>
         </section>
 
