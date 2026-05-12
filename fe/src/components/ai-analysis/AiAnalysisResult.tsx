@@ -120,15 +120,15 @@ function SimilarCaseCard({
       onClick={onClick}
       className="flex w-full flex-col items-start rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left"
     >
-      <div className="flex w-full flex-col gap-[8px]">
-        <div className="flex w-full items-center justify-between gap-[8px]">
-          <div className="flex flex-wrap items-start gap-[4px]">
+        <div className="flex w-full flex-col gap-[8px]">
+          <div className="flex w-full items-start justify-between gap-[8px]">
+            <div className="flex min-w-0 flex-1 flex-wrap items-start gap-[4px]">
             {item.tags.map((tag) => (
               <SecondaryBadge key={`${item.caseId}-${tag}`} text={tag} />
             ))}
           </div>
 
-          <div className="flex items-center justify-center gap-[4px]">
+          <div className="flex shrink-0 items-center justify-end gap-[4px] whitespace-nowrap text-right">
             <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
               유사도
             </p>
@@ -690,9 +690,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   <button
                     type="button"
                     onClick={() => navigate('/explore')}
-                    className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5D5D5D] underline [text-decoration-skip-ink:none]"
+                    className="appearance-none border-0 bg-transparent p-[0px]"
                   >
-                    모든 사례 보기
+                    <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5D5D5D] underline [text-decoration-skip-ink:none]">
+                      모든 사례 보기
+                    </span>
                   </button>
                 </div>
               </section>
