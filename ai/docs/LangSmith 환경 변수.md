@@ -1,6 +1,6 @@
 # LangSmith 셋업 가이드 (PM-07)
 
-> 📌 **Status**: v1 (셋업 진행 중)
+> 📌 **Status**: v1 (계정/키/프로젝트 셋업 완료, BE 공유 대기)
 > 📌 **Last updated**: 2026-05-19
 > 📌 **담당**: 팀장 (오혜림)
 > 📌 **전달 대상**: AI, BE
@@ -46,11 +46,15 @@ ReAct 루프의 각 스텝(Tool 선택 → Tool 호출 → 응답 생성)을 시
 `ai/.env` 파일에 아래 4개 변수 추가:
 
 ```bash
-LANGCHAIN_TRACING_V2=true
-LANGCHAIN_ENDPOINT=https://api.smith.langchain.com
-LANGCHAIN_API_KEY=<2.2에서 발급받은 키>
-LANGCHAIN_PROJECT=sidepick-agent-c
+LANGSMITH_TRACING=true
+LANGSMITH_ENDPOINT=https://apac.api.smith.langchain.com
+LANGSMITH_API_KEY=<2.2에서 발급받은 키>
+LANGSMITH_PROJECT=sidepick-agent-c
 ```
+
+> 📍 **데이터 region**: 아시아태평양 (APAC) — 가입 시 선택. endpoint에 `apac.` 포함됨.
+> 📍 **변수 prefix**: `LANGSMITH_*` (LangSmith 공식 권장). 구 `LANGCHAIN_*` prefix도 호환되지만 신 prefix가 미래 안전.
+> ⚠️ `LANGSMITH_TRACING_V2`가 아니라 `LANGSMITH_TRACING` (V2 없음) — 신 prefix 표준.
 
 > ⚠️ `.env`는 `.gitignore`에 등록되어 있어 push되지 않음. **절대 코드에 하드코딩 금지**.
 
@@ -68,10 +72,10 @@ LangChain Agent 코드가 있다면 한 번 실행 후:
 
 | 변수명 | 값 (공유) | 용도 |
 |---|---|---|
-| `LANGCHAIN_TRACING_V2` | `true` | 트레이싱 ON/OFF 스위치 |
-| `LANGCHAIN_ENDPOINT` | `https://api.smith.langchain.com` | LangSmith API 엔드포인트 |
-| `LANGCHAIN_API_KEY` | _(팀장이 디스코드 DM으로 개별 전달)_ | 인증 키 |
-| `LANGCHAIN_PROJECT` | `sidepick-agent-c` | 프로젝트 이름 |
+| `LANGSMITH_TRACING` | `true` | 트레이싱 ON/OFF 스위치 |
+| `LANGSMITH_ENDPOINT` | `https://apac.api.smith.langchain.com` | LangSmith API 엔드포인트 (APAC region) |
+| `LANGSMITH_API_KEY` | _(팀장이 디스코드 DM으로 개별 전달)_ | 인증 키 |
+| `LANGSMITH_PROJECT` | `sidepick-agent-c` | 프로젝트 이름 |
 
 - **AI**: 위 4개 변수 본인 로컬 `.env`에 추가
 - **BE**: 동일하게 본인 로컬 `.env`에 추가 (4주차 에이전트 C 연동 시 사용)
@@ -97,9 +101,10 @@ LangChain Agent 코드가 있다면 한 번 실행 후:
 
 ## 5. 다음 단계
 
-- [x] 팀장: 계정 생성 + API 키 발급
+- [x] 팀장: 계정 생성 (APAC region 선택)
+- [x] 팀장: API 키 발급 (Personal Access Token, 1년 만료)
 - [x] 팀장: 프로젝트 생성 (`sidepick-agent-c`)
-- [ ] 팀장: AI/BE에 API 키 디스코드 DM 공유
-- [ ] AI: 로컬 `.env`에 4개 변수 추가
+- [x] 팀장(AI 역할): 본인 로컬 `.env`에 4개 변수 추가
+- [ ] 팀장: BE에게 API 키 디스코드 DM 공유 (5/20)
 - [ ] BE: 로컬 `.env`에 4개 변수 추가 (4주차)
 - [ ] AI: 4주차 ReAct 구현 시 LangSmith trace 정상 기록 확인
