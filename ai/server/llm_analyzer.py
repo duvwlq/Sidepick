@@ -3,9 +3,13 @@ import json
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+from server.mock_llm import get_mock_analysis
+
 load_dotenv()
 
 client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+USE_MOCK_LLM = os.getenv("USE_MOCK_LLM", "false").lower() == "true"
 
 # Claude한테 줄 시스템 프롬프트 (역할 + 출력 형식 지시)
 SYSTEM_PROMPT = """당신은 부업 실패 사례를 분석하는 전문가입니다.
@@ -35,7 +39,10 @@ def analyze_experience(
     free_text: str
 ) -> dict:
     """부업 실패 경험을 LLM으로 분석"""
-    
+
+    if USE_MOCK_LLM:
+        return get_mock_analysis(category=category, free_text=free_text)
+
     user_prompt = f"""
 부업 카테고리: {category}
 어려웠던 점 (체크): {', '.join(difficulties) if difficulties else '없음'}

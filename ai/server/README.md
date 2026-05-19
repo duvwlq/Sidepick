@@ -7,7 +7,8 @@
 ```
 server/
 ├── main.py              FastAPI 앱 + 엔드포인트 정의
-├── llm_analyzer.py      Claude API 호출 + 분석 로직
+├── llm_analyzer.py      Claude API 호출 + 분석 로직 (Mock 모드 분기 포함)
+├── mock_llm.py          Mock 응답 템플릿 (7개 카테고리 시나리오)
 ├── __init__.py          (패키지 인식용 빈 파일)
 └── tests/
     ├── test_api.py       Anthropic API 단순 호출 테스트
@@ -50,6 +51,31 @@ python -m server.tests.test_samples
 - 모델: `claude-sonnet-4-5`
 - max_tokens: 500
 - 평균 응답 시간: 2~4초
+
+## 🧪 Mock 모드 (AI-03)
+
+실제 LLM 호출 없이 미리 정의된 가짜 응답을 반환. UI/플로우 개발 시 비용 0원.
+
+**ON 시키기:**
+
+`ai/.env` 파일에서:
+```bash
+USE_MOCK_LLM=true
+```
+
+→ `analyze_experience()` 호출 시 카테고리 기반 mock 응답 반환 (응답에 `[MOCK]` 접두사 표시).
+
+**제공 시나리오**: 7개 카테고리 (스마트스토어 / 유튜브 / 배달 / 블로그 / 강의 / 콘텐츠 / 기타)
++ 매칭 안 되는 카테고리는 default mock 반환.
+
+**OFF 시키기 (운영)**: `USE_MOCK_LLM=false` (또는 변수 미설정).
+
+**단독 테스트**:
+```bash
+cd ~/Sidepick/ai
+source venv/bin/activate
+python -m server.mock_llm   # 7개 카테고리 mock 응답 확인
+```
 
 ## 추후 추가 예정
 
