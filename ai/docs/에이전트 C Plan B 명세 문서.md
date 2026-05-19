@@ -4,7 +4,7 @@
 > 📌 **Last updated**: 2026-05-19
 > 📌 **담당**: 팀장 (오혜림)
 > 📌 **전달 대상**: BE, AI
-> 📌 **관련 문서**: [`agent_c_tools.md`](./agent_c_tools.md), [`agent_c_routing.md`](./agent_c_routing.md)
+> 📌 **관련 문서**: [에이전트 C Tool 명세 문서](./에이전트%20C%20Tool%20명세%20문서.md), [라우팅 규칙 명세 문서](./라우팅%20규칙%20명세%20문서.md)
 
 ---
 

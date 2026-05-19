@@ -4,7 +4,7 @@
 > 📌 **Last updated**: 2026-05-19
 > 📌 **담당**: 팀장 (오혜림)
 > 📌 **전달 대상**: BE, AI
-> 📌 **관련 문서**: [`agent_c_plan_b.md`](./agent_c_plan_b.md), [`agent_c_routing.md`](./agent_c_routing.md)
+> 📌 **관련 문서**: [에이전트 C Plan B 명세 문서](./에이전트%20C%20Plan%20B%20명세%20문서.md), [라우팅 규칙 명세 문서](./라우팅%20규칙%20명세%20문서.md)
 
 ---
 
@@ -145,7 +145,7 @@ faiss_index/
 3. **Tool 결과 0건일 경우**: "비슷한 사례를 찾지 못했어요" 안내 (Plan B 트리거 #2)
 4. **카테고리 화이트리스트**: 7개 부업 카테고리 외 응답 차단
 
-상세는 [`agent_c_plan_b.md`](./agent_c_plan_b.md) Plan B 트리거 #2 참고.
+상세는 [에이전트 C Plan B 명세 문서](./에이전트%20C%20Plan%20B%20명세%20문서.md) Plan B 트리거 #2 참고.
 
 ---
 
