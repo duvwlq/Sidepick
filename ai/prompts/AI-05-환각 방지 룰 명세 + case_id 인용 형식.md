@@ -13,25 +13,59 @@
 
 ## 1. case_id 인용 형식 검증
 
-### 정규식
+### 정규식 (7개 카테고리 enum 직접 매칭)
+
 ```python
 import re
 
-INSTANCE_PATTERN = r'\[출처:\s*(case_\d+(,\s*case_\d+)*|업종 통계 — [가-힣·\s]+)\]'
+# 7개 부업 카테고리 enum (전체 시스템 통일 — 카테고리 화이트리스트와 동일)
+ALLOWED_CATEGORIES = [
+    "온라인 판매·이커머스",
+    "콘텐츠·SNS",
+    "디지털 상품·지식",
+    "플랫폼 노동",
+    "재능·프리랜서",
+    "투자·재테크",
+    "오프라인 부업"
+]
+
+# 카테고리를 정규식으로 변환 (특수문자 escape 처리)
+category_pattern = "|".join(re.escape(c) for c in ALLOWED_CATEGORIES)
+
+# 최종 정규식: 사례 ID 또는 업종 통계(7개 카테고리 중 하나) 인용
+CITATION_PATTERN = (
+    rf"\[출처:\s*("
+    rf"case_\d+(,\s*case_\d+)*"               # 사례 ID 1개 이상
+    rf"|업종 통계 — ({category_pattern})"      # 또는 통계 (카테고리 중 하나)
+    rf")\]"
+)
 
 def validate_citation(response: str) -> bool:
-    return bool(re.search(INSTANCE_PATTERN, response))
+    """LLM 응답에 case_id 인용이 정확한 형식으로 있는지 검증"""
+    return bool(re.search(CITATION_PATTERN, response))
 ```
 
 ### 허용 형식
 - `[출처: case_042]` — 사례 1개
 - `[출처: case_042, case_077, case_108]` — 사례 여러 개
-- `[출처: 업종 통계 — 콘텐츠·SNS]` — 통계만 사용
-- `[출처: case_042, 업종 통계 — 콘텐츠·SNS]` — 사례 + 통계 혼합
+- `[출처: 업종 통계 — 콘텐츠·SNS]` — 통계만 사용 (7개 카테고리 enum 중 하나)
+- `[출처: 업종 통계 — 온라인 판매·이커머스]` — 한글+공백+가운뎃점 카테고리
+- `[출처: 업종 통계 — 콘텐츠·SNS]` — 영문 알파벳 포함 카테고리 (SNS 등)
+
+### 거부 형식 (환각 의심)
+- `[출처: 업종 통계 — 주식 단타]` — 7개 카테고리 외 ❌
+- `[출처: 업종 통계 — 코인]` — enum에 없는 카테고리 ❌
+- `[출처: case_abc]` — 숫자 ID 아님 ❌
+- `[출처: 통계 자료]` — "업종 통계 — " prefix 없음 ❌
 
 ### 검증 실패 시
 1. 같은 prompt로 재생성 (max 1회)
 2. 재생성도 실패 시 Plan B (단순 RAG fallback)
+
+### enum 방식 채택 이유
+- `[가-힣·\s]+` 같은 정규식 범위 표현 대신 7개 카테고리를 직접 enum으로 매칭 → 가독성 ↑
+- 카테고리 화이트리스트 검증(2번)과 동일한 `ALLOWED_CATEGORIES` 변수 사용 → 일관성 ↑
+- 카테고리 추가/변경 시 한 곳만 수정하면 됨
 
 ---
 

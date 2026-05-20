@@ -206,11 +206,35 @@ OOO님이 겪으신 상황, 비슷한 경험 하신 분들이 꽤 있어요.
 #### 1. case_id 인용 형식 검증 (필수)
 ```python
 import re
-pattern = r'\[출처:\s*(case_\d+(,\s*case_\d+)*|업종 통계 — [가-힣·\s]+)\]'
-if not re.search(pattern, llm_response):
+
+# 7개 카테고리 enum (카테고리 화이트리스트와 동일)
+ALLOWED_CATEGORIES = [
+    "온라인 판매·이커머스",
+    "콘텐츠·SNS",
+    "디지털 상품·지식",
+    "플랫폼 노동",
+    "재능·프리랜서",
+    "투자·재테크",
+    "오프라인 부업"
+]
+
+# 카테고리 enum을 정규식으로 변환 (가운뎃점·공백 escape 처리)
+category_pattern = "|".join(re.escape(c) for c in ALLOWED_CATEGORIES)
+
+# 정규식: 사례 ID 또는 업종 통계(7개 카테고리 중 하나) 인용 매칭
+CITATION_PATTERN = (
+    rf"\[출처:\s*("
+    rf"case_\d+(,\s*case_\d+)*"
+    rf"|업종 통계 — ({category_pattern})"
+    rf")\]"
+)
+
+if not re.search(CITATION_PATTERN, llm_response):
     # 환각으로 판단 → 재생성 (max 1회) → 실패 시 Plan B
     return regenerate_or_fallback()
 ```
+
+→ 자세한 명세는 `ai/prompts/AI-05-환각 방지 룰 명세 + case_id 인용 형식.md` 참조
 
 #### 2. 카테고리 화이트리스트 검증
 ```python
