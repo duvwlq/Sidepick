@@ -4,7 +4,7 @@
 **작성자**: 오혜림 (AI 파트)
 **대상**: BE (정근원)
 **연관 티켓**: SP-W1-BE-06 (가드레일 인프라 설계)
-**참조**: `ai/prompts/agent_c_v1.md`
+**참조**: `ai/prompts/AI-04-agent_c_v1.md`
 
 > 📌 본 문서는 시스템 프롬프트 v1과 함께 BE 응답 검증 로직 구현 시 사용합니다.
 > 4주차 SP-W1-BE-06 (가드레일 인프라 설계) 작업의 핵심 명세입니다.
@@ -164,7 +164,7 @@ def validate_case_ids_exist(response: str) -> bool:
 ```bash
 # .env
 PROMPT_VERSION=v1
-AGENT_C_PROMPT_PATH=ai/prompts/agent_c_v1.md
+AGENT_C_PROMPT_PATH=ai/prompts/AI-04-agent_c_v1.md
 VALIDATION_RETRY_MAX=1
 SELF_VERIFICATION_THRESHOLD=0.7
 ```

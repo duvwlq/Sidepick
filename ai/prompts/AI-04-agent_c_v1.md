@@ -283,7 +283,7 @@ v1 → v2로 갱신 시 다음 항목 검토:
 
 v2 작성 시:
 ```bash
-cp prompts/agent_c_v1.md prompts/agent_c_v2.md
+cp prompts/AI-04-agent_c_v1.md prompts/AI-04-agent_c_v2.md
 # v2.md 수정
 # 환경 변수 PROMPT_VERSION=v2로 변경
 git commit -m "feat(prompt): agent C v2 — 50개 시나리오 테스트 반영"
