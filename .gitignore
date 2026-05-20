@@ -23,9 +23,5 @@ __pycache__/
 # Claude Code
 .claude/
 
-# AI handoff (개인 작업 인수인계, 로컬 보관)
-ai/handoff/
-
 # 크롤링 raw candidates (광고 포함, 정제 전. 분석엔 strict/review만 사용)
 ai/data/success_*_candidates.csv
-
