@@ -25,3 +25,6 @@ __pycache__/
 
 # 크롤링 raw candidates (광고 포함, 정제 전. 분석엔 strict/review만 사용)
 ai/data/success_*_candidates.csv
+
+# AI handoff (인수인계 자료, 별도 레포 RookieAILabs에서 관리)
+ai/handoff/
