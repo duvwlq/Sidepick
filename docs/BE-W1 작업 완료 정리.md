@@ -23,6 +23,28 @@
 
 ## 티켓별 작업 완료
 
+## GitHub 링크
+
+- 레포지토리: [duvwlq/Sidepick](https://github.com/duvwlq/Sidepick)
+- 기준 브랜치: [`main`](https://github.com/duvwlq/Sidepick/tree/main)
+- 문서 반영 커밋:
+  - [`31e9315` - BE-06, BE-07 문서 반영](https://github.com/duvwlq/Sidepick/commit/31e9315)
+  - [`5ffb266` - BE 주차 설계 산출물 반영](https://github.com/duvwlq/Sidepick/commit/5ffb266)
+
+### 산출물 링크
+
+- [BE-01 DB 스키마 ERD](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-01%20DB%20%EC%8A%A4%ED%82%A4%EB%A7%88%20ERD.md)
+- [BE-01 마이그레이션 스크립트 초안](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-01%20%EB%A7%88%EC%9D%B4%EA%B7%B8%EB%A0%88%EC%9D%B4%EC%85%98%20%EC%8A%A4%ED%81%AC%EB%A6%BD%ED%8A%B8%20%EC%B4%88%EC%95%88.sql)
+- [BE-02 OAuth 구조 설계](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-02%20OAuth%20%EA%B5%AC%EC%A1%B0%20%EC%84%A4%EA%B3%84.md)
+- [BE-03 API 명세 문서](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-03%20API%20%EB%AA%85%EC%84%B8%20%EB%AC%B8%EC%84%9C.md)
+- [BE-03 Swagger 초안](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-03%20Swagger%20%EC%B4%88%EC%95%88.yaml)
+- [BE-04 환경 변수 명세](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-04%20%ED%99%98%EA%B2%BD%20%EB%B3%80%EC%88%98%20%EB%AA%85%EC%84%B8.md)
+- [BE-05 큐잉 인프라 설계 문서](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-05%20%ED%81%90%EC%9E%89%20%EC%9D%B8%ED%94%84%EB%9D%BC%20%EC%84%A4%EA%B3%84%20%EB%AC%B8%EC%84%9C.md)
+- [BE-06 가드레일 인프라 설계 문서](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-06%20%EA%B0%80%EB%93%9C%EB%A0%88%EC%9D%BC%20%EC%9D%B8%ED%94%84%EB%9D%BC%20%EC%84%A4%EA%B3%84%20%EB%AC%B8%EC%84%9C.md)
+- [BE-07 토큰 모니터링 명세](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-07%20%ED%86%A0%ED%81%B0%20%EB%AA%A8%EB%8B%88%ED%84%B0%EB%A7%81%20%EB%AA%85%EC%84%B8.md)
+- [BE-W1 작업 완료 정리](https://github.com/duvwlq/Sidepick/blob/main/docs/BE-W1%20%EC%9E%91%EC%97%85%20%EC%99%84%EB%A3%8C%20%EC%A0%95%EB%A6%AC.md)
+- [.env.example](https://github.com/duvwlq/Sidepick/blob/main/.env.example)
+
 ### BE-01 DB 스키마 전체 설계
 
 - 상태: `진행중`

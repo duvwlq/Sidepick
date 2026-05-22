@@ -274,6 +274,10 @@
 - 실패사례와 필드 모양을 최대한 맞춘다.
 - FAISS 통합 인덱스를 고려해 `structured_data`와 `keywords`를 공통 포맷으로 맞춘다.
 - `citation_key`는 응답 인용 형식용 canonical key다. 예: `success_042`
+- 4주차 구현 시 저장 경로는 이중화된다:
+  - DB: `success_cases` insert
+  - FAISS: 통합 인덱스 add with `type="success"`
+- 둘 중 하나라도 빠지면 `search_cases(type="success")`가 0건으로 보일 수 있으므로 동시 적재를 기본 규칙으로 둔다.
 
 ### 8. `guides`
 
