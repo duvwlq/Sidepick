@@ -74,15 +74,16 @@ app:
     created-at-end: ${APP_EXPERIENCE_IMPORT_CREATED_AT_END:2026-04-30T23:59:59}
     default-age-group: ${APP_EXPERIENCE_IMPORT_DEFAULT_AGE_GROUP:30s}
     default-risk-level: ${APP_EXPERIENCE_IMPORT_DEFAULT_RISK_LEVEL:MEDIUM}
-    default-category-id: ${APP_EXPERIENCE_IMPORT_DEFAULT_CATEGORY_ID:5}
+    default-category-id: ${APP_EXPERIENCE_IMPORT_DEFAULT_CATEGORY_ID:8}
     category-map:
-      온라인판매_이커머스: 1
-      콘텐츠_SNS: 2
-      디지털상품_지식판매: 3
-      플랫폼노동: 4
-      재능_프리랜서: 5
-      투자_재테크: 6
-      오프라인부업: 7
+      "[온라인판매_이커머스]": 1
+      "[콘텐츠_SNS]": 2
+      "[디지털상품_지식판매]": 3
+      "[플랫폼노동]": 4
+      "[재능_프리랜서]": 5
+      "[투자_재테크]": 6
+      "[오프라인부업]": 7
+      "[기타]": 8
   demo-seed:
     enabled: ${APP_DEMO_SEED_ENABLED:false}
   mail:
@@ -98,6 +99,8 @@ app:
       expose-code: ${APP_EMAIL_VERIFICATION_EXPOSE_CODE:false}
   security:
     admin-emails: ${APP_SECURITY_ADMIN_EMAILS:}
+  agent-c:
+    prompt-path: ${AGENT_C_PROMPT_PATH:ai/prompts/AI-04-agent_c_v1.md}
   oauth:
     kakao:
       client-id: ${APP_OAUTH_KAKAO_CLIENT_ID:}

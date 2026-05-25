@@ -40,7 +40,7 @@ PROGRESS_PATH = DATA_DIR / "matching_table_progress.json"
 CATEGORIES = [
     {"key": "online_sales",     "label": "온라인 판매 · 이커머스"},
     {"key": "content_sns",      "label": "콘텐츠 · SNS 기반 수익"},
-    {"key": "digital_products", "label": "디지털 상품 · 지식 판매"},
+    {"key": "digital_products", "label": "디지털·지식판매"},
     {"key": "platform_work",    "label": "플랫폼 노동"},
     {"key": "freelance",        "label": "재능 · 프리랜서"},
     {"key": "investment",       "label": "투자 · 재테크"},

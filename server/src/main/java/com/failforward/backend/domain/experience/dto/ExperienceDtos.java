@@ -104,13 +104,7 @@ public final class ExperienceDtos {
             return new ExperienceResponse(
                     experience.getId(),
                     UserSummary.from(experience.getUser()),
-                    new CategoryResponse(
-                            experience.getCategory().getId(),
-                            experience.getCategory().getName(),
-                            experience.getCategory().getDescription(),
-                            experience.getCategory().getIcon(),
-                            experience.getCategory().getColor()
-                    ),
+                    CategoryResponse.from(experience.getCategory()),
                     experience.getTitle(),
                     experience.getContent(),
                     experience.getBusinessType(),

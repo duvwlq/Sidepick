@@ -1,6 +1,8 @@
 package com.failforward.backend.domain.category.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -29,15 +31,34 @@ public class BusinessCategory {
     @Column(nullable = false, length = 20)
     private String color;
 
-    private BusinessCategory(Long id, String name, String description, String icon, String color) {
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private BusinessCategoryType type;
+
+    private BusinessCategory(
+            Long id,
+            String name,
+            String description,
+            String icon,
+            String color,
+            BusinessCategoryType type
+    ) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.icon = icon;
         this.color = color;
+        this.type = type;
     }
 
-    public static BusinessCategory create(Long id, String name, String description, String icon, String color) {
-        return new BusinessCategory(id, name, description, icon, color);
+    public static BusinessCategory create(
+            Long id,
+            String name,
+            String description,
+            String icon,
+            String color,
+            BusinessCategoryType type
+    ) {
+        return new BusinessCategory(id, name, description, icon, color, type);
     }
 }

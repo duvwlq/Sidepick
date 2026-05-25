@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.failforward.backend.domain.analysis.dto.AiServerDtos.AiAnalysisResponse;
 import com.failforward.backend.domain.category.entity.BusinessCategory;
+import com.failforward.backend.domain.category.entity.BusinessCategoryType;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.user.entity.User;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -101,7 +102,8 @@ class AIAnalysisSupportTest {
                 "\uD14C\uC2A4\uD2B8 \uCE74\uD14C\uACE0\uB9AC",
                 "description",
                 "icon",
-                "#000000"
+                "#000000",
+                BusinessCategoryType.business_field
         );
 
         return FailureExperience.create(

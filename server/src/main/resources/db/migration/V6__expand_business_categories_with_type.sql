@@ -1,14 +1,5 @@
-USE failforward;
-SET NAMES utf8mb4;
-
-CREATE TABLE IF NOT EXISTS business_categories (
-    id BIGINT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    description TEXT,
-    icon VARCHAR(20) NOT NULL,
-    color VARCHAR(20) NOT NULL,
-    type ENUM('business_field', 'cross_topic') NOT NULL
-);
+ALTER TABLE business_categories
+    ADD COLUMN IF NOT EXISTS type ENUM('business_field', 'cross_topic') NOT NULL DEFAULT 'business_field' AFTER color;
 
 INSERT INTO business_categories (id, name, description, icon, color, type)
 VALUES
@@ -34,53 +25,3 @@ ON DUPLICATE KEY UPDATE
     icon = VALUES(icon),
     color = VALUES(color),
     type = VALUES(type);
-
-ALTER TABLE ai_analysis
-    ADD COLUMN IF NOT EXISTS structured_summary TEXT NULL AFTER summary_list;
-
-ALTER TABLE failure_experiences
-    ADD COLUMN IF NOT EXISTS category_id BIGINT NULL AFTER user_id;
-
-UPDATE failure_experiences
-SET category_id = 5
-WHERE category_id IS NULL;
-
-ALTER TABLE failure_experiences
-    MODIFY COLUMN category_id BIGINT NOT NULL;
-
-SET @has_category_fk := (
-    SELECT COUNT(*)
-    FROM information_schema.TABLE_CONSTRAINTS
-    WHERE CONSTRAINT_SCHEMA = DATABASE()
-      AND TABLE_NAME = 'failure_experiences'
-      AND CONSTRAINT_NAME = 'fk_failure_experiences_category'
-      AND CONSTRAINT_TYPE = 'FOREIGN KEY'
-);
-
-SET @add_category_fk_sql := IF(
-    @has_category_fk = 0,
-    'ALTER TABLE failure_experiences ADD CONSTRAINT fk_failure_experiences_category FOREIGN KEY (category_id) REFERENCES business_categories(id)',
-    'SELECT 1'
-);
-
-PREPARE add_category_fk_stmt FROM @add_category_fk_sql;
-EXECUTE add_category_fk_stmt;
-DEALLOCATE PREPARE add_category_fk_stmt;
-
-SET @has_category_index := (
-    SELECT COUNT(*)
-    FROM information_schema.STATISTICS
-    WHERE TABLE_SCHEMA = DATABASE()
-      AND TABLE_NAME = 'failure_experiences'
-      AND INDEX_NAME = 'idx_failure_experiences_category_id'
-);
-
-SET @add_category_index_sql := IF(
-    @has_category_index = 0,
-    'CREATE INDEX idx_failure_experiences_category_id ON failure_experiences(category_id)',
-    'SELECT 1'
-);
-
-PREPARE add_category_index_stmt FROM @add_category_index_sql;
-EXECUTE add_category_index_stmt;
-DEALLOCATE PREPARE add_category_index_stmt;

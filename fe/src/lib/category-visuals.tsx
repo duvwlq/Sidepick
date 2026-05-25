@@ -174,7 +174,7 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   },
   {
     id: 3,
-    label: '디지털 상품·지식 판매',
+    label: '디지털·지식판매',
     descriptionLines: [
       '전자책 판매 / 강의 제작 (클래스)',
       '/ 강의 플랫폼, 지식 판매',
