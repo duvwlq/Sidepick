@@ -1,11 +1,18 @@
 # PM-12 — 분석 근거 모달 (Explainability Tooltip) 기획
 
-**버전**: v1
+**버전**: v2
 **작성일**: 2026-05-27
 **작성자**: 오혜림 (팀장 / PM)
 **티켓**: PM-12
 **대상**: AI / BE / PD / FE (4파트 협업)
 **연관**: MVP 심사 피드백 #3 (유사 사례 매칭 정확도) + #4 (분석 흐름 구체화)
+
+### v2 변경 이력 (2026-05-27)
+
+- 3파트 합의 완료 (AI / BE / PD 수용 가능 회신)
+- 적용 위치 P0 2곳으로 확정 (P1/P2는 베타테스트 후 결정)
+- **데이터 스키마 TypeScript interface 형식으로 확정** (섹션 3 전면 개정)
+- `_debug` 필드 옵션 A 채택 (모든 응답에 포함, FE 모달엔 표시 X)
 
 > 📌 사용자가 AI 분석 결과나 유사 사례 매칭을 볼 때, "?" 아이콘 클릭/호버 시 **근거 정보**를 모달/툴팁으로 노출하는 기능.
 > 일반 커뮤니티에는 없는 **검증 가능한 데이터** 차별화 포인트.
@@ -61,74 +68,208 @@ W1~W2에서 만든 안전장치를 사용자가 직접 확인 가능:
 
 ---
 
-## 3. 모달 데이터 스키마 (BE 응답 형식)
+## 3. 모달 데이터 스키마 (v2 확정 — TypeScript interface)
 
-### 3.1 AI 분석 결과 (P0 #1)
+### 3.1 설계 원칙 5가지
+
+| 원칙 | 적용 |
+|---|---|
+| **간결성** | 사용자가 이해 가능한 정보만. 내부 디버깅 메타는 응답에는 있어도 모달엔 표시 X |
+| **확장성** | 미래 추가 필드 (V2 모델 비교 등)와 호환되는 구조 |
+| **재사용성** | AI 분석 + 유사 사례 + 챗봇 모두 비슷한 패턴 (공통 베이스) |
+| **타입 안정성** | TypeScript interface로 FE 받기 쉽게 |
+| **null-safety** | 일부 필드 옵셔널 (예: agent_b 미발동 시 verification 필드 생략) |
+
+### 3.2 공통 베이스 — `ExplanationBase`
+
+모든 explanation 필드가 공유하는 베이스. (AI 분석 / 유사 사례 / 챗봇 모두 공통)
+
+```typescript
+interface ExplanationBase {
+  confidence_score: number;       // 0~1, FE에서 %로 변환 (예: 0.87 → "87%")
+  analysis_method: string;        // 사용자 노출용 짧은 설명
+                                  // 예: "Claude Sonnet 4.5 + SBERT/FAISS 유사 사례 매칭"
+  generated_at: string;           // ISO 8601 — FE에서 "5분 전" 상대 표시
+}
+```
+
+### 3.3 P0 #1: AI 분석 결과 explanation
+
+```typescript
+interface AnalysisExplanation extends ExplanationBase {
+  // 1) 사용된 입력 — 사용자가 본인 입력 재확인
+  input_used: {
+    category_name: string;          // "온라인 판매·이커머스" (slug 아닌 한글)
+    difficulties_checked: string[]; // ["마케팅/홍보", "재고관리"]
+    free_text_length: number;       // 자유서술 글자 수 (예: 142)
+    duration_months: number;
+    weekly_hours: number;
+  };
+
+  // 2) 매칭된 패턴 — 결과의 직접적 근거
+  matched_patterns: Array<{
+    pattern: string;                // "마케팅 비용 대비 매출 부진"
+    confidence: number;             // 0~1
+  }>;
+
+  // 3) 분석에 사용된 유사 사례 — 출처 노출
+  similar_cases_used: Array<{
+    case_id: string;                // "case_42"
+    title: string;                  // 카드 표시용
+    similarity: number;             // 0~1
+    link: string;                   // 원본 보기 URL (있을 때만)
+  }>;
+
+  // 4) 검증 상태 — 단순화 (사용자에겐 "검증 완료" / "검증 미통과"만)
+  is_verified: boolean;             // 에이전트 B 통과 여부
+
+  // 5) 내부 디버깅용 — 응답엔 항상 포함하되 FE 모달엔 표시 X (옵션 A)
+  _debug?: {
+    agent_b_threshold: number;      // 0.7
+    regenerated: boolean;
+    response_time_ms: number;
+  };
+}
+```
+
+### 3.4 P0 #2: 유사 사례 매칭 explanation
+
+```typescript
+interface SimilarCaseExplanation extends ExplanationBase {
+  // 1) 유사도 — 사용자 노출 핵심
+  similarity_score: number;         // 0~1, FE에서 % 표시
+
+  // 2) 매칭된 키워드 — 왜 이 사례가 추천됐는지
+  matched_keywords: string[];       // ["스마트스토어", "마케팅 비용", "6개월"]
+
+  // 3) 카테고리 일치 — 단순 boolean
+  category_match: boolean;          // 사용자 카테고리와 동일 여부
+
+  // 4) 출처 정보
+  source: string;                   // "blog" / "kin" / "cafe" / "community"
+  case_id: string;                  // 원본 보기 링크용
+
+  // 5) 내부 디버깅용 (옵션 A)
+  _debug?: {
+    embedding_model: string;        // "ko-sbert-nli"
+    faiss_rank: number;             // 1-indexed
+    user_category_slug: string;
+    case_category_slug: string;
+  };
+}
+```
+
+### 3.5 P1 #3: 에이전트 C 챗봇 explanation (W5 추가 예정)
+
+```typescript
+interface ChatbotExplanation extends ExplanationBase {
+  // 1) Tool 호출 흐름 — 어떤 데이터로 답변했는지
+  tool_calls: Array<{
+    tool: "search_cases" | "query_stats";
+    args: Record<string, any>;      // 예: { query: "스마트스토어 시작", type: "failure" }
+    result_count: number;
+  }>;
+
+  // 2) 인용된 case_id — 답변 근거
+  cited_case_ids: string[];
+
+  // 3) Plan B 발동 여부
+  plan_b_triggered: boolean;
+  plan_b_reason?: "iterations_exceeded" | "tool_empty_result" | "llm_parse_error"
+                  | "timeout" | "tool_api_error";  // 발동 시만
+
+  // 4) 응답 시간
+  response_time_ms: number;
+}
+```
+
+### 3.6 핵심 결정 사항 정리
+
+| 결정 | 이유 |
+|---|---|
+| **`_debug` prefix로 내부 메타 분리** | BE 응답엔 포함 (옵션 A) FE 모달엔 노출 X. 미래 관리자 모드/모니터링 활용 |
+| **`similarity` / `confidence`는 0~1 float** | DB 일관성. FE에서 % 변환 (반올림) |
+| **`case_id`는 string** | "case_42" 형태 직관적 + 미래 namespacing 가능 ("blog_42" / "kin_15") |
+| **`is_verified`는 boolean** | 단순화 (true → "검증 완료" 뱃지 / false → 표시 안 함) |
+| **`generated_at` ISO 8601** | FE에서 상대 시간 변환 ("5분 전") |
+| **공통 베이스 `ExplanationBase` 사용** | AI / 유사 사례 / 챗봇 공통 필드 재사용 |
+
+### 3.7 BE API 응답 예시 (실제 형식)
+
+#### POST /api/analyze 응답
 
 ```json
 {
-  "analysis_id": "analysis_789",
-  "result": {
-    "keywords": ["초기투자과다", "마케팅부족", "재고관리실패"],
-    "failure_category": "마케팅부족",
-    "summary": "초기 자금 과다 투자 + 마케팅 부재로 재고 누적",
-    "risk_level": "high"
-  },
-  "explanation": {
-    "input_used": {
-      "category": "온라인 판매·이커머스",
-      "difficulties_checked": ["마케팅/홍보", "재고관리"],
-      "free_text_length": 142,
-      "duration_months": 6,
-      "weekly_hours": 10
+  "success": true,
+  "data": {
+    "analysis_id": "analysis_789",
+    "result": {
+      "keywords": ["초기투자과다", "마케팅부족", "재고관리실패"],
+      "failure_category": "마케팅부족",
+      "summary": "초기 자금 과다 투자 + 마케팅 부재로 재고 누적",
+      "risk_level": "high"
     },
-    "matched_patterns": [
-      { "pattern": "마케팅 비용 대비 매출 부진", "confidence": 0.92 },
-      { "pattern": "재고 회전율 낮음", "confidence": 0.78 }
-    ],
-    "confidence_score": 0.87,
-    "agent_b_verified": true,
-    "similar_cases_used": ["case_42", "case_87", "case_123"],
-    "analysis_method": "Claude Sonnet + SBERT/FAISS 유사 사례 매칭"
+    "explanation": {
+      "confidence_score": 0.87,
+      "analysis_method": "Claude Sonnet 4.5 + SBERT/FAISS 유사 사례 매칭",
+      "generated_at": "2026-06-15T14:23:45+09:00",
+      "input_used": {
+        "category_name": "온라인 판매·이커머스",
+        "difficulties_checked": ["마케팅/홍보", "재고관리"],
+        "free_text_length": 142,
+        "duration_months": 6,
+        "weekly_hours": 10
+      },
+      "matched_patterns": [
+        { "pattern": "마케팅 비용 대비 매출 부진", "confidence": 0.92 },
+        { "pattern": "재고 회전율 낮음", "confidence": 0.78 }
+      ],
+      "similar_cases_used": [
+        { "case_id": "case_42", "title": "스마트스토어 6개월 후 닫은 후기", "similarity": 0.87, "link": "/cases/case_42" },
+        { "case_id": "case_87", "title": "쿠팡 위탁판매 실패담", "similarity": 0.81, "link": "/cases/case_87" }
+      ],
+      "is_verified": true,
+      "_debug": {
+        "agent_b_threshold": 0.7,
+        "regenerated": false,
+        "response_time_ms": 4523
+      }
+    }
   }
 }
 ```
 
-### 3.2 유사 사례 매칭 (P0 #2)
+#### POST /api/similar 응답 (유사 사례 매칭)
 
 ```json
 {
-  "similar_cases": [
-    {
-      "case_id": "case_42",
-      "title": "스마트스토어 6개월 만에 닫은 후기",
-      "category": "online-commerce",
-      "explanation": {
-        "similarity_score": 0.87,
-        "matched_keywords": ["스마트스토어", "마케팅 비용", "6개월"],
-        "category_match": true,
-        "embedding_model": "ko-sbert-nli",
-        "rank": 1
+  "success": true,
+  "data": {
+    "query_id": "query_456",
+    "similar_cases": [
+      {
+        "case_id": "case_42",
+        "title": "스마트스토어 6개월 만에 닫은 후기",
+        "category": "online-commerce",
+        "preview": "마케팅 비용 대비 매출이...",
+        "explanation": {
+          "confidence_score": 0.87,
+          "analysis_method": "SBERT (ko-sbert-nli) 임베딩 + FAISS L2 거리",
+          "generated_at": "2026-06-15T14:23:45+09:00",
+          "similarity_score": 0.87,
+          "matched_keywords": ["스마트스토어", "마케팅 비용", "6개월"],
+          "category_match": true,
+          "source": "blog",
+          "case_id": "case_42",
+          "_debug": {
+            "embedding_model": "ko-sbert-nli",
+            "faiss_rank": 1,
+            "user_category_slug": "online-commerce",
+            "case_category_slug": "online-commerce"
+          }
+        }
       }
-    }
-  ]
-}
-```
-
-### 3.3 에이전트 C 챗봇 응답 (P1 #3)
-
-```json
-{
-  "response": "스마트스토어 시작하실 거면... [출처: case_42, case_77]",
-  "explanation": {
-    "tool_calls": [
-      { "tool": "search_cases", "args": { "query": "스마트스토어 시작", "type": "failure" }, "result_count": 3 },
-      { "tool": "query_stats", "args": { "category": "스마트스토어", "metric": "failure_top3" }, "result_count": 3 }
-    ],
-    "cited_case_ids": ["case_42", "case_77"],
-    "confidence_score": 0.91,
-    "plan_b_triggered": false,
-    "response_time_ms": 4523
+    ]
   }
 }
 ```
@@ -250,10 +391,10 @@ W1~W2에서 만든 안전장치를 사용자가 직접 확인 가능:
 
 ## 10. 다음 단계
 
-- [x] PM-12 v1 명세 작성 (본 문서)
-- [ ] W3 시작 전(5/31~6/1) AI/BE/PD 디스코드 공유 + 합의
-- [ ] W3 P1 추가: 3파트 작업 분배 + 일정 합의 → PM-12 v2
-- [ ] W4: 병렬 구현 (AI 메타 / BE API / PD 디자인)
-- [ ] W5: FE 통합
-- [ ] W6: 시연 시나리오에 포함
-- [ ] 베타테스트 2회 또는 3회 평가 항목 추가
+- [x] PM-12 v1 명세 작성
+- [x] AI/BE/PD 3파트 합의 (5/27 — 다들 수용 가능 회신)
+- [x] PM-12 v2 — TypeScript interface 스키마 확정 + `_debug` 옵션 A 채택
+- [ ] W4 시작 (6/8): AI explanation 메타 / BE API / PD 디자인 (병렬 작업)
+- [ ] W5 (6/15~6/21): FE 모달 컴포넌트 구현 + P0 2곳 통합
+- [ ] W6 (6/22~6/25): 시연 시나리오에 모달 동작 포함
+- [ ] 베타테스트 3회 (6/13) 또는 4회 (6/20)에 평가 항목 추가
