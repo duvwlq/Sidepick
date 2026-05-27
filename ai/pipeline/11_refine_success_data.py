@@ -30,42 +30,13 @@ from bs4 import BeautifulSoup
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
-# -------------------------------
-# 성공 경험담 패턴 (필수 — 이 중 1개 이상 매칭 시 진짜 성공 사례)
-# -------------------------------
-SUCCESS_EXPERIENCE_PATTERNS = [
-    r"월\s*\d+\s*만원",              # 월 100만원 / 월 500만원
-    r"\d+\s*개월\s*만에",             # 3개월 만에
-    r"\d+\s*년\s*만에",               # 1년 만에
-    r"수익\s*인증",
-    r"성공\s*후기",
-    r"제가\s*\w+\s*(?:했|해|한)",      # "제가 ~ 했어요" 1인칭 경험
-    r"저는\s*\w+\s*(?:했|해|한)",      # "저는 ~ 했어요" 1인칭 경험
-    r"\d+\s*만원\s*(?:벌|수익|매출)",  # 50만원 벌었어요
-    r"(?:성공|달성)\s*했(?:어|었|네|네요)",
-]
-
-# 질문 글 패턴 (지식인) — 이거 매칭되면 제외
-QUESTION_PATTERNS = [
-    r"\?",
-    r"궁금해요",
-    r"알려주세요",
-    r"어떤가요",
-    r"가능한가요",
-    r"어떻게\s*해야",
-    r"추천해\s*주세요",
-    r"방법이\s*있을까요",
-]
-
-
-def has_success_experience(text: str) -> bool:
-    """성공 경험담 패턴 매칭 여부"""
-    return any(re.search(p, text) for p in SUCCESS_EXPERIENCE_PATTERNS)
-
-
-def is_question(text: str) -> bool:
-    """질문 글 여부 (지식인용)"""
-    return sum(1 for p in QUESTION_PATTERNS if re.search(p, text)) >= 2
+# 공통 패턴 + 필터 함수 (AI-06)
+from crawler_utils import (
+    SUCCESS_EXPERIENCE_PATTERNS,
+    QUESTION_PATTERNS,
+    has_success_experience,
+    is_question,
+)
 
 
 def to_mobile_blog_url(url: str) -> str:

@@ -32,49 +32,19 @@ from bs4 import BeautifulSoup
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 
-HEADERS_PC = {
-    "User-Agent": (
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-        "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"
-    ),
-    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
-}
+# 공통 패턴 + 필터 함수 + HTTP 헤더 (AI-06)
+from crawler_utils import (
+    HEADERS_PC,
+    SUCCESS_EXPERIENCE_PATTERNS,
+    QUESTION_PATTERNS,
+    AD_KEYWORDS,
+    has_success_experience,
+    is_question,
+    is_ad,
+    clean_node,
+)
 
-# 11번과 동일 패턴 (통일)
-SUCCESS_EXPERIENCE_PATTERNS = [
-    r"월\s*\d+\s*만원",
-    r"\d+\s*개월\s*만에",
-    r"\d+\s*년\s*만에",
-    r"수익\s*인증",
-    r"성공\s*후기",
-    r"제가\s*\w+\s*(?:했|해|한)",
-    r"저는\s*\w+\s*(?:했|해|한)",
-    r"\d+\s*만원\s*(?:벌|수익|매출)",
-    r"(?:성공|달성)\s*했(?:어|었|네|네요)",
-]
-
-QUESTION_PATTERNS = [
-    r"\?",
-    r"궁금해요",
-    r"알려주세요",
-    r"어떤가요",
-    r"가능한가요",
-    r"어떻게\s*해야",
-    r"추천해\s*주세요",
-    r"방법이\s*있을까요",
-]
-
-# 광고 키워드 (09번 + 커뮤니티 특성 반영)
-AD_KEYWORDS = [
-    "오픈채팅", "카톡", "텔레그램", "문의주세요", "상담문의",
-    "추천인", "제휴", "수익보장", "초보가능", "당일지급",
-    "bit.ly", "tinyurl", "naver.me", "open.kakao.com",
-    "리딩방", "전담멘토", "1:1 코칭", "유료 클래스",
-    "강의 신청", "VIP", "단톡방", "공동구매", "협찬",
-    "DM 주세요", "디엠 주세요", "쪽지 주세요",
-    "노하우 가르쳐", "비법 공유", "수강 신청", "코드 입력",
-]
-
+# 스크립트별 고유 검색 키워드 (공통 모듈 X)
 KEYWORDS = [
     "부업 성공 후기",
     "부업 월 100만원",
@@ -84,25 +54,6 @@ KEYWORDS = [
     "블로그 부업 수익",
     "유튜브 수익화 후기",
 ]
-
-
-def has_success_experience(text: str) -> bool:
-    return any(re.search(p, text) for p in SUCCESS_EXPERIENCE_PATTERNS)
-
-
-def is_question(text: str) -> bool:
-    return sum(1 for p in QUESTION_PATTERNS if re.search(p, text)) >= 2
-
-
-def is_ad(text: str) -> bool:
-    hits = sum(1 for k in AD_KEYWORDS if k in text)
-    return hits >= 2
-
-
-def clean_node(node):
-    if not node:
-        return ""
-    return node.get_text(separator="\n", strip=True)
 
 
 # -------------------------------
