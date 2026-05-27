@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import FlashToastListener from './components/common/FlashToastListener';
-import Home from './pages/Home';
-import Explore from './pages/Explore';
+import Home from './pages/HomeV3';
+import Explore from './pages/ExploreV3';
 import Create from './pages/Create';
 import MyPage from './pages/MyPage';
 import AiAnalysisResultPage from './pages/AiAnalysisResultPage';
