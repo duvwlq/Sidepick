@@ -1,10 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthInput from '../../components/auth/AuthInput';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { ErrorState } from '../../components/common/Skeleton';
+import { SignupErrorText, SignupField } from '../../components/auth/FigmaSignupPrimitives';
 import { useToast } from '../../components/common/useToast';
+import arrowLeftIcon from '../../assets/auth-figma/arrow-left.svg';
+import batteryFrameIcon from '../../assets/auth-figma/battery-frame.svg';
+import brandMarkIcon from '../../assets/auth-figma/brand-mark.svg';
+import cellularConnectionIcon from '../../assets/auth-figma/cellular-connection.svg';
+import googleIcon from '../../assets/auth-figma/google-icon.svg';
+import kakaoIcon from '../../assets/auth-figma/kakao-icon.svg';
+import naverIcon from '../../assets/auth-figma/naver-icon.svg';
+import wifiIcon from '../../assets/auth-figma/wifi.svg';
 import { login } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
@@ -19,6 +24,7 @@ export default function AuthEntryPage() {
   const [loginError, setLoginError] = useState('');
   const [kakaoError, setKakaoError] = useState('');
   const [googleError, setGoogleError] = useState('');
+  const [naverError, setNaverError] = useState('');
 
   const nextPath = useMemo(() => {
     const params = new URLSearchParams(location.search);
@@ -93,86 +99,152 @@ export default function AuthEntryPage() {
     window.location.href = googleAuthUrl;
   }
 
+  function handleNaverLogin() {
+    const naverClientId = import.meta.env.VITE_NAVER_CLIENT_ID;
+    const redirectUri = `${window.location.origin}/auth/naver/callback`;
+
+    if (!naverClientId) {
+      setNaverError('잠시 연결이 불안정해요. 다시 시도해주세요.');
+      return;
+    }
+
+    const naverAuthUrl =
+      `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
+      `&client_id=${encodeURIComponent(naverClientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&state=${encodeURIComponent(nextPath)}`;
+
+    window.location.href = naverAuthUrl;
+  }
+
   return (
-    <AuthLayout>
-      <AuthHeader title="로그인" />
-
-      <section className="px-1 pb-8">
-        {reason ? (
-          <div className="mb-6 rounded-[18px] bg-[#F7F7F8] px-4 py-3 text-sm leading-6 text-[#555555]">
-            {reason}
-          </div>
-        ) : null}
-
-        <div className="space-y-5">
-          <AuthInput
-            label="이메일"
-            type="email"
-            placeholder="이메일 형식으로 입력해주세요"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <AuthInput
-            label="비밀번호"
-            type="password"
-            placeholder="비밀번호를 입력해주세요"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </div>
-
-        {loginError ? <div className="mt-4"><ErrorState message={loginError} /></div> : null}
-
-        <button
-          type="button"
-          onClick={() => void handleLogin()}
-          disabled={loading}
-          className="mt-6 h-14 w-full rounded-[16px] bg-[#111111] text-base font-semibold text-white disabled:bg-[#D8D8D8]"
-        >
-          {loading ? '잠시만 기다려주세요' : '로그인'}
-        </button>
-
-        <div className="mt-4 flex items-center justify-center gap-3 text-sm text-[#7D7D7D]">
-          <Link
-            to={`/signup/email?next=${encodeURIComponent(nextPath)}`}
-            className="underline-offset-2 hover:underline"
-          >
-            회원가입
-          </Link>
-          <span className="text-[#D4D4D4]">|</span>
-          <button type="button" disabled className="cursor-not-allowed text-[#B7B7B7]">
-            ID/PW 찾기
-          </button>
-        </div>
-
-        <div className="mt-10">
-          <p className="text-center text-sm font-medium text-[#6A6A6A]">소셜 로그인</p>
-
-          <div className="mt-4 space-y-3">
-            <button
-              type="button"
-              onClick={handleKakaoLogin}
-              className="flex h-14 w-full items-center justify-center rounded-[16px] bg-[#191919] text-base font-semibold text-[#FEE500]"
-            >
-              카카오 로그인
-            </button>
-
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="flex h-14 w-full items-center justify-center rounded-[16px] border border-[#E4E4E4] bg-white text-base font-medium text-[#202124]"
-            >
-              구글 로그인
-            </button>
+    <div className="min-h-screen overflow-x-hidden bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-[375px] flex-col bg-white">
+        <div className="flex w-full flex-col">
+          <div className="flex h-[59px] w-full items-center justify-center px-[24px] pb-[19px] pt-[21px]">
+            <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center pt-[1.5px]">
+              <span className="font-['Pretendard'] text-[17px] font-[600] leading-[22px] tracking-[0px] text-black">
+                9:41
+              </span>
+            </div>
+            <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
+              <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
+              <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
+              <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
+            </div>
           </div>
 
-          <p className="mt-4 text-center text-xs leading-5 text-[#8C8C8C]">
-            이메일 로그인과 소셜 로그인을 모두 사용할 수 있습니다.
-          </p>
-          {kakaoError ? <div className="mt-3"><ErrorState message={kakaoError} /></div> : null}
-          {googleError ? <div className="mt-3"><ErrorState message={googleError} /></div> : null}
+          <div className="flex w-full items-center px-[16px] py-[20px]">
+            <button
+              type="button"
+              aria-label="뒤로가기"
+              onClick={() => window.history.back()}
+              className="flex h-[24px] w-[24px] items-center justify-center"
+            >
+              <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
+            </button>
+          </div>
         </div>
-      </section>
-    </AuthLayout>
+
+        <section className="flex w-full flex-col gap-[32px] pb-[20px] pt-[20px]">
+          <div className="flex w-full flex-col items-center gap-[8px]">
+            <div className="flex h-[21px] items-center gap-[5.133px]">
+              <img src={brandMarkIcon} alt="" className="h-[21px] w-[21px]" />
+              <span className="font-['Pretendard'] text-[28px] font-[700] leading-[21px] tracking-[0px] text-black">
+                sidePick
+              </span>
+            </div>
+            <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5D5D5D]">
+              서비스 이용을 위해 로그인해주세요.
+            </p>
+          </div>
+
+          {reason ? (
+            <div className="px-[16px]">
+              <div className="rounded-[10px] bg-[#F5F5F5] px-[16px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5D5D5D]">
+                {reason}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="flex w-full flex-col gap-[24px] px-[16px]">
+            <div className="flex w-full flex-col gap-[16px]">
+              <SignupField
+                label="아이디"
+                type="email"
+                placeholder="이메일 형식으로 입력해주세요"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                fieldHeight={43}
+              />
+              <SignupField
+                label="비밀번호"
+                type="password"
+                placeholder="비밀번호를 입력해주세요"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                fieldHeight={43}
+              />
+              {loginError ? <SignupErrorText>{loginError}</SignupErrorText> : null}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void handleLogin()}
+              disabled={loading}
+              className="flex h-[48px] w-full items-center justify-center rounded-[8px] bg-[#CBE5D8] py-[5px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-white disabled:opacity-70"
+            >
+              {loading ? '잠시만 기다려주세요' : '로그인'}
+            </button>
+
+            <div className="flex w-full items-center justify-center gap-[8px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-black">
+              <Link to={`/signup/email?next=${encodeURIComponent(nextPath)}&mode=local`}>회원가입</Link>
+              <span>|</span>
+              <button type="button" disabled>
+                ID/PW 찾기
+              </button>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col gap-[16px] px-[16px]">
+            <div className="flex w-full items-center justify-center">
+              <span className="whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A]">
+                간편 로그인
+              </span>
+            </div>
+
+            <div className="flex w-full items-center justify-center gap-[24px]">
+              <button
+                type="button"
+                onClick={handleKakaoLogin}
+                className="flex h-[48px] w-[48px] items-center justify-center rounded-[999px] bg-[#FFCD00]"
+              >
+                <img src={kakaoIcon} alt="" className="h-[17px] w-[18px]" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleNaverLogin}
+                className="flex h-[48px] w-[48px] items-center justify-center rounded-[999px] bg-[#06BE34]"
+              >
+                <img src={naverIcon} alt="" className="h-[16px] w-[17px]" />
+              </button>
+
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className="flex h-[48px] w-[48px] items-center justify-center rounded-[999px] border border-[#D8D8D8] bg-white"
+              >
+                <img src={googleIcon} alt="" className="h-[17px] w-[17px]" />
+              </button>
+            </div>
+
+            {kakaoError ? <SignupErrorText>{kakaoError}</SignupErrorText> : null}
+            {naverError ? <SignupErrorText>{naverError}</SignupErrorText> : null}
+            {googleError ? <SignupErrorText>{googleError}</SignupErrorText> : null}
+          </div>
+        </section>
+      </div>
+    </div>
   );
 }

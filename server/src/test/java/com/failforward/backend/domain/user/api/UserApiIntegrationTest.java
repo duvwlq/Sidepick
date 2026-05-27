@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.user.api;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +40,27 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.user.ageGroup").value("20s"))
                 .andExpect(jsonPath("$.data.user.authProvider").value("LOCAL"))
                 .andExpect(jsonPath("$.data.user.emailVerified").value(true))
+                .andExpect(jsonPath("$.data.user.profileCompleted").value(true));
+    }
+
+    @Test
+    void updateMeUpdatesNicknameAndAgeGroup() throws Exception {
+        String token = registerAndLogin("update_me@sidepick.dev", "password123", "beforeUser", "20s");
+
+        mockMvc.perform(patch("/api/users/me")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "nickname": "afterUser",
+                                  "ageGroup": "30s",
+                                  "profileImage": null
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.user.nickname").value("afterUser"))
+                .andExpect(jsonPath("$.data.user.ageGroup").value("30s"))
                 .andExpect(jsonPath("$.data.user.profileCompleted").value(true));
     }
 }

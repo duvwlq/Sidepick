@@ -1,12 +1,16 @@
 import { createContext, useMemo, useState, type ReactNode } from 'react';
 
 type AuthFlowData = {
+  signupMode: 'local' | 'social';
   email: string;
   password: string;
   passwordConfirm: string;
   nickname: string;
   verificationCode: string;
   ageGroup: string;
+  region: string;
+  employmentStatus: string;
+  signupPurposes: string[];
   verificationSent: boolean;
   verificationConfirmed: boolean;
   verificationMessage: string;
@@ -19,12 +23,16 @@ type AuthFlowContextValue = {
 };
 
 const initialForm: AuthFlowData = {
+  signupMode: 'local',
   email: '',
   password: '',
   passwordConfirm: '',
   nickname: '',
   verificationCode: '',
   ageGroup: '20s',
+  region: '',
+  employmentStatus: '',
+  signupPurposes: [],
   verificationSent: false,
   verificationConfirmed: false,
   verificationMessage: '',

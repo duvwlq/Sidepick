@@ -11,10 +11,14 @@ import { AuthFlowProvider } from './context/AuthFlowContext';
 import AuthEntryPage from './pages/auth/AuthEntryPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import KakaoCallbackPage from './pages/auth/KakaoCallbackPage';
+import NaverCallbackPage from './pages/auth/NaverCallbackPage';
 import SignupEmailPage from './pages/auth/SignupEmailPage';
+import SignupExperiencePage from './pages/auth/SignupExperiencePage';
+import SignupNicknameStepPage from './pages/auth/SignupNicknameStepPage';
 import SignupVerifyPage from './pages/auth/SignupVerifyPage';
 import SignupPasswordPage from './pages/auth/SignupPasswordPage';
-import SignupNicknamePage from './pages/auth/SignupNicknamePage';
+import SignupPurposePage from './pages/auth/SignupPurposePage';
+import SignupRegionPage from './pages/auth/SignupRegionPage';
 
 export default function App() {
   return (
@@ -27,10 +31,14 @@ export default function App() {
           <Route path="/login" element={<AuthEntryPage />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
           <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+          <Route path="/auth/naver/callback" element={<NaverCallbackPage />} />
           <Route path="/signup/email" element={<SignupEmailPage />} />
           <Route path="/signup/verify" element={<SignupVerifyPage />} />
           <Route path="/signup/password" element={<SignupPasswordPage />} />
-          <Route path="/signup/nickname" element={<SignupNicknamePage />} />
+          <Route path="/signup/nickname" element={<SignupNicknameStepPage />} />
+          <Route path="/signup/region" element={<SignupRegionPage />} />
+          <Route path="/signup/employment" element={<SignupExperiencePage />} />
+          <Route path="/signup/purpose" element={<SignupPurposePage />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/create" element={<Create />} />

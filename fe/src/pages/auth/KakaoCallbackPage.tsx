@@ -49,6 +49,13 @@ export default function KakaoCallbackPage() {
         }
 
         saveSession(payload.accessToken, payload.refreshToken, payload.user);
+        if (!payload.user.profileCompleted) {
+          navigate(`/signup/nickname?next=${encodeURIComponent(callbackParams.state)}&mode=social`, {
+            replace: true,
+          });
+          return;
+        }
+
         setFlashToast(`환영해요, ${payload.user.nickname}님!`);
         navigate(callbackParams.state, { replace: true });
       } catch (callbackError) {

@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AuthButton from '../../components/auth/AuthButton';
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthInput from '../../components/auth/AuthInput';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { ErrorState } from '../../components/common/Skeleton';
+import {
+  InlineHelperRow,
+  SignupButton,
+  SignupErrorText,
+  SignupField,
+  SignupFieldGroup,
+  SignupScreen,
+} from '../../components/auth/FigmaSignupPrimitives';
 import { useToast } from '../../components/common/useToast';
 import { useAuthFlow } from '../../context/useAuthFlow';
 import { confirmEmailVerification, requestEmailVerification } from '../../lib/api';
@@ -79,52 +82,48 @@ export default function SignupVerifyPage() {
   }
 
   return (
-    <AuthLayout>
-      <AuthHeader
-        title="이메일 인증"
-        onBack={() => navigate(`/signup/email?next=${encodeURIComponent(nextPath)}`)}
-      />
+    <SignupScreen
+      title="휴대폰 인증"
+      headlineLines={['이메일로 발송한', '인증 번호를 입력해 주세요']}
+      onBack={() => navigate(`/signup/email?next=${encodeURIComponent(nextPath)}`)}
+    >
+      <SignupFieldGroup>
+        <SignupField
+          label="인증 번호"
+          placeholder="인증번호 6자리를 입력해 주세요"
+          value={form.verificationCode}
+          onChange={(event) =>
+            updateField(
+              'verificationCode',
+              event.target.value.replace(/\D/g, '').slice(0, 6),
+            )
+          }
+          suffix={<span>00:00</span>}
+          fieldHeight={37}
+        />
 
-      <section className="pt-2">
-        <div className="mb-6">
-          <h2 className="whitespace-pre-line text-[22px] font-semibold leading-8 text-black">
-            이메일로 발송된{'\n'}인증번호를 입력해주세요
-          </h2>
-          <p className="mt-3 break-words text-sm text-[#777777]">{form.email}</p>
-          {form.verificationMessage ? (
-            <p className="mt-2 break-words text-sm text-[#666666]">{form.verificationMessage}</p>
-          ) : null}
-        </div>
+        {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-        <div className="flex flex-col gap-4">
-          <AuthInput
-            label="인증 번호"
-            placeholder="인증번호 6자리를 입력해주세요"
-            value={form.verificationCode}
-            onChange={(event) =>
-              updateField(
-                'verificationCode',
-                event.target.value.replace(/\D/g, '').slice(0, 6),
-              )
-            }
-          />
+        <SignupButton onClick={() => void handleNext()} disabled={loading}>
+          {loading ? '잠시만 기다려주세요' : '다음으로'}
+        </SignupButton>
 
-          {error ? <ErrorState message={error} /> : null}
-
-          <AuthButton onClick={() => void handleNext()} disabled={loading}>
-            {loading ? '잠시만 기다려주세요' : '다음으로'}
-          </AuthButton>
-
-          <button
-            type="button"
-            onClick={() => void handleResend()}
-            disabled={resending}
-            className="min-h-[44px] text-sm text-[#666666] disabled:opacity-60"
-          >
-            {resending ? '잠시만 기다려주세요' : '인증번호가 오지 않았나요? 재발송'}
-          </button>
-        </div>
-      </section>
-    </AuthLayout>
+        <button
+          type="button"
+          onClick={() => void handleResend()}
+          disabled={resending}
+          className="w-full"
+        >
+          <InlineHelperRow>
+            <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5D5D5D]">
+              인증번호가 오지 않으셨나요?
+            </span>
+            <span className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-black">
+              {resending ? '잠시만 기다려주세요' : '재발송'}
+            </span>
+          </InlineHelperRow>
+        </button>
+      </SignupFieldGroup>
+    </SignupScreen>
   );
 }

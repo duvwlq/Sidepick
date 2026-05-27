@@ -7,7 +7,7 @@ export type UserSummary = {
   nickname: string;
   ageGroup: string;
   profileImage: string | null;
-  authProvider: 'LOCAL' | 'KAKAO' | 'GOOGLE';
+  authProvider: 'LOCAL' | 'KAKAO' | 'GOOGLE' | 'NAVER';
   emailVerified: boolean;
   profileCompleted: boolean;
   createdAt: string;
@@ -211,6 +211,13 @@ export function loginWithGoogle(input: { code: string; redirectUri: string }) {
   });
 }
 
+export function loginWithNaver(input: { code: string; redirectUri: string }) {
+  return request<AuthPayload>('/auth/oauth/naver', {
+    method: 'POST',
+    body: input,
+  });
+}
+
 export function getCategories() {
   return request<Category[]>('/categories');
 }
@@ -304,5 +311,16 @@ export function getMatchedCases(token: string, analysisId: number | string) {
 export function getMe(token: string) {
   return request<{ user: UserSummary }>('/users/me', {
     token,
+  });
+}
+
+export function updateMe(
+  token: string,
+  input: { nickname: string; ageGroup: string; profileImage?: string | null },
+) {
+  return request<{ user: UserSummary }>('/users/me', {
+    method: 'PATCH',
+    token,
+    body: input,
   });
 }

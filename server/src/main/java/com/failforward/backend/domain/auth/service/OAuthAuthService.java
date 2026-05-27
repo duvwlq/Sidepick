@@ -73,6 +73,26 @@ public class OAuthAuthService {
         ));
     }
 
+    @Transactional
+    public AuthPayload loginWithNaver(OAuthLoginRequest request) {
+        ensureNaverAuthEnabled();
+        OAuthProperties.Provider providerConfig = requireConfiguredProvider(AuthProvider.NAVER);
+        OAuthTokenResponse tokenResponse = exchangeAuthorizationCode(
+                "https://nid.naver.com/oauth2.0/token",
+                providerConfig,
+                request
+        );
+        NaverUserInfoEnvelope userInfoEnvelope = fetchNaverUserInfo(tokenResponse.accessToken());
+        NaverUserInfoResponse userInfo = userInfoEnvelope.response();
+        return authTokenService.issue(findOrCreateSocialUser(
+                AuthProvider.NAVER,
+                userInfo.id(),
+                userInfo.email(),
+                userInfo.name(),
+                userInfo.profileImage()
+        ));
+    }
+
     private void ensureKakaoAuthEnabled() {
         if (!authFeatureProperties.kakaoEnabled()) {
             throw new BadRequestException("Kakao login is not available right now.");
@@ -85,10 +105,17 @@ public class OAuthAuthService {
         }
     }
 
+    private void ensureNaverAuthEnabled() {
+        if (!authFeatureProperties.naverEnabled()) {
+            throw new BadRequestException("Naver login is not available right now.");
+        }
+    }
+
     private OAuthProperties.Provider requireConfiguredProvider(AuthProvider provider) {
         OAuthProperties.Provider config = switch (provider) {
             case KAKAO -> oAuthProperties.kakao();
             case GOOGLE -> oAuthProperties.google();
+            case NAVER -> oAuthProperties.naver();
             default -> throw new BadRequestException("OAuth provider is not supported.");
         };
 
@@ -164,6 +191,24 @@ public class OAuthAuthService {
             return body;
         } catch (Exception exception) {
             throw new BadRequestException("Failed to fetch Google user info.");
+        }
+    }
+
+    private NaverUserInfoEnvelope fetchNaverUserInfo(String accessToken) {
+        try {
+            ResponseEntity<NaverUserInfoEnvelope> response = oauthRestTemplate.exchange(
+                    "https://openapi.naver.com/v1/nid/me",
+                    HttpMethod.GET,
+                    new HttpEntity<>(buildBearerHeaders(accessToken)),
+                    NaverUserInfoEnvelope.class
+            );
+            NaverUserInfoEnvelope body = response.getBody();
+            if (body == null || body.response() == null || body.response().id() == null || body.response().id().isBlank()) {
+                throw new BadRequestException("Naver user info response is invalid.");
+            }
+            return body;
+        } catch (Exception exception) {
+            throw new BadRequestException("Failed to fetch Naver user info.");
         }
     }
 
@@ -277,6 +322,19 @@ public class OAuthAuthService {
             @JsonProperty("email") String email,
             @JsonProperty("name") String name,
             @JsonProperty("picture") String picture
+    ) {
+    }
+
+    private record NaverUserInfoEnvelope(
+            @JsonProperty("response") NaverUserInfoResponse response
+    ) {
+    }
+
+    private record NaverUserInfoResponse(
+            @JsonProperty("id") String id,
+            @JsonProperty("email") String email,
+            @JsonProperty("name") String name,
+            @JsonProperty("profile_image") String profileImage
     ) {
     }
 }

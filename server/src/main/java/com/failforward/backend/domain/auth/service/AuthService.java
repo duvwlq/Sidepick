@@ -48,4 +48,9 @@ public class AuthService {
     public AuthPayload loginWithGoogle(OAuthLoginRequest request) {
         return oAuthAuthService.loginWithGoogle(request);
     }
+
+    @Transactional
+    public AuthPayload loginWithNaver(OAuthLoginRequest request) {
+        return oAuthAuthService.loginWithNaver(request);
+    }
 }

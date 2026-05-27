@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AuthButton from '../../components/auth/AuthButton';
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthInput from '../../components/auth/AuthInput';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { ErrorState } from '../../components/common/Skeleton';
+import {
+  SignupButton,
+  SignupErrorText,
+  SignupField,
+  SignupFieldGroup,
+  SignupScreen,
+} from '../../components/auth/FigmaSignupPrimitives';
 import { useToast } from '../../components/common/useToast';
 import { useAuthFlow } from '../../context/useAuthFlow';
 import { requestEmailVerification } from '../../lib/api';
@@ -52,39 +54,31 @@ export default function SignupEmailPage() {
   }
 
   return (
-    <AuthLayout>
-      <AuthHeader
-        title="개인 정보 등록"
-        onBack={() =>
-          navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
-            replace: true,
-          })
-        }
-      />
+    <SignupScreen
+      title="비밀번호 설정"
+      headlineLines={['로그인 시 사용할', '아이디를 입력해 주세요']}
+      onBack={() =>
+        navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
+          replace: true,
+        })
+      }
+    >
+      <SignupFieldGroup>
+        <SignupField
+          label="이메일"
+          type="email"
+          placeholder="영문, 숫자를 조합하여 8자 이상 입력해 주세요"
+          value={form.email}
+          onChange={(event) => updateField('email', event.target.value)}
+          fieldHeight={37}
+        />
 
-      <section className="pt-2">
-        <div className="mb-6">
-          <h2 className="whitespace-pre-line text-[22px] font-semibold leading-8 text-black">
-            이메일로{'\n'}본인 확인을 진행할게요
-          </h2>
-        </div>
+        {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-        <div className="flex flex-col gap-4">
-          <AuthInput
-            label="이메일"
-            type="email"
-            placeholder="이메일 형식에 맞게 다시 작성해주세요"
-            value={form.email}
-            onChange={(event) => updateField('email', event.target.value)}
-          />
-
-          {error ? <ErrorState message={error} /> : null}
-
-          <AuthButton onClick={() => void handleNext()} disabled={loading}>
-            {loading ? '잠시만 기다려주세요' : '인증번호 받기'}
-          </AuthButton>
-        </div>
-      </section>
-    </AuthLayout>
+        <SignupButton onClick={() => void handleNext()} disabled={loading}>
+          {loading ? '잠시만 기다려주세요' : '다음으로'}
+        </SignupButton>
+      </SignupFieldGroup>
+    </SignupScreen>
   );
 }

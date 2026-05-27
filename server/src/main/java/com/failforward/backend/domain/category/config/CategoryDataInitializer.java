@@ -28,7 +28,7 @@ public class CategoryDataInitializer {
                     2L,
                     "콘텐츠·SNS",
                     "유튜브, 블로그, 인스타그램, 릴스, 뉴스레터, 개인 브랜딩 기반 활동",
-                    "content",
+                    "content-sns",
                     "#FF8A00",
                     BusinessCategoryType.business_field
             ),
@@ -36,7 +36,7 @@ public class CategoryDataInitializer {
                     3L,
                     "디지털·지식판매",
                     "전자책, 강의 제작, 온라인 클래스, 지식 문서, 템플릿, PDF 자료 판매 등",
-                    "digital",
+                    "digital-product",
                     "#7A5CFF",
                     BusinessCategoryType.business_field
             ),
@@ -44,7 +44,7 @@ public class CategoryDataInitializer {
                     4L,
                     "플랫폼 노동",
                     "배달, 대리운전, 쿠팡플렉스, 설문 참여, 테스트 작업 등 플랫폼 기반 활동",
-                    "platform",
+                    "platform-labor",
                     "#13A37F",
                     BusinessCategoryType.business_field
             ),
@@ -52,7 +52,7 @@ public class CategoryDataInitializer {
                     5L,
                     "재능·프리랜서",
                     "디자인, 영상 편집, 글쓰기, 개발, 번역, 외주, 레슨 등 프리랜서형 활동",
-                    "freelance",
+                    "talent",
                     "#E64980",
                     BusinessCategoryType.business_field
             ),
@@ -76,7 +76,7 @@ public class CategoryDataInitializer {
                     8L,
                     "부업 시작 전 공통",
                     "시작 전 체크리스트, 진입 판단, 준비도 점검 등 공통 안내",
-                    "common",
+                    "pre-start",
                     "#3B82F6",
                     BusinessCategoryType.cross_topic
             ),
@@ -92,7 +92,7 @@ public class CategoryDataInitializer {
                     10L,
                     "본업 + 부업",
                     "겸업 가능 범위, 시간 관리, 회사 규정, 병행 전략 등",
-                    "workplus",
+                    "work-balance",
                     "#2563EB",
                     BusinessCategoryType.cross_topic
             ),

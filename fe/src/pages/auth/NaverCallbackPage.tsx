@@ -4,12 +4,12 @@ import AuthHeader from '../../components/auth/AuthHeader';
 import AuthLayout from '../../components/auth/AuthLayout';
 import { ErrorState, LoadingState } from '../../components/common/Skeleton';
 import { useToast } from '../../components/common/useToast';
-import { loginWithGoogle } from '../../lib/api';
+import { loginWithNaver } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
 
-export default function GoogleCallbackPage() {
+export default function NaverCallbackPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [error, setError] = useState('');
@@ -20,14 +20,14 @@ export default function GoogleCallbackPage() {
       code: params.get('code'),
       oauthError: params.get('error'),
       state: params.get('state') || '/',
-      redirectUri: `${window.location.origin}/auth/google/callback`,
+      redirectUri: `${window.location.origin}/auth/naver/callback`,
     };
   }, []);
 
   const immediateError = callbackParams.oauthError
-    ? '구글 로그인에 실패했어요.'
+    ? '네이버 로그인에 실패했어요.'
     : !callbackParams.code
-      ? '구글 로그인 정보를 확인하지 못했어요.'
+      ? '네이버 로그인 정보를 확인하지 못했어요.'
       : '';
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function GoogleCallbackPage() {
 
     async function handleCallback() {
       try {
-        const payload = await loginWithGoogle({
+        const payload = await loginWithNaver({
           code: callbackParams.code!,
           redirectUri: callbackParams.redirectUri,
         });
@@ -49,6 +49,7 @@ export default function GoogleCallbackPage() {
         }
 
         saveSession(payload.accessToken, payload.refreshToken, payload.user);
+
         if (!payload.user.profileCompleted) {
           navigate(`/signup/nickname?next=${encodeURIComponent(callbackParams.state)}&mode=social`, {
             replace: true,
@@ -63,7 +64,7 @@ export default function GoogleCallbackPage() {
           setError(
             resolveErrorMessage(
               callbackError,
-              '구글 로그인 처리 중 문제가 발생했어요. 다시 시도해주세요.',
+              '네이버 로그인 처리 중 문제가 발생했어요. 다시 시도해주세요.',
             ),
           );
         }
@@ -86,7 +87,7 @@ export default function GoogleCallbackPage() {
 
   return (
     <AuthLayout>
-      <AuthHeader title="구글 로그인" onBack={() => navigate('/auth')} />
+      <AuthHeader title="네이버 로그인" onBack={() => navigate('/auth')} />
 
       <section className="flex min-h-[calc(100vh-150px)] flex-col justify-center">
         <div className="space-y-4 rounded-2xl border border-[#EAEAEA] bg-white px-4 py-6 text-center">
@@ -97,7 +98,7 @@ export default function GoogleCallbackPage() {
             </>
           ) : (
             <>
-              <p className="text-base font-medium text-black">구글 로그인 처리 중입니다.</p>
+              <p className="text-base font-medium text-black">네이버 로그인 처리 중입니다.</p>
               <LoadingState message="잠시만 기다려주세요." />
             </>
           )}

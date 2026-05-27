@@ -68,4 +68,10 @@ public class AuthController {
     public ApiResponse<AuthPayload> loginWithGoogle(@Valid @RequestBody OAuthLoginRequest request) {
         return ApiResponse.ok("Google login succeeded.", authService.loginWithGoogle(request));
     }
+
+    @Operation(summary = "Naver OAuth login")
+    @PostMapping("/oauth/naver")
+    public ApiResponse<AuthPayload> loginWithNaver(@Valid @RequestBody OAuthLoginRequest request) {
+        return ApiResponse.ok("Naver login succeeded.", authService.loginWithNaver(request));
+    }
 }

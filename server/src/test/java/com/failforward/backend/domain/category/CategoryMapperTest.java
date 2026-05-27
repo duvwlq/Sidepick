@@ -17,8 +17,8 @@ class CategoryMapperTest {
 
     @Test
     void normalizesSlashWhenLookingUpKoreanName() {
-        assertEquals("tax-business", CategoryMapper.toSlug("세금/사업자").orElseThrow());
-        assertEquals("digital-products", CategoryMapper.toSlug("디지털·지식판매").orElseThrow());
+        assertEquals("tax", CategoryMapper.toSlug("세금/사업자").orElseThrow());
+        assertEquals("digital-product", CategoryMapper.toSlug("디지털·지식판매").orElseThrow());
     }
 
     @Test

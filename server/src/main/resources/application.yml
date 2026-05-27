@@ -94,6 +94,7 @@ app:
     local-enabled: ${APP_AUTH_LOCAL_ENABLED:true}
     kakao-enabled: ${APP_AUTH_KAKAO_ENABLED:true}
     google-enabled: ${APP_AUTH_GOOGLE_ENABLED:true}
+    naver-enabled: ${APP_AUTH_NAVER_ENABLED:true}
     email-verification:
       expiration-minutes: ${APP_EMAIL_VERIFICATION_EXPIRATION_MINUTES:10}
       expose-code: ${APP_EMAIL_VERIFICATION_EXPOSE_CODE:false}
@@ -108,6 +109,9 @@ app:
     google:
       client-id: ${APP_OAUTH_GOOGLE_CLIENT_ID:}
       client-secret: ${APP_OAUTH_GOOGLE_CLIENT_SECRET:}
+    naver:
+      client-id: ${APP_OAUTH_NAVER_CLIENT_ID:}
+      client-secret: ${APP_OAUTH_NAVER_CLIENT_SECRET:}
   jwt:
     secret: ${APP_JWT_SECRET}
     access-token-expiration-seconds: ${APP_JWT_ACCESS_EXPIRES:3600}

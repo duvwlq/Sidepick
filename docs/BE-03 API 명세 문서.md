@@ -40,7 +40,7 @@
 1. 성공사례 등록 API를 일반 API로 둘지, 관리자성 API로 제한할지
 2. 에이전트 C SSE를 별도 stream endpoint로 둘지, 단일 endpoint streaming으로 단순화할지
 3. 4주차 구현 시 실제 LLM 호출 주체를 `server`가 아니라 `ai-server`로 고정할지
-4. 통계 API의 `category` 입력은 slug(`commerce`, `content`, ...)로 고정한다.
+4. 통계 API의 `category` 입력은 slug(`commerce`, `content-sns`, `digital-product`, `platform-labor`, `talent`, `investment`, `offline`)로 고정한다.
 
 ## 목적
 
@@ -224,7 +224,7 @@
 
 - AI-02 기준으로 통계/그래프 외부 API는 `/api/stats/...` 네임스페이스로 통일한다.
 - 내부 구현에서 `categoryId`를 쓰더라도 외부 계약은 `category` query 기준으로 둔다.
-- `category` query 값은 한글명이 아니라 slug(`commerce`, `content`, `digital`, `platform`, `freelance`, `investment`, `offline`)로 고정한다.
+- `category` query 값은 한글명이 아니라 slug(`commerce`, `content-sns`, `digital-product`, `platform-labor`, `talent`, `investment`, `offline`)로 고정한다.
 
 ### 업종별 통계 응답 초안
 

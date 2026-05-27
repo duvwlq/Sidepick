@@ -77,14 +77,17 @@ public class User extends BaseTimeEntity {
     }
 
     public static User createSocial(AuthProvider authProvider, String email, String nickname, String ageGroup, String profileImage) {
-        return new User(email, null, nickname, ageGroup, profileImage, authProvider, true, nickname != null && !nickname.isBlank());
+        return new User(email, null, nickname, ageGroup, profileImage, authProvider, true, false);
     }
 
     public void updateProfile(String nickname, String ageGroup, String profileImage) {
         this.nickname = nickname;
         this.ageGroup = ageGroup;
         this.profileImage = profileImage;
-        this.profileCompleted = nickname != null && !nickname.isBlank();
+        this.profileCompleted = nickname != null
+                && !nickname.isBlank()
+                && ageGroup != null
+                && !ageGroup.isBlank();
     }
 
     public void verifyEmail() {
