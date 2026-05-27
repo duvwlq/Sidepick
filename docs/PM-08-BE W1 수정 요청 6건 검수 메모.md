@@ -13,14 +13,15 @@
 
 ✅ **BE가 5/25에 6건 모두 처리 완료**. PM-08 검수에서 12건 정합성 이슈 발견 → PM-03 v1.3 / 서비스 정책 v1.3 업데이트로 해결.
 
-| # | 요청 항목 | 우선순위 | 처리 결과 | 검수 |
+| # | 요청 항목 | 우선순위 | 처리 결과 (BE 답변 5/27) | 검수 |
 |---|---|---|---|---|
-| 1 | `AGENT_C_PROMPT_PATH` 환경변수 | 🔴 P0 | `PromptLoader.java` (신규) | ✅ |
-| 2 | `business_categories` type 컬럼 + 16개 INSERT SQL | 🔴 P0 | `V6__expand_business_categories_with_type.sql` + `002__...update.sql` | ✅ |
-| 3 | `SPECIAL_LABELS` + 카테고리명 정합화 | 🔴 P0 | `guardrail.py` + `test_guardrail.py` (신규) | ✅ |
-| 4 | Swagger `/api` prefix | 🟡 P1 | `application.yml` 변경 | ✅ |
-| 5 | 카테고리 slug 16개 매핑 | 🟡 P1 | `CategoryMapper.java` (신규) | ✅ |
-| 6 | 성공사례 이중 적재 명세 | 🟡 P1 | 추정 — feature/backend에서 미확인 | ⚠️ |
+| 1 | `AGENT_C_PROMPT_PATH` 환경변수 | 🔴 P0 | `.env.example` L49 + `docs/BE-04 환경 변수 명세.md` L79 + `PromptLoader.java` | ✅ |
+| 2 | `business_categories` type 컬럼 + 16개 INSERT SQL | 🔴 P0 | `V6__expand_business_categories_with_type.sql` + `docs/BE-01 마이그레이션 스크립트 초안.sql` | ✅ |
+| 3 | `SPECIAL_LABELS` 3종 정합화 | 🔴 P0 | `docs/BE-06 가드레일 인프라 설계 문서.md` L149 + `guardrail.py` | ✅ |
+| 4 | Swagger `/api` prefix | 🟡 P1 | `docs/BE-03 Swagger 초안.yaml` L9 + `OpenApiConfig.java` + 통합 테스트 | ✅ |
+| 5 | 카테고리 slug 16개 매핑 | 🟡 P1 | `CategoryMapper.java` + `docs/BE-03 API 명세 문서.md` (slug 입력 기준) | ✅ |
+| 6 | 성공사례 이중 적재 명세 | 🟡 P1 | **`docs/BE-21 성공사례 이중 적재 로직 명세.md` L69** (success_cases insert + FAISS add 동시) | ✅ |
+| (보너스) | 카테고리명 "디지털·지식판매" 통일 | — | `CategoryMapper.java` L13 + V6 SQL L8 + BE-06 L78 | ✅ |
 
 ---
 
@@ -56,23 +57,15 @@ PM-03 v1.2가 정한 slug가 짧고 모호. BE가 더 명확하게 정의 → **
 
 - [x] **PM-03 v1.3** — slug 9개 + 한글명 3개 업데이트 (커밋: 본 PR)
 - [x] **`docs/사이드픽-서비스-정책.md`** — 한글명 3개 동기화
-- [ ] **AI-04 / AI-05 enum 검토** — 부업 분야 7개만 영향, 횡단 9개는 enum 미포함이라 영향 없음 → 추가 작업 불필요
-- [ ] **BE-01 성공사례 이중 적재 로직 명세 (P1 #6)** — feature/backend에 명세 commit 확인 필요. BE에 추가 확인 요청.
-- [ ] **W3 메모리 등록** — 카테고리 정합성 검증 자동화 (Python 스크립트로 SQL ↔ PM-03 매칭)
+- [x] **AI-04 / AI-05 enum 검토** — 부업 분야 7개만 영향, 횡단 9개는 enum 미포함이라 영향 없음 → 추가 작업 불필요
+- [x] **BE-21 성공사례 이중 적재 로직 명세** — BE 답변(5/27) `codex/continue-on-laptop` 브랜치 `docs/BE-21 성공사례 이중 적재 로직 명세.md` L69 확인. **성공사례 등록 시 `success_cases` insert + `FAISS add(type="success")` 동시 처리 원칙 명시 완료**.
+- [ ] **W3 메모리 등록** — 카테고리 정합성 검증 자동화 (Python 스크립트로 SQL ↔ PM-03 매칭) — 옵션
+- [ ] **BE 테스트 실행 확인** — BE 답변(5/27)에 "환경에 Maven/Docker 없어 실제 실행 미진행" 명시. 다음 BE 셋업 시 테스트 통과 확인 필요
 
 ---
 
-## 4. BE 디스코드 공유 메시지 (참고)
+## 4. PM-08 최종 결과 — ✅ 완료
 
-```
-[PM-08 BE W1 수정 요청 6건 검수 완료]
-
-5/25 BE commit 09ea72b 확인. P0 3건 + P1 3건 다 처리됐어요. 감사합니다!
-
-정합성 검수 중 12건 불일치 발견 → PM-03 v1.3 / 서비스 정책으로 BE에 맞춰 정리했습니다.
-(slug 9개 + 한글명 띄어쓰기 3개. 대부분 BE가 더 명확 + 한국어 규범 준수라 채택)
-
-상세: ai/docs/PM-08-BE W1 수정 요청 6건 검수 메모.md
-
-확인 요청 1건: BE-01 성공사례 이중 적재 로직 명세는 어디에 정리됐는지 알려주세요.
-```
+- BE 답변 5/27 수령. **6건 + 보너스 1건 모두 위치 명시되어 확인 완료**.
+- PM-03 v1.3 / 서비스 정책 v1.3 정합화 commit.
+- 미완 항목 없음. BE 테스트 실행 확인만 다음 셋업 시 확인 필요.
