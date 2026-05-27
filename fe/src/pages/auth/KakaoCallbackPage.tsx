@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthLayout from '../../components/auth/AuthLayout';
 import { ErrorState, LoadingState } from '../../components/common/Skeleton';
+import { useToast } from '../../components/common/useToast';
 import { loginWithKakao } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
@@ -10,6 +11,7 @@ import { saveSession } from '../../lib/session';
 
 export default function KakaoCallbackPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [error, setError] = useState('');
 
   const callbackParams = useMemo(() => {
@@ -67,6 +69,13 @@ export default function KakaoCallbackPage() {
       cancelled = true;
     };
   }, [callbackParams, immediateError, navigate]);
+
+  useEffect(() => {
+    const message = immediateError || error;
+    if (message) {
+      showToast(message);
+    }
+  }, [error, immediateError, showToast]);
 
   return (
     <AuthLayout>

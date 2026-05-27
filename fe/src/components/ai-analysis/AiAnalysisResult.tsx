@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import amountIcon from '../../assets/images/amount.svg';
 import durationIcon from '../../assets/images/duration.svg';
 import { ErrorState, LoadingState } from '../common/Skeleton';
+import { useToast } from '../common/useToast';
 import {
   ApiError,
   createAnalysis,
@@ -232,6 +233,7 @@ function FaqShortcutCard({ onClick }: { onClick: () => void }) {
 
 export default function AiAnalysisResult({ experienceId }: Props) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [experience, setExperience] = useState<Experience | null>(null);
   const [report, setReport] = useState<Awaited<ReturnType<typeof getReport>> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -257,6 +259,12 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
     void loadPageData(experienceId);
   }, [experienceId]);
+
+  useEffect(() => {
+    if (error) {
+      showToast(error);
+    }
+  }, [error, showToast]);
 
   async function loadPageData(targetExperienceId: number) {
     setLoading(true);
@@ -564,6 +572,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                 <LoaderCircle size={18} strokeWidth={2.2} className="animate-spin text-[#5E5E5E]" />
                 <LoadingState
                   message="분석이 완료되면 이 화면에서 바로 결과를 볼 수 있습니다."
+                  showSpinner={false}
                   className="text-left"
                 />
               </div>

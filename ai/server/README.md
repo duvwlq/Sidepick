@@ -51,7 +51,7 @@ python -m server.tests.test_samples
 - max_tokens: 500
 - 평균 응답 시간: 2~4초
 
-## 추후 추가 예정
+## 참고
 
-- `POST /similar` — SBERT/FAISS 유사 사례 검색 (`recommender/` 자산 활용)
-- `POST /guide` — 성공 가이드 매칭
+- 현재 저장소 기준으로 `/similar`, `/guide` 엔드포인트 구현은 없습니다.
+- 유사 사례/가이드 로직은 현재 백엔드와 `matching_table.json` 쪽 처리 기준을 함께 봐야 합니다.

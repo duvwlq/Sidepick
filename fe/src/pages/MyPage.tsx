@@ -1,16 +1,25 @@
 import { ChevronRight, CircleHelp, LogOut, UserRound } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { LoadingState } from '../components/common/Skeleton';
+import { useToast } from '../components/common/useToast';
 import Layout from '../components/layout/Layout';
 import { getMe, type UserSummary } from '../lib/api';
 import { clearSession, getAccessToken, getStoredUser } from '../lib/session';
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const token = getAccessToken();
   const [user, setUser] = useState<UserSummary | null>(() => getStoredUser());
   const [loading, setLoading] = useState(Boolean(token));
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (error) {
+      showToast(error);
+    }
+  }, [error, showToast]);
 
   useEffect(() => {
     if (!token) {
@@ -36,7 +45,7 @@ export default function MyPage() {
       <div className="space-y-4 bg-[#FAFAFA] p-4">
         {loading ? (
           <section className="rounded-[20px] bg-white p-5 shadow-sm">
-            <p className="text-sm text-[#757575]">사용자 정보를 불러오는 중입니다.</p>
+            <LoadingState message="사용자 정보를 불러오는 중입니다." />
           </section>
         ) : user ? (
           <section className="rounded-[24px] bg-white p-5 shadow-sm">

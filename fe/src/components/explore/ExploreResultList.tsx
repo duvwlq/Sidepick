@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Experience } from '../../lib/api';
 import { extractExperienceTagLabels } from '../../lib/explore-tags';
+import { LoadingState } from '../common/Skeleton';
 import Card from '../common/Card';
 
 type Props = {
@@ -45,8 +46,8 @@ export default function ExploreResultList({
   return (
     <section className="flex w-full flex-col gap-[2px] bg-[#EEEEEE] pb-[110px]">
       {loading ? (
-        <div className="bg-[#FFFFFF] px-[20px] py-[48px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#666666]">
-          사례 목록을 불러오는 중입니다.
+        <div className="bg-[#FFFFFF] px-[20px] py-[48px]">
+          <LoadingState message="사례 목록을 불러오는 중입니다." />
         </div>
       ) : error ? (
         <div className="bg-[#FFFFFF] px-[20px] py-[48px] text-center text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#D33B3B]">

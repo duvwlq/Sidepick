@@ -17,12 +17,7 @@
 
 ## 팀장 확인 필요 항목
 
-1. 회원가입 상세항목을 `users` 확장으로 가는 방향이 맞는지
-2. 공감 기능을 `experience_reactions` 단일 테이블로 받는지
-3. 성공사례를 실패사례와 분리된 별도 테이블로 확정하는지
-4. 알림 테이블 `notifications`를 4주차 범위에 포함하는지
-5. `guides` 테이블을 5주차 구현 선행 스키마로 이번 범위에 포함하는지
-6. 토큰 모니터링 테이블 2종을 이번 고도화 DB 범위에 포함하는지
+1. `users` 확장, `experience_reactions`, `success_cases`, `notifications`, `guides`, 토큰 모니터링 2종 테이블 포함 방향 모두 팀장 확인 완료
 
 ## 목적
 
@@ -444,7 +439,7 @@ erDiagram
 - [x] 성공사례 테이블 (실패와 비슷한 스키마)
 - [x] 부업 가이드 테이블
 - [x] ERD 작성
-- [ ] 팀장 확인 받음
+- [x] 팀장 확인 받음
 
 ## 전달 메모
 
@@ -452,4 +447,5 @@ erDiagram
 - 댓글 저장 테이블은 이미 있으므로, 신규 범위는 댓글 알림용 `notifications`다.
 - 현재 설계는 S3 전제가 아니라 `image_url` 기반 이미지 저장 구조다.
 - PM-03 반영으로 5주차 부업 가이드 페이지 선행 스키마 `guides`를 포함했다.
+- 팀장 확인 결과 `users` 확장, `experience_reactions`, `success_cases`, `notifications`, `guides`, 토큰 모니터링 테이블 포함 방향 모두 확정됐다.
 - 실제 적용 전에는 이 문서와 SQL 초안을 함께 보고 확정하는 것을 권장한다.

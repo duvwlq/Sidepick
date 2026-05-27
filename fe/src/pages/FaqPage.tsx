@@ -138,8 +138,8 @@ export default function FaqPage() {
                       <p className="min-w-full text-left text-[12px] font-light leading-[14.4px] tracking-[0px] text-[#5E5E5E]">
                         {categoryLabel}
                       </p>
-                      <div className="flex items-start">
-                        <p className="truncate text-left text-[14px] font-semibold leading-[16.8px] tracking-[0px] text-[#000000]">
+                      <div className="flex min-w-0 items-start">
+                        <p className="break-words text-left text-[14px] font-semibold leading-[16.8px] tracking-[0px] text-[#000000]">
                           {item.question}
                         </p>
                       </div>

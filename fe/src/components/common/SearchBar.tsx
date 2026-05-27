@@ -1,4 +1,4 @@
-import { forwardRef, type ChangeEvent, type KeyboardEvent } from 'react';
+﻿import { forwardRef, type ChangeEvent, type KeyboardEvent } from 'react';
 import searchIcon from '../../assets/images/search.svg';
 
 type SearchBarProps = {

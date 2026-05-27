@@ -64,6 +64,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
             log.warn("Experience CSV import skipped because the file is empty: {}", csvPath);
             return;
         }
+        log.info("Experience import category map: {}", properties.getCategoryMap());
         String importSource = csvPath.getFileName().toString();
 
         if (properties.getReplaceMode() == ExperienceImportProperties.ReplaceMode.DELETE_IMPORTED_THEN_IMPORT) {
@@ -494,41 +495,12 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         if (normalized.matches("\\d+")) {
             return validateCategoryId(Long.parseLong(normalized));
         }
-        if (normalized.contains("\uC7AC\uB2A5") || normalized.contains("\uD504\uB9AC\uB79C\uC11C")) {
-            return validateCategoryId(5L);
-        }
-        if (normalized.contains("\uCF58\uD150\uCE20") || normalized.contains("sns")) {
-            return validateCategoryId(2L);
-        }
-        if (normalized.contains("\uB514\uC9C0\uD138") || normalized.contains("\uC9C0\uC2DD\uD310\uB9E4")) {
-            return validateCategoryId(3L);
-        }
-        if (normalized.contains("\uD50C\uB7AB\uD3FC") || normalized.contains("\uB178\uB3D9")) {
-            return validateCategoryId(4L);
-        }
-        if (normalized.contains("\uD22C\uC790") || normalized.contains("\uC7AC\uD14C\uD06C")) {
-            return validateCategoryId(6L);
-        }
-        if (normalized.contains("\uC624\uD504\uB77C\uC778") || normalized.contains("\uBD80\uC5C5")) {
-            return validateCategoryId(7L);
-        }
-        if (normalized.contains("online") || normalized.contains("digital") || normalized.contains("sns")
-                || normalized.contains("smartstore") || normalized.contains("ecommerce") || normalized.contains("e-commerce")
-                || normalized.contains("store")) {
-            return validateCategoryId(1L);
-        }
-        if (normalized.contains("offline") || normalized.contains("storefront") || normalized.contains("local")
-                || normalized.contains("popup")) {
-            return validateCategoryId(2L);
-        }
-        if (normalized.contains("content") || normalized.contains("youtube") || normalized.contains("blog")
-                || normalized.contains("newsletter") || normalized.contains("class")) {
-            return validateCategoryId(3L);
-        }
-        if (normalized.contains("saas") || normalized.contains("service") || normalized.contains("app")
-                || normalized.contains("platform") || normalized.contains("automation")) {
-            return validateCategoryId(4L);
-        }
+        log.warn(
+                "Falling back to default category. rawCategory='{}', normalized='{}', availableKeys={}",
+                rawCategory,
+                normalized,
+                properties.getCategoryMap().keySet()
+        );
         return validateCategoryId(properties.getDefaultCategoryId());
     }
 
@@ -711,7 +683,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
 
     private String normalizeCategoryKey(String value) {
         String normalized = normalizeKey(value);
-        return normalized.replace(" ", "");
+        return normalized.replaceAll("[\\s_\\-·./]+", "");
     }
 
     private String normalizeKey(String value) {

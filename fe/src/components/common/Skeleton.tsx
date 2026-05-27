@@ -1,3 +1,5 @@
+import { LoaderCircle } from 'lucide-react';
+
 type SkeletonProps = {
   className?: string;
 };
@@ -66,14 +68,19 @@ export function ErrorState({ message }: { message: string }) {
 export function LoadingState({
   message,
   className = '',
+  showSpinner = true,
 }: {
   message: string;
   className?: string;
+  showSpinner?: boolean;
 }) {
   return (
     <div
-      className={`w-full rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[20px] text-center text-[14px] leading-[20px] text-[#666666] ${className}`.trim()}
+      className={`flex w-full flex-col items-center justify-center gap-[10px] rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[20px] text-center text-[14px] leading-[20px] text-[#666666] ${className}`.trim()}
     >
+      {showSpinner ? (
+        <LoaderCircle size={18} strokeWidth={2.2} className="animate-spin text-[#5E5E5E]" />
+      ) : null}
       {message}
     </div>
   );

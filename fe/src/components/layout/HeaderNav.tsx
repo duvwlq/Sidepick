@@ -97,15 +97,15 @@ export default function HeaderNav({
       translate="no"
     >
       {showStatusBar ? <StatusBar /> : null}
-      <div className="flex h-[64px] w-full items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
-        <div className="flex h-[24px] w-[24px] items-center justify-start">{renderLeftButton()}</div>
+      <div className="flex h-[64px] w-full items-center bg-[#FFFFFF] px-[16px] py-[20px]">
+        <div className="flex h-[24px] w-[24px] shrink-0 items-center justify-start">{renderLeftButton()}</div>
         <h1
           translate="no"
-          className="whitespace-nowrap text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]"
+          className="min-w-0 flex-1 px-[12px] text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]"
         >
           {title}
         </h1>
-        <div className="flex h-[24px] w-[24px] items-center justify-end">{renderRightButton()}</div>
+        <div className="flex h-[24px] w-[24px] shrink-0 items-center justify-end">{renderRightButton()}</div>
       </div>
     </header>
   );
@@ -113,8 +113,8 @@ export default function HeaderNav({
 
 function StatusBar() {
   return (
-    <div className="flex h-[59px] w-full items-center justify-center gap-[154px] bg-[#FFFFFF] px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex h-[22px] min-w-px flex-[1_0_0] items-center justify-center pt-[1.5px]">
+    <div className="flex h-[59px] w-full items-center justify-between bg-[#FFFFFF] px-[24px] pb-[19px] pt-[21px]">
+      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center pt-[1.5px]">
         <p
           translate="no"
           className="text-center font-['SF_Pro'] text-[17px] font-[600] leading-[22px] tracking-[0px] text-[#000000]"
@@ -122,7 +122,7 @@ function StatusBar() {
           9:41
         </p>
       </div>
-      <div className="flex h-[22px] min-w-px flex-[1_0_0] items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
+      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
         <div className="flex h-[12.226px] w-[19.2px] items-end gap-[1.6px]">
           <div className="h-[4px] w-[3px] rounded-[999px] bg-[#000000]" />
           <div className="h-[6px] w-[3px] rounded-[999px] bg-[#000000]" />

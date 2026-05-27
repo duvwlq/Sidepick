@@ -1,55 +1,31 @@
-# recommender/ — SBERT + FAISS 유사 사례 검색
+# AI Recommender Assets
 
-부업 실패 사례 간 유사도를 계산하고 검색하는 임베딩 자산.
+## 개요
 
-향후 `POST /similar` 엔드포인트(추후 추가 예정)에서 활용.
+`ai/recommender/` 는 유사 사례 검색용 SBERT/FAISS 자산 보관 폴더입니다.
+현재 FastAPI 서버에 직접 연결되어 있지는 않습니다.
 
-## 📂 파일 목록
+## 현재 상태
 
-| 파일 | 용도 |
-|---|---|
-| `embedding_pipeline.py` | SBERT 임베딩 생성 파이프라인 |
-| `recommender.py` | 유사 사례 검색 로직 |
-| `data_cleaning.py` | 임베딩 입력용 데이터 클렌징 |
-| `cleaned_data.csv` | 클렌징된 입력 데이터 |
-| `similarity_index.index` | FAISS 인덱스 (binary, ~3MB) |
-| `similarity_index_data.pkl` | FAISS 매핑 데이터 (binary, ~750KB) |
+- 서버 미연결
+- 실험/자산 보관 성격
+- 현재 서비스에서 더 직접적으로 쓰이는 가이드 매핑은 `matching_table.json` 과 백엔드 로직입니다
 
-## 🧠 동작 방식
+## 주의
 
-```
-유저 입력 텍스트
-    ↓ (SBERT 인코딩)
-벡터 (768차원)
-    ↓ (FAISS top-k 검색)
-유사 사례 ID 리스트 + 유사도 점수
-    ↓
-원본 데이터(`../data/failure_cases_49.csv`)에서 매칭하여 반환
-```
+기존 README 에 있던 49건 기준 설명은 현재 메인 데이터 기준과 다를 수 있습니다.
+현재 데이터 기준은 `ai/data/README.md` 를 우선 확인해야 합니다.
 
-## 🚧 통합 상태
+## 파일
 
-현재는 자산만 보유. **FastAPI 서버에는 아직 연결되지 않음**.
+- `embedding_pipeline.py`
+- `recommender.py`
+- `data_cleaning.py`
+- `cleaned_data.csv`
+- `similarity_index.index`
+- `similarity_index_data.pkl`
 
-다음 작업:
-1. `server/`에 `/similar` 엔드포인트 추가
-2. `recommender.py`의 검색 함수를 FastAPI에서 호출
-3. `failure_cases_49.csv` 기준으로 인덱스 재생성 (현재 인덱스는 더 큰 데이터셋 기반)
+## 참고
 
-## ⚠️ 인덱스 재생성 필요성
-
-`similarity_index.*` 파일은 yumenikkidiary 레포의 데이터(아마 1,000건 이상) 기준으로 만들어진 것입니다. 우리는 **49건 + 검수 20건** 정도만 사용하므로, **재생성 권장**:
-
-```bash
-cd ~/Sidepick/ai
-source venv/bin/activate
-python recommender/embedding_pipeline.py  # 입력 경로 수정 필요
-```
-
-## 🗂️ 원본 위치
-
-- 원본: [yumenikkidiary/sidejob-data-collection](https://github.com/yumenikkidiary/sidejob-data-collection)
-  - `ai/embedding_pipeline.py`
-  - `ai/model/recommender.py`
-  - `models/similarity_index.*`
-- 구버전 백업: [`../archive_ai_a/data/raw/`](../archive_ai_a/data/raw/)
+- 현재 데이터 기준: [ai/data/README.md](/D:/Codex_Folder/Sidepick/ai/data/README.md)
+- AI 서버 구현: [ai/server/main.py](/D:/Codex_Folder/Sidepick/ai/server/main.py)
