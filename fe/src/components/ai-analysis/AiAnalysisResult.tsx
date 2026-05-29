@@ -2,6 +2,7 @@ import { mockAnalysisData } from '../../constants/mockAnalysisData';
 import PatternBar from './PatternBar';
 import ActionCard from './ActionCard';
 import SimilarCaseCard from './SimilarCaseCard';
+import FailureToSuccessButton from './FailureToSuccessButton';
 
 type SummaryData = {
   nickname: string;
@@ -20,6 +21,9 @@ type SummaryData = {
     tags: string[];
     similarity: number;
   }[];
+  // PM-10: 실패→성공 연결 버튼용
+  caseId?: string;
+  relatedSuccessCount?: number;
 };
 
 export default function AiAnalysisResult() {
@@ -134,6 +138,12 @@ export default function AiAnalysisResult() {
             모두 사례 보기
           </button>
         </section>
+
+        {/* PM-10: 실패→성공 연결 버튼 */}
+        <FailureToSuccessButton
+          caseId={data.caseId ?? 'unknown'}
+          relatedSuccessCount={data.relatedSuccessCount ?? 0}
+        />
 
         <button
           type="button"
