@@ -126,7 +126,8 @@ class DemoScenarioSupportTest {
                 "[]",
                 null,
                 false,
-                "{\"source\":\"test\"}"
+                "{\"source\":\"test\"}",
+                "FAILURE"
         );
     }
 

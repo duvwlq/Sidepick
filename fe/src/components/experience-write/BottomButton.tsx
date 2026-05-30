@@ -16,7 +16,7 @@ export default function BottomButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className={`flex h-[48px] w-full items-center justify-center gap-[4px] rounded-[8px] py-[5px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1] ${
+      className={`flex h-[40px] w-full items-center justify-center gap-[4px] rounded-[10px] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1] ${
         disabled ? 'bg-[#BABABA]' : 'bg-[#131416]'
       }`}
     >

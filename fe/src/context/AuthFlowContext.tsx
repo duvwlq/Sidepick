@@ -5,12 +5,16 @@ type AuthFlowData = {
   email: string;
   password: string;
   passwordConfirm: string;
+  fullName: string;
+  birthDate: string;
+  gender: string;
   nickname: string;
   verificationCode: string;
   ageGroup: string;
   region: string;
-  employmentStatus: string;
+  experienceStatus: string;
   signupPurposes: string[];
+  nicknameChecked: boolean;
   verificationSent: boolean;
   verificationConfirmed: boolean;
   verificationMessage: string;
@@ -27,12 +31,16 @@ const initialForm: AuthFlowData = {
   email: '',
   password: '',
   passwordConfirm: '',
+  fullName: '',
+  birthDate: '',
+  gender: '',
   nickname: '',
   verificationCode: '',
   ageGroup: '20s',
   region: '',
-  employmentStatus: '',
+  experienceStatus: '',
   signupPurposes: [],
+  nicknameChecked: false,
   verificationSent: false,
   verificationConfirmed: false,
   verificationMessage: '',

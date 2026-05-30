@@ -27,7 +27,7 @@ export default function SignupEmailPage() {
 
   async function handleNext() {
     if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      setError('이메일 형식에 맞게 다시 작성해주세요');
+      setError('이메일 형식에 맞게 다시 입력해 주세요.');
       return;
     }
 
@@ -35,17 +35,18 @@ export default function SignupEmailPage() {
     setError('');
 
     try {
-      const payload = await requestEmailVerification({ email: form.email });
+      const payload = await requestEmailVerification({ email: form.email.trim() });
+      updateField('email', form.email.trim());
       updateField('verificationSent', true);
       updateField(
         'verificationMessage',
         payload.verificationCode
-          ? `개발용 인증 코드: ${payload.verificationCode}`
-          : '이메일 인증이 완료되었어요',
+          ? `개발용 인증코드: ${payload.verificationCode}`
+          : '인증 메일을 발송했어요.',
       );
       navigate(`/signup/verify?next=${encodeURIComponent(nextPath)}`);
     } catch (requestError) {
-      const message = resolveErrorMessage(requestError, '이메일 형식에 맞게 다시 작성해주세요');
+      const message = resolveErrorMessage(requestError, '이메일 형식에 맞게 다시 입력해 주세요.');
       setError(message);
       showToast(message);
     } finally {
@@ -55,8 +56,8 @@ export default function SignupEmailPage() {
 
   return (
     <SignupScreen
-      title="비밀번호 설정"
-      headlineLines={['로그인 시 사용할', '아이디를 입력해 주세요']}
+      title="개인 정보 등록"
+      headline="이메일로 본인 확인을 진행할게요"
       onBack={() =>
         navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
           replace: true,
@@ -67,16 +68,16 @@ export default function SignupEmailPage() {
         <SignupField
           label="이메일"
           type="email"
-          placeholder="영문, 숫자를 조합하여 8자 이상 입력해 주세요"
+          placeholder="이메일을 입력해 주세요"
           value={form.email}
           onChange={(event) => updateField('email', event.target.value)}
-          fieldHeight={37}
+          fieldHeight={40}
         />
 
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-        <SignupButton onClick={() => void handleNext()} disabled={loading}>
-          {loading ? '잠시만 기다려주세요' : '다음으로'}
+        <SignupButton onClick={() => void handleNext()} disabled={loading} tone="soft">
+          {loading ? '인증 메일 발송 중...' : '다음으로'}
         </SignupButton>
       </SignupFieldGroup>
     </SignupScreen>

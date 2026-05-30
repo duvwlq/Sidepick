@@ -29,10 +29,11 @@ class NaverAuthFeatureIntegrationTest {
                         .content("""
                                 {
                                   "code": "dummy-code",
+                                  "state": "dummy-state",
                                   "redirectUri": "http://localhost:4174/auth/naver/callback"
                                 }
                                 """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data.detail").value("Naver login is not available right now."));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 }

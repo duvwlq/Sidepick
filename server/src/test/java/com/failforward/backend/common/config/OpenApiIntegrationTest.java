@@ -39,7 +39,7 @@ class OpenApiIntegrationTest {
     }
 
     @Test
-    void generatedBusinessPathsKeepApiPrefix() throws Exception {
+    void generatedBusinessPathsRelyOnSingleServerPrefix() throws Exception {
         String response = mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -51,8 +51,12 @@ class OpenApiIntegrationTest {
         while (fieldNames.hasNext()) {
             String path = fieldNames.next();
             org.junit.jupiter.api.Assertions.assertTrue(
-                    path.startsWith("/api/"),
-                    () -> "OpenAPI path must start with /api/: " + path
+                    path.startsWith("/"),
+                    () -> "OpenAPI path must start with /: " + path
+            );
+            org.junit.jupiter.api.Assertions.assertFalse(
+                    path.startsWith("/api/api/"),
+                    () -> "OpenAPI path must not duplicate the /api server prefix: " + path
             );
         }
     }

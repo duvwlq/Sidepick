@@ -74,6 +74,7 @@ app:
     created-at-end: ${APP_EXPERIENCE_IMPORT_CREATED_AT_END:2026-04-30T23:59:59}
     default-age-group: ${APP_EXPERIENCE_IMPORT_DEFAULT_AGE_GROUP:30s}
     default-risk-level: ${APP_EXPERIENCE_IMPORT_DEFAULT_RISK_LEVEL:MEDIUM}
+    default-case-status: ${APP_EXPERIENCE_IMPORT_DEFAULT_CASE_STATUS:FAILURE}
     default-category-id: ${APP_EXPERIENCE_IMPORT_DEFAULT_CATEGORY_ID:8}
     category-map:
       "[온라인판매_이커머스]": 1

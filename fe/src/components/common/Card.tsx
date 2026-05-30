@@ -37,9 +37,9 @@ export default function Card({
       <div className="flex w-full min-w-0 flex-col items-start gap-[8px]">
         <div className="flex w-full items-center">
           <div className="flex min-w-0 flex-wrap items-start gap-[4px] overflow-hidden">
-            {visibleChips.map((chip) => (
+            {visibleChips.map((chip, index) => (
               <span
-                key={chip}
+                key={`${chip}-${index}`}
                 className="flex max-w-full items-center justify-center rounded-[999px] bg-[#F3F3F3] px-[8px] py-[3px]"
               >
                 <span className="truncate whitespace-nowrap font-['Pretendard'] text-[11px] font-[500] leading-[13px] tracking-[0px] text-[#5E5E5E]">

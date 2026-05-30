@@ -9,6 +9,8 @@ import {
 } from '../../components/auth/FigmaSignupPrimitives';
 import { useAuthFlow } from '../../context/useAuthFlow';
 
+const PASSWORD_POLICY = /^(?=.*[A-Za-z])(?=.*\d).{8,64}$/;
+
 export default function SignupPasswordPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,24 +28,24 @@ export default function SignupPasswordPage() {
       return;
     }
 
-    if (form.password.length < 8) {
-      setError('비밀번호는 8자 이상 입력해 주세요.');
+    if (!PASSWORD_POLICY.test(form.password)) {
+      setError('영문, 숫자를 조합하여 8자 이상 입력해 주세요.');
       return;
     }
 
     if (form.password !== form.passwordConfirm) {
-      setError('비밀번호가 일치하지 않습니다.');
+      setError('비밀번호가 일치하지 않아요.');
       return;
     }
 
     setError('');
-    navigate(`/signup/nickname?next=${encodeURIComponent(nextPath)}`);
+    navigate(`/signup/nickname?next=${encodeURIComponent(nextPath)}&mode=local`);
   }
 
   return (
     <SignupScreen
       title="비밀번호 설정"
-      headlineLines={['로그인 시 사용할', '비밀번호를 입력해 주세요']}
+      headline="로그인 시 사용할 비밀번호를 입력해 주세요"
       onBack={() => navigate(`/signup/verify?next=${encodeURIComponent(nextPath)}`)}
     >
       <SignupFieldGroup>
@@ -53,7 +55,7 @@ export default function SignupPasswordPage() {
           placeholder="영문, 숫자를 조합하여 8자 이상 입력해 주세요"
           value={form.password}
           onChange={(event) => updateField('password', event.target.value)}
-          fieldHeight={37}
+          fieldHeight={40}
         />
 
         <SignupField
@@ -62,12 +64,14 @@ export default function SignupPasswordPage() {
           placeholder="비밀번호 확인을 위해 다시 한 번 입력해 주세요"
           value={form.passwordConfirm}
           onChange={(event) => updateField('passwordConfirm', event.target.value)}
-          fieldHeight={37}
+          fieldHeight={40}
         />
 
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-        <SignupButton onClick={handleNext}>다음으로</SignupButton>
+        <SignupButton onClick={handleNext} tone="soft">
+          다음으로
+        </SignupButton>
       </SignupFieldGroup>
     </SignupScreen>
   );

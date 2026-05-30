@@ -158,13 +158,13 @@ function SelectTrigger({
       <button
         type="button"
         onClick={onClick}
-        className="flex h-[40px] w-full items-center justify-between rounded-[8px] border border-[#E6E6E6] bg-[#FFFFFF] px-[16px] py-[10px]"
+        className="flex h-[36px] w-full items-center justify-between rounded-[10px] border border-[#E6E6E6] bg-[#FFFFFF] px-[16px] py-[8px]"
         aria-label={label}
         aria-haspopup="dialog"
       >
         <span
-          className={`truncate font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] [font-feature-settings:'case'_1] ${
-            value ? 'text-[#5D5D5D]' : 'text-[#BABABA]'
+          className={`truncate font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+            value ? 'text-[#131416]' : 'text-[#BABABA]'
           }`}
         >
           {value || '선택해주세요'}
@@ -254,16 +254,16 @@ function MoneyBox({
   return (
     <div className="flex w-full flex-col gap-[10px]">
       <FieldLabel label={label} />
-      <div className="relative h-[40px] w-full rounded-[10px] bg-[#F8F8F8]">
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-[16px] py-[10px]">
+      <div className="relative h-[36px] w-full rounded-[10px] bg-[#F8F8F8]">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-between px-[16px] py-[8px]">
           <span
-            className={`font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] [font-feature-settings:'case'_1] ${
-              value ? 'text-[#111111]' : 'text-[#BABABA]'
+            className={`font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+              value ? 'text-[#131416]' : 'text-[#BABABA]'
             }`}
           >
             {value ? Number(value).toLocaleString('ko-KR') : '예: 1,000,000'}
           </span>
-          <span className="font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
+          <span className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
             원
           </span>
         </div>
@@ -292,14 +292,14 @@ function ChoiceButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[40px] w-full items-center gap-[4px] rounded-[8px] border px-[16px] py-[10px] ${
+      className={`flex h-[36px] w-full items-center gap-[4px] rounded-[10px] border px-[16px] py-[8px] ${
         active ? 'border-[#131416] bg-[#F8F8F8]' : 'border-[#E6E6E6] bg-[#FFFFFF]'
       }`}
     >
       <CheckIcon active={active} />
       <span
         className={`min-w-0 flex-1 truncate text-left font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
-          active ? 'text-[#131416]' : 'text-[#757575]'
+          active ? 'text-[#131416]' : 'text-[#8A8A8A]'
         }`}
       >
         {label}

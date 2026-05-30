@@ -127,7 +127,8 @@ class AIAnalysisSupportTest {
                 "[]",
                 "lesson",
                 false,
-                "{}"
+                "{}",
+                "FAILURE"
         );
     }
 }

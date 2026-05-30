@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SignupButton, SignupFieldGroup, SignupScreen } from '../../components/auth/FigmaSignupPrimitives';
 import { useAuthFlow } from '../../context/useAuthFlow';
-import { EMPLOYMENT_OPTIONS, parseNextPath, parseSignupMode } from './signup-flow';
+import { EXPERIENCE_OPTIONS, parseNextPath, parseSignupMode } from './signup-flow';
 
 function OptionButton({
   active,
@@ -16,7 +16,7 @@ function OptionButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[40px] w-full items-center rounded-[10px] border px-[16px] text-left font-['Pretendard'] text-[14px] leading-[16.8px] ${
+      className={`flex h-[40px] w-full items-center rounded-[10px] border px-[16px] text-left font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] ${
         active ? 'border-[#5A876E] bg-[#EAF3EE] text-[#2F4D3D]' : 'border-[#E6E6E6] bg-white text-[#494949]'
       }`}
     >
@@ -34,25 +34,23 @@ export default function SignupExperiencePage() {
 
   return (
     <SignupScreen
-      title="본업 여부"
-      headlineLines={['현재 본업을 하고 계신지', '알려주세요']}
+      title="경험 여부"
+      headline="이전에 부업을 진행해본 경험이 있으신가요?"
       onBack={() => navigate(`/signup/region?next=${encodeURIComponent(nextPath)}&mode=${signupMode}`)}
     >
       <SignupFieldGroup>
-        {EMPLOYMENT_OPTIONS.map((option) => (
+        {EXPERIENCE_OPTIONS.map((option) => (
           <OptionButton
-            key={option}
-            active={form.employmentStatus === option}
-            label={option}
-            onClick={() => updateField('employmentStatus', option)}
+            key={option.value}
+            active={form.experienceStatus === option.value}
+            label={option.label}
+            onClick={() => updateField('experienceStatus', option.value)}
           />
         ))}
 
         <SignupButton
-          onClick={() =>
-            navigate(`/signup/purpose?next=${encodeURIComponent(nextPath)}&mode=${signupMode}`)
-          }
-          disabled={!form.employmentStatus}
+          onClick={() => navigate(`/signup/purpose?next=${encodeURIComponent(nextPath)}&mode=${signupMode}`)}
+          disabled={!form.experienceStatus}
           tone="primary"
         >
           다음으로

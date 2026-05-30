@@ -7,7 +7,7 @@ import { register, updateMe } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { getAccessToken, getRefreshToken, getStoredUser, saveSession, saveStoredUser } from '../../lib/session';
-import { parseNextPath, parseSignupMode, PURPOSE_OPTIONS } from './signup-flow';
+import { deriveAgeGroup, parseNextPath, parseSignupMode, PURPOSE_OPTIONS } from './signup-flow';
 
 function PurposeButton({
   active,
@@ -22,7 +22,7 @@ function PurposeButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-h-[40px] w-full items-center rounded-[10px] border px-[16px] py-[10px] text-left font-['Pretendard'] text-[14px] leading-[16.8px] ${
+      className={`flex min-h-[40px] w-full items-center rounded-[10px] border px-[16px] py-[10px] text-left font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] ${
         active ? 'border-[#5A876E] bg-[#EAF3EE] text-[#2F4D3D]' : 'border-[#E6E6E6] bg-white text-[#494949]'
       }`}
     >
@@ -62,7 +62,7 @@ export default function SignupPurposePage() {
 
   async function handleComplete() {
     if (!form.signupPurposes.length) {
-      setError('사용 목적을 하나 이상 선택해주세요.');
+      setError('사용 목적을 하나 이상 선택해 주세요.');
       return;
     }
 
@@ -82,7 +82,13 @@ export default function SignupPurposePage() {
 
         const payload = await updateMe(accessToken, {
           nickname: form.nickname.trim(),
-          ageGroup: storedUser.ageGroup || '20s',
+          fullName: form.fullName.trim(),
+          birthDate: form.birthDate,
+          gender: form.gender,
+          region: form.region,
+          signupPurposes: form.signupPurposes,
+          experienceStatus: form.experienceStatus,
+          ageGroup: deriveAgeGroup(form.birthDate),
           profileImage: storedUser.profileImage,
         });
         saveSession(accessToken, refreshToken, payload.user);
@@ -91,17 +97,23 @@ export default function SignupPurposePage() {
         const payload = await register({
           email: form.email,
           password: form.password,
+          fullName: form.fullName.trim(),
+          birthDate: form.birthDate,
+          gender: form.gender,
+          region: form.region,
+          signupPurposes: form.signupPurposes,
           nickname: form.nickname.trim(),
-          ageGroup: form.ageGroup || '20s',
+          experienceStatus: form.experienceStatus,
+          ageGroup: deriveAgeGroup(form.birthDate),
         });
         saveSession(payload.accessToken, payload.refreshToken, payload.user);
       }
 
-      setFlashToast(`환영해요, ${form.nickname.trim()}님!`);
+      setFlashToast(`환영해요, ${form.nickname.trim()}님`);
       reset();
       navigate(nextPath, { replace: true });
     } catch (submitError) {
-      const message = resolveErrorMessage(submitError, '회원가입을 완료하지 못했어요. 다시 시도해주세요.');
+      const message = resolveErrorMessage(submitError, '회원가입을 완료하지 못했어요. 다시 시도해 주세요.');
       setError(message);
       showToast(message);
     } finally {
@@ -112,7 +124,7 @@ export default function SignupPurposePage() {
   return (
     <SignupScreen
       title="서비스 목적"
-      headlineLines={['사이드픽을 방문하게 된 목적을', '알려주세요']}
+      headline="사이드픽을 방문하게 된 목적이 어떻게 되시나요?"
       onBack={() => navigate(`/signup/employment?next=${encodeURIComponent(nextPath)}&mode=${signupMode}`)}
     >
       <SignupFieldGroup>
@@ -132,7 +144,7 @@ export default function SignupPurposePage() {
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
         <SignupButton onClick={() => void handleComplete()} disabled={loading} tone="primary">
-          {loading ? '완료 중입니다' : '가입 완료'}
+          {loading ? '가입을 완료하는 중이에요' : '가입 완료'}
         </SignupButton>
       </SignupFieldGroup>
     </SignupScreen>

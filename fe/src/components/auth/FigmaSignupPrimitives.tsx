@@ -6,7 +6,9 @@ import wifiIcon from '../../assets/auth-figma/wifi.svg';
 
 type SignupScreenProps = {
   title: string;
-  headlineLines: [string, string];
+  headline?: string;
+  headlineLines?: string[];
+  caption?: string;
   onBack?: () => void;
   children: ReactNode;
 };
@@ -15,7 +17,7 @@ type SignupFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   label: string;
   placeholder: string;
   suffix?: ReactNode;
-  fieldHeight?: 37 | 40 | 43;
+  fieldHeight?: 40 | 43;
 };
 
 type SignupButtonProps = {
@@ -27,32 +29,30 @@ type SignupButtonProps = {
 
 export function SignupScreen({
   title,
+  headline,
   headlineLines,
+  caption,
   onBack,
   children,
 }: SignupScreenProps) {
+  const resolvedHeadline = headlineLines?.join(' ') ?? headline ?? '';
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-white">
       <div className="mx-auto flex min-h-screen w-full max-w-[375px] flex-col bg-white">
         <div className="flex w-full flex-col">
           <div className="flex h-[59px] w-full items-center justify-center px-[24px] pb-[19px] pt-[21px]">
             <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center pt-[1.5px]">
-              <span className="font-['Pretendard'] text-[17px] font-[600] leading-[22px] tracking-[0px] text-black">
-                9:41
-              </span>
+              <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">9:41</span>
             </div>
             <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
-              <img
-                src={cellularConnectionIcon}
-                alt=""
-                className="h-[12.226px] w-[19.2px] shrink-0"
-              />
+              <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
               <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
               <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
             </div>
           </div>
 
-          <div className="flex w-full items-center justify-between px-[16px] py-[20px]">
+          <div className="flex h-[64px] w-full items-center px-[16px] py-[20px]">
             <button
               type="button"
               aria-label="뒤로가기"
@@ -62,23 +62,27 @@ export function SignupScreen({
               <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
             </button>
 
-            <div className="flex flex-col justify-center text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-black">
-              <span>{title}</span>
+            <div className="flex-1 text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">
+              {title}
             </div>
 
             <div className="h-[24px] w-[24px] shrink-0" aria-hidden="true" />
           </div>
         </div>
 
-        <div className="flex w-full flex-col items-start gap-[48px] py-[20px]">
-          <div className="flex w-full items-center justify-center px-[16px]">
-            <div className="min-w-0 flex-1 font-['Pretendard'] text-[20px] font-[400] leading-[24px] tracking-[0px] text-black">
-              <p>{headlineLines[0]}</p>
-              <p>{headlineLines[1]}</p>
-            </div>
+        <div className="flex w-full flex-col gap-[48px] py-[20px]">
+          <div className="flex w-full flex-col gap-[8px] px-[16px]">
+            <p className="font-['Pretendard'] text-[20px] font-[400] leading-[24px] text-black">
+              {resolvedHeadline}
+            </p>
+            {caption ? (
+              <p className="font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#8A8A8A]">
+                {caption}
+              </p>
+            ) : null}
           </div>
 
-          <div className="flex w-full flex-col items-start px-[16px]">{children}</div>
+          <div className="flex w-full flex-col gap-[16px] px-[16px]">{children}</div>
         </div>
       </div>
     </div>
@@ -89,45 +93,41 @@ export function SignupField({
   label,
   placeholder,
   suffix,
-  fieldHeight = 37,
+  fieldHeight = 40,
   value,
   className = '',
   ...props
 }: SignupFieldProps) {
-  const textValue = typeof value === 'string' ? value : '';
-  const hasValue = textValue.length > 0;
-  const hasSuffix = Boolean(suffix);
+  const hasValue = typeof value === 'string' && value.length > 0;
 
   return (
-    <div className="flex w-full flex-col items-start gap-[4px]">
-      <div className="flex flex-col justify-center overflow-hidden font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-black">
-        <span>{label}</span>
-      </div>
+    <div className="flex w-full flex-col gap-[4px]">
+      <span className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-black">{label}</span>
 
-      <label className={`relative w-full ${className}`}>
+      <label className={`relative block w-full ${className}`}>
         <div
-          className="flex w-full items-center justify-between rounded-[10px] bg-[#EEEEEE] px-[16px] py-[10px]"
+          className="flex w-full items-center justify-between rounded-[10px] bg-[#F8F8F8] px-[16px] py-[10px]"
           style={{ height: `${fieldHeight}px` }}
         >
-          {!hasValue ? (
-            <div className="pointer-events-none min-w-0 flex-1 overflow-hidden font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5D5D5D]/50">
-              <span className="block truncate">{placeholder}</span>
-            </div>
-          ) : (
-            <div className="min-w-0 flex-1" aria-hidden="true" />
-          )}
+          <span
+            className={`pointer-events-none min-w-0 flex-1 truncate font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] ${
+              hasValue ? 'text-[#494949]' : 'text-[#BABABA]'
+            }`}
+          >
+            {hasValue ? value : placeholder}
+          </span>
 
           {suffix ? (
-            <div className="pointer-events-none ml-[8px] shrink-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5D5D5D]">
+            <span className="pointer-events-none ml-[8px] shrink-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
               {suffix}
-            </div>
+            </span>
           ) : null}
         </div>
 
         <input
           value={value}
-          className={`absolute inset-0 h-full w-full border-0 bg-transparent px-[16px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5D5D5D] caret-black outline-none placeholder:text-transparent ${
-            hasSuffix ? 'pr-[56px]' : ''
+          className={`absolute inset-0 h-full w-full border-0 bg-transparent px-[16px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-transparent caret-black outline-none placeholder:text-transparent ${
+            suffix ? 'pr-[64px]' : ''
           }`}
           {...props}
         />
@@ -142,50 +142,35 @@ export function SignupButton({
   disabled = false,
   tone = 'soft',
 }: SignupButtonProps) {
-  const backgroundClass =
-    tone === 'primary'
-      ? 'bg-[#5A876E] text-white'
-      : 'bg-[#CBE5D8] text-white';
-
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`flex h-[48px] w-[343px] items-center justify-center rounded-[8px] py-[5px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] ${backgroundClass} disabled:opacity-70`}
+      className={`flex h-[48px] w-full items-center justify-center rounded-[10px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white disabled:opacity-60 ${
+        tone === 'primary' ? 'bg-[#5A876E]' : 'bg-[#CBE5D8]'
+      }`}
     >
       {children}
     </button>
   );
 }
 
-export function SignupFieldGroup({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  return <div className="flex w-full flex-col items-start gap-[16px]">{children}</div>;
+export function SignupFieldGroup({ children }: { children: ReactNode }) {
+  return <div className="flex w-full flex-col gap-[16px]">{children}</div>;
 }
 
-export function InlineHelperRow({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function InlineHelperRow({ children }: { children: ReactNode }) {
   return (
-    <div className="flex w-full items-center justify-center gap-[4px] font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px]">
+    <div className="flex w-full items-center justify-center gap-[4px] font-['Pretendard'] text-[12px] leading-[14.4px]">
       {children}
     </div>
   );
 }
 
-export function SignupErrorText({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export function SignupErrorText({ children }: { children: ReactNode }) {
   return (
-    <p className="w-full font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#D33B3B]">
+    <p className="w-full font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#D33B3B]">
       {children}
     </p>
   );

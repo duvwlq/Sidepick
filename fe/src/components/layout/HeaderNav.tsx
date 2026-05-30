@@ -76,8 +76,7 @@ export default function HeaderNav({
     }
 
     const icon = rightIcon === 'search' ? searchIcon : rightIcon === 'menu' ? menuIcon : bellIcon;
-    const label =
-      rightIcon === 'search' ? '검색 열기' : rightIcon === 'menu' ? '메뉴 열기' : '알림';
+    const label = rightIcon === 'search' ? '검색 열기' : rightIcon === 'menu' ? '메뉴 열기' : '알림';
 
     return (
       <button
@@ -93,7 +92,7 @@ export default function HeaderNav({
 
   return (
     <header
-      className="fixed top-0 left-1/2 z-50 w-full max-w-[430px] -translate-x-1/2 bg-[#FFFFFF] notranslate"
+      className="fixed left-1/2 top-0 z-50 w-full max-w-[430px] -translate-x-1/2 bg-[#FFFFFF] notranslate"
       translate="no"
     >
       {showStatusBar ? <StatusBar /> : null}

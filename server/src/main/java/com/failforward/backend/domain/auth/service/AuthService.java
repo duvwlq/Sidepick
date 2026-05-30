@@ -6,6 +6,8 @@ import com.failforward.backend.domain.auth.dto.AuthDtos.EmailVerificationPayload
 import com.failforward.backend.domain.auth.dto.AuthDtos.EmailVerificationRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.LoginRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.OAuthLoginRequest;
+import com.failforward.backend.domain.auth.dto.AuthDtos.OAuthStatePayload;
+import com.failforward.backend.domain.auth.dto.AuthDtos.OAuthStateRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.SignUpRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class AuthService {
     private final LocalAuthService localAuthService;
     private final EmailVerificationService emailVerificationService;
     private final OAuthAuthService oAuthAuthService;
+    private final OAuthStateService oAuthStateService;
 
     @Transactional
     public AuthPayload signUp(SignUpRequest request) {
@@ -52,5 +55,9 @@ public class AuthService {
     @Transactional
     public AuthPayload loginWithNaver(OAuthLoginRequest request) {
         return oAuthAuthService.loginWithNaver(request);
+    }
+
+    public OAuthStatePayload issueOAuthState(OAuthStateRequest request) {
+        return oAuthStateService.issue(request.provider(), request.redirectUri());
     }
 }

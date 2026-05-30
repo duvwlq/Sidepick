@@ -14,11 +14,11 @@ export default function AuthButton({
   ...props
 }: Props) {
   const baseStyle =
-    'h-12 w-full rounded-xl text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60';
+    "flex h-[48px] w-full items-center justify-center rounded-[10px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] transition disabled:cursor-not-allowed disabled:opacity-60";
 
   const variantStyle: Record<Variant, string> = {
     primary: 'bg-[#111111] text-white',
-    secondary: 'border border-[#E5E5E5] bg-white text-[#666666]',
+    secondary: 'border border-[#E5E5E5] bg-white text-[#8A8A8A]',
     kakao: 'bg-[#FEE500] text-[#191600]',
   };
 

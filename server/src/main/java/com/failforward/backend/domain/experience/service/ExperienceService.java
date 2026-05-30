@@ -3,6 +3,7 @@ package com.failforward.backend.domain.experience.service;
 import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.api.PageInfo;
+import com.failforward.backend.common.privacy.SensitiveDataMaskingService;
 import com.failforward.backend.common.security.AdminAccessPolicy;
 import com.failforward.backend.common.security.CurrentUserProvider;
 import com.failforward.backend.domain.analysis.service.AIAnalysisService;
@@ -12,9 +13,12 @@ import com.failforward.backend.domain.experience.dto.ExperienceDtos;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
 import com.failforward.backend.domain.user.entity.User;
+import com.failforward.backend.domain.view.service.UserExperienceViewService;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +36,9 @@ public class ExperienceService {
     private final CategoryService categoryService;
     private final ExperienceRequestSupport requestSupport;
     private final ExperienceComparisonSupport comparisonSupport;
+    private final SensitiveDataMaskingService maskingService;
+    private final UserExperienceViewService userExperienceViewService;
+    private final EntityManager entityManager;
 
     @Transactional
     public ExperienceDtos.ExperienceResponse create(ExperienceDtos.ExperienceCreateRequest request) {
@@ -61,7 +68,8 @@ public class ExperienceService {
                 payload.marketingChannelsJson(),
                 payload.lessonsLearned(),
                 payload.wouldRetry(),
-                payload.structuredDataJson()
+                payload.structuredDataJson(),
+                "FAILURE"
         ));
 
         var analysis = aiAnalysisService.analyzeAfterExperienceCreate(saved).orElse(null);
@@ -96,7 +104,8 @@ public class ExperienceService {
                 payload.marketingChannelsJson(),
                 payload.lessonsLearned(),
                 payload.wouldRetry(),
-                payload.structuredDataJson()
+                payload.structuredDataJson(),
+                "FAILURE"
         );
 
         FailureExperience saved = experienceRepository.save(experience);
@@ -167,6 +176,7 @@ public class ExperienceService {
     public ExperienceDtos.ExperienceResponse getDetail(Long experienceId) {
         FailureExperience experience = getExperienceEntity(experienceId);
         experience.increaseViewCount();
+        userExperienceViewService.recordView(experience);
         FailureExperience saved = experienceRepository.save(experience);
         return ExperienceDtos.ExperienceResponse.from(saved, aiAnalysisService.findByExperience(saved).orElse(null));
     }
@@ -178,6 +188,22 @@ public class ExperienceService {
                 .map(candidate -> toSimilarity(target, candidate))
                 .sorted((left, right) -> Double.compare(right.similarityScore(), left.similarityScore()))
                 .limit(Math.max(limit, 1))
+                .toList();
+    }
+
+    public List<ExperienceDtos.ExperienceResponse> getRelatedSuccessCases(Long experienceId, int limit) {
+        FailureExperience target = getExperienceEntity(experienceId);
+        int safeLimit = Math.max(limit, 1);
+        entityManager.clear();
+        return experienceRepository.findPublicSuccessByCategory(
+                        target.getId(),
+                        target.getCategory().getId(),
+                        PageRequest.of(0, safeLimit)
+                ).stream()
+                .map(experience -> ExperienceDtos.ExperienceResponse.from(
+                        experience,
+                        aiAnalysisService.findByExperience(experience).orElse(null)
+                ))
                 .toList();
     }
 
@@ -344,12 +370,12 @@ public class ExperienceService {
         return new ExperiencePayload(
                 category,
                 resolvedTitle,
-                content,
-                resolvedBusinessType,
+                maskingService.maskText(content),
+                maskingService.maskText(resolvedBusinessType),
                 investmentAmount,
                 resolvedDurationMonths,
                 resolvedWeeklyHours,
-                averageDailyHours,
+                maskingService.maskText(averageDailyHours),
                 isConcurrentWithMainJob,
                 monthlyRevenue,
                 resolvedFailureReason,
@@ -357,11 +383,11 @@ public class ExperienceService {
                 requestSupport.writeJson(resolvedDifficulties),
                 resolvedDifficultyEtc,
                 resolvedDifficultyExtra,
-                targetMarket,
-                marketingChannels == null ? List.of() : marketingChannels,
+                maskingService.maskText(targetMarket),
+                marketingChannels == null ? List.of() : marketingChannels.stream().map(maskingService::maskText).toList(),
                 resolvedLessons,
                 wouldRetry != null ? wouldRetry : Boolean.FALSE,
-                requestSupport.writeJson(marketingChannels == null ? List.of() : marketingChannels),
+                requestSupport.writeJson(marketingChannels == null ? List.of() : marketingChannels.stream().map(maskingService::maskText).toList()),
                 requestSupport.writeJson(structured)
         );
     }

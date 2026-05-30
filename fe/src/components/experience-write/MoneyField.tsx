@@ -11,14 +11,14 @@ export default function MoneyField({ label, value, onChange }: Props) {
     <div>
       <FieldLabel label={label} />
 
-      <div className="mt-3 flex h-12 items-center rounded-[16px] border border-[#CCD2E0] bg-white px-4">
+      <div className="mt-3 flex h-[36px] items-center rounded-[10px] border border-[#E6E6E6] bg-white px-[16px]">
         <input
           value={value}
           onChange={(event) => onChange(event.target.value.replace(/[^\d]/g, ''))}
-          className="flex-1 text-sm text-[#111111] outline-none placeholder:text-[#9CA3AF]"
+          className="flex-1 font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#131416] outline-none placeholder:text-[#BABABA]"
           placeholder="1000000"
         />
-        <span className="text-sm text-[#555555]">원</span>
+        <span className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">원</span>
       </div>
     </div>
   );

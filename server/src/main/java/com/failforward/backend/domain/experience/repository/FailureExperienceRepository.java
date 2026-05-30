@@ -19,6 +19,9 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
     List<FailureExperience> findAllByIsPublicTrueOrderByCreatedAtDesc();
 
     @EntityGraph(attributePaths = {"user", "category"})
+    List<FailureExperience> findAllByUserIdOrderByCreatedAtDesc(Long userId);
+
+    @EntityGraph(attributePaths = {"user", "category"})
     @Query("""
             select e
             from FailureExperience e
@@ -109,6 +112,22 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
             order by e.viewCount desc, e.likeCount desc, e.createdAt desc
             """)
     List<FailureExperience> findPublicSimilarByCategory(
+            @Param("experienceId") Long experienceId,
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "category"})
+    @Query("""
+            select e
+            from FailureExperience e
+            where e.isPublic = true
+              and e.caseStatus = 'SUCCESS'
+              and e.id <> :experienceId
+              and e.category.id = :categoryId
+            order by e.viewCount desc, e.likeCount desc, e.createdAt desc
+            """)
+    List<FailureExperience> findPublicSuccessByCategory(
             @Param("experienceId") Long experienceId,
             @Param("categoryId") Long categoryId,
             Pageable pageable

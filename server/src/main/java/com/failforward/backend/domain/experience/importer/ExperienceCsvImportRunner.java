@@ -14,7 +14,10 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -49,6 +52,8 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
     private static final Pattern NUMBER_PATTERN = Pattern.compile("[^0-9.-]");
     private static final Pattern SPLIT_PATTERN = Pattern.compile("\\s*(\\||;|/|\\n|,)\\s*");
     private static final TypeReference<List<String>> STRING_LIST_TYPE = new TypeReference<>() {};
+    private static final DateTimeFormatter BASIC_DATE = DateTimeFormatter.BASIC_ISO_DATE;
+    private static final DateTimeFormatter DASHED_DATE = DateTimeFormatter.ISO_LOCAL_DATE;
 
     private final JdbcTemplate jdbcTemplate;
     private final ObjectMapper objectMapper;
@@ -233,15 +238,21 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
     }
 
     private long upsertExperience(ImportedRow row, long userId, int index, int totalCount, String importSource) {
-        long categoryId = resolveCategoryId(row.category());
-        LocalDateTime createdAt = resolveCreatedAt(row.id(), index, totalCount);
+        long categoryId = resolveCategoryId(row.category(), row.categorySlug());
+        LocalDateTime createdAt = resolveCreatedAt(row.id(), row.postDate(), index, totalCount);
         LocalDateTime updatedAt = createdAt;
-        String businessType = trimToLength(firstNonBlank(row.category(), "Other"), 50);
+        String businessType = trimToLength(firstNonBlank(row.category(), row.categorySlug(), "Other"), 50);
         String content = firstNonBlank(row.freeText(), row.summary(), "No content provided");
         List<String> failureReasons = parseList(row.failureReasons());
         List<String> difficulties = parseList(row.difficulties());
+        String caseStatus = resolveCaseStatus(row.caseStatus());
         String failureReason = trimToLength(
-                firstNonBlank(firstItem(failureReasons), row.failureCategory(), firstItem(difficulties), "Other"),
+                firstNonBlank(
+                        firstItem(failureReasons),
+                        row.failureCategory(),
+                        firstItem(difficulties),
+                        "SUCCESS".equals(caseStatus) ? "SUCCESS_STORY" : "Other"
+                ),
                 50
         );
         String title = trimToLength(resolveTitle(row, content, index), 100);
@@ -251,17 +262,23 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         Integer durationMonths = parseInteger(row.duration());
         Integer monthlyRevenue = parseInteger(row.revenueAmount());
         Boolean concurrentWithMainJob = parseBoolean(row.hasMainJob());
+        Boolean wouldRetry = "SUCCESS".equals(caseStatus) ? Boolean.TRUE : Boolean.FALSE;
 
         Map<String, Object> structuredData = new LinkedHashMap<>();
         structuredData.put("importSource", importSource);
         structuredData.put("importRowId", row.id());
+        structuredData.put("externalCaseId", row.externalId());
         structuredData.put("rawCategory", row.category());
+        structuredData.put("categorySlug", row.categorySlug());
         structuredData.put("rawDuration", row.duration());
         structuredData.put("rawDailyHours", row.dailyHours());
         structuredData.put("rawHasMainJob", row.hasMainJob());
         structuredData.put("keywords", parseList(row.keywords()));
         structuredData.put("failureCategory", row.failureCategory());
         structuredData.put("riskLevel", row.riskLevel());
+        structuredData.put("source", row.source());
+        structuredData.put("originalLink", row.link());
+        structuredData.put("postDate", row.postDate());
 
         if (properties.isPreserveIds() && row.id() != null) {
             long experienceId = row.id();
@@ -273,7 +290,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                             investment_amount, duration_months, weekly_hours, average_daily_hours,
                             is_concurrent_with_main_job, monthly_revenue, failure_reason, failure_reasons,
                             difficulties, difficulty_etc, difficulty_extra, target_market, marketing_channels,
-                            lessons_learned, would_retry, structured_data, view_count, like_count, is_public,
+                            lessons_learned, would_retry, structured_data, case_status, view_count, like_count, is_public,
                             created_at, updated_at
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, TRUE, ?, ?)
                         ON DUPLICATE KEY UPDATE
@@ -298,6 +315,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                             lessons_learned = VALUES(lessons_learned),
                             would_retry = VALUES(would_retry),
                             structured_data = VALUES(structured_data),
+                            case_status = VALUES(case_status),
                             is_public = VALUES(is_public),
                             updated_at = VALUES(updated_at)
                         """,
@@ -321,8 +339,9 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                         null,
                         "[]",
                         content,
-                        Boolean.FALSE,
+                        wouldRetry,
                         toJson(structuredData),
+                        caseStatus,
                         Timestamp.valueOf(createdAt),
                         Timestamp.valueOf(updatedAt)
                 );
@@ -334,9 +353,9 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                             investment_amount, duration_months, weekly_hours, average_daily_hours,
                             is_concurrent_with_main_job, monthly_revenue, failure_reason, failure_reasons,
                             difficulties, difficulty_etc, difficulty_extra, target_market, marketing_channels,
-                            lessons_learned, would_retry, structured_data, view_count, like_count, is_public,
+                            lessons_learned, would_retry, structured_data, case_status, view_count, like_count, is_public,
                             created_at, updated_at
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, TRUE, ?, ?)
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, TRUE, ?, ?)
                         """,
                         experienceId,
                         userId,
@@ -358,8 +377,9 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                         null,
                         "[]",
                         content,
-                        Boolean.FALSE,
+                        wouldRetry,
                         toJson(structuredData),
+                        caseStatus,
                         Timestamp.valueOf(createdAt),
                         Timestamp.valueOf(updatedAt)
                 );
@@ -376,9 +396,9 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                         investment_amount, duration_months, weekly_hours, average_daily_hours,
                         is_concurrent_with_main_job, monthly_revenue, failure_reason, failure_reasons,
                         difficulties, difficulty_etc, difficulty_extra, target_market, marketing_channels,
-                        lessons_learned, would_retry, structured_data, view_count, like_count, is_public,
+                        lessons_learned, would_retry, structured_data, case_status, view_count, like_count, is_public,
                         created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, TRUE, ?, ?)
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, TRUE, ?, ?)
                     """,
                     Statement.RETURN_GENERATED_KEYS
             );
@@ -401,10 +421,11 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
             statement.setString(17, null);
             statement.setString(18, "[]");
             statement.setString(19, content);
-            statement.setBoolean(20, false);
+            statement.setBoolean(20, wouldRetry);
             statement.setString(21, toJson(structuredData));
-            statement.setTimestamp(22, Timestamp.valueOf(createdAt));
-            statement.setTimestamp(23, Timestamp.valueOf(updatedAt));
+            statement.setString(22, caseStatus);
+            statement.setTimestamp(23, Timestamp.valueOf(createdAt));
+            statement.setTimestamp(24, Timestamp.valueOf(updatedAt));
             return statement;
         }, keyHolder);
 
@@ -416,7 +437,7 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
     }
 
     private void upsertAnalysis(ImportedRow row, long experienceId, int index, int totalCount) {
-        LocalDateTime processedAt = resolveCreatedAt(row.id(), index, totalCount);
+        LocalDateTime processedAt = resolveCreatedAt(row.id(), row.postDate(), index, totalCount);
         List<String> keywords = parseList(row.keywords());
         String structuredSummary = firstNonBlank(row.summary(), row.freeText());
         String riskLevel = normalizeRiskLevel(row.riskLevel());
@@ -475,7 +496,12 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         );
     }
 
-    private long resolveCategoryId(String rawCategory) {
+    private long resolveCategoryId(String rawCategory, String categorySlug) {
+        Long slugMapped = mapCategorySlugToId(categorySlug);
+        if (slugMapped != null) {
+            return validateCategoryId(slugMapped);
+        }
+
         if (rawCategory == null || rawCategory.isBlank()) {
             return validateCategoryId(properties.getDefaultCategoryId());
         }
@@ -504,6 +530,23 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         return validateCategoryId(properties.getDefaultCategoryId());
     }
 
+    private Long mapCategorySlugToId(String categorySlug) {
+        if (categorySlug == null || categorySlug.isBlank()) {
+            return null;
+        }
+        return switch (normalizeCategoryKey(categorySlug)) {
+            case "onlinecommerce" -> 1L;
+            case "contentsns" -> 2L;
+            case "digitalproducts" -> 3L;
+            case "platformlabor" -> 4L;
+            case "talentfreelance" -> 5L;
+            case "investment" -> 6L;
+            case "offlinesidejob" -> 7L;
+            case "beforestart", "taxbusiness", "workplussidejob", "marketing", "tools", "mentalcare", "legalcontract", "accounting", "insight", "etc", "기타" -> 8L;
+            default -> null;
+        };
+    }
+
     private long validateCategoryId(long categoryId) {
         if (categoryRepository.existsById(categoryId)) {
             return categoryId;
@@ -524,7 +567,11 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         return category + " failure case " + (index + 1);
     }
 
-    private LocalDateTime resolveCreatedAt(Long rowId, int index, int totalCount) {
+    private LocalDateTime resolveCreatedAt(Long rowId, String rawPostDate, int index, int totalCount) {
+        LocalDateTime parsedPostDate = parsePostDate(rawPostDate);
+        if (parsedPostDate != null) {
+            return parsedPostDate;
+        }
         LocalDateTime start = properties.getCreatedAtStart();
         LocalDateTime end = properties.getCreatedAtEnd();
         if (start == null || end == null || end.isBefore(start)) {
@@ -551,6 +598,30 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                 yield start.plusSeconds(random.nextLong(bound));
             }
         };
+    }
+
+    private LocalDateTime parsePostDate(String rawPostDate) {
+        if (rawPostDate == null || rawPostDate.isBlank()) {
+            return null;
+        }
+        String trimmed = rawPostDate.trim();
+        try {
+            return LocalDate.parse(trimmed, BASIC_DATE).atStartOfDay();
+        } catch (DateTimeParseException ignored) {
+        }
+        try {
+            return LocalDate.parse(trimmed, DASHED_DATE).atStartOfDay();
+        } catch (DateTimeParseException ignored) {
+        }
+        return null;
+    }
+
+    private String resolveCaseStatus(String rawCaseStatus) {
+        String normalized = normalizeKey(firstNonBlank(rawCaseStatus, properties.getDefaultCaseStatus()));
+        if (normalized.contains("success") || normalized.contains("성공")) {
+            return "SUCCESS";
+        }
+        return "FAILURE";
     }
 
     private String mapAverageDailyHours(String rawDailyHours) {
@@ -725,7 +796,9 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
 
     private record ImportedRow(
             Long id,
+            String externalId,
             String category,
+            String categorySlug,
             String duration,
             String dailyHours,
             String investAmount,
@@ -737,14 +810,20 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
             String summary,
             String keywords,
             String failureCategory,
-            String riskLevel
+            String riskLevel,
+            String source,
+            String link,
+            String postDate,
+            String caseStatus
     ) {
         private static ImportedRow from(Map<String, String> row) {
             Map<String, String> normalized = new LinkedHashMap<>();
             row.forEach((key, value) -> normalized.put(normalizeHeader(key), value));
             return new ImportedRow(
                     parseLong(normalized.get("id")),
-                    firstValue(normalized, "category"),
+                    firstValue(normalized, "case_id", "external_id", "id"),
+                    firstValue(normalized, "category", "category_raw"),
+                    firstValue(normalized, "category_slug"),
                     firstValue(normalized, "duration", "duration_months"),
                     firstValue(normalized, "daily_hours", "dailyhours"),
                     firstValue(normalized, "invest_amount", "investment_amount"),
@@ -752,11 +831,15 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
                     firstValue(normalized, "has_main_job", "main_job"),
                     firstValue(normalized, "failure_reasons", "failure_reason"),
                     firstValue(normalized, "difficulties", "difficulty"),
-                    firstValue(normalized, "free_text", "content", "body"),
-                    firstValue(normalized, "summary", "title"),
+                    firstValue(normalized, "free_text", "content", "body", "full_text"),
+                    firstValue(normalized, "summary", "title", "description"),
                     firstValue(normalized, "keywords", "keyword"),
                     firstValue(normalized, "failure_category"),
-                    firstValue(normalized, "risk_level")
+                    firstValue(normalized, "risk_level"),
+                    firstValue(normalized, "source"),
+                    firstValue(normalized, "link", "url"),
+                    firstValue(normalized, "postdate", "post_date"),
+                    firstValue(normalized, "case_status")
             );
         }
 

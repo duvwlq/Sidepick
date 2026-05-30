@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.experience.service;
 
 import com.failforward.backend.common.api.BadRequestException;
+import com.failforward.backend.common.privacy.SensitiveDataMaskingService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
@@ -11,9 +12,11 @@ import org.springframework.stereotype.Component;
 class ExperienceRequestSupport {
 
     private final ObjectMapper objectMapper;
+    private final SensitiveDataMaskingService maskingService;
 
-    ExperienceRequestSupport(ObjectMapper objectMapper) {
+    ExperienceRequestSupport(ObjectMapper objectMapper, SensitiveDataMaskingService maskingService) {
         this.objectMapper = objectMapper;
+        this.maskingService = maskingService;
     }
 
     void validateWriteRequest(
@@ -61,12 +64,12 @@ class ExperienceRequestSupport {
     }
 
     String normalizeOptionalText(String value) {
-        return hasText(value) ? value.trim() : "";
+        return hasText(value) ? maskingService.maskText(value.trim()) : "";
     }
 
     String resolveFailureReason(String failureReason, List<String> failureReasons) {
         return hasText(failureReason)
-                ? failureReason
+                ? maskingService.maskText(failureReason)
                 : (failureReasons.isEmpty() ? "UNSPECIFIED" : failureReasons.get(0));
     }
 
@@ -75,7 +78,7 @@ class ExperienceRequestSupport {
     }
 
     String resolveLessons(String lessonsLearned, String content) {
-        return hasText(lessonsLearned) ? lessonsLearned : content;
+        return hasText(lessonsLearned) ? maskingService.maskText(lessonsLearned) : maskingService.maskText(content);
     }
 
     Map<String, Object> buildStructuredData(
@@ -105,9 +108,9 @@ class ExperienceRequestSupport {
         structured.put("difficulties", difficulties);
         structured.put("difficultyEtc", difficultyEtc);
         structured.put("difficultyExtra", difficultyExtra);
-        structured.put("targetMarket", targetMarket);
+        structured.put("targetMarket", maskingService.maskText(targetMarket));
         structured.put("wouldRetry", wouldRetry != null ? wouldRetry : Boolean.FALSE);
-        return structured;
+        return maskingService.maskObjectMap(structured);
     }
 
     String writeJson(Object value) {

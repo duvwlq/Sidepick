@@ -34,12 +34,14 @@ public class OAuthAuthService {
     private final OAuthProperties oAuthProperties;
     private final AuthFeatureProperties authFeatureProperties;
     private final AuthTokenService authTokenService;
+    private final OAuthStateService oAuthStateService;
     @Qualifier("oauthRestTemplate")
     private final RestTemplate oauthRestTemplate;
 
     @Transactional
     public AuthPayload loginWithKakao(OAuthLoginRequest request) {
         ensureKakaoAuthEnabled();
+        oAuthStateService.consume(AuthProvider.KAKAO, request.state(), request.redirectUri());
         OAuthProperties.Provider providerConfig = requireConfiguredProvider(AuthProvider.KAKAO);
         OAuthTokenResponse tokenResponse = exchangeAuthorizationCode(
                 "https://kauth.kakao.com/oauth/token",
@@ -57,6 +59,7 @@ public class OAuthAuthService {
     @Transactional
     public AuthPayload loginWithGoogle(OAuthLoginRequest request) {
         ensureGoogleAuthEnabled();
+        oAuthStateService.consume(AuthProvider.GOOGLE, request.state(), request.redirectUri());
         OAuthProperties.Provider providerConfig = requireConfiguredProvider(AuthProvider.GOOGLE);
         OAuthTokenResponse tokenResponse = exchangeAuthorizationCode(
                 "https://oauth2.googleapis.com/token",
@@ -76,6 +79,7 @@ public class OAuthAuthService {
     @Transactional
     public AuthPayload loginWithNaver(OAuthLoginRequest request) {
         ensureNaverAuthEnabled();
+        oAuthStateService.consume(AuthProvider.NAVER, request.state(), request.redirectUri());
         OAuthProperties.Provider providerConfig = requireConfiguredProvider(AuthProvider.NAVER);
         OAuthTokenResponse tokenResponse = exchangeAuthorizationCode(
                 "https://nid.naver.com/oauth2.0/token",

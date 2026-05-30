@@ -3,6 +3,28 @@ import { SignupButton, SignupFieldGroup, SignupScreen } from '../../components/a
 import { useAuthFlow } from '../../context/useAuthFlow';
 import { parseNextPath, parseSignupMode, REGION_OPTIONS } from './signup-flow';
 
+function RegionOption({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-[40px] w-full items-center rounded-[10px] border px-[16px] text-left font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] ${
+        active ? 'border-[#5A876E] bg-[#EAF3EE] text-[#2F4D3D]' : 'border-[#E6E6E6] bg-white text-[#494949]'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function SignupRegionPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -13,32 +35,23 @@ export default function SignupRegionPage() {
   return (
     <SignupScreen
       title="거주지 설정"
-      headlineLines={[`${form.nickname || '회원'}님이 살고 계신`, '지역이 어디신가요?']}
+      headline="지금 주로 머무르는 지역을 선택해 주세요"
       onBack={() => navigate(`/signup/nickname?next=${encodeURIComponent(nextPath)}&mode=${signupMode}`)}
     >
       <SignupFieldGroup>
-        <div className="flex w-full flex-col gap-[4px]">
-          <span className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-black">
-            거주지
-          </span>
-          <select
-            value={form.region}
-            onChange={(event) => updateField('region', event.target.value)}
-            className="h-[40px] w-full rounded-[10px] border-0 bg-[#F8F8F8] px-[16px] font-['Pretendard'] text-[14px] text-[#494949] outline-none"
-          >
-            <option value="">지역을 선택해주세요</option>
-            {REGION_OPTIONS.map((region) => (
-              <option key={region} value={region}>
-                {region}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-col gap-[8px]">
+          {REGION_OPTIONS.map((region) => (
+            <RegionOption
+              key={region}
+              active={form.region === region}
+              label={region}
+              onClick={() => updateField('region', region)}
+            />
+          ))}
         </div>
 
         <SignupButton
-          onClick={() =>
-            navigate(`/signup/employment?next=${encodeURIComponent(nextPath)}&mode=${signupMode}`)
-          }
+          onClick={() => navigate(`/signup/employment?next=${encodeURIComponent(nextPath)}&mode=${signupMode}`)}
           disabled={!form.region}
           tone="primary"
         >

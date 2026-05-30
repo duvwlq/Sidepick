@@ -30,7 +30,7 @@ export default function SignupVerifyPage() {
 
   async function handleNext() {
     if (!form.verificationCode.trim()) {
-      setError('인증 번호가 일치하지 않습니다. 다시 확인해주세요');
+      setError('인증번호 6자리를 입력해 주세요.');
       return;
     }
 
@@ -43,11 +43,11 @@ export default function SignupVerifyPage() {
         code: form.verificationCode,
       });
       updateField('verificationConfirmed', true);
-      updateField('verificationMessage', '이메일 인증이 완료되었어요');
-      setFlashToast('이메일 인증이 완료되었어요');
+      updateField('verificationMessage', '이메일 인증이 완료되었어요.');
+      setFlashToast('이메일 인증이 완료되었어요.');
       navigate(`/signup/password?next=${encodeURIComponent(nextPath)}`);
     } catch (confirmError) {
-      const message = resolveErrorMessage(confirmError, '인증 번호가 일치하지 않습니다. 다시 확인해주세요');
+      const message = resolveErrorMessage(confirmError, '인증번호가 일치하지 않아요. 다시 확인해 주세요.');
       setError(message);
       showToast(message);
     } finally {
@@ -57,7 +57,7 @@ export default function SignupVerifyPage() {
 
   async function handleResend() {
     if (!form.email.trim()) {
-      setError('이메일 형식에 맞게 다시 작성해주세요');
+      setError('이메일을 먼저 입력해 주세요.');
       return;
     }
 
@@ -69,11 +69,12 @@ export default function SignupVerifyPage() {
       updateField(
         'verificationMessage',
         payload.verificationCode
-          ? `개발용 인증 코드: ${payload.verificationCode}`
-          : '이메일 인증이 완료되었어요',
+          ? `개발용 인증코드: ${payload.verificationCode}`
+          : '인증 메일을 다시 발송했어요.',
       );
+      showToast('인증번호를 다시 발송했어요.');
     } catch (requestError) {
-      const message = resolveErrorMessage(requestError, '잠시 연결이 불안정해요. 다시 시도해주세요.');
+      const message = resolveErrorMessage(requestError, '잠시 후 다시 시도해 주세요.');
       setError(message);
       showToast(message);
     } finally {
@@ -83,8 +84,8 @@ export default function SignupVerifyPage() {
 
   return (
     <SignupScreen
-      title="휴대폰 인증"
-      headlineLines={['이메일로 발송한', '인증 번호를 입력해 주세요']}
+      title="이메일 인증"
+      headline="이메일로 발송한 인증 번호를 입력해 주세요"
       onBack={() => navigate(`/signup/email?next=${encodeURIComponent(nextPath)}`)}
     >
       <SignupFieldGroup>
@@ -93,33 +94,25 @@ export default function SignupVerifyPage() {
           placeholder="인증번호 6자리를 입력해 주세요"
           value={form.verificationCode}
           onChange={(event) =>
-            updateField(
-              'verificationCode',
-              event.target.value.replace(/\D/g, '').slice(0, 6),
-            )
+            updateField('verificationCode', event.target.value.replace(/\D/g, '').slice(0, 6))
           }
           suffix={<span>00:00</span>}
-          fieldHeight={37}
+          fieldHeight={40}
         />
 
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-        <SignupButton onClick={() => void handleNext()} disabled={loading}>
-          {loading ? '잠시만 기다려주세요' : '다음으로'}
+        <SignupButton onClick={() => void handleNext()} disabled={loading} tone="soft">
+          {loading ? '인증 확인 중...' : '다음으로'}
         </SignupButton>
 
-        <button
-          type="button"
-          onClick={() => void handleResend()}
-          disabled={resending}
-          className="w-full"
-        >
+        <button type="button" onClick={() => void handleResend()} disabled={resending} className="w-full">
           <InlineHelperRow>
-            <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5D5D5D]">
+            <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#5D5D5D]">
               인증번호가 오지 않으셨나요?
             </span>
-            <span className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-black">
-              {resending ? '잠시만 기다려주세요' : '재발송'}
+            <span className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-black">
+              {resending ? '재발송 중' : '재발송'}
             </span>
           </InlineHelperRow>
         </button>
