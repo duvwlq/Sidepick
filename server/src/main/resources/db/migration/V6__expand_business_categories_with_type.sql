@@ -1,4 +1,4 @@
-ALTER TABLE business_categories
+﻿ALTER TABLE business_categories
     ADD COLUMN IF NOT EXISTS type ENUM('business_field', 'cross_topic') NOT NULL DEFAULT 'business_field' AFTER color;
 
 INSERT INTO business_categories (id, name, description, icon, color, type)
