@@ -5,9 +5,15 @@ export type UserSummary = {
   id: number;
   email: string;
   nickname: string;
+  fullName: string | null;
+  birthDate: string | null;
+  gender: string | null;
+  region: string | null;
+  signupPurposes: string[];
+  experienceStatus: string | null;
   ageGroup: string;
   profileImage: string | null;
-  authProvider: 'LOCAL' | 'KAKAO' | 'GOOGLE';
+  authProvider: 'LOCAL' | 'KAKAO' | 'GOOGLE' | 'NAVER';
   emailVerified: boolean;
   profileCompleted: boolean;
   createdAt: string;
@@ -52,6 +58,7 @@ export type Experience = {
   id: number;
   author: UserSummary;
   category: Category;
+  caseStatus: 'FAILURE' | 'SUCCESS';
   title: string;
   content: string;
   businessType: string | null;
@@ -304,5 +311,51 @@ export function getMatchedCases(token: string, analysisId: number | string) {
 export function getMe(token: string) {
   return request<{ user: UserSummary }>('/users/me', {
     token,
+  });
+}
+
+export function getMyExperiences(token: string) {
+  return request<Experience[]>('/users/me/experiences', {
+    token,
+  });
+}
+
+export function getMyBookmarks(token: string) {
+  return request<Experience[]>('/users/me/bookmarks', {
+    token,
+  });
+}
+
+export function getMyRecentViews(token: string) {
+  return request<Experience[]>('/users/me/recent-views', {
+    token,
+  });
+}
+
+export function unbookmarkExperience(token: string, experienceId: number | string) {
+  return request<{ experienceId: number; bookmarked: boolean }>(`/experiences/${experienceId}/bookmarks`, {
+    method: 'DELETE',
+    token,
+  });
+}
+
+export function updateMe(
+  token: string,
+  input: {
+    nickname: string;
+    fullName: string;
+    birthDate: string;
+    gender: string;
+    region: string;
+    signupPurposes: string[];
+    experienceStatus: string;
+    ageGroup: string;
+    profileImage?: string | null;
+  },
+) {
+  return request<{ user: UserSummary }>('/users/me', {
+    method: 'PATCH',
+    token,
+    body: input,
   });
 }
