@@ -37,12 +37,13 @@ type PendingPayload = Omit<ExperienceUpsertInput, 'categoryId'> & {
 };
 
 type GuideWritingTable = {
-  guides: Record<string, {
-    category_key: string;
-    category_label: string;
-    difficulty_key: string;
-    difficulty_label: string;
-    guide: string;
+  categories: Array<{
+    id: string;
+    category: string;
+    examples: Array<{
+      pattern: string;
+      text: string;
+    }>;
   }>;
 };
 
@@ -54,23 +55,23 @@ type GuideExample = {
 };
 
 const CATEGORY_KEY_BY_LABEL: Record<string, string> = {
-  '온라인 판매 · 이커머스': 'online_sales',
+  '온라인 판매·이커머스': 'online_sales',
   '콘텐츠·SNS 기반': 'content_sns',
-  '디지털 상품·지식 판매': 'digital_products',
-  '플랫폼 기반 노동형': 'platform_work',
+  '디지털 상품·지식 판매': 'digital_knowledge',
+  '플랫폼 기반 노동형': 'platform_labor',
   '재능 판매·프리랜서': 'freelance',
   '투자·재테크': 'investment',
-  '오프라인 기반 부업': 'offline_work',
+  '오프라인 기반 부업': 'offline',
 };
 
-const DIFFICULTY_KEY_BY_LABEL: Record<string, string> = {
-  '고객 확보(마케팅)': 'customer_acquisition',
-  '수익 구조 이해': 'revenue_structure',
-  '시간 관리': 'time_management',
-  '수익화 연결': 'monetization',
-  '운영 지속성': 'sustainability',
-  '정보 부족': 'information_lack',
-  '경쟁 심화': 'competition',
+const GUIDE_PATTERN_BY_DIFFICULTY_LABEL: Record<string, string> = {
+  '고객 확보(마케팅)': '마케팅 부족',
+  '수익 구조 이해': '수익 구조 이해 부족',
+  '시간 관리': '시간 관리',
+  '수익화 연결': '수익화 연결',
+  '운영 지속성': '운영 지속성',
+  '정보 부족': '정보 부족',
+  '경쟁 심화': '경쟁 심화',
 };
 
 function parseAmount(value: string) {
@@ -408,20 +409,23 @@ export default function CreateWizardPage() {
     return difficulties
       .filter((item) => item !== '기타')
       .map((item) => {
-        const difficultyKey = DIFFICULTY_KEY_BY_LABEL[item];
-        if (!difficultyKey) {
+        const category = guideTable.categories.find((entry) => entry.id === categoryKey);
+        if (!category) {
           return null;
         }
-        const guideKey = `${categoryKey}__${difficultyKey}`;
-        const guide = guideTable.guides[guideKey];
-        if (!guide) {
+        const pattern = GUIDE_PATTERN_BY_DIFFICULTY_LABEL[item];
+        if (!pattern) {
+          return null;
+        }
+        const example = category.examples.find((entry) => entry.pattern === pattern);
+        if (!example) {
           return null;
         }
         return {
-          key: guideKey,
-          categoryLabel: guide.category_label,
-          difficultyLabel: guide.difficulty_label,
-          guide: guide.guide,
+          key: `${category.id}__${item}`,
+          categoryLabel: category.category,
+          difficultyLabel: item,
+          guide: example.text,
         };
       })
       .filter((item): item is GuideExample => item !== null);
