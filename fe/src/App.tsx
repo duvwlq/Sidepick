@@ -15,7 +15,7 @@ export default function App() {
         <Route path="/create" element={<Create />} />
         <Route path="/analysis-result" element={<AiAnalysisResultPage />} />
         <Route path="/mypage" element={<MyPage />} />
-        {/* PM-10: 실패→성공 연결 버튼 → 좌우 분할 화면 (placeholder, W3 구현 예정) */}
+        {/* PM-10: 실패→성공 연결 버튼 → 상하 분할 화면 (placeholder, W3 구현 예정) */}
         <Route
           path="/experiences/:id/success-comparison"
           element={<SuccessComparisonPage />}

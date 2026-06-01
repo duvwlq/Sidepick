@@ -2,7 +2,7 @@
  * FailureToSuccessButton — 실패→성공 연결 버튼 (PM-10)
  *
  * 사용자 분석 결과 페이지에서 "성공 사례 보기" 클릭 시
- * 좌우 분할 화면(/experiences/:id/success-comparison)으로 라우팅.
+ * 상하 분할 화면(/experiences/:id/success-comparison)으로 라우팅.
  *
  * 동작:
  * - relatedSuccessCount > 0 → 활성 (진한 그린, 클릭 가능, "성공 사례 보기")

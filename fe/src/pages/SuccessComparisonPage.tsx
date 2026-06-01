@@ -1,7 +1,7 @@
 /**
- * SuccessComparisonPage — 실패↔성공 좌우 분할 화면 (placeholder)
+ * SuccessComparisonPage — 실패↔성공 상하 분할 화면 (placeholder)
  *
- * PM-10에서 라우팅 타겟으로 신설. 실제 좌우 분할 UI는 W3에서 PD 디자인 받은 후 구현.
+ * PM-10에서 라우팅 타겟으로 신설. 실제 상하 분할 UI는 W3에서 PD 디자인 받은 후 구현.
  *
  * Route: /experiences/:id/success-comparison
  * 진입: AiAnalysisResult 페이지의 FailureToSuccessButton 클릭
@@ -21,12 +21,12 @@ export default function SuccessComparisonPage() {
       <div className="bg-[#F3F3F3] px-4 py-6 min-h-[60vh]">
         <div className="rounded-2xl bg-white p-6 text-center">
           <h1 className="text-base font-bold text-black mb-2">
-            🚧 좌우 분할 화면 — W3 구현 예정
+            🚧 상하 분할 화면 — W3 구현 예정
           </h1>
           <p className="text-xs text-[#7A7A7A] leading-5">
-            PD 디자인 완성 후 W3 (6/1~)에 좌우 분할 UI 구현 예정입니다.
+            PD 디자인 완성 후 W3 (6/1~)에 상하 분할 UI 구현 예정입니다.
             <br />
-            좌측: 사용자 실패 사례 / 우측: 매칭된 성공 사례
+            위: 사용자 실패 사례 / 아래: 매칭된 성공 사례
           </p>
 
           <div className="mt-6 p-4 rounded-lg bg-[#F5F5F5] text-left">

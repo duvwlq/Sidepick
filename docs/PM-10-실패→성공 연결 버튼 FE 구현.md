@@ -37,7 +37,7 @@ type FailureToSuccessButtonProps = {
 
 - Route: `/experiences/:id/success-comparison`
 - 내용: "W3 구현 예정" 안내 + case_id 확인용 영역 + 이전 페이지 버튼
-- W3에 PD 디자인 받아 좌우 분할 UI로 교체
+- W3에 PD 디자인 받아 상하 분할 UI로 교체
 
 ### 1.3 `AiAnalysisResult` 통합
 
@@ -91,7 +91,7 @@ mockAnalysisData의 `relatedSuccessCount: 3` → `0`으로 변경 후 새로고�
 ## 5. 후속 작업 (W3 인계)
 
 - W3 시작 (6/1): PD 디자인 시안 수령 → 색상·아이콘·인터랙션 조정
-- W3 진행: `SuccessComparisonPage` 좌우 분할 UI 본격 구현 (placeholder 교체)
+- W3 진행: `SuccessComparisonPage` 상하 분할 UI 본격 구현 (placeholder 교체)
 - W4: BE API 연동 (실제 `relatedSuccessCount` 동적 계산)
 
 ---
