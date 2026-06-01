@@ -26,8 +26,8 @@
 
 | 티켓 | 작업 | 시작일 | 마감일 | 전달 대상 | 산출물 | 우선순위 |
 |---|---|---|---|---|---|---|
-| **AI-12** | 실패패턴 그래프 데이터 가공 + JSON 포맷 | 6/1(월) 오전 | 6/1(월) 밤 | → BE | failure_pattern.json + 가공 스크립트 | 🔴 P0 |
-| **AI-13** | 실패 시점 분포 데이터 가공 + JSON 포맷 | 6/2(화) 오전 | 6/2(화) 밤 | → BE | failure_timing.json + 스크립트 | 🔴 P0 |
+| **AI-12** | 실패패턴 그래프 데이터 가공 + JSON 포맷 | 6/1(월) 오전 | 6/1(월) 밤 | → BE-22 + BE-29 | failure_pattern.json + 가공 스크립트 | 🔴 P0 |
+| **AI-13** | 실패 시점 분포 데이터 가공 + JSON 포맷 | 6/2(화) 오전 | 6/2(화) 밤 | → BE-22 + BE-29 | failure_timing.json + 스크립트 | 🔴 P0 |
 | **AI-14** | 성공사례 AI 분석글 초안 작성 | 6/3(수) 오전 | 6/5(금) 밤 | → BE / 자체 보관 | 분석글 N건 JSON + 프롬프트 v1 | 🔴 P0 |
 | **AI-15** | 에이전트 B 자기검증 루프 구현 | 6/4(목) 오전 | 6/6(금) 밤 | → BE 연동 | agent_b.py + 테스트 결과 | 🔴 P0 |
 | **AI-16** | 에이전트 A AI 로직 설계 + API 스펙 | 6/2(화) 오후 | 6/3(수) 밤 | → BE | API 명세 + 프롬프트 초안 | 🔴 P0 |
@@ -67,11 +67,14 @@
 ```
 AI-08 통합 정제 데이터셋 (351건, W2 완료)
     ↓
-AI-12 / AI-13 (그래프·시점 JSON) ──→ BE-22 통계 API
+AI-12 (실패패턴 JSON) ──┬──→ BE-22 통계 API + TOP3 차트
+                       └──→ BE-29 실패패턴 그래프 FE
+AI-13 (시점 분포 JSON) ─┬──→ BE-22 통계 API
+                       └──→ BE-29 시점 분포 차트 FE
     ↓
 PM-14 (분석글 기획) ──→ AI-14 (분석글 초안)
                             ↓
-                       AI-17 (explanation 메타)
+                       AI-17 (explanation 메타 — 분석글 + 유사사례 중심)
                             ↓
                        AI-15 (에이전트 B 자기검증 — 환각 방지)
 
@@ -87,9 +90,10 @@ AI-16 (에이전트 A 로직) ──→ BE-27 (에이전트 A API)
 - **마감**: 6/1(월) 밤
 - **우선순위**: 🔴 P0
 - **산출물**:
-  - `ai/data/failure_pattern.json` (BE 입력용)
+  - `ai/data/failure_pattern.json` (BE-22 + BE-29 입력용)
   - `ai/pipeline/20_aggregate_failure_pattern.py`
 - **의존성**: AI-08 integrated_success_sample.csv (351건)
+- **전달**: BE-22 (통계 API + TOP3) + BE-29 (실패패턴 그래프 FE)
 
 #### 작업 설명
 
@@ -132,6 +136,7 @@ AI-16 (에이전트 A 로직) ──→ BE-27 (에이전트 A API)
   - `ai/data/failure_timing.json`
   - `ai/pipeline/21_aggregate_failure_timing.py`
 - **의존성**: AI-12 동일
+- **전달**: BE-22 (통계 API) + BE-29 (시점 분포 차트 FE)
 
 #### 작업 설명
 
@@ -241,6 +246,7 @@ PDF 명세: **신뢰도 < 0.7 발동 / 재생성 1회 / 결과 캐싱**. AI 분�
   - `ai/server/llm_analyzer.py`에 explanation 필드 추가
   - 분석 + 유사 사례 API 응답에 explanation 포함
 - **의존성**: PM-12 v2 스키마 / AI-14 분석글 / AI-15 에이전트 B
+- **적용 범위**: AI 분석글 + 유사사례 매칭 (PM-12 P0 2곳). BE-22/BE-29 통계 그래프는 사실 데이터라 explanation 필요 없음 (옵션)
 
 #### 작업 설명
 
@@ -251,7 +257,7 @@ PM-12 v2에서 합의한 `AnalysisExplanation` + `SimilarCaseExplanation` 필드
 - [ ] `AnalysisExplanation` 필드 구현 (input_used / matched_patterns / similar_cases_used / is_verified / _debug)
 - [ ] `SimilarCaseExplanation` 필드 구현 (similarity_score / matched_keywords / category_match / source / case_id / _debug)
 - [ ] AI-14 분석글 결과에 explanation 적용
-- [ ] BE-22/23/24 API 응답 형식 점검
+- [ ] BE-23 (히스토리) / BE-24 (검색) API 응답 형식 점검 — BE-22/29 통계 그래프엔 미적용 (사실 데이터)
 
 ---
 
