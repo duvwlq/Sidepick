@@ -1,0 +1,224 @@
+{
+  "version": "1.0",
+  "generated_at": "2026-06-02T15:29:45+09:00",
+  "source": {
+    "dataset": "pickply_100.csv",
+    "total_cases": 100,
+    "note": "픽플리 설문 100건 실패 데이터. AI-08 통합 정제 351건은 W3 후속 통합 예정."
+  },
+  "categories": {
+    "online-commerce": {
+      "label_ko": "온라인 판매·이커머스",
+      "total": 12,
+      "patterns": [
+        {
+          "label": "시장 조사 부족",
+          "count": 6,
+          "percent": 50.0
+        },
+        {
+          "label": "마케팅 실패",
+          "count": 6,
+          "percent": 50.0
+        },
+        {
+          "label": "실행력 부족",
+          "count": 3,
+          "percent": 25.0
+        },
+        {
+          "label": "자본 부족",
+          "count": 3,
+          "percent": 25.0
+        },
+        {
+          "label": "시간 부족",
+          "count": 2,
+          "percent": 16.7
+        }
+      ]
+    },
+    "content-sns": {
+      "label_ko": "콘텐츠·SNS",
+      "total": 23,
+      "patterns": [
+        {
+          "label": "마케팅 실패",
+          "count": 14,
+          "percent": 60.9
+        },
+        {
+          "label": "실행력 부족",
+          "count": 8,
+          "percent": 34.8
+        },
+        {
+          "label": "시간 부족",
+          "count": 7,
+          "percent": 30.4
+        },
+        {
+          "label": "시장 조사 부족",
+          "count": 5,
+          "percent": 21.7
+        },
+        {
+          "label": "원인을 모르겠음",
+          "count": 2,
+          "percent": 8.7
+        }
+      ]
+    },
+    "digital-products": {
+      "label_ko": "디지털·지식판매",
+      "total": 1,
+      "patterns": [
+        {
+          "label": "실행력 부족",
+          "count": 1,
+          "percent": 100.0
+        },
+        {
+          "label": "마케팅 실패",
+          "count": 1,
+          "percent": 100.0
+        }
+      ]
+    },
+    "platform-labor": {
+      "label_ko": "플랫폼 노동",
+      "total": 25,
+      "patterns": [
+        {
+          "label": "시간 부족",
+          "count": 12,
+          "percent": 48.0
+        },
+        {
+          "label": "실행력 부족",
+          "count": 11,
+          "percent": 44.0
+        },
+        {
+          "label": "시장 조사 부족",
+          "count": 4,
+          "percent": 16.0
+        },
+        {
+          "label": "자본 부족",
+          "count": 3,
+          "percent": 12.0
+        },
+        {
+          "label": "원인을 모르겠음",
+          "count": 2,
+          "percent": 8.0
+        }
+      ]
+    },
+    "talent-freelance": {
+      "label_ko": "재능·프리랜서",
+      "total": 9,
+      "patterns": [
+        {
+          "label": "실행력 부족",
+          "count": 5,
+          "percent": 55.6
+        },
+        {
+          "label": "마케팅 실패",
+          "count": 3,
+          "percent": 33.3
+        },
+        {
+          "label": "시간 부족",
+          "count": 3,
+          "percent": 33.3
+        },
+        {
+          "label": "시장 조사 부족",
+          "count": 1,
+          "percent": 11.1
+        },
+        {
+          "label": "자본 부족",
+          "count": 1,
+          "percent": 11.1
+        }
+      ]
+    },
+    "investment": {
+      "label_ko": "투자·재테크",
+      "total": 25,
+      "patterns": [
+        {
+          "label": "시장 조사 부족",
+          "count": 15,
+          "percent": 60.0
+        },
+        {
+          "label": "자본 부족",
+          "count": 8,
+          "percent": 32.0
+        },
+        {
+          "label": "시간 부족",
+          "count": 8,
+          "percent": 32.0
+        },
+        {
+          "label": "실행력 부족",
+          "count": 7,
+          "percent": 28.0
+        },
+        {
+          "label": "원인을 모르겠음",
+          "count": 2,
+          "percent": 8.0
+        }
+      ]
+    },
+    "offline-sidejob": {
+      "label_ko": "오프라인 부업",
+      "total": 4,
+      "patterns": [
+        {
+          "label": "마케팅 실패",
+          "count": 2,
+          "percent": 50.0
+        },
+        {
+          "label": "시간 부족",
+          "count": 1,
+          "percent": 25.0
+        },
+        {
+          "label": "시장 조사 부족",
+          "count": 1,
+          "percent": 25.0
+        },
+        {
+          "label": "실행력 부족",
+          "count": 1,
+          "percent": 25.0
+        },
+        {
+          "label": "자본 부족",
+          "count": 1,
+          "percent": 25.0
+        }
+      ]
+    },
+    "etc": {
+      "label_ko": "기타",
+      "total": 1,
+      "patterns": [
+        {
+          "label": "실행력 부족",
+          "count": 1,
+          "percent": 100.0
+        }
+      ]
+    }
+  }
+}
