@@ -46,6 +46,7 @@ BUCKET_BY_LABEL: dict[str, dict] = {b["label"]: b for b in DURATION_BUCKETS}
 
 INPUT_PATH = Path("ai/data/pickply_100.csv")
 OUTPUT_PATH = Path("ai/data/failure_timing.json")
+MIN_SAMPLE_SIZE = 10  # 이 미만이면 차트 표시 X
 KST = timezone(timedelta(hours=9))
 
 
@@ -104,18 +105,25 @@ def aggregate(rows: list[dict[str, str]]) -> dict:
         categories_out[slug] = {
             "label_ko": meta["label"],
             "total": total,
+            "sufficient_data": total >= MIN_SAMPLE_SIZE,
+            "display_status": "ok" if total >= MIN_SAMPLE_SIZE else "insufficient",
             "distribution": distribution,
             "peak_bucket": peak_bucket,
         }
 
     return {
-        "version": "1.0",
+        "version": "1.1",
         "generated_at": datetime.now(KST).isoformat(timespec="seconds"),
         "source": {
             "dataset": "pickply_100.csv",
             "total_cases": sum(totals.values()),
             "bucket_format": "픽플리 설문 5단계 bucket. month별 분포가 아닌 bucket 분포.",
             "note": "AI-08 통합 정제 351건은 W3 후속 통합 예정. 그때 month 추정값 같이 산출 검토.",
+        },
+        "display_policy": {
+            "min_sample_size": MIN_SAMPLE_SIZE,
+            "insufficient_message": "데이터 수집 중이에요 (10건 이상 모이면 차트 표시)",
+            "rule": "sufficient_data=false 카테고리는 차트 대신 안내 메시지 노출 권장",
         },
         "buckets": DURATION_BUCKETS,
         "categories": categories_out,
@@ -130,12 +138,20 @@ def main() -> None:
         encoding="utf-8",
     )
     print(f"✅ {OUTPUT_PATH} 생성 완료 ({len(result['categories'])}개 카테고리)")
-    for slug, info in result["categories"].items():
+    sufficient = [s for s, i in result["categories"].items() if i["sufficient_data"]]
+    insufficient = [s for s, i in result["categories"].items() if not i["sufficient_data"]]
+    print(f"📊 차트 표시 가능 (n≥{MIN_SAMPLE_SIZE}): {len(sufficient)}개")
+    for slug in sufficient:
+        info = result["categories"][slug]
         peak = next(d for d in info["distribution"] if d["bucket"] == info["peak_bucket"])
         print(
-            f"  - {slug} (n={info['total']}): peak={peak['label']} "
+            f"  ✅ {slug} (n={info['total']}): peak={peak['label']} "
             f"({peak['count']}건, {peak['percent']}%)"
         )
+    print(f"⚠️ 데이터 수집 중 (n<{MIN_SAMPLE_SIZE}): {len(insufficient)}개")
+    for slug in insufficient:
+        info = result["categories"][slug]
+        print(f"  ⏳ {slug} (n={info['total']})")
 
 
 if __name__ == "__main__":

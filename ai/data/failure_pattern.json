@@ -1,15 +1,22 @@
 {
-  "version": "1.0",
-  "generated_at": "2026-06-02T15:29:45+09:00",
+  "version": "1.1",
+  "generated_at": "2026-06-02T16:55:20+09:00",
   "source": {
     "dataset": "pickply_100.csv",
     "total_cases": 100,
     "note": "픽플리 설문 100건 실패 데이터. AI-08 통합 정제 351건은 W3 후속 통합 예정."
   },
+  "display_policy": {
+    "min_sample_size": 10,
+    "insufficient_message": "데이터 수집 중이에요 (10건 이상 모이면 차트 표시)",
+    "rule": "sufficient_data=false 카테고리는 차트 대신 안내 메시지 노출 권장"
+  },
   "categories": {
     "online-commerce": {
       "label_ko": "온라인 판매·이커머스",
       "total": 12,
+      "sufficient_data": true,
+      "display_status": "ok",
       "patterns": [
         {
           "label": "시장 조사 부족",
@@ -41,6 +48,8 @@
     "content-sns": {
       "label_ko": "콘텐츠·SNS",
       "total": 23,
+      "sufficient_data": true,
+      "display_status": "ok",
       "patterns": [
         {
           "label": "마케팅 실패",
@@ -72,6 +81,8 @@
     "digital-products": {
       "label_ko": "디지털·지식판매",
       "total": 1,
+      "sufficient_data": false,
+      "display_status": "insufficient",
       "patterns": [
         {
           "label": "실행력 부족",
@@ -88,6 +99,8 @@
     "platform-labor": {
       "label_ko": "플랫폼 노동",
       "total": 25,
+      "sufficient_data": true,
+      "display_status": "ok",
       "patterns": [
         {
           "label": "시간 부족",
@@ -119,6 +132,8 @@
     "talent-freelance": {
       "label_ko": "재능·프리랜서",
       "total": 9,
+      "sufficient_data": false,
+      "display_status": "insufficient",
       "patterns": [
         {
           "label": "실행력 부족",
@@ -150,6 +165,8 @@
     "investment": {
       "label_ko": "투자·재테크",
       "total": 25,
+      "sufficient_data": true,
+      "display_status": "ok",
       "patterns": [
         {
           "label": "시장 조사 부족",
@@ -181,6 +198,8 @@
     "offline-sidejob": {
       "label_ko": "오프라인 부업",
       "total": 4,
+      "sufficient_data": false,
+      "display_status": "insufficient",
       "patterns": [
         {
           "label": "마케팅 실패",
@@ -212,6 +231,8 @@
     "etc": {
       "label_ko": "기타",
       "total": 1,
+      "sufficient_data": false,
+      "display_status": "insufficient",
       "patterns": [
         {
           "label": "실행력 부족",

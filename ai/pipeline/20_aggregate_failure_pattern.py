@@ -37,6 +37,7 @@ CATEGORY_SLUG_MAP: dict[str, dict[str, str]] = {
 INPUT_PATH = Path("ai/data/pickply_100.csv")
 OUTPUT_PATH = Path("ai/data/failure_pattern.json")
 TOP_N = 5
+MIN_SAMPLE_SIZE = 10  # 이 미만이면 차트 표시 X, "데이터 수집 중" 처리
 KST = timezone(timedelta(hours=9))
 
 
@@ -82,16 +83,23 @@ def aggregate(rows: list[dict[str, str]]) -> dict:
         categories_out[slug_key] = {
             "label_ko": meta["label"],
             "total": total,
+            "sufficient_data": total >= MIN_SAMPLE_SIZE,
+            "display_status": "ok" if total >= MIN_SAMPLE_SIZE else "insufficient",
             "patterns": patterns,
         }
 
     return {
-        "version": "1.0",
+        "version": "1.1",
         "generated_at": datetime.now(KST).isoformat(timespec="seconds"),
         "source": {
             "dataset": "pickply_100.csv",
             "total_cases": sum(totals.values()),
             "note": "픽플리 설문 100건 실패 데이터. AI-08 통합 정제 351건은 W3 후속 통합 예정.",
+        },
+        "display_policy": {
+            "min_sample_size": MIN_SAMPLE_SIZE,
+            "insufficient_message": "데이터 수집 중이에요 (10건 이상 모이면 차트 표시)",
+            "rule": "sufficient_data=false 카테고리는 차트 대신 안내 메시지 노출 권장",
         },
         "categories": categories_out,
     }
@@ -105,10 +113,18 @@ def main() -> None:
         encoding="utf-8",
     )
     print(f"✅ {OUTPUT_PATH} 생성 완료 ({len(result['categories'])}개 카테고리)")
-    for slug, info in result["categories"].items():
+    sufficient = [s for s, i in result["categories"].items() if i["sufficient_data"]]
+    insufficient = [s for s, i in result["categories"].items() if not i["sufficient_data"]]
+    print(f"📊 차트 표시 가능 (n≥{MIN_SAMPLE_SIZE}): {len(sufficient)}개")
+    for slug in sufficient:
+        info = result["categories"][slug]
         top1 = info["patterns"][0] if info["patterns"] else None
         if top1:
-            print(f"  - {slug} (n={info['total']}): TOP1 {top1['label']} {top1['percent']}%")
+            print(f"  ✅ {slug} (n={info['total']}): TOP1 {top1['label']} {top1['percent']}%")
+    print(f"⚠️ 데이터 수집 중 (n<{MIN_SAMPLE_SIZE}): {len(insufficient)}개")
+    for slug in insufficient:
+        info = result["categories"][slug]
+        print(f"  ⏳ {slug} (n={info['total']})")
 
 
 if __name__ == "__main__":
