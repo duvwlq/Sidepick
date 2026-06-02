@@ -28,3 +28,6 @@ ai/data/success_*_candidates.csv
 
 # AI handoff (인수인계 자료, 별도 레포 RookieAILabs에서 관리)
 ai/handoff/
+
+# 외부 전달용 문서 (PD/BE 디스코드 메시지, 다른 파트 Task 티켓 등 — git에 올리지 않음)
+docs/_local/
