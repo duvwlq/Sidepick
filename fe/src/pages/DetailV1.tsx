@@ -2,19 +2,21 @@
   ChevronRight,
   X,
 } from 'lucide-react';
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { Bookmark } from 'lucide-react';
+import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
-import bookmarkTopIcon from '../assets/detail-v1-figma/bookmark-top.svg';
 import aiGuideStarIcon from '../assets/detail-v1-figma/ai-guide-star.svg';
 import clockIcon from '../assets/detail-v1-figma/clock.svg';
 import dollarSignIcon from '../assets/detail-v1-figma/dollar-sign.svg';
 import moreVerticalIcon from '../assets/detail-v1-figma/more-vertical.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
+import BottomNav from '../components/layout/BottomNav';
+import { CardMetaRow, CaseChip, CaseChipRow, CaseSurface, CaseTextLink } from '../components/common/CaseUi';
 import { ErrorState, LoadingState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
@@ -31,6 +33,7 @@ import {
   type Experience,
   unbookmarkExperience,
 } from '../lib/api';
+import { publishBookmarkSync } from '../lib/bookmark-sync';
 import { extractExperienceImageUrls } from '../lib/experience-images';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
@@ -181,45 +184,6 @@ function StatusBarV1() {
   );
 }
 
-function TagChip({
-  text,
-  tone,
-  compact = false,
-}: {
-  text: string;
-  tone: 'type' | 'status-success' | 'status-failure' | 'category' | 'keyword';
-  compact?: boolean;
-}) {
-  const toneClass =
-    tone === 'type'
-      ? 'bg-[#C06D43] font-[400] text-white'
-      : tone === 'status-success'
-      ? 'bg-[#5A876E] font-[400] text-white'
-      : tone === 'status-failure'
-        ? 'bg-[#C06D43] font-[400] text-white'
-        : tone === 'category'
-          ? 'bg-[#CBE5D8] font-[500] text-[#5A876E]'
-          : 'bg-[#D8D8D8] font-[400] text-white';
-
-  const widthClass = compact
-    ? tone === 'category'
-      ? 'max-w-[92px]'
-      : tone === 'type' || tone === 'keyword'
-        ? 'max-w-[40px]'
-        : 'max-w-[40px]'
-    : tone === 'category'
-      ? 'max-w-[120px]'
-      : tone === 'type' || tone === 'keyword'
-        ? 'max-w-[78px]'
-        : 'max-w-[40px]';
-
-  return (
-    <span className={`inline-flex h-[18px] items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px] ${toneClass}`}>
-      <span className={`${widthClass} truncate`}>{text}</span>
-    </span>
-  );
-}
-
 function MetricStatColumn({
   icon,
   value,
@@ -298,18 +262,19 @@ function SimilarCaseCard({
   const barWidth = similarity == null ? 0 : Math.max(8, Math.min(30, Math.round((similarity / 100) * 30)));
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex min-h-[135px] w-full flex-col gap-[8px] rounded-[4px] bg-[#F8F8F8] px-[16px] py-[12px] text-left"
-    >
+    <CaseSurface className="w-full">
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex min-h-[135px] w-full flex-col gap-[8px] px-[16px] py-[12px] text-left"
+      >
       <div className="flex items-center justify-between gap-[8px]">
-        <div className="flex min-w-0 flex-1 items-center gap-[4px] overflow-hidden pr-[8px]">
-          <TagChip text={success ? '성공' : '실패'} tone={success ? 'status-success' : 'status-failure'} compact />
-          <TagChip text={tags[0] ?? '카테고리'} tone="category" compact />
-          <TagChip text={tags[1] ?? '키워드'} tone="keyword" compact />
-          <TagChip text={tags[2] ?? '키워드'} tone="keyword" compact />
-        </div>
+        <CaseChipRow className="min-w-0 flex-1 pr-[8px]">
+          <CaseChip label={success ? '성공' : '실패'} tone={success ? 'status-success' : 'status-failure'} compact maxWidthClassName="max-w-[40px]" />
+          <CaseChip label={tags[0] ?? '카테고리'} tone="category" compact maxWidthClassName="max-w-[116px]" />
+          <CaseChip label={tags[1] ?? '키워드'} tone="keyword" compact maxWidthClassName="max-w-[64px]" />
+          <CaseChip label={tags[2] ?? '키워드'} tone="keyword" compact maxWidthClassName="max-w-[64px]" />
+        </CaseChipRow>
         {similarity != null ? (
           <div className="flex shrink-0 items-center gap-[4px]">
             <span className="relative h-[4px] w-[30px] rounded-[999px] bg-[#EEEEEE]">
@@ -337,20 +302,19 @@ function SimilarCaseCard({
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex min-w-0 items-center gap-[4px] font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-          <span>{author}</span>
-          <span>·</span>
-          <span>{createdAt}</span>
-          <span>·</span>
-          <span>{`조회 ${viewCount.toLocaleString()}`}</span>
-        </div>
-        <div className="flex shrink-0 items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-          <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px] shrink-0" />
-          <span>{likeCount.toLocaleString()}</span>
-        </div>
-      </div>
+      <CardMetaRow
+        nickname={author}
+        createdAt={createdAt}
+        viewCount={viewCount}
+        trailing={
+          <div className="flex shrink-0 items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+            <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px] shrink-0" />
+            <span>{likeCount.toLocaleString()}</span>
+          </div>
+        }
+      />
     </button>
+    </CaseSurface>
   );
 }
 
@@ -426,11 +390,13 @@ function DetailBottomNav() {
 
 export default function DetailV1() {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const accessToken = getAccessToken();
   const viewer = getStoredUser();
   const experienceId = id ? Number(id) : null;
+  const analysisSectionRef = useRef<HTMLElement | null>(null);
 
   const [experience, setExperience] = useState<Experience | null>(null);
   const [loading, setLoading] = useState(true);
@@ -438,7 +404,6 @@ export default function DetailV1() {
   const [bookmarked, setBookmarked] = useState(false);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [fabExpanded, setFabExpanded] = useState(false);
   const [successCases, setSuccessCases] = useState<Experience[]>([]);
 
   const isOwner = useMemo(() => {
@@ -511,6 +476,17 @@ export default function DetailV1() {
     };
   }, [experienceId, accessToken]);
 
+  useEffect(() => {
+    if (!experience) {
+      return;
+    }
+    const searchParams = new URLSearchParams(location.search);
+    if (searchParams.get('focus') !== 'analysis') {
+      return;
+    }
+    analysisSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [experience, location.search]);
+
   const imageUrls = useMemo(() => (experience ? extractExperienceImageUrls(experience) : []), [experience]);
   const tags = useMemo(() => (experience ? buildTopTags(experience) : []), [experience]);
   const issueChips = useMemo(() => (experience ? buildIssueChips(experience) : []), [experience]);
@@ -530,6 +506,19 @@ export default function DetailV1() {
         ? await unbookmarkExperience(accessToken, experience.id)
         : await bookmarkExperience(accessToken, experience.id);
       setBookmarked(payload.bookmarked);
+      setExperience((current) =>
+        current
+          ? {
+              ...current,
+              likeCount: payload.bookmarkCount,
+            }
+          : current,
+      );
+      publishBookmarkSync({
+        experienceId: experience.id,
+        bookmarked: payload.bookmarked,
+        bookmarkCount: payload.bookmarkCount,
+      });
       showToast(payload.bookmarked ? '북마크에 저장했어요.' : '북마크를 해제했어요.');
     } catch (bookmarkError) {
       showToast(resolveErrorMessage(bookmarkError, '북마크 처리에 실패했습니다. 잠시 후 다시 시도해 주세요.'));
@@ -554,15 +543,6 @@ export default function DetailV1() {
       showToast(resolveErrorMessage(deleteError, '사례를 삭제하지 못했습니다.'));
       setDeleting(false);
     }
-  }
-
-  function moveToCreate() {
-    setFabExpanded(false);
-    if (!accessToken) {
-      navigate(`/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`);
-      return;
-    }
-    navigate('/create');
   }
 
   function moveToGuide() {
@@ -600,7 +580,7 @@ export default function DetailV1() {
         />
       ) : null}
 
-      <div className="relative min-h-screen bg-white pb-[148px]">
+      <div className="relative min-h-screen bg-white pb-[200px]">
         <div className="sticky top-0 z-30 bg-white">
           <StatusBarV1 />
           <div className="flex items-center justify-between bg-white px-[16px] py-[20px]">
@@ -627,14 +607,17 @@ export default function DetailV1() {
               className="flex h-[24px] w-[24px] items-center justify-center"
               aria-label={bookmarked ? '북마크 해제' : '북마크 저장'}
             >
-              <span className={`relative h-[24px] w-[24px] ${bookmarked ? 'rounded-[4px] bg-[#E7F1EB]' : ''}`}>
-                <img src={bookmarkTopIcon} alt="" className="absolute left-[5px] top-[2px] h-[20px] w-[16px]" />
-              </span>
+              <Bookmark
+                size={22}
+                strokeWidth={2}
+                fill={bookmarked ? '#5A876E' : 'none'}
+                color={bookmarked ? '#5A876E' : '#131416'}
+              />
             </button>
           </div>
         </div>
 
-        <main className="flex flex-col gap-[12px] pb-[180px]">
+        <main className="flex flex-col gap-[12px] pb-[320px]">
           <section className="bg-white px-[16px] py-[12px]">
             <div className="flex items-start justify-between gap-[12px]">
               <div className="flex min-w-0 items-center gap-[8px]">
@@ -674,6 +657,13 @@ export default function DetailV1() {
                     <div className="absolute right-0 top-[26px] z-50 flex w-[92px] flex-col rounded-[12px] border border-[#E6E6E6] bg-white p-[6px] shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
                       <button
                         type="button"
+                        onClick={() => navigate(`/create?experienceId=${experience.id}`)}
+                        className="rounded-[8px] px-[10px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] tracking-[0px] text-[#131416]"
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => void handleDelete()}
                         disabled={deleting}
                         className="rounded-[8px] px-[10px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] tracking-[0px] text-[#D33B3B] disabled:opacity-60"
@@ -710,12 +700,12 @@ export default function DetailV1() {
             ) : null}
 
             <div className="pt-[24px]">
-              <div className="flex flex-wrap items-center gap-[4px]">
-                <TagChip text={tags[0] ?? '부업'} tone="type" />
-                <TagChip text={tags[1] ?? '카테고리'} tone="category" />
-                <TagChip text={tags[2] ?? '키워드'} tone="keyword" />
-                <TagChip text={tags[3] ?? '키워드'} tone="keyword" />
-              </div>
+              <CaseChipRow>
+                <CaseChip label={tags[0] ?? '부업'} tone="type" maxWidthClassName="max-w-[44px]" />
+                <CaseChip label={tags[1] ?? '카테고리'} tone="category" maxWidthClassName="max-w-[116px]" />
+                <CaseChip label={tags[2] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[64px]" />
+                <CaseChip label={tags[3] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[64px]" />
+              </CaseChipRow>
             </div>
 
             <div className="pt-[24px]">
@@ -754,7 +744,7 @@ export default function DetailV1() {
 
           </section>
 
-          <section className="bg-white px-[16px] py-[10px]">
+          <section className="bg-white px-[16px] pb-[20px] pt-[10px]">
             <SectionBlockTitle title="핵심 이슈" description="해당 사례에서 찾아볼 수 있는 핵심 이슈입니다." />
             <div className="pt-[10px]">
               <div className="flex flex-wrap gap-[6px]">
@@ -765,7 +755,7 @@ export default function DetailV1() {
             </div>
           </section>
 
-          <section className="bg-white px-[16px] py-[12px]">
+          <section ref={analysisSectionRef} className="bg-white px-[16px] py-[12px]">
             <div className="rounded-[10px] border border-[#EEEEEE] border-b-[2px] border-b-[#5A876E] bg-white px-[16px] py-[16px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
               <div className="flex items-center gap-[4px]">
                 <div className="flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[4px] bg-gradient-to-b from-[#92BFA6] to-[#5A876E]">
@@ -786,7 +776,7 @@ export default function DetailV1() {
                     key={`${index}-${line}`}
                     className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] tracking-[0px] text-[#494949]"
                   >
-                    <span className="font-[400]">{line}</span>
+                    <span className="font-[600]">{line}</span>
                   </li>
                 ))}
               </ol>
@@ -798,7 +788,7 @@ export default function DetailV1() {
             </div>
           </section>
 
-          <section className="bg-white px-[16px] py-[10px]">
+          <section className="bg-white px-[16px] pb-[20px] pt-[10px]">
             <SectionBlockTitle title="실패 패턴" description="유사 카테고리 내 실패 원인 별 비중 그래프 데이터입니다." />
             <div className="pt-[10px]">
               <div className="flex flex-col gap-[16px] rounded-[10px] bg-[#F8F8F8] p-[16px]">
@@ -806,6 +796,17 @@ export default function DetailV1() {
                   <PatternRow key={item.label} label={item.label} percent={item.percent} />
                 ))}
               </div>
+            </div>
+            <div className="pt-[16px]">
+              <button
+                type="button"
+                onClick={moveToGuide}
+                className="flex h-[34px] items-center gap-[4px] rounded-[999px] bg-[#375E49] px-[12px] text-white shadow-[0_0_4px_rgba(0,0,0,0.15)]"
+              >
+                <img src={guideIcon} alt="" className="h-[16px] w-[13.091px] opacity-90" />
+                <span className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px]">해당 부업 가이드 바로가기</span>
+                <ChevronRight size={14} strokeWidth={2} />
+              </button>
             </div>
           </section>
 
@@ -816,6 +817,13 @@ export default function DetailV1() {
                 <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
                   현재 사례와 비슷한 경험을 가진 다른 사례들을 추천해 드립니다.
                 </p>
+              </div>
+
+              <div className="flex justify-end pt-[8px]">
+                <CaseTextLink
+                  label="성공 사례 비교"
+                  onClick={() => navigate(`/experiences/${experience.id}/success-comparison`)}
+                />
               </div>
 
               <div className="pt-[12px]">
@@ -865,57 +873,23 @@ export default function DetailV1() {
               </div>
 
               <div className="flex justify-center pt-[8px]">
-                <button
-                  type="button"
-                  onClick={() => navigate('/explore')}
-                  className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5D5D5D] underline"
-                >
-                  모든 사례 보기
-                </button>
+                <CaseTextLink label="모든 사례 보기" onClick={() => navigate('/explore')} />
               </div>
             </div>
           </section>
         </main>
 
-        <div className="fixed bottom-[84px] left-1/2 z-30 flex w-full max-w-[375px] -translate-x-1/2 items-center justify-between px-[24px] py-[16px]">
-          <button
-            type="button"
-            onClick={moveToGuide}
-            className="flex h-[34px] items-center gap-[4px] rounded-[999px] bg-[#375E49] px-[12px] text-white shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-          >
-            <img src={guideIcon} alt="" className="h-[16px] w-[13.091px]" />
-            <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px]">해당 부업 가이드 바로가기</span>
-            <ChevronRight size={14} strokeWidth={2} />
-          </button>
-
-          <div className="relative h-[36px] w-[122px]">
-            {fabExpanded ? (
-              <button
-                type="button"
-                onClick={moveToCreate}
-                className="absolute right-0 top-[-49px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-              >
-                <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-black">경험 작성</span>
-              </button>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={() => setFabExpanded((current) => !current)}
-              className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full ${
-                fabExpanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E] shadow-[0_8px_16px_rgba(90,135,110,0.24)]'
-              }`}
-              aria-label={fabExpanded ? '경험 작성 닫기' : '경험 작성'}
-            >
-              {fabExpanded ? <X size={20} strokeWidth={2.2} color="#FFFFFF" /> : <img src={plusIcon} alt="" className="h-[20.667px] w-[20.667px]" />}
-            </button>
-          </div>
-        </div>
-
-        <DetailBottomNav />
+        <BottomNav
+          active="explore"
+          showFab={false}
+        />
       </div>
     </div>
   );
 }
+
+void DetailBottomNav;
+void X;
+void editIcon;
+void plusIcon;
 

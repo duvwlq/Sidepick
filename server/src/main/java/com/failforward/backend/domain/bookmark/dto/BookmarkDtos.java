@@ -7,7 +7,8 @@ public final class BookmarkDtos {
 
     public record BookmarkStatusResponse(
             Long experienceId,
-            boolean bookmarked
+            boolean bookmarked,
+            int bookmarkCount
     ) {
     }
 }

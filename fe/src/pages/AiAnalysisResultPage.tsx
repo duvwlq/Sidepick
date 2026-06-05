@@ -53,6 +53,11 @@ export default function AiAnalysisResultPage() {
     }
   };
 
+  const shouldContinuePolling = (requestError: unknown) =>
+    requestError instanceof ApiError &&
+    (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
+      requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR);
+
   const scheduleRedirect = (targetExperienceId: string) => {
     cleanupTimers();
     setPhase('completed');
@@ -73,6 +78,24 @@ export default function AiAnalysisResultPage() {
     }
 
     let mounted = true;
+
+    async function checkReportStatus(targetExperienceId: string) {
+      try {
+        const report = await getReport(targetExperienceId);
+        if (report.reportStatus === 'READY') {
+          if (mounted) {
+            scheduleRedirect(targetExperienceId);
+          }
+          return true;
+        }
+      } catch (reportError) {
+        if (mounted) {
+          setError(resolveErrorMessage(reportError, '응답이 지연되고 있어요. 잠시 후 다시 시도해주세요.'));
+        }
+      }
+
+      return false;
+    }
 
     async function bootstrap() {
       let targetExperienceId = experienceId;
@@ -108,7 +131,7 @@ export default function AiAnalysisResultPage() {
             setError(
               resolveErrorMessage(
                 requestError,
-                '경험 등록 중 문제가 발생했어요. 다시 시도해주세요.',
+                '경험 등록 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.',
               ),
             );
           }
@@ -148,45 +171,18 @@ export default function AiAnalysisResultPage() {
             return;
           }
         } catch (requestError) {
-          if (
-            requestError instanceof ApiError &&
-            (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
-              requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR)
-          ) {
+          if (!shouldContinuePolling(requestError)) {
             if (mounted) {
-              setError(resolveErrorMessage(requestError, '잠시 연결이 불안정해요. 다시 시도해주세요.'));
+              setError(resolveErrorMessage(requestError, '응답이 지연되고 있어요. 잠시 후 다시 시도해주세요.'));
             }
             return;
           }
-
-          if (mounted) {
-            setError(resolveErrorMessage(requestError, '잠시 연결이 불안정해요. 다시 시도해주세요.'));
-          }
-          return;
         }
       }
 
       pollRef.current = window.setInterval(() => {
         void checkReportStatus(targetExperienceId);
       }, 1000);
-    }
-
-    async function checkReportStatus(targetExperienceId: string) {
-      try {
-        const report = await getReport(targetExperienceId);
-        if (report.reportStatus === 'READY') {
-          if (mounted) {
-            scheduleRedirect(targetExperienceId);
-          }
-          return true;
-        }
-      } catch (reportError) {
-        if (mounted) {
-          setError(resolveErrorMessage(reportError, '잠시 연결이 불안정해요. 다시 시도해주세요.'));
-        }
-      }
-
-      return false;
     }
 
     void bootstrap();
@@ -276,7 +272,7 @@ function AnalyzingScreen({ nickname }: { nickname: string }) {
           <span className="font-semibold">{nickname}</span>
           <span>님의</span>
         </p>
-        <p>경험을 분석하고 있어요!</p>
+        <p>경험을 분석하고 있어요</p>
       </div>
 
       <div className="flex flex-col items-center gap-5">

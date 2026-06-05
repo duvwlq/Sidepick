@@ -85,6 +85,7 @@ export default function SignupNicknameStepPage() {
     updateField('signupMode', signupMode);
     if (signupMode === 'social' && !form.nickname.trim() && storedUser?.nickname) {
       updateField('nickname', storedUser.nickname);
+      updateField('nicknameChecked', true);
     }
     if (signupMode === 'social' && !form.fullName.trim() && storedUser?.fullName) {
       updateField('fullName', storedUser.fullName);

@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
@@ -17,9 +18,11 @@ import categoryCommerceImage from '../assets/home-v1-figma/category-commerce.web
 import categoryContentImage from '../assets/home-v1-figma/category-content.webp';
 import categoryDigitalImage from '../assets/home-v1-figma/category-digital.webp';
 import categoryPlatformImage from '../assets/home-v1-figma/category-platform.webp';
+import BottomNav from '../components/layout/BottomNav';
+import { CardActionButton, CaseChip, CaseChipRow, CaseSurface, CaseTextLink, CardMetaRow } from '../components/common/CaseUi';
 import { CardSkeleton, PageMessage } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
-import { getExperiences, type Experience } from '../lib/api';
+import { getExperiences, getMyHomeFeed, type Experience } from '../lib/api';
 import { getExperienceImageMeta } from '../lib/experience-images';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken } from '../lib/session';
@@ -68,27 +71,24 @@ const CATEGORY_CARDS: CategoryCardData[] = [
   },
   {
     id: 5,
-    title: '중고/재판매',
-    subtitle: ['리셀, 위탁판매', '중고거래'],
-    image: categoryCommerceImage,
+    title: '재능 판매·프리랜서',
+    subtitle: ['디자인/ 영상 편집/ 글쓰기, 카피라이팅/ 개발/ 번역/ 코칭, 멘토링 등 플랫폼 활동'],
+    image: categoryDigitalImage,
+    imageClassName: 'object-[50%_42%]',
   },
   {
     id: 6,
-    title: '무자본 프리랜서',
-    subtitle: ['번역, 외주집', '포트폴리오'],
-    image: categoryDigitalImage,
+    title: '투자·재테크',
+    subtitle: ['주식/ 코인/ ETF/ P2P 투자/ 부동산 소액 투자 등'],
+    image: categoryCommerceImage,
+    imageClassName: 'object-[50%_48%]',
   },
   {
     id: 7,
-    title: '오프라인 부업',
-    subtitle: ['이벤트, 알바', '행사 스태프'],
+    title: '오프라인 기반 부업',
+    subtitle: ['공방, 핸드메이드/ 플리마켓 판매/ 클래스 운영 (오프라인) 등'],
     image: categoryPlatformImage,
-  },
-  {
-    id: 8,
-    title: '커뮤니티 운영',
-    subtitle: ['모임, 멤버십', '구독형 운영'],
-    image: categoryContentImage,
+    imageClassName: 'object-[62%_44%]',
   },
 ];
 
@@ -189,7 +189,7 @@ function SearchBarV1({ onClick }: { onClick: () => void }) {
         onFocus={onClick}
         onClick={onClick}
         className="absolute inset-0 h-full w-full cursor-text rounded-[999px] bg-transparent px-[16px] text-transparent caret-transparent outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/30"
-        aria-label="검색창 열기"
+        aria-label="검색"
       />
     </label>
   );
@@ -241,7 +241,7 @@ function CategoryCardV1({ category }: { category: CategoryCardData }) {
   return (
     <Link
       to={`/explore?categoryId=${category.id}`}
-      className="relative flex h-[160px] w-full overflow-hidden rounded-[16px] bg-[#E6ECE8] transition-transform duration-150 hover:scale-[0.995] active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/35"
+      className="relative flex h-[160px] w-full overflow-hidden rounded-[10px] bg-[#E6ECE8] transition-transform duration-150 hover:scale-[0.995] active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/35"
     >
       <img
         src={category.image}
@@ -283,7 +283,7 @@ function PopularTabButton({
       onClick={onClick}
       aria-pressed={active}
       className={`flex items-center justify-center border-b-[1.5px] px-[8px] py-[4px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 ${
-        active ? 'border-[#D07B48]' : 'border-transparent'
+        active ? 'border-[#C98559]' : 'border-transparent'
       }`}
     >
       <span
@@ -316,24 +316,24 @@ function StoryCardV1({
 
   if (horizontal) {
     return (
-      <article
-        className={`w-[311px] shrink-0 rounded-[4px] bg-white shadow-[0_0_2px_rgba(0,0,0,0.10)] ${
+      <CaseSurface
+        className={`w-[311px] shrink-0 ${
           isCompactHorizontal ? 'h-[135px]' : 'h-[173px]'
         }`}
       >
         <div className="flex h-full w-full flex-col rounded-[4px] bg-white px-[16px] py-[12px]">
           <div className="flex w-full flex-col gap-[8px]">
             <div className="flex w-full items-center">
-              <div className="flex items-start gap-[4px]">
+              <CaseChipRow>
                 {badges.map((badge, index) => (
-                  <span
+                  <CaseChip
                     key={`${experience.id}-${badge.label}-${index}`}
-                    className={`inline-flex h-[18px] ${badge.widthClassName} items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px] ${badge.className}`}
-                  >
-                    {badge.label}
-                  </span>
+                    label={badge.label}
+                    tone={index === 0 ? (experience.caseStatus === 'SUCCESS' ? 'status-success' : 'status-failure') : index === 1 ? 'category' : 'keyword'}
+                    maxWidthClassName={badge.widthClassName}
+                  />
                 ))}
-              </div>
+              </CaseChipRow>
             </div>
 
             {hasRegisteredImage ? (
@@ -342,7 +342,7 @@ function StoryCardV1({
                   <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" />
                 </div>
                 <div className="flex h-[60px] w-[188px] shrink-0 flex-col gap-[4px]">
-                  <h3 className="line-clamp-1 w-[188px] font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-[#131416]">
+                  <h3 className="line-clamp-1 w-[188px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
                     {experience.title}
                   </h3>
                   <p className="w-[188px] overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
@@ -353,10 +353,10 @@ function StoryCardV1({
             ) : (
               <div className="flex h-[60px] w-full items-start gap-[8px]">
                 <div className="flex h-[60px] w-[276px] shrink-0 flex-col gap-[3px]">
-                  <h3 className="line-clamp-1 min-h-[17px] w-[276px] font-['Pretendard'] text-[13px] font-[500] leading-[15.6px] tracking-[0px] text-[#131416]">
+                  <h3 className="line-clamp-1 min-h-[19px] w-[276px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
                     {experience.title}
                   </h3>
-                  <p className="w-[276px] overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[11px] font-[400] leading-[15.4px] tracking-[0px] text-[#494949]">
+                  <p className="w-[276px] overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
                     {preview}
                   </p>
                 </div>
@@ -364,58 +364,52 @@ function StoryCardV1({
             )}
           </div>
 
-          <div className="flex w-full items-center justify-between">
-            <div className="flex items-start gap-[4px] whitespace-nowrap font-['Pretendard'] text-[11px] font-[300] leading-[15.4px] tracking-[0px] text-[#8A8A8A]">
-              <span>{experience.author.nickname || '닉네임'}</span>
-              <span>·</span>
-              <span>{formatDate(experience.createdAt)}</span>
-              <span>·</span>
-              <span className="flex items-center gap-[2px]">
-                <span>조회</span>
-                <span>{experience.viewCount.toLocaleString()}</span>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-[2px]">
-              <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
-              <span className="font-['Pretendard'] text-[11px] font-[400] leading-[15.4px] tracking-[0px] text-[#8A8A8A]">
-                {experience.likeCount.toLocaleString()}
-              </span>
-            </div>
-          </div>
+          <CardMetaRow
+            nickname={experience.author.nickname || '닉네임'}
+            createdAt={formatDate(experience.createdAt)}
+            viewCount={experience.viewCount}
+            trailing={
+              <>
+                <div className="flex items-center gap-[2px]">
+                  <Heart size={14} strokeWidth={1.75} color="#8A8A8A" />
+                  <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">0</span>
+                </div>
+                <div className="flex items-center gap-[2px]">
+                  <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
+                  <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+                    {experience.likeCount.toLocaleString()}
+                  </span>
+                </div>
+              </>
+            }
+          />
 
           {showSuccessCta ? (
             <div className="mt-auto flex w-full flex-col items-end justify-center pt-[2px] pr-[2px]">
-              <button
-                type="button"
-                onClick={() => onSuccessClick(experience)}
-                className="inline-flex items-center justify-center rounded-[8px] bg-[#5A876E] px-[12px] py-[7px] font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] tracking-[0px] text-white"
-              >
-                성공 사례 보기
-              </button>
+              <CardActionButton label="성공 사례 보기" onClick={() => onSuccessClick(experience)} />
             </div>
           ) : null}
         </div>
-      </article>
+      </CaseSurface>
     );
   }
 
   if (!horizontal) {
     return (
-      <article className="w-full rounded-[4px] bg-white shadow-[0_0_2px_rgba(0,0,0,0.10)]">
+      <CaseSurface className="w-full">
         <div className="flex w-full flex-col gap-[8px] rounded-[4px] bg-white px-[16px] py-[12px]">
           <div className="flex w-full flex-col">
             <div className="flex w-full items-center">
-              <div className="flex items-start gap-[4px]">
+              <CaseChipRow>
                 {badges.map((badge, index) => (
-                  <span
+                  <CaseChip
                     key={`${experience.id}-${badge.label}-${index}`}
-                    className={`inline-flex h-[18px] ${badge.widthClassName} items-center justify-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px] ${badge.className}`}
-                  >
-                    {badge.label}
-                  </span>
+                    label={badge.label}
+                    tone={index === 0 ? (experience.caseStatus === 'SUCCESS' ? 'status-success' : 'status-failure') : index === 1 ? 'category' : 'keyword'}
+                    maxWidthClassName={badge.widthClassName}
+                  />
                 ))}
-              </div>
+              </CaseChipRow>
             </div>
 
             <div className="flex h-[60px] w-full items-start gap-[8px] pt-[8px]">
@@ -426,7 +420,7 @@ function StoryCardV1({
               ) : null}
 
               <div className={`flex h-[60px] shrink-0 flex-col gap-[4px] ${hasRegisteredImage ? 'w-[220px]' : 'w-full'}`}>
-                <h3 className={`line-clamp-1 font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-[#131416] ${hasRegisteredImage ? 'w-[220px]' : 'w-full'}`}>
+                <h3 className={`line-clamp-1 font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416] ${hasRegisteredImage ? 'w-[220px]' : 'w-full'}`}>
                   {experience.title}
                 </h3>
                 <p className={`${hasRegisteredImage ? 'w-[220px]' : 'w-full'} overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]`}>
@@ -436,39 +430,33 @@ function StoryCardV1({
             </div>
           </div>
 
-          <div className="flex w-full items-center justify-between">
-            <div className="flex items-start gap-[4px] whitespace-nowrap font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-              <span>{experience.author.nickname || '닉네임'}</span>
-              <span>·</span>
-              <span>{formatDate(experience.createdAt)}</span>
-              <span>·</span>
-              <span className="flex items-center gap-[2px]">
-                <span>조회</span>
-                <span>{experience.viewCount.toLocaleString()}</span>
-              </span>
-            </div>
-
-            <div className="flex items-center gap-[2px]">
-              <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
-              <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-                {experience.likeCount.toLocaleString()}
-              </span>
-            </div>
-          </div>
+          <CardMetaRow
+            nickname={experience.author.nickname || '닉네임'}
+            createdAt={formatDate(experience.createdAt)}
+            viewCount={experience.viewCount}
+            trailing={
+              <>
+                <div className="flex items-center gap-[2px]">
+                  <Heart size={14} strokeWidth={1.75} color="#8A8A8A" />
+                  <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">0</span>
+                </div>
+                <div className="flex items-center gap-[2px]">
+                  <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
+                  <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+                    {experience.likeCount.toLocaleString()}
+                  </span>
+                </div>
+              </>
+            }
+          />
 
           {showSuccessCta ? (
             <div className="flex w-full flex-col items-end justify-center pt-[2px] pr-[2px]">
-              <button
-                type="button"
-                onClick={() => onSuccessClick(experience)}
-                className="inline-flex items-center justify-center rounded-[8px] bg-[#5A876E] px-[12px] py-[7px] font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] tracking-[0px] text-white"
-              >
-                성공 사례 보기
-              </button>
+              <CardActionButton label="성공 사례 보기" onClick={() => onSuccessClick(experience)} />
             </div>
           ) : null}
         </div>
-      </article>
+      </CaseSurface>
     );
   }
 
@@ -536,11 +524,17 @@ function StoryCardV1({
               <span>{`조회 ${experience.viewCount.toLocaleString()}`}</span>
             </div>
 
-            <div className="flex items-center gap-[2px]">
-              <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
-              <span className="font-['Pretendard'] text-[8px] font-[400] leading-[11.2px] tracking-[0px] text-[#A8A8A8]">
-                {experience.likeCount.toLocaleString()}
-              </span>
+            <div className="flex items-center gap-[6px]">
+              <div className="flex items-center gap-[2px]">
+                <Heart size={14} strokeWidth={1.75} color="#A8A8A8" />
+                <span className="font-['Pretendard'] text-[8px] font-[400] leading-[11.2px] tracking-[0px] text-[#A8A8A8]">0</span>
+              </div>
+              <div className="flex items-center gap-[2px]">
+                <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
+                <span className="font-['Pretendard'] text-[8px] font-[400] leading-[11.2px] tracking-[0px] text-[#A8A8A8]">
+                  {experience.likeCount.toLocaleString()}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -574,24 +568,6 @@ function ExploreSegmentButton({
       >
         {label}
       </span>
-    </button>
-  );
-}
-
-function TextLinkButton({
-  label,
-  onClick,
-}: {
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex items-center justify-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#757575] underline decoration-[0.5px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/20 active:opacity-70"
-    >
-      {label}
     </button>
   );
 }
@@ -749,9 +725,10 @@ export default function HomeV1() {
   const { showToast } = useToast();
   const [selectedTopic, setSelectedTopic] = useState<PopularTopic>('유튜브');
   const [sort, setSort] = useState<SortKey>('latest');
-  const [expandedCategories, setExpandedCategories] = useState(false);
+  const [categoryExpanded, setCategoryExpanded] = useState(false);
   const [fabExpanded, setFabExpanded] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [isPersonalizedFeed, setIsPersonalizedFeed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -761,19 +738,32 @@ export default function HomeV1() {
 
   useEffect(() => {
     setFabExpanded(false);
-  }, [sort, selectedTopic, expandedCategories]);
+  }, [sort, selectedTopic]);
 
   async function loadExperiences(nextSort: SortKey) {
     setLoading(true);
     setError('');
     try {
+      const token = getAccessToken();
+
+      if (token) {
+        const payload = await getMyHomeFeed(token);
+        if (payload.experiences.length) {
+          setExperiences(payload.experiences);
+          setIsPersonalizedFeed(true);
+          return;
+        }
+      }
+
       const payload = await getExperiences({
         page: 0,
         size: 20,
         sort: nextSort,
       });
       setExperiences(payload.experiences);
+      setIsPersonalizedFeed(false);
     } catch (loadError) {
+      setIsPersonalizedFeed(false);
       setError(resolveErrorMessage(loadError, '사례 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'));
     } finally {
       setLoading(false);
@@ -781,8 +771,8 @@ export default function HomeV1() {
   }
 
   const visibleCategories = useMemo(
-    () => (expandedCategories ? CATEGORY_CARDS : CATEGORY_CARDS.slice(0, 4)),
-    [expandedCategories],
+    () => (categoryExpanded ? CATEGORY_CARDS : CATEGORY_CARDS.slice(0, 4)),
+    [categoryExpanded],
   );
 
   const popularExperiences = useMemo(() => {
@@ -809,10 +799,10 @@ export default function HomeV1() {
 
         <header>
           <div className="flex h-[64px] items-center justify-between bg-white px-[16px] pb-[18px] pt-[22px]">
-            <div className="flex w-[118px] items-center gap-[2px]">
-              <img src={brandMarkIcon} alt="" className="h-[16px] w-[16px] shrink-0" />
+            <div className="flex w-[132px] items-center gap-[4px]">
+              <img src={brandMarkIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
               <span className="font-['Bruno_Ace_SC'] text-[20px] font-[400] leading-[16px] tracking-[0px] text-[#5A876E]">
-                sidePick
+                SIDEPICK
               </span>
             </div>
 
@@ -822,16 +812,16 @@ export default function HomeV1() {
               className="flex h-[24px] w-[24px] items-center justify-center rounded-[999px] transition-colors duration-150 hover:bg-[#F5F5F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 active:bg-[#EFEFEF]"
               aria-label="알림"
             >
-              <img src={bellIcon} alt="" className="h-[24px] w-[24px]" />
+              <img src={bellIcon} alt="" className="h-[22px] w-[20px]" />
             </button>
           </div>
 
           <div className="bg-white px-[16px] pb-[12px] pt-[2px]">
-              <SearchBarV1 onClick={() => navigate('/explore?mode=search')} />
+              <SearchBarV1 onClick={() => navigate('/search')} />
           </div>
         </header>
 
-        <main className="pb-[196px]">
+        <main className="pb-[388px]">
           <section className="px-[16px] pt-[18px]">
             <SectionHeader title="부업 카테고리" actionLabel="전체보기" onAction={() => navigate('/explore')} />
 
@@ -842,28 +832,30 @@ export default function HomeV1() {
             </div>
 
             <div className="flex justify-center pt-[12px]">
-              <TextLinkButton
-                label={expandedCategories ? '접어 보기' : '펼쳐 보기'}
-                onClick={() => setExpandedCategories((previous) => !previous)}
+              <CaseTextLink
+                label={categoryExpanded ? '접기' : '전체 보기'}
+                onClick={() => setCategoryExpanded((current) => !current)}
               />
             </div>
           </section>
 
-          <section className="px-[16px] pt-[12px]">
+          <section className="px-[16px] pb-[56px] pt-[12px]">
             <SectionHeader title="인기 부업" />
 
-            <div className="flex items-center pt-[16px]">
-              {POPULAR_TOPICS.map((topic) => (
-                <PopularTabButton
-                  key={topic}
-                  active={selectedTopic === topic}
-                  label={topic}
-                  onClick={() => setSelectedTopic(topic)}
-                />
-              ))}
-            </div>
+            {!isPersonalizedFeed ? (
+              <div className="flex items-center pt-[16px]">
+                {POPULAR_TOPICS.map((topic) => (
+                  <PopularTabButton
+                    key={topic}
+                    active={selectedTopic === topic}
+                    label={topic}
+                    onClick={() => setSelectedTopic(topic)}
+                  />
+                ))}
+              </div>
+            ) : null}
 
-            <div className="overflow-x-auto pt-[16px]">
+            <div className={`overflow-x-auto ${isPersonalizedFeed ? 'pt-[12px]' : 'pt-[16px]'}`}>
               <div className="flex h-[173px] w-max items-center gap-[10px] pr-[16px]">
                 {loading ? (
                   <>
@@ -897,7 +889,7 @@ export default function HomeV1() {
             </div>
           </section>
 
-          <section className="px-[16px] pt-[12px]">
+          <section className="px-[16px] pb-[120px] pt-[12px]">
             <SectionHeader title="탐색" />
 
             <div className="flex justify-center pt-[16px]">
@@ -949,61 +941,37 @@ export default function HomeV1() {
               )}
             </div>
 
-            <div className="flex justify-center pt-[28px]">
-              <TextLinkButton label="모든 사례 보기" onClick={() => navigate('/explore')} />
+            <div className="flex justify-center pt-[36px]">
+              <CaseTextLink label="모든 사례 보기" onClick={() => navigate('/explore')} />
             </div>
           </section>
         </main>
 
-        <div className="fixed bottom-[116px] left-1/2 z-40 flex w-full max-w-[375px] -translate-x-1/2 justify-end px-[30px]">
-          <div className="relative h-[36px] w-[122px]">
-            {fabExpanded ? (
-              <button
-                type="button"
-                onClick={() => {
-                  const token = getAccessToken();
-                  setFabExpanded(false);
-                  if (!token) {
-                    navigate(
-                      `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
-                        '경험 작성은 로그인이 필요한 서비스입니다.',
-                      )}`,
-                    );
-                    return;
-                  }
-
-                  navigate('/create');
-                }}
-                className="absolute right-0 top-[-49px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-                aria-label="경험 작성 열기"
-              >
-                <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-black">
-                  경험 작성
-                </span>
-              </button>
-            ) : null}
-
-            <button
-              type="button"
-              onClick={() => setFabExpanded((current) => !current)}
-              className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/35 ${
-                fabExpanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E] shadow-[0_8px_16px_rgba(90,135,110,0.24)]'
-              }`}
-              aria-label={fabExpanded ? '경험 작성 닫기' : '경험 작성'}
-            >
-              <img
-                src={plusIcon}
-                alt=""
-                className={`transition-transform ${fabExpanded ? 'h-[22px] w-[22px] rotate-45' : 'h-[18px] w-[18px]'}`}
-              />
-            </button>
-          </div>
-        </div>
-
-        <BottomNavV1Clean />
+        <BottomNav
+          active="home"
+          showFab
+          fabExpanded={fabExpanded}
+          onFabToggle={() => setFabExpanded((current) => !current)}
+          onCreateClick={() => {
+            const token = getAccessToken();
+            setFabExpanded(false);
+            if (!token) {
+              navigate(
+                `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
+                  '경험 작성은 로그인이 필요한 서비스입니다.',
+                )}`,
+              );
+              return;
+            }
+            navigate('/create');
+          }}
+        />
       </div>
     </div>
   );
 }
+
+void BottomNavV1Clean;
+void editIcon;
+void plusIcon;
 

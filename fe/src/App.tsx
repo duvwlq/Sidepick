@@ -24,6 +24,8 @@ import SignupPurposePage from './pages/auth/SignupPurposePage';
 import SignupRegionPage from './pages/auth/SignupRegionPage';
 import HomeV1 from './pages/HomeV1';
 import ExploreV1 from './pages/ExploreV1';
+import ExploreFigmaMainPage from './pages/ExploreFigmaMainPage';
+import SearchPage from './pages/SearchPage';
 import SuccessComparisonPage from './pages/SuccessComparisonPage';
 
 export default function App() {
@@ -35,6 +37,7 @@ export default function App() {
           <Route path="/" element={<HomeV1 />} />
           <Route path="/v1/home" element={<HomeV1 />} />
           <Route path="/v1/explore" element={<ExploreV1 />} />
+          <Route path="/explore-figma" element={<ExploreFigmaMainPage />} />
           <Route path="/auth" element={<AuthEntryPage />} />
           <Route path="/login" element={<AuthEntryPage />} />
           <Route path="/auth/kakao/callback" element={<KakaoCallbackPage />} />
@@ -48,6 +51,7 @@ export default function App() {
           <Route path="/signup/employment" element={<SignupExperiencePage />} />
           <Route path="/signup/purpose" element={<SignupPurposePage />} />
           <Route path="/explore" element={<ExploreV1 />} />
+          <Route path="/search" element={<SearchPage />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/create" element={<CreateWizardPage />} />
           <Route path="/create-v2" element={<Navigate to="/create" replace />} />

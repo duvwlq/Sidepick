@@ -27,12 +27,12 @@ public class BookmarkService {
         FailureExperience experience = getExperience(experienceId);
         Optional<ExperienceBookmark> existing = bookmarkRepository.findByExperienceAndUserId(experience, user.getId());
         if (existing.isPresent()) {
-            return new BookmarkStatusResponse(experienceId, true);
+            return new BookmarkStatusResponse(experienceId, true, experience.getLikeCount());
         }
 
         bookmarkRepository.save(ExperienceBookmark.create(experience, user));
         experience.increaseLikeCount();
-        return new BookmarkStatusResponse(experienceId, true);
+        return new BookmarkStatusResponse(experienceId, true, experience.getLikeCount());
     }
 
     @Transactional
@@ -43,12 +43,17 @@ public class BookmarkService {
             bookmarkRepository.delete(bookmark);
             experience.decreaseLikeCount();
         });
-        return new BookmarkStatusResponse(experienceId, false);
+        return new BookmarkStatusResponse(experienceId, false, experience.getLikeCount());
     }
 
     public BookmarkStatusResponse getStatus(Long experienceId) {
         User user = currentUserProvider.getCurrentUserEntity();
-        return new BookmarkStatusResponse(experienceId, bookmarkRepository.existsByExperienceIdAndUserId(experienceId, user.getId()));
+        FailureExperience experience = getExperience(experienceId);
+        return new BookmarkStatusResponse(
+                experienceId,
+                bookmarkRepository.existsByExperienceIdAndUserId(experienceId, user.getId()),
+                experience.getLikeCount()
+        );
     }
 
     private FailureExperience getExperience(Long experienceId) {

@@ -41,6 +41,8 @@ export type Category = {
   description: string;
   icon: string;
   color: string;
+  slug?: string | null;
+  type?: string | null;
 };
 
 export type AnalysisSummary = {
@@ -146,6 +148,13 @@ export type AnalysisReport = {
   similarCases: AnalysisReportSimilarCase[];
 };
 
+export type ExperienceComparePayload = {
+  experiences: Experience[];
+  commonPatterns: string[];
+  differences: string[];
+  recommendations: string[];
+};
+
 export type OAuthStatePayload = {
   state: string;
   provider: 'KAKAO' | 'GOOGLE' | 'NAVER';
@@ -155,6 +164,7 @@ export type OAuthStatePayload = {
 export type BookmarkStatusPayload = {
   experienceId: number;
   bookmarked: boolean;
+  bookmarkCount: number;
 };
 
 export type ReactionType = 'HEART' | 'TEAR';
@@ -176,6 +186,44 @@ export type MyAnalysisItem = {
   riskLevel: string | null;
   processedAt: string | null;
   createdAt: string;
+};
+
+export type HomeFeedPayload = {
+  strategy: string;
+  preferredCategoryIds: number[];
+  experiences: Experience[];
+};
+
+export type FailurePatternStatItem = {
+  label: string;
+  count: number;
+  percent: number;
+};
+
+export type FailurePatternStatsPayload = {
+  category: string;
+  labelKo: string;
+  total: number;
+  sufficientData: boolean;
+  explanation: string;
+  patterns: FailurePatternStatItem[];
+};
+
+export type FailureTimingStatItem = {
+  bucket: string;
+  label: string;
+  order: number;
+  count: number;
+  percent: number;
+};
+
+export type FailureTimingStatsPayload = {
+  category: string;
+  total: number;
+  sufficientData: boolean;
+  explanation: string;
+  peakBucket: string;
+  distribution: FailureTimingStatItem[];
 };
 
 export type ExperienceUpsertInput = {
@@ -311,12 +359,53 @@ export function getExperiences(params?: {
   );
 }
 
+export function searchCases(params?: {
+  page?: number;
+  size?: number;
+  categoryId?: number;
+  failureReason?: string;
+  q?: string;
+  sort?: 'latest' | 'popular';
+}) {
+  const searchParams = new URLSearchParams();
+  if (params?.page !== undefined) {
+    searchParams.set('page', String(params.page));
+  }
+  if (params?.size !== undefined) {
+    searchParams.set('size', String(params.size));
+  }
+  if (params?.categoryId !== undefined) {
+    searchParams.set('categoryId', String(params.categoryId));
+  }
+  if (params?.failureReason) {
+    searchParams.set('failureReason', params.failureReason);
+  }
+  if (params?.q) {
+    searchParams.set('q', params.q);
+  }
+  if (params?.sort) {
+    searchParams.set('sort', params.sort);
+  }
+
+  const query = searchParams.toString();
+  return request<ExperienceListPayload>(
+    `/experiences/search${query ? `?${query}` : ''}`,
+  );
+}
+
 export function getExperience(id: number | string) {
   return request<Experience>(`/experiences/${id}`);
 }
 
 export function getRelatedSuccessCases(id: number | string, limit = 10) {
   return request<Experience[]>(`/experiences/${id}/success-cases?limit=${limit}`);
+}
+
+export function compareExperiences(experienceIds: number[]) {
+  return request<ExperienceComparePayload>('/experiences/compare', {
+    method: 'POST',
+    body: { experienceIds },
+  });
 }
 
 export function createExperience(token: string, input: ExperienceUpsertInput) {
@@ -355,7 +444,7 @@ export function getReport(experienceId: number | string) {
 }
 
 export function createAnalysis(token: string, experienceId: number | string) {
-  return request<PatternAnalysis>(`/experiences/${experienceId}/analysis`, {
+  return request<null>(`/experiences/${experienceId}/analysis`, {
     method: 'POST',
     token,
   });
@@ -392,9 +481,23 @@ export function getMyRecentViews(token: string) {
 }
 
 export function getMyAnalysisReports(token: string) {
-  return request<MyAnalysisItem[]>('/users/me/analysis-reports', {
+  return request<MyAnalysisItem[]>('/users/me/analysis-history', {
     token,
   });
+}
+
+export function getMyHomeFeed(token: string) {
+  return request<HomeFeedPayload>('/users/me/home-feed', {
+    token,
+  });
+}
+
+export function getFailurePatternStats(categorySlug: string) {
+  return request<FailurePatternStatsPayload>(`/stats/failure-pattern?category=${encodeURIComponent(categorySlug)}`);
+}
+
+export function getFailureTimingStats(categorySlug: string) {
+  return request<FailureTimingStatsPayload>(`/stats/failure-timing?category=${encodeURIComponent(categorySlug)}`);
 }
 
 export function bookmarkExperience(token: string, experienceId: number | string) {

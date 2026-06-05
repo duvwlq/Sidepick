@@ -9,6 +9,7 @@ import groupsIcon from '../assets/create-wizard-figma/groups-figma.svg';
 
 export type CategoryVisual = {
   id: number;
+  key: string;
   label: string;
   descriptionLines: string[];
   icon: ReactNode;
@@ -25,6 +26,7 @@ function CategoryGlyph({ src, alt }: { src: string; alt: string }) {
 export const CATEGORY_VISUALS: CategoryVisual[] = [
   {
     id: 1,
+    key: 'online_sales',
     label: '온라인 판매·이커머스',
     descriptionLines: [
       '스마트스토어, 쿠팡, 오픈마켓',
@@ -34,6 +36,7 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   },
   {
     id: 2,
+    key: 'content_sns',
     label: '콘텐츠·SNS 기반',
     descriptionLines: [
       '유튜브, 블로그, 인스타그램',
@@ -43,6 +46,7 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   },
   {
     id: 3,
+    key: 'digital_knowledge',
     label: '디지털 상품·지식 판매',
     descriptionLines: [
       '전자책, 강의, 템플릿',
@@ -52,6 +56,7 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   },
   {
     id: 4,
+    key: 'platform_labor',
     label: '플랫폼 기반 노동형',
     descriptionLines: [
       '배달, 대리운전, 쿠팡플렉스',
@@ -61,6 +66,7 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   },
   {
     id: 5,
+    key: 'freelance',
     label: '재능 판매·프리랜서',
     descriptionLines: [
       '디자인, 글쓰기, 번역, 개발',
@@ -70,6 +76,7 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   },
   {
     id: 6,
+    key: 'investment',
     label: '투자·재테크',
     descriptionLines: [
       '주식, 코인, ETF, P2P 투자',
@@ -79,6 +86,7 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   },
   {
     id: 7,
+    key: 'offline',
     label: '오프라인 기반 부업',
     descriptionLines: [
       '공방, 플리마켓, 클래스 운영',

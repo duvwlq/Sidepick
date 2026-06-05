@@ -235,6 +235,53 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void searchEndpointUsesSameFiltersAsExperienceList() throws Exception {
+        String token = registerAndLogin("search_case@sidepick.dev", "password123", "searchCaseUser", "20s");
+
+        createExperienceWithPayload(token, """
+                {
+                  "title": "Mall keyword case",
+                  "content": "Mall search case with low demand.",
+                  "categoryId": 1,
+                  "businessType": "Online store",
+                  "investmentAmount": 300000,
+                  "durationMonths": 2,
+                  "failureReason": "Weak demand validation",
+                  "failureReasons": ["Weak demand validation"]
+                }
+                """);
+
+        createExperienceWithPayload(token, """
+                {
+                  "title": "Content keyword case",
+                  "content": "Creator search case with weak retention.",
+                  "categoryId": 2,
+                  "businessType": "Content creation",
+                  "investmentAmount": 800000,
+                  "durationMonths": 4,
+                  "failureReason": "Weak retention",
+                  "failureReasons": ["Weak retention"]
+                }
+                """);
+
+        mockMvc.perform(get("/api/experiences/search")
+                        .param("q", "Mall")
+                        .param("categoryId", "1")
+                        .param("sort", "latest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(1))
+                .andExpect(jsonPath("$.data.experiences[0].title").value("Mall keyword case"));
+
+        mockMvc.perform(get("/api/experiences/cases/search")
+                        .param("q", "Creator")
+                        .param("categoryId", "2")
+                        .param("sort", "latest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(1))
+                .andExpect(jsonPath("$.data.experiences[0].title").value("Content keyword case"));
+    }
+
+    @Test
     void listRejectsInvalidFilterRanges() throws Exception {
         mockMvc.perform(get("/api/experiences")
                         .param("durationMonthsMin", "10")
@@ -274,6 +321,26 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].id").value(successExperienceId))
                 .andExpect(jsonPath("$.data[0].caseStatus").value("SUCCESS"));
+    }
+
+    @Test
+    void compareEndpointReturnsPatternsDifferencesAndRecommendations() throws Exception {
+        String token = registerAndLogin("compare@sidepick.dev", "password123", "compareUser", "20s");
+        long firstExperienceId = createExperience(token, "Compare first", "Compare first content");
+        long secondExperienceId = createExperience(token, "Compare second", "Compare second content");
+
+        mockMvc.perform(post("/api/experiences/compare")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "experienceIds": [%d, %d]
+                                }
+                                """.formatted(firstExperienceId, secondExperienceId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(2))
+                .andExpect(jsonPath("$.data.commonPatterns").isArray())
+                .andExpect(jsonPath("$.data.differences").isArray())
+                .andExpect(jsonPath("$.data.recommendations.length()").value(2));
     }
 
     @Test

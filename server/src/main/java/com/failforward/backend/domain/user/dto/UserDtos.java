@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.user.dto;
 
 import com.failforward.backend.domain.auth.dto.AuthDtos.UserSummary;
+import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceResponse;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -55,6 +56,13 @@ public final class UserDtos {
 
     public record MeResponse(
             UserSummary user
+    ) {
+    }
+
+    public record HomeFeedResponse(
+            String strategy,
+            List<Long> preferredCategoryIds,
+            List<ExperienceResponse> experiences
     ) {
     }
 }

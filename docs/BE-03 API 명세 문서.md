@@ -470,9 +470,11 @@
 
 - 이 문서는 “현재 코드”와 “고도화 목표”를 섞지 않기 위해 섹션을 분리했다.
 - 히스토리 API는 `GET /users/me/analysis-history`, 사례 검색은 `GET /experiences` 필터 확장으로 단일화했다.
+- 개인화 홈 API는 `GET /users/me/home-feed`를 기준으로 유지한다.
 - 에이전트 C는 `server -> ai-server` 호출 구조를 전제로 API를 정리했다.
 - 통계/그래프 외부 API는 AI-02 기준으로 `/api/stats/...` 네임스페이스를 사용한다.
 - 통계/그래프/가이드 검색의 `category` 입력은 `CategoryMapper` 기준 slug로 통일한다.
+- FAISS 수동 재동기화용 관리자 endpoint 초안은 공용 API가 아니라 운영용 설계 문서(`BE-28`)에서 별도로 관리한다.
 - Swagger 자동화 이전 단계로, 현재는 `BE-03 Swagger 초안.yaml`을 기준 초안으로 둔다.
 
 ## 작업 완료 현황

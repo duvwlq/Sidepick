@@ -47,6 +47,15 @@ public class GlobalExceptionHandler {
         return build(request, HttpStatus.UNPROCESSABLE_ENTITY, "입력한 내용을 다시 확인해주세요.", ErrorCode.VALIDATION_ERROR);
     }
 
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidRequest(
+            InvalidRequestException exception,
+            HttpServletRequest request
+    ) {
+        logWarn(request, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, exception.getMessage(), null, exception);
+        return build(request, HttpStatus.BAD_REQUEST, "Request is invalid.", ErrorCode.VALIDATION_ERROR);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidation(
             MethodArgumentNotValidException exception,
@@ -67,6 +76,16 @@ public class GlobalExceptionHandler {
     ) {
         logWarn(request, HttpStatus.UNAUTHORIZED, ErrorCode.AUTH_REQUIRED, exception.getMessage(), null, exception);
         return build(request, HttpStatus.UNAUTHORIZED, "로그인 후 이용할 수 있어요.", ErrorCode.AUTH_REQUIRED);
+    }
+
+    @ExceptionHandler(RateLimitExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRateLimited(
+            RateLimitExceededException exception,
+            HttpServletRequest request
+    ) {
+        logWarn(request, HttpStatus.TOO_MANY_REQUESTS, ErrorCode.RATE_LIMITED, exception.getMessage(), null,
+                exception);
+        return build(request, HttpStatus.TOO_MANY_REQUESTS, "Too many requests.", ErrorCode.RATE_LIMITED);
     }
 
     @ExceptionHandler(AccessDeniedException.class)

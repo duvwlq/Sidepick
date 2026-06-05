@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
 
 type AuthFlowData = {
   signupMode: 'local' | 'social';
@@ -51,18 +51,28 @@ const AuthFlowContext = createContext<AuthFlowContextValue | null>(null);
 export function AuthFlowProvider({ children }: { children: ReactNode }) {
   const [form, setForm] = useState<AuthFlowData>(initialForm);
 
+  const updateField = useCallback(<K extends keyof AuthFlowData>(key: K, value: AuthFlowData[K]) => {
+    setForm((prev) => {
+      if (Object.is(prev[key], value)) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [key]: value,
+      };
+    });
+  }, []);
+
+  const reset = useCallback(() => setForm(initialForm), []);
+
   const value = useMemo(
     () => ({
       form,
-      updateField: <K extends keyof AuthFlowData>(key: K, value: AuthFlowData[K]) => {
-        setForm((prev) => ({
-          ...prev,
-          [key]: value,
-        }));
-      },
-      reset: () => setForm(initialForm),
+      updateField,
+      reset,
     }),
-    [form],
+    [form, reset, updateField],
   );
 
   return (

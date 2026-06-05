@@ -46,6 +46,21 @@ METADATA_PATH = RECOMMENDER_DIR / "sidepick_metadata.pkl"
 MODEL_NAME = "jhgan/ko-sroberta-multitask"
 
 
+def load_sentence_transformer(model_name: str) -> SentenceTransformer:
+    """
+    로컬 캐시가 있으면 오프라인으로만 모델을 로드한다.
+
+    운영 환경에서 모델이 이미 캐시된 상태라면 Hugging Face HEAD 재시도 로그를
+    남길 이유가 없으므로 local_files_only=True를 먼저 시도한다.
+    """
+    try:
+        print("📦 로컬 캐시 우선 확인 중...")
+        return SentenceTransformer(model_name, local_files_only=True)
+    except Exception:
+        print("🌐 로컬 캐시가 없어 온라인 로딩으로 전환합니다.")
+        return SentenceTransformer(model_name)
+
+
 # ═══════════════════════════════════════════════
 # 1. SidePickSimilarityEngine 클래스
 # ═══════════════════════════════════════════════
@@ -71,7 +86,7 @@ class SidePickSimilarityEngine:
 
     def __init__(self, model_name: str = MODEL_NAME):
         print(f"🤖 SBERT 모델 로딩 중: {model_name}")
-        self.model = SentenceTransformer(model_name)
+        self.model = load_sentence_transformer(model_name)
         self.index = None
         self.data = None  # DataFrame
         self.texts = None  # List[str] - 임베딩 입력

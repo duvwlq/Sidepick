@@ -30,6 +30,14 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void getMyHomeFeedWithoutAuthReturnsUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/users/me/home-feed"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("AUTH_REQUIRED"));
+    }
+
+    @Test
     void getMeWithAuthReturnsCurrentUserProfile() throws Exception {
         String token = registerAndLogin("me_test@sidepick.dev", "password123", "meUser", "20s");
 
@@ -125,7 +133,7 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
         String token = registerAndLogin("analysis_me@sidepick.dev", "password123", "analysisUser", "20s");
         createExperience(token, "분석용 사례", "분석용 본문입니다.");
 
-        mockMvc.perform(get("/api/users/me/analysis-reports")
+        mockMvc.perform(get("/api/users/me/analysis-history")
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -142,7 +150,8 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
         mockMvc.perform(post("/api/experiences/{experienceId}/bookmarks", experienceId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(viewerToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.bookmarked").value(true));
+                .andExpect(jsonPath("$.data.bookmarked").value(true))
+                .andExpect(jsonPath("$.data.bookmarkCount").value(1));
 
         mockMvc.perform(get("/api/users/me/bookmarks")
                         .header(HttpHeaders.AUTHORIZATION, bearer(viewerToken)))
@@ -153,7 +162,8 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
         mockMvc.perform(delete("/api/experiences/{experienceId}/bookmarks", experienceId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(viewerToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.bookmarked").value(false));
+                .andExpect(jsonPath("$.data.bookmarked").value(false))
+                .andExpect(jsonPath("$.data.bookmarkCount").value(0));
     }
 
     @Test
@@ -178,5 +188,29 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data[0].title").value("Second viewed"))
                 .andExpect(jsonPath("$.data[1].id").value(firstExperienceId))
                 .andExpect(jsonPath("$.data[1].title").value("First viewed"));
+    }
+
+    @Test
+    void getMyHomeFeedReturnsActivityBasedRecommendations() throws Exception {
+        String ownerToken = registerAndLogin("home_owner@sidepick.dev", "password123", "homeOwner", "20s");
+        String viewerToken = registerAndLogin("home_viewer@sidepick.dev", "password123", "homeViewer", "20s");
+        long firstExperienceId = createExperience(ownerToken, "Commerce target", "Commerce content");
+        long secondExperienceId = createExperience(ownerToken, "Second commerce target", "Commerce content 2");
+
+        mockMvc.perform(post("/api/experiences/{experienceId}/bookmarks", firstExperienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(viewerToken)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/experiences/{experienceId}", secondExperienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(viewerToken)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/users/me/home-feed")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(viewerToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.strategy").value("activity-based"))
+                .andExpect(jsonPath("$.data.preferredCategoryIds.length()").value(1))
+                .andExpect(jsonPath("$.data.experiences.length()").isNotEmpty());
     }
 }

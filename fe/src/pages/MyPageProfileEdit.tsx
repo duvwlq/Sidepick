@@ -1,57 +1,98 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import albumActionIcon from '../assets/mypage-profile-edit-figma/album-action.svg';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
+import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
+import cameraActionIcon from '../assets/mypage-profile-edit-figma/camera-action.svg';
+import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
+import wifiIcon from '../assets/auth-figma/wifi.svg';
+import checkIcon from '../assets/mypage-figma/check.svg';
+import checkSelectedIcon from '../assets/mypage-figma/check-selected.svg';
 import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.png';
 import cameraIcon from '../assets/mypage-overview-figma/camera.svg';
+import chevronDownIcon from '../assets/explore-figma/chevron-down.svg';
+import BottomNav from '../components/layout/BottomNav';
 import { useToast } from '../components/common/useToast';
 import {
   ApiError,
-  changeMyPassword,
   getMe,
   updateMyAccountSettings,
   type UserSummary,
 } from '../lib/api';
+import { getProfileOverrides, mergeProfileOverrides, saveProfileOverrides } from '../lib/profile-overrides';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { clearSession, getAccessToken, getStoredUser, saveStoredUser } from '../lib/session';
+
+const REGION_OPTIONS = ['서울', '경기', '인천', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '부산', '대구', '대전', '광주', '울산', '세종', '제주'];
 
 function isAuthError(error: unknown) {
   return error instanceof ApiError && (error.status === 401 || error.status === 403);
 }
 
-function FieldLabel({ children }: { children: string }) {
-  return <p className="text-[14px] font-[600] leading-[17px] text-[#131416]">{children}</p>;
+function IosStatusBar() {
+  return (
+    <div className="flex h-[59px] items-center justify-between bg-white px-[24px] pb-[19px] pt-[21px]">
+      <div className="flex min-w-0 flex-1 justify-center pt-[1.5px] font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">
+        9:41
+      </div>
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
+        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px]" />
+        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px]" />
+        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px]" />
+      </div>
+    </div>
+  );
 }
 
-function FieldHint({ children }: { children: string }) {
-  return <p className="text-[12px] leading-[17px] text-[#8A8A8A]">{children}</p>;
+function FieldLabel({ children }: { children: ReactNode }) {
+  return <div className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-black">{children}</div>;
 }
 
-function InputField({
+function TextInput({
   value,
   placeholder,
   readOnly = false,
-  type = 'text',
+  trailingIcon,
+  onClick,
   onChange,
 }: {
   value: string;
   placeholder: string;
   readOnly?: boolean;
-  type?: 'text' | 'password';
+  trailingIcon?: ReactNode;
+  onClick?: () => void;
   onChange: (value: string) => void;
 }) {
   return (
-    <input
-      type={type}
-      value={value}
-      readOnly={readOnly}
-      onChange={(event) => onChange(event.target.value)}
-      placeholder={placeholder}
-      className="h-[44px] w-full rounded-[12px] border border-[#ECECEC] bg-[#F8F8F8] px-[16px] text-[14px] text-[#131416] outline-none placeholder:text-[#BABABA] read-only:text-[#8A8A8A]"
-    />
+    <div
+      className={`flex h-[40px] w-full items-center justify-between rounded-[10px] bg-[#F8F8F8] px-[16px] py-[10px] ${onClick ? 'cursor-pointer' : ''}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={
+        onClick
+          ? (event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                onClick();
+              }
+            }
+          : undefined
+      }
+    >
+      <input
+        value={value}
+        readOnly={readOnly}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className="w-full bg-transparent font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#131416] outline-none placeholder:text-[#BABABA] read-only:pointer-events-none read-only:text-[#BABABA]"
+      />
+      {trailingIcon}
+    </div>
   );
 }
 
-function ExperienceToggle({
+function ChoiceButton({
   selected,
   label,
   onClick,
@@ -64,30 +105,135 @@ function ExperienceToggle({
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[44px] flex-1 items-center justify-center rounded-[12px] border text-[14px] ${
-        selected ? 'border-[#5A876E] bg-[#F4F8F5] font-[600] text-[#5A876E]' : 'border-[#E5E5E5] bg-white text-[#8A8A8A]'
+      className={`flex h-[40px] flex-1 items-center gap-[8px] rounded-[8px] px-[16px] py-[10px] ${
+        selected ? 'border-[1.5px] border-[#5A876E] bg-white' : 'border border-[#E6E6E6] bg-white'
       }`}
     >
-      {label}
+      <img src={selected ? checkSelectedIcon : checkIcon} alt="" className="h-[14px] w-[14px]" />
+      <span
+        className={`font-['Pretendard'] text-[14px] leading-[16.8px] ${
+          selected ? 'font-[600] text-[#5A876E]' : 'font-[400] text-[#8A8A8A]'
+        }`}
+      >
+        {label}
+      </span>
     </button>
   );
+}
+
+function PhotoActionSheet({
+  open,
+  onClose,
+  onCameraClick,
+  onAlbumClick,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onCameraClick: () => void;
+  onAlbumClick: () => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(0,0,0,0.28)]">
+      <button type="button" onClick={onClose} className="absolute inset-0" aria-label="닫기" />
+      <div className="relative w-full max-w-[375px] rounded-tl-[24px] rounded-tr-[24px] bg-white px-[24px] pb-[48px] pt-[24px]">
+        <p className="text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">프로필 사진 변경</p>
+        <div className="mt-[24px] flex flex-col gap-[36px]">
+          <button type="button" onClick={onCameraClick} className="flex items-center gap-[8px] text-left">
+            <img src={cameraActionIcon} alt="" className="h-[20px] w-[20px]" />
+            <span className="font-['Pretendard'] text-[14px] font-[500] leading-[19.6px] text-[#131416]">사진 촬영</span>
+          </button>
+          <button type="button" onClick={onAlbumClick} className="flex items-center gap-[8px] text-left">
+            <img src={albumActionIcon} alt="" className="h-[20px] w-[20px]" />
+            <span className="font-['Pretendard'] text-[14px] font-[500] leading-[19.6px] text-[#131416]">앨범에서 선택</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RegionActionSheet({
+  open,
+  selectedRegion,
+  onClose,
+  onSelect,
+}: {
+  open: boolean;
+  selectedRegion: string;
+  onClose: () => void;
+  onSelect: (value: string) => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-[rgba(0,0,0,0.28)]">
+      <button type="button" onClick={onClose} className="absolute inset-0" aria-label="닫기" />
+      <div className="relative flex w-full max-w-[375px] flex-col rounded-tl-[24px] rounded-tr-[24px] bg-white px-[24px] pb-[32px] pt-[24px]">
+        <p className="text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">거주지 선택</p>
+        <div className="mt-[20px] grid max-h-[360px] grid-cols-2 gap-[8px] overflow-y-auto">
+          {REGION_OPTIONS.map((option) => {
+            const active = option === selectedRegion;
+            return (
+              <button
+                key={option}
+                type="button"
+                onClick={() => onSelect(option)}
+                className={`flex h-[40px] items-center justify-center rounded-[10px] border font-['Pretendard'] text-[14px] leading-[16.8px] ${
+                  active ? 'border-[#5A876E] bg-[#EAF3EE] font-[600] text-[#2F4D3D]' : 'border-[#E6E6E6] bg-white font-[400] text-[#494949]'
+                }`}
+              >
+                {option}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function fileToDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ''));
+    reader.onerror = () => reject(new Error('파일을 읽지 못했어요.'));
+    reader.readAsDataURL(file);
+  });
 }
 
 export default function MyPageProfileEdit() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const token = getAccessToken();
-  const storedUser = getStoredUser();
+  const storedUser = mergeProfileOverrides(getStoredUser());
+  const storedOverrides = getProfileOverrides();
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const albumInputRef = useRef<HTMLInputElement | null>(null);
 
   const [currentUser, setCurrentUser] = useState<UserSummary | null>(storedUser);
   const [nickname, setNickname] = useState(storedUser?.nickname ?? '');
   const [experienceStatus, setExperienceStatus] = useState(storedUser?.experienceStatus ?? 'NO_EXPERIENCE');
-  const [email, setEmail] = useState(storedUser?.email ?? '');
   const [region, setRegion] = useState(storedUser?.region ?? '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState(storedUser?.email ?? '');
+  const [phone, setPhone] = useState(storedOverrides.phone);
+  const [savedPhone, setSavedPhone] = useState(storedOverrides.phone);
+  const [previewImage, setPreviewImage] = useState(storedUser?.profileImage ?? '');
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [regionSheetOpen, setRegionSheetOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const hasChanges =
+    nickname.trim() !== (currentUser?.nickname ?? '').trim() ||
+    experienceStatus !== (currentUser?.experienceStatus ?? 'NO_EXPERIENCE') ||
+    region !== (currentUser?.region ?? '') ||
+    previewImage !== (currentUser?.profileImage ?? '') ||
+    phone.trim() !== savedPhone.trim();
 
   useEffect(() => {
     if (!token) {
@@ -99,28 +245,27 @@ export default function MyPageProfileEdit() {
 
     void getMe(token)
       .then((payload) => {
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
 
-        setCurrentUser(payload.user);
-        setNickname(payload.user.nickname ?? '');
-        setExperienceStatus(payload.user.experienceStatus ?? 'NO_EXPERIENCE');
-        setEmail(payload.user.email ?? '');
-        setRegion(payload.user.region ?? '');
+        const mergedUser = mergeProfileOverrides(payload.user);
+        const overrides = getProfileOverrides();
+        setCurrentUser(mergedUser);
+        setNickname(mergedUser?.nickname ?? '');
+        setExperienceStatus(mergedUser?.experienceStatus ?? 'NO_EXPERIENCE');
+        setRegion(mergedUser?.region ?? '');
+        setEmail(mergedUser?.email ?? '');
+        setPhone(overrides.phone);
+        setSavedPhone(overrides.phone);
+        setPreviewImage(mergedUser?.profileImage ?? '');
       })
       .catch((error) => {
-        if (cancelled) {
-          return;
-        }
-
+        if (cancelled) return;
         if (isAuthError(error)) {
           clearSession();
           navigate('/auth?next=%2Fmypage%2Fprofile%2Fedit', { replace: true });
           return;
         }
-
-        showToast(resolveErrorMessage(error, '프로필 정보를 불러오지 못했습니다.'), 'error');
+        showToast(resolveErrorMessage(error, '프로필 정보를 불러오지 못했어요.'), 'error');
       });
 
     return () => {
@@ -128,58 +273,64 @@ export default function MyPageProfileEdit() {
     };
   }, [navigate, showToast, token]);
 
+  async function handleImageChange(fileList: FileList | null) {
+    const file = fileList?.[0];
+    if (!file) {
+      return;
+    }
+
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      setPreviewImage(dataUrl);
+      setSheetOpen(false);
+    } catch (error) {
+      showToast(resolveErrorMessage(error, '이미지를 불러오지 못했어요.'), 'error');
+    }
+  }
+
   async function handleSave() {
     const trimmedNickname = nickname.trim();
+    const normalizedPhone = phone.replace(/\D/g, '').trim();
+    const accountSettingsChanged =
+      trimmedNickname !== (currentUser?.nickname ?? '').trim() ||
+      experienceStatus !== (currentUser?.experienceStatus ?? 'NO_EXPERIENCE');
+
     if (!trimmedNickname) {
       showToast('닉네임을 입력해 주세요.', 'error');
       return;
     }
 
-    const wantsPasswordChange = currentPassword || newPassword || confirmPassword;
-    if (wantsPasswordChange) {
-      if (!currentPassword || !newPassword || !confirmPassword) {
-        showToast('비밀번호 변경 항목을 모두 입력해 주세요.', 'error');
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        showToast('새 비밀번호 확인이 일치하지 않습니다.', 'error');
-        return;
-      }
-    }
-
     if (!token || !currentUser) {
-      showToast('로그인 정보를 확인할 수 없습니다.', 'error');
+      showToast('로그인 정보를 확인할 수 없어요.', 'error');
       return;
     }
 
     setSaving(true);
-
     try {
-      const profilePayload = await updateMyAccountSettings(token, {
-        nickname: trimmedNickname,
-        experienceStatus,
+      const payload = accountSettingsChanged
+        ? await updateMyAccountSettings(token, {
+            nickname: trimmedNickname,
+            experienceStatus,
+          })
+        : null;
+
+      saveProfileOverrides({
+        phone: normalizedPhone,
+        region,
+        profileImage: previewImage || null,
       });
 
-      if (wantsPasswordChange) {
-        await changeMyPassword(token, {
-          currentPassword,
-          newPassword,
-        });
-      }
-
-      const mergedUser = {
+      const mergedUser = mergeProfileOverrides({
         ...currentUser,
-        ...profilePayload.user,
-        region,
-        email,
-      };
+        ...(payload?.user ?? {}),
+      });
 
       setCurrentUser(mergedUser);
-      saveStoredUser(mergedUser);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmPassword('');
-      showToast('계정 설정을 저장했어요.', 'success');
+      setSavedPhone(normalizedPhone);
+      if (mergedUser) {
+        saveStoredUser(mergedUser);
+      }
+      showToast('프로필 수정이 완료되었어요.', 'success');
       navigate('/mypage');
     } catch (error) {
       if (isAuthError(error)) {
@@ -187,93 +338,136 @@ export default function MyPageProfileEdit() {
         navigate('/auth?next=%2Fmypage%2Fprofile%2Fedit', { replace: true });
         return;
       }
-
-      showToast(resolveErrorMessage(error, '계정 설정 저장에 실패했습니다.'), 'error');
+      showToast(resolveErrorMessage(error, '프로필 수정에 실패했어요.'), 'error');
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
-      <header className="flex h-[64px] items-center justify-between px-[16px]">
-        <button
-          type="button"
-          onClick={() => navigate(-1)}
-          className="flex h-[24px] w-[24px] items-center justify-center"
-          aria-label="뒤로가기"
-        >
-          <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
-        </button>
-        <h1 className="text-[16px] font-[600] text-[#000000]">계정 설정</h1>
-        <button
-          type="button"
-          onClick={() => void handleSave()}
-          disabled={saving}
-          className="text-[14px] font-[600] text-[#5A876E] disabled:opacity-50"
-        >
-          {saving ? '저장 중' : '저장'}
-        </button>
-      </header>
-
-      <main className="flex flex-col gap-[24px] px-[16px] pb-[40px] pt-[12px]">
-        <section className="flex flex-col items-center gap-[12px] rounded-[20px] bg-[#FAFAFA] px-[20px] py-[24px]">
-          <div className="relative h-[96px] w-[96px] overflow-hidden rounded-full bg-[#F1F1F1]">
-            <img
-              src={currentUser?.profileImage ?? avatarPlaceholderIcon}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-            <span className="absolute bottom-[2px] right-[2px] flex h-[26px] w-[26px] items-center justify-center rounded-full bg-[#8A8A8A]">
-              <img src={cameraIcon} alt="" className="h-[14px] w-[14px]" />
-            </span>
+    <>
+      <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
+        <header className="bg-white">
+          <IosStatusBar />
+          <div className="flex items-center justify-between px-[16px] py-[20px]">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="flex h-[24px] w-[24px] items-center justify-center"
+              aria-label="뒤로 가기"
+            >
+              <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
+            </button>
+            <h1 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">프로필 수정</h1>
+            <button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={saving || !hasChanges}
+              className={`font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] ${
+                hasChanges ? 'text-[#5A876E]' : 'text-[#D8D8D8]'
+              }`}
+            >
+              저장
+            </button>
           </div>
-          <FieldHint>프로필 사진 변경은 아직 준비 중입니다.</FieldHint>
-        </section>
+        </header>
 
-        <section className="flex flex-col gap-[20px]">
-          <div className="flex flex-col gap-[8px]">
-            <FieldLabel>닉네임</FieldLabel>
-            <InputField value={nickname} placeholder="닉네임을 입력해 주세요" onChange={setNickname} />
-          </div>
+        <main className="flex flex-col items-center pb-[110px]">
+          <button type="button" onClick={() => setSheetOpen(true)} className="mt-[2px] flex flex-col items-center justify-center">
+            <div className="relative flex h-[100px] w-[100px] items-center justify-center overflow-hidden rounded-full bg-[#F1F1F1]">
+              <img src={previewImage || avatarPlaceholderIcon} alt="" className="h-[80px] w-[80px] rounded-full object-cover" />
+              <span className="absolute left-[67.5px] top-[67px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
+                <img src={cameraIcon} alt="" className="h-[14px] w-[14px]" />
+              </span>
+            </div>
+          </button>
 
-          <div className="flex flex-col gap-[8px]">
-            <FieldLabel>부업 경험 여부</FieldLabel>
-            <div className="flex gap-[8px]">
-              <ExperienceToggle
-                selected={experienceStatus === 'HAS_EXPERIENCE'}
-                label="경험 있음"
-                onClick={() => setExperienceStatus('HAS_EXPERIENCE')}
-              />
-              <ExperienceToggle
-                selected={experienceStatus === 'NO_EXPERIENCE'}
-                label="경험 없음"
-                onClick={() => setExperienceStatus('NO_EXPERIENCE')}
+          <section className="mt-[2px] flex w-full max-w-[343px] flex-col gap-[20px]">
+            <div className="flex flex-col gap-[4px]">
+              <FieldLabel>닉네임</FieldLabel>
+              <TextInput value={nickname} placeholder="닉네임" onChange={setNickname} />
+            </div>
+
+            <div className="flex flex-col gap-[4px]">
+              <FieldLabel>부업 경험 여부</FieldLabel>
+              <div className="flex gap-[4px]">
+                <ChoiceButton selected={experienceStatus === 'HAS_EXPERIENCE'} label="경험 있음" onClick={() => setExperienceStatus('HAS_EXPERIENCE')} />
+                <ChoiceButton selected={experienceStatus === 'NO_EXPERIENCE'} label="경험 없음" onClick={() => setExperienceStatus('NO_EXPERIENCE')} />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-[4px]">
+              <FieldLabel>거주지</FieldLabel>
+              <TextInput
+                value={region}
+                placeholder="지역을 선택해주세요"
+                readOnly
+                onClick={() => setRegionSheetOpen(true)}
+                onChange={setRegion}
+                trailingIcon={<img src={chevronDownIcon} alt="" className="h-[16px] w-[16px]" />}
               />
             </div>
-          </div>
 
-          <div className="flex flex-col gap-[8px]">
-            <FieldLabel>이메일</FieldLabel>
-            <InputField value={email} placeholder="이메일" readOnly onChange={setEmail} />
-            <FieldHint>이메일은 현재 수정할 수 없습니다.</FieldHint>
-          </div>
+            <div className="flex flex-col gap-[4px]">
+              <FieldLabel>
+                <span className="flex items-center gap-[4px]">
+                  <span>이메일</span>
+                  <span className="text-[10px] leading-[12px] text-[#5E5E5E]">(선택)</span>
+                </span>
+              </FieldLabel>
+              <TextInput value={email} placeholder="이메일 주소를 입력해주세요" readOnly onChange={setEmail} />
+            </div>
 
-          <div className="flex flex-col gap-[8px]">
-            <FieldLabel>지역</FieldLabel>
-            <InputField value={region} placeholder="지역" readOnly onChange={setRegion} />
-            <FieldHint>지역 수정은 다음 단계에서 지원할 예정입니다.</FieldHint>
-          </div>
-        </section>
+            <div className="flex flex-col gap-[4px]">
+              <FieldLabel>
+                <span className="flex items-center gap-[4px]">
+                  <span>전화번호</span>
+                  <span className="text-[10px] leading-[12px] text-[#5E5E5E]">(선택)</span>
+                </span>
+              </FieldLabel>
+              <TextInput
+                value={phone}
+                placeholder="- 없이 숫자만 입력해주세요"
+                onChange={(value) => setPhone(value.replace(/\D/g, ''))}
+              />
+            </div>
+          </section>
+        </main>
 
-        <section className="flex flex-col gap-[12px] rounded-[20px] bg-[#FAFAFA] px-[16px] py-[16px]">
-          <FieldLabel>비밀번호 변경</FieldLabel>
-          <InputField value={currentPassword} type="password" placeholder="현재 비밀번호" onChange={setCurrentPassword} />
-          <InputField value={newPassword} type="password" placeholder="새 비밀번호 (영문+숫자 8자 이상)" onChange={setNewPassword} />
-          <InputField value={confirmPassword} type="password" placeholder="새 비밀번호 확인" onChange={setConfirmPassword} />
-          <FieldHint>변경하지 않으려면 비워두세요.</FieldHint>
-        </section>
-      </main>
-    </div>
+        <BottomNav active="mypage" showFab />
+      </div>
+
+      <PhotoActionSheet
+        open={sheetOpen}
+        onClose={() => setSheetOpen(false)}
+        onCameraClick={() => cameraInputRef.current?.click()}
+        onAlbumClick={() => albumInputRef.current?.click()}
+      />
+      <RegionActionSheet
+        open={regionSheetOpen}
+        selectedRegion={region}
+        onClose={() => setRegionSheetOpen(false)}
+        onSelect={(value) => {
+          setRegion(value);
+          setRegionSheetOpen(false);
+        }}
+      />
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(event) => void handleImageChange(event.target.files)}
+      />
+      <input
+        ref={albumInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(event) => void handleImageChange(event.target.files)}
+      />
+    </>
   );
 }

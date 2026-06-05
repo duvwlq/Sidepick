@@ -5,8 +5,10 @@ import guideNavIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
 import homeNavIcon from '../assets/home-v1-figma/icons/home-figma.svg';
 import searchNavIcon from '../assets/home-v1-figma/icons/search-nav-figma.svg';
 import userNavIcon from '../assets/home-v1-figma/icons/user-figma.svg';
+import ExampleCard from '../components/create/ExampleCard';
 import { useToast } from '../components/common/useToast';
 import {
+  createExperience,
   getCategories,
   getExperience,
   updateExperience,
@@ -17,7 +19,6 @@ import { CATEGORY_VISUALS } from '../lib/category-visuals';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
-const PENDING_EXPERIENCE_CREATE_KEY = 'pendingExperienceCreate';
 const MIN_CONTENT_LENGTH = 10;
 const MAX_CONTENT_LENGTH = 2000;
 const DURATION_OPTIONS = ['1개월 미만', '1개월', '2개월', '3개월', '4개월', '5개월', '6개월', '7개월', '8개월', '9개월', '10개월', '11개월', '1년 이상'];
@@ -72,6 +73,16 @@ const GUIDE_PATTERN_BY_DIFFICULTY_LABEL: Record<string, string> = {
   '운영 지속성': '운영 지속성',
   '정보 부족': '정보 부족',
   '경쟁 심화': '경쟁 심화',
+};
+
+const CATEGORY_SLUG_BY_KEY: Record<string, string> = {
+  online_sales: 'online-commerce',
+  content_sns: 'content-sns',
+  digital_knowledge: 'digital-products',
+  platform_labor: 'platform-labor',
+  freelance: 'talent-freelance',
+  investment: 'investment',
+  offline: 'offline-sidejob',
 };
 
 function parseAmount(value: string) {
@@ -135,9 +146,24 @@ function normalizeCategoryName(value: string) {
   return value.replace(/\s+/g, '').replace(/[·,/()]/g, '').toLowerCase();
 }
 
-function findMatchedCategory(selectedCategory: string | null, categories: Category[]) {
-  if (!selectedCategory) return undefined;
-  const normalizedSelected = normalizeCategoryName(selectedCategory);
+function getCategoryLabelByKey(key: string | null) {
+  if (!key) return null;
+  return CATEGORY_VISUALS.find((item) => item.key === key)?.label ?? null;
+}
+
+function findMatchedCategory(selectedCategoryKey: string | null, selectedCategoryLabel: string | null, categories: Category[]) {
+  if (!selectedCategoryKey && !selectedCategoryLabel) return undefined;
+  const selectedSlug = selectedCategoryKey ? CATEGORY_SLUG_BY_KEY[selectedCategoryKey] : undefined;
+  if (selectedSlug) {
+    const matchedBySlug = categories.find((category) => category.slug === selectedSlug);
+    if (matchedBySlug) {
+      return matchedBySlug;
+    }
+  }
+  if (!selectedCategoryLabel) {
+    return undefined;
+  }
+  const normalizedSelected = normalizeCategoryName(selectedCategoryLabel);
   return categories.find((category) => normalizeCategoryName(category.name) === normalizedSelected)
     ?? categories.find((category) => normalizedSelected.includes(normalizeCategoryName(category.name)));
 }
@@ -282,7 +308,7 @@ export default function CreateWizardPage() {
   const [categoryLoading, setCategoryLoading] = useState(true);
   const [step, setStep] = useState<WizardStep>(1);
   const [openSheet, setOpenSheet] = useState<OpenSheet>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategoryKey, setSelectedCategoryKey] = useState<string | null>(null);
   const [duration, setDuration] = useState<string | null>(null);
   const [dailyTime, setDailyTime] = useState<string | null>(null);
   const [investmentAmount, setInvestmentAmount] = useState('');
@@ -366,7 +392,7 @@ export default function CreateWizardPage() {
     getExperience(editingExperienceId)
       .then((experience) => {
         if (cancelled) return;
-        setSelectedCategory(experience.businessType ?? experience.category.name);
+        setSelectedCategoryKey(CATEGORY_KEY_BY_LABEL[experience.businessType ?? experience.category.name] ?? null);
         setDuration(mapMonthsToDuration(experience.durationMonths));
         setDailyTime(mapAverageDailyHoursToLabel(experience.averageDailyHours));
         setInvestmentAmount(experience.investmentAmount ? String(experience.investmentAmount) : '');
@@ -394,22 +420,22 @@ export default function CreateWizardPage() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [openSheet]);
 
-  const matchedCategory = useMemo(() => findMatchedCategory(selectedCategory, categories), [categories, selectedCategory]);
+  const selectedCategory = useMemo(() => getCategoryLabelByKey(selectedCategoryKey), [selectedCategoryKey]);
+
+  const matchedCategory = useMemo(
+    () => findMatchedCategory(selectedCategoryKey, selectedCategory, categories),
+    [categories, selectedCategory, selectedCategoryKey],
+  );
 
   const guideExamples = useMemo<GuideExample[]>(() => {
-    if (!guideTable || !selectedCategory) {
-      return [];
-    }
-
-    const categoryKey = CATEGORY_KEY_BY_LABEL[selectedCategory];
-    if (!categoryKey) {
+    if (!guideTable || !selectedCategoryKey) {
       return [];
     }
 
     return difficulties
       .filter((item) => item !== '기타')
       .map((item) => {
-        const category = guideTable.categories.find((entry) => entry.id === categoryKey);
+        const category = guideTable.categories.find((entry) => entry.id === selectedCategoryKey);
         if (!category) {
           return null;
         }
@@ -429,7 +455,7 @@ export default function CreateWizardPage() {
         };
       })
       .filter((item): item is GuideExample => item !== null);
-  }, [difficulties, guideTable, selectedCategory]);
+  }, [difficulties, guideTable, selectedCategoryKey]);
 
   useEffect(() => {
     if (exampleIndex >= guideExamples.length) {
@@ -438,7 +464,7 @@ export default function CreateWizardPage() {
   }, [exampleIndex, guideExamples.length]);
 
   const stepDisabled =
-    (step === 1 && !selectedCategory)
+    (step === 1 && !selectedCategoryKey)
     || (step === 2 && (!duration || !dailyTime || isConcurrentWithMainJob === null))
     || (step === 3 && (!difficulties.length || (difficulties.includes('기타') && !difficultyEtc.trim())))
     || (step === 4 && (content.trim().length < MIN_CONTENT_LENGTH || content.trim().length > MAX_CONTENT_LENGTH));
@@ -510,8 +536,12 @@ export default function CreateWizardPage() {
         return;
       }
 
-      sessionStorage.setItem(PENDING_EXPERIENCE_CREATE_KEY, JSON.stringify({ payload }));
-      navigate('/analysis-result?pendingCreate=1');
+      const created = await createExperience(token, {
+        ...payload,
+        categoryId: matchedCategory.id,
+      });
+      showToast('경험을 등록했어요. AI 분석을 시작합니다.', 'success');
+      navigate(`/analysis-result?experienceId=${created.id}`);
     } catch (error) {
       showToast(resolveErrorMessage(error, '경험을 처리하지 못했어요.'), 'error');
     } finally {
@@ -533,13 +563,13 @@ export default function CreateWizardPage() {
               <p className="text-[14px] font-[500] leading-[16.8px] text-[#131416]">어떠한 부업을 경험했었나요? *</p>
               <div className="grid grid-cols-2 gap-[10px]">
                 {CATEGORY_VISUALS.map((category) => {
-                  const selected = selectedCategory === category.label;
-                  const hasSelection = Boolean(selectedCategory);
+                  const selected = selectedCategoryKey === category.key;
+                  const hasSelection = Boolean(selectedCategoryKey);
                   return (
                     <button
                       key={category.id}
                       type="button"
-                      onClick={() => setSelectedCategory(category.label)}
+                      onClick={() => setSelectedCategoryKey(category.key)}
                       className={`flex h-[151px] flex-col rounded-[16px] border px-[14px] py-[16px] text-left transition ${selected ? 'border-[#5A876E] bg-[#F4F8F5]' : 'border-[#E6E6E6] bg-white'} ${hasSelection && !selected ? 'opacity-[0.38]' : 'opacity-100'}`}
                     >
                       <div className="flex h-[50px] w-[50px] items-center justify-center">{category.icon}</div>
@@ -639,67 +669,16 @@ export default function CreateWizardPage() {
                 </div>
               </div>
 
-              <div className="rounded-[10px] border border-[#5A876E] bg-white px-[12px] py-[12px]">
-                <button type="button" onClick={() => setExampleVisible((current) => !current)} className="flex w-full items-center justify-between text-left">
-                  <span className="text-[14px] font-[500] text-[#131416]">작성 예시</span>
-                  <span className="text-[#5A876E]">{exampleVisible ? '−' : '+'}</span>
-                </button>
-                <p className="pt-[6px] text-[10px] leading-[12px] text-[#8A8A8A]">예시를 참고하면 더 자세하게 작성할 수 있어요</p>
-                {exampleVisible ? (
-                  <div className="pt-[10px]">
-                    {guideLoading ? (
-                      <div className="rounded-[10px] bg-[#F8F8F8] px-[12px] py-[14px] text-[12px] leading-[18px] text-[#8A8A8A]">
-                        작성 예시를 불러오는 중이에요.
-                      </div>
-                    ) : guideExamples.length > 0 ? (
-                      <div className="rounded-[10px] bg-[#F8F8F8] px-[12px] py-[14px]">
-                        <div className="flex items-center justify-between gap-[8px] pb-[10px]">
-                          <div className="flex flex-wrap items-center gap-[6px]">
-                            <span className="rounded-full bg-[#E9F1EC] px-[8px] py-[3px] text-[10px] font-[500] leading-[12px] text-[#5A876E]">
-                              {guideExamples[exampleIndex]?.categoryLabel}
-                            </span>
-                            <span className="rounded-full bg-white px-[8px] py-[3px] text-[10px] font-[500] leading-[12px] text-[#6A6A6A]">
-                              {guideExamples[exampleIndex]?.difficultyLabel}
-                            </span>
-                          </div>
-                          {guideExamples.length > 1 ? (
-                            <span className="text-[10px] leading-[12px] text-[#8A8A8A]">
-                              {exampleIndex + 1} / {guideExamples.length}
-                            </span>
-                          ) : null}
-                        </div>
-                        <div className="space-y-[8px] text-[12px] leading-[18px] text-[#5E5E5E]">
-                          {guideExamples[exampleIndex]?.guide.split('\n').filter(Boolean).map((line) => (
-                            <p key={`${guideExamples[exampleIndex]?.key}-${line}`}>{line}</p>
-                          ))}
-                        </div>
-                        {guideExamples.length > 1 ? (
-                          <div className="flex justify-end gap-[8px] pt-[12px]">
-                            <button
-                              type="button"
-                              onClick={() => setExampleIndex((current) => (current === 0 ? guideExamples.length - 1 : current - 1))}
-                              className="rounded-[8px] border border-[#D9E6DE] px-[10px] py-[6px] text-[11px] font-[500] text-[#5A876E]"
-                            >
-                              이전 예시
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setExampleIndex((current) => (current + 1) % guideExamples.length)}
-                              className="rounded-[8px] border border-[#D9E6DE] px-[10px] py-[6px] text-[11px] font-[500] text-[#5A876E]"
-                            >
-                              다음 예시
-                            </button>
-                          </div>
-                        ) : null}
-                      </div>
-                    ) : (
-                      <div className="rounded-[10px] bg-[#F8F8F8] px-[12px] py-[14px] text-[12px] leading-[18px] text-[#8A8A8A]">
-                        {guideError ?? '선택한 카테고리와 어려움 조합에 맞는 작성 예시를 준비 중이에요.'}
-                      </div>
-                    )}
-                  </div>
-                ) : null}
-              </div>
+              <ExampleCard
+                visible={exampleVisible}
+                loading={guideLoading}
+                error={guideError}
+                examples={guideExamples}
+                exampleIndex={exampleIndex}
+                onToggleVisible={() => setExampleVisible((current) => !current)}
+                onPrevious={() => setExampleIndex((current) => (current === 0 ? guideExamples.length - 1 : current - 1))}
+                onNext={() => setExampleIndex((current) => (current + 1) % guideExamples.length)}
+              />
 
               <div className="flex flex-col gap-[8px]">
                 <span className="text-[14px] font-[500] leading-[16.8px] text-[#131416]">사진 등록 (선택)</span>

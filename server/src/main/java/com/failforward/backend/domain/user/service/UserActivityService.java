@@ -8,10 +8,15 @@ import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceRe
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
 import com.failforward.backend.domain.user.dto.UserDtos.MeResponse;
+import com.failforward.backend.domain.user.dto.UserDtos.HomeFeedResponse;
 import com.failforward.backend.domain.user.dto.UserDtos.MyAnalysisItemResponse;
 import com.failforward.backend.domain.user.entity.User;
 import com.failforward.backend.domain.view.repository.UserExperienceViewRepository;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -72,7 +77,93 @@ public class UserActivityService {
                 .toList();
     }
 
+    public HomeFeedResponse getMyHomeFeed() {
+        User user = currentUserProvider.getCurrentUserEntity();
+        Map<Long, Integer> categoryWeights = new LinkedHashMap<>();
+
+        accumulateCategoryWeights(categoryWeights, experienceRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId()), 2);
+        accumulateCategoryWeights(
+                categoryWeights,
+                bookmarkRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId()).stream()
+                        .map(bookmark -> bookmark.getExperience())
+                        .toList(),
+                3
+        );
+        accumulateCategoryWeights(
+                categoryWeights,
+                userExperienceViewRepository.findAllByUserIdOrderByLastViewedAtDesc(user.getId()).stream()
+                        .map(view -> view.getExperience())
+                        .toList(),
+                1
+        );
+
+        List<Long> preferredCategoryIds = categoryWeights.entrySet().stream()
+                .sorted(Map.Entry.<Long, Integer>comparingByValue(Comparator.reverseOrder()))
+                .map(Map.Entry::getKey)
+                .limit(3)
+                .toList();
+
+        List<FailureExperience> recommended = new ArrayList<>();
+        for (Long categoryId : preferredCategoryIds) {
+            List<FailureExperience> items = experienceRepository.searchPublicPopular(
+                    null,
+                    categoryId,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+            for (FailureExperience item : items) {
+                if (recommended.stream().noneMatch(existing -> existing.getId().equals(item.getId()))) {
+                    recommended.add(item);
+                }
+                if (recommended.size() >= 12) {
+                    break;
+                }
+            }
+            if (recommended.size() >= 12) {
+                break;
+            }
+        }
+
+        String strategy = "activity-based";
+        if (recommended.isEmpty()) {
+            strategy = "popular-fallback";
+            recommended.addAll(
+                    experienceRepository.searchPublicPopular(
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null
+                            ).stream()
+                            .limit(12)
+                            .toList()
+            );
+        }
+
+        return new HomeFeedResponse(
+                strategy,
+                preferredCategoryIds,
+                recommended.stream().map(this::toResponse).toList()
+        );
+    }
+
     private ExperienceResponse toResponse(FailureExperience experience) {
         return ExperienceResponse.from(experience, aiAnalysisService.findByExperience(experience).orElse(null));
+    }
+
+    private void accumulateCategoryWeights(
+            Map<Long, Integer> categoryWeights,
+            List<FailureExperience> experiences,
+            int weight
+    ) {
+        for (FailureExperience experience : experiences) {
+            Long categoryId = experience.getCategory().getId();
+            categoryWeights.merge(categoryId, weight, Integer::sum);
+        }
     }
 }

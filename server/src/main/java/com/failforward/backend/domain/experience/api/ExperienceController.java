@@ -35,7 +35,7 @@ public class ExperienceController {
 
     private final ExperienceService experienceService;
 
-    @Operation(summary = "사례 목록 조회")
+    @Operation(summary = "List experiences")
     @GetMapping
     public ApiResponse<ExperienceListPayload> getExperiences(
             @RequestParam(defaultValue = "0") int page,
@@ -63,20 +63,48 @@ public class ExperienceController {
         ));
     }
 
-    @Operation(summary = "사례 작성")
+    @Operation(summary = "Search cases")
+    @GetMapping({"/search", "/cases/search"})
+    public ApiResponse<ExperienceListPayload> searchCases(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String failureReason,
+            @RequestParam(required = false) String q,
+            @RequestParam(defaultValue = "latest") String sort,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Integer durationMonthsMin,
+            @RequestParam(required = false) Integer durationMonthsMax,
+            @RequestParam(required = false) Integer investmentAmountMin,
+            @RequestParam(required = false) Integer investmentAmountMax
+    ) {
+        return ApiResponse.ok("Cases search loaded.", experienceService.getList(
+                page,
+                size,
+                failureReason,
+                q,
+                sort,
+                categoryId,
+                durationMonthsMin,
+                durationMonthsMax,
+                investmentAmountMin,
+                investmentAmountMax
+        ));
+    }
+
+    @Operation(summary = "Create experience")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ExperienceResponse> createExperience(@Valid @RequestBody ExperienceCreateRequest request) {
         return ApiResponse.ok("Experience created.", experienceService.create(request));
     }
 
-    @Operation(summary = "사례 상세 조회")
+    @Operation(summary = "Get experience detail")
     @GetMapping("/{experienceId}")
     public ApiResponse<ExperienceResponse> getExperience(@PathVariable Long experienceId) {
         return ApiResponse.ok("Experience loaded.", experienceService.getDetail(experienceId));
     }
 
-    @Operation(summary = "사례 수정")
+    @Operation(summary = "Update experience")
     @PatchMapping("/{experienceId}")
     public ApiResponse<ExperienceResponse> updateExperience(
             @PathVariable Long experienceId,
@@ -85,7 +113,7 @@ public class ExperienceController {
         return ApiResponse.ok("Experience updated.", experienceService.update(experienceId, request));
     }
 
-    @Operation(summary = "?щ? ?섏젙")
+    @Operation(summary = "Replace experience")
     @PutMapping("/{experienceId}")
     public ApiResponse<ExperienceResponse> replaceExperience(
             @PathVariable Long experienceId,
@@ -94,14 +122,14 @@ public class ExperienceController {
         return ApiResponse.ok("Experience updated.", experienceService.update(experienceId, request));
     }
 
-    @Operation(summary = "사례 삭제")
+    @Operation(summary = "Delete experience")
     @DeleteMapping("/{experienceId}")
     public ApiResponse<Void> deleteExperience(@PathVariable Long experienceId) {
         experienceService.delete(experienceId);
         return ApiResponse.ok("Experience deleted.", null);
     }
 
-    @Operation(summary = "유사 사례 조회")
+    @Operation(summary = "List similar experiences")
     @GetMapping("/{experienceId}/similar")
     public ApiResponse<List<SimilarityMatchResponse>> getSimilarExperiences(
             @PathVariable Long experienceId,
@@ -110,7 +138,7 @@ public class ExperienceController {
         return ApiResponse.ok("Similar experiences loaded.", experienceService.getSimilar(experienceId, limit));
     }
 
-    @Operation(summary = "관련 성공 사례 조회")
+    @Operation(summary = "List related success cases")
     @GetMapping("/{experienceId}/success-cases")
     public ApiResponse<List<ExperienceResponse>> getRelatedSuccessCases(
             @PathVariable Long experienceId,
@@ -119,7 +147,7 @@ public class ExperienceController {
         return ApiResponse.ok("Related success cases loaded.", experienceService.getRelatedSuccessCases(experienceId, limit));
     }
 
-    @Operation(summary = "사례 비교")
+    @Operation(summary = "Compare experiences")
     @PostMapping("/compare")
     public ApiResponse<CompareResponse> compareExperiences(@RequestBody CompareRequest request) {
         return ApiResponse.ok("Experiences compared.", experienceService.compare(request.experienceIds()));

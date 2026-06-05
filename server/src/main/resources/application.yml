@@ -103,6 +103,13 @@ app:
     admin-emails: ${APP_SECURITY_ADMIN_EMAILS:}
   agent-c:
     prompt-path: ${AGENT_C_PROMPT_PATH:ai/prompts/AI-04-agent_c_v1.md}
+  agent-a:
+    timeout-sec: ${AGENT_A_TIMEOUT_SEC:10}
+    rate-limit-per-min: ${AGENT_A_RATE_LIMIT_PER_MIN:5}
+  stats:
+    failure-pattern-path: ${APP_STATS_FAILURE_PATTERN_PATH:../ai/data/failure_pattern.json}
+    failure-timing-path: ${APP_STATS_FAILURE_TIMING_PATH:../ai/data/failure_timing.json}
+    minimum-sufficient-sample: ${APP_STATS_MINIMUM_SUFFICIENT_SAMPLE:5}
   oauth:
     kakao:
       client-id: ${APP_OAUTH_KAKAO_CLIENT_ID:}

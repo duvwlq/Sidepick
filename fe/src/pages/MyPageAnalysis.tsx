@@ -22,6 +22,13 @@ function formatDate(value: string | null) {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
 }
 
+function buildAnalysisNavigationTarget(item: MyAnalysisItem) {
+  if (item.reportStatus === 'READY') {
+    return `/experiences/${item.experienceId}?focus=analysis`;
+  }
+  return `/analysis-result?experienceId=${item.experienceId}`;
+}
+
 export default function MyPageAnalysis() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -99,7 +106,7 @@ export default function MyPageAnalysis() {
               <button
                 key={`${item.experienceId}-${item.analysisId ?? 'pending'}`}
                 type="button"
-                onClick={() => navigate(`/analysis-result?experienceId=${item.experienceId}`)}
+                onClick={() => navigate(buildAnalysisNavigationTarget(item))}
                 className="rounded-[16px] bg-white px-[16px] py-[14px] text-left shadow-[0_0_2px_rgba(0,0,0,0.1)]"
               >
                 <div className="flex items-center justify-between gap-[12px]">

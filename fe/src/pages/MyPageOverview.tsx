@@ -4,122 +4,30 @@ import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
-import editIcon from '../assets/explore-figma/edit.svg';
-import liveHelpNavIcon from '../assets/images/live-help.svg';
-import homeNavIcon from '../assets/images/home.svg';
-import plusFabIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
-import searchNavIcon from '../assets/images/search.svg';
-import userNavIcon from '../assets/images/user.svg';
+import chevronIcon from '../assets/mypage-figma/chevron.svg';
+import edit2Icon from '../assets/mypage-figma/edit2.svg';
+import eyeIcon from '../assets/mypage-figma/eye.svg';
+import fileTextIcon from '../assets/mypage-figma/file-text.svg';
+import heartIcon from '../assets/mypage-figma/heart.svg';
 import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.png';
 import cameraIcon from '../assets/mypage-overview-figma/camera.svg';
-import chevronIcon from '../assets/mypage-overview-figma/chevron.svg';
 import sectionDraftIcon from '../assets/mypage-overview-figma/section-draft.svg';
 import settingsIcon from '../assets/mypage-overview-figma/settings.svg';
-import statRecentIcon from '../assets/mypage-overview-figma/stat-recent.svg';
-import statWrittenIcon from '../assets/mypage-overview-figma/stat-written.svg';
+import BottomNav from '../components/layout/BottomNav';
 import {
   ApiError,
   getMe,
-  getMyAnalysisReports,
   getMyBookmarks,
   getMyExperiences,
   getMyRecentViews,
   type Experience,
-  type MyAnalysisItem,
   type UserSummary,
 } from '../lib/api';
+import { BOOKMARK_SYNC_EVENT, type BookmarkSyncDetail } from '../lib/bookmark-sync';
 import { getExperienceImageMeta } from '../lib/experience-images';
-import { getRecentViewedExperienceIds } from '../lib/personal-activity';
+import { mergeProfileOverrides } from '../lib/profile-overrides';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { clearSession, getAccessToken, getStoredUser } from '../lib/session';
-
-type OverviewCardVariant = 'with-thumbnail' | 'text-only';
-
-type DraftPreviewViewModel = {
-  id: number;
-  title: string;
-  description: string;
-  savedAt: string;
-};
-
-type PreviewCaseViewModel = {
-  id: number;
-  statusLabel: '성공' | '실패';
-  categoryLabel: string;
-  keywords: [string, string];
-  title: string;
-  description: string;
-  authorName: string;
-  createdAtLabel: string;
-  viewCountLabel: string;
-  bookmarkCountLabel: string;
-  variant: OverviewCardVariant;
-};
-
-type BookmarkPreviewViewModel = {
-  id: number;
-  title: string;
-  createdAtLabel: string;
-};
-
-type MyPageOverviewViewModel = {
-  profile: {
-    nickname: string;
-    email: string;
-    avatarUrl: string | null;
-  };
-  counts: {
-    written: number;
-    bookmarked: number;
-    recent: number;
-  };
-  draft: DraftPreviewViewModel | null;
-  writtenPreview: PreviewCaseViewModel[];
-  bookmarkPreview: BookmarkPreviewViewModel[];
-};
-
-/* const FIGMA_PREVIEW_MODE = true;
-const PREVIEW_DRAFT: DraftPreviewViewModel = {
-  id: 90001,
-  title: '제목입니다',
-  description: '본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기',
-  savedAt: '2026.00.00',
-};
-
-const PREVIEW_WRITTEN_CARDS: PreviewCaseViewModel[] = [
-  {
-    id: 10111,
-    statusLabel: '실패',
-    categoryLabel: '카테고리',
-    keywords: ['키워드', '키워드'],
-    title: '제목',
-    description: '본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기',
-    authorName: '닉네임',
-    createdAtLabel: '2026.00.00',
-    viewCountLabel: '999',
-    bookmarkCountLabel: '999',
-    variant: 'with-thumbnail',
-  },
-  {
-    id: 10112,
-    statusLabel: '성공',
-    categoryLabel: '카테고리',
-    keywords: ['키워드', '키워드'],
-    title: '제목',
-    description: '본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기',
-    authorName: '닉네임',
-    createdAtLabel: '2026.00.00',
-    viewCountLabel: '999',
-    bookmarkCountLabel: '999',
-    variant: 'text-only',
-  },
-]; */
-
-/* const PREVIEW_BOOKMARK_CARDS: BookmarkPreviewViewModel[] = [
-  { id: 10121, title: '제목입니다', createdAtLabel: '2026.00.00' },
-  { id: 10122, title: '제목입니다', createdAtLabel: '2026.00.00' },
-  { id: 10123, title: '제목입니다', createdAtLabel: '2026.00.00' },
-]; */
 
 function isAuthError(error: unknown) {
   return error instanceof ApiError && (error.status === 401 || error.status === 403);
@@ -143,7 +51,7 @@ function stripImageMarkdown(content: string) {
   return content.replace(/!\[[^\]]*]\(([^)]+)\)/g, '').replace(/\s+/g, ' ').trim();
 }
 
-function extractKeywordTags(experience: Experience): [string, string] {
+function extractKeywordTags(experience: Experience) {
   const raw = [
     ...(experience.analysis?.keywords ?? []),
     ...experience.failureReasons,
@@ -154,184 +62,61 @@ function extractKeywordTags(experience: Experience): [string, string] {
     .filter(Boolean)
     .filter((value) => value !== experience.category.name);
 
-  const unique = Array.from(new Set(raw));
-  return [unique[0] ?? '키워드', unique[1] ?? '키워드'];
+  return Array.from(new Set(raw)).slice(0, 2);
 }
 
-function toPreviewCase(experience: Experience): PreviewCaseViewModel {
-  const imageMeta = getExperienceImageMeta(experience);
-  const [keywordA, keywordB] = extractKeywordTags(experience);
-
-  return {
-    id: experience.id,
-    statusLabel: experience.caseStatus === 'SUCCESS' ? '성공' : '실패',
-    categoryLabel: sanitizeText(experience.category.name, '카테고리'),
-    keywords: [keywordA, keywordB],
-    title: sanitizeText(experience.title, '제목'),
-    description: sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기'),
-    authorName: sanitizeText(experience.author.nickname, '닉네임'),
-    createdAtLabel: formatDate(experience.createdAt),
-    viewCountLabel: experience.viewCount.toLocaleString(),
-    bookmarkCountLabel: experience.likeCount.toLocaleString(),
-    variant: imageMeta.primaryImageUrl ? 'with-thumbnail' : 'text-only',
-  };
+function resolveBookmarkCount(experience: Experience) {
+  return (experience as Experience & { bookmarkCount?: number }).bookmarkCount ?? experience.likeCount;
 }
 
-function toBookmarkPreview(experience: Experience): BookmarkPreviewViewModel {
-  return {
-    id: experience.id,
-    title: sanitizeText(experience.title, '제목입니다'),
-    createdAtLabel: formatDate(experience.createdAt),
-  };
-}
+const BOOKMARK_ACCENT_FILTER =
+  'invert(48%) sepia(12%) saturate(901%) hue-rotate(97deg) brightness(92%) contrast(88%)';
 
-function buildFallbackProfile(user: UserSummary | null) {
-  return {
-    nickname: sanitizeText(user?.nickname, '닉네임'),
-    email: sanitizeText(user?.email, '@sidepick@gmail.com'),
-    avatarUrl: user?.profileImage ?? null,
-  };
-}
-
-function StatusBar() {
+function IosStatusBar() {
   return (
-    <div className="flex h-[59px] w-[375px] items-center px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] tracking-[0px] text-[#000000]">9:41</span>
+    <div className="flex h-[59px] items-center justify-between bg-white px-[24px] pb-[19px] pt-[21px]">
+      <div className="flex min-w-0 flex-1 justify-center pt-[1.5px] font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">
+        9:41
       </div>
-      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
+      <div className="flex min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
+        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px]" />
+        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px]" />
+        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px]" />
       </div>
     </div>
   );
 }
 
-function OverviewHeader() {
-  const navigate = useNavigate();
-
-  return (
-    <header className="flex h-[64px] w-[375px] items-center justify-between px-[16px] py-[20px]">
-      <div className="h-[24px] w-[24px] shrink-0" aria-hidden="true" />
-      <h1 className="flex h-[19px] w-[70px] items-center justify-center text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
-        마이페이지
-      </h1>
-      <button
-        type="button"
-        aria-label="설정"
-        className="flex h-[20px] w-[20px] items-center justify-center"
-        onClick={() => {
-          navigate('/mypage/profile/edit');
-        }}
-      >
-        <img src={settingsIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
-      </button>
-    </header>
-  );
-}
-
-type StatItemProps = {
-  icon: 'written' | 'bookmarked' | 'recent';
-  label: string;
-  value: string;
-  onClick: () => void;
-};
-
-function StatItem({ icon, label, value, onClick }: StatItemProps) {
-  return (
-    <button type="button" onClick={onClick} className="flex h-[78px] w-[107.667px] flex-col items-center gap-[10px] py-[16px]">
-      <div className="flex items-center gap-[4px]">
-        {icon === 'written' ? <img src={statWrittenIcon} alt="" className="h-[14px] w-[14px] shrink-0" /> : null}
-        {icon === 'bookmarked' ? <img src={bookmarkIcon} alt="" className="h-[16px] w-[16px] shrink-0" /> : null}
-        {icon === 'recent' ? <img src={statRecentIcon} alt="" className="h-[16px] w-[16px] shrink-0" /> : null}
-        <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-          {label}
-        </span>
-      </div>
-      <span className="font-['Pretendard'] text-[14px] font-[500] leading-[19.6px] tracking-[0px] text-[#494949]">{value}</span>
-    </button>
-  );
-}
-
-function ProfileSummaryRow({ counts }: { counts: MyPageOverviewViewModel['counts'] }) {
-  const navigate = useNavigate();
-
-  return (
-    <div className="flex h-[78px] w-[323px] items-center">
-      <StatItem icon="written" label="작성한 글" value={counts.written.toLocaleString()} onClick={() => navigate('/mypage/written')} />
-      <StatItem icon="bookmarked" label="북마크" value={counts.bookmarked.toLocaleString()} onClick={() => navigate('/mypage/bookmarks')} />
-      <StatItem icon="recent" label="최근 본 글" value={counts.recent.toLocaleString()} onClick={() => navigate('/mypage/recent')} />
-    </div>
-  );
-}
-
-function ProfileCard({ profile, counts }: Pick<MyPageOverviewViewModel, 'profile' | 'counts'>) {
-  const navigate = useNavigate();
-
-  return (
-    <button
-      type="button"
-      className="flex h-[174px] w-[343px] flex-col items-start rounded-[4px] bg-[#FFFFFF] px-[10px] shadow-[0px_0px_2px_rgba(0,0,0,0.1)]"
-      onClick={() => {
-        navigate('/mypage/profile/edit');
-      }}
-    >
-      <div className="flex h-[96px] w-[323px] items-center justify-between py-[8px]">
-        <div className="flex items-center gap-[8px]">
-          <div className="relative h-[80px] w-[80px]">
-            <div className="flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-[999px] bg-[#F1F1F1] p-[8px]">
-              {profile.avatarUrl ? (
-                <img src={profile.avatarUrl} alt="" className="h-[64px] w-[64px] rounded-[999px] object-cover" />
-              ) : (
-                <img src={avatarPlaceholderIcon} alt="" className="h-[80px] w-[80px] shrink-0" />
-              )}
-            </div>
-            <div className="absolute left-[49.5px] top-[49px] flex h-[24px] w-[24px] items-center justify-center rounded-[999px] bg-[#8A8A8A]">
-              <img src={cameraIcon} alt="" className="h-[14px] w-[14px] shrink-0" />
-            </div>
-          </div>
-          <div className="flex flex-col items-start">
-            <span className="flex min-h-[22px] min-w-[42px] items-center font-['Pretendard'] text-[16px] font-[400] leading-[22.4px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
-              {profile.nickname}
-            </span>
-            <span className="flex min-h-[14px] min-w-[101px] items-center font-['Pretendard'] text-[10px] font-[400] leading-[14px] tracking-[0px] text-[#BABABA] [font-feature-settings:'case'_1]">
-              {profile.email}
-            </span>
-          </div>
-        </div>
-        <div className="flex h-[20px] w-[20px] items-center justify-center">
-          <img src={chevronIcon} alt="" className="h-[8px] w-[4px] shrink-0" />
-        </div>
-      </div>
-      <div className="h-0 w-[323px] border-t border-[#EEEEEE]" />
-      <ProfileSummaryRow counts={counts} />
-    </button>
-  );
-}
-
-type SectionHeaderProps = {
+function SectionHeader({
+  icon,
+  title,
+  onViewAll,
+}: {
+  icon: 'draft' | 'written' | 'bookmark' | 'recent';
   title: string;
-  icon: 'draft' | 'written' | 'bookmarked';
   onViewAll: () => void;
-  widthClassName?: string;
-};
+}) {
+  const iconNode =
+    icon === 'bookmark' ? (
+      <img src={bookmarkIcon} alt="" className="h-[16px] w-[16px]" />
+    ) : icon === 'draft' ? (
+      <img src={sectionDraftIcon} alt="" className="h-[16px] w-[16px]" />
+    ) : icon === 'written' ? (
+      <img src={fileTextIcon} alt="" className="h-[16px] w-[16px]" />
+    ) : (
+      <img src={eyeIcon} alt="" className="h-[16px] w-[16px]" />
+    );
 
-function SectionHeader({ title, icon, onViewAll, widthClassName = 'w-[319px]' }: SectionHeaderProps) {
   return (
-    <div className={`flex h-[17px] items-center justify-between ${widthClassName}`}>
+    <div className="flex w-full items-center justify-between">
       <div className="flex items-center gap-[6px]">
-        {icon === 'draft' ? <img src={sectionDraftIcon} alt="" className="h-[16px] w-[16px] shrink-0" /> : null}
-        {icon === 'written' ? <img src={sectionDraftIcon} alt="" className="h-[16px] w-[16px] shrink-0" /> : null}
-        {icon === 'bookmarked' ? <img src={bookmarkIcon} alt="" className="h-[16px] w-[16px] shrink-0" /> : null}
-        <span className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
-          {title}
-        </span>
+        {iconNode}
+        <span className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-[#494949]">{title}</span>
       </div>
       <button
         type="button"
         onClick={onViewAll}
-        className="flex h-[14px] min-w-[43px] shrink-0 items-center justify-center whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]"
+        className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#8A8A8A]"
       >
         전체보기
       </button>
@@ -339,558 +124,330 @@ function SectionHeader({ title, icon, onViewAll, widthClassName = 'w-[319px]' }:
   );
 }
 
-function DraftCard95({ draft }: { draft: DraftPreviewViewModel }) {
-  const navigate = useNavigate();
+function Tag({
+  label,
+  tone,
+}: {
+  label: string;
+  tone: 'success' | 'failure' | 'category' | 'keyword';
+}) {
+  const toneClass =
+    tone === 'success'
+      ? 'bg-[#5A876E] text-white'
+      : tone === 'failure'
+        ? 'bg-[#C06D43] text-white'
+        : tone === 'category'
+          ? 'bg-[#CBE5D8] text-[#5A876E]'
+          : 'bg-[#E6E6E6] text-[#8A8A8A]';
 
   return (
-    <button
-      type="button"
-      className="flex h-[95px] w-[319px] flex-col items-start gap-[16px] rounded-[4px] bg-[#F8F8F8] px-[16px] py-[12px] text-left"
-      onClick={() => {
-        navigate('/create');
-      }}
-    >
-      <div className="flex w-full flex-col items-start gap-[4px]">
-        <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
-          {draft.title}
-        </span>
-        <span className="max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
-          {draft.description}
-        </span>
-      </div>
-      <div className="flex items-center gap-[4px] font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-        <span>임시저장</span>
-        <span>•</span>
-        <span>{draft.savedAt}</span>
-      </div>
-    </button>
+    <span className={`inline-flex h-[18px] items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[10px] font-[500] leading-[12px] ${toneClass}`}>
+      <span className="max-w-[120px] truncate whitespace-nowrap">{label}</span>
+    </span>
   );
 }
 
-function DraftSection({
-  draft,
-  loading,
+function MetaRow({ experience }: { experience: Experience }) {
+  return (
+    <div className="flex w-full items-center justify-between">
+      <div className="flex min-w-0 items-center gap-[4px] overflow-hidden font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">
+        <span className="truncate">{sanitizeText(experience.author.nickname, '닉네임')}</span>
+        <span>•</span>
+        <span>{formatDate(experience.createdAt)}</span>
+        <span>•</span>
+        <span>{`조회 ${experience.viewCount}`}</span>
+      </div>
+      <div className="ml-[8px] flex shrink-0 items-center gap-[4px]">
+        <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+          <img src={heartIcon} alt="" className="h-[14px] w-[14px]" />
+          <span>{experience.likeCount}</span>
+        </div>
+        <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+          <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
+          <span>{resolveBookmarkCount(experience)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProfileCard({
+  profile,
+  counts,
 }: {
-  draft: DraftPreviewViewModel | null;
-  loading: boolean;
+  profile: UserSummary | null;
+  counts: { written: number; bookmarked: number; recent: number };
 }) {
   const navigate = useNavigate();
-  const content = draft;
+  const nickname = sanitizeText(profile?.nickname, '닉네임');
+  const email = sanitizeText(profile?.email, '@sidepick@gmail.com');
+
+  const statItems = [
+    { key: 'written', icon: edit2Icon, label: '작성한 글', value: counts.written, path: '/mypage/written', iconClassName: 'h-[14px] w-[14px]' },
+    { key: 'bookmark', icon: bookmarkIcon, label: '북마크', value: counts.bookmarked, path: '/mypage/bookmarks', iconClassName: 'h-[16px] w-[16px]' },
+    { key: 'recent', icon: eyeIcon, label: '최근 본 글', value: counts.recent, path: '/mypage/recent', iconClassName: 'h-[16px] w-[16px]' },
+  ] as const;
 
   return (
-    <section className="flex h-[146px] w-[343px] flex-col items-start gap-[10px] rounded-[4px] bg-[#FFFFFF] p-[12px] shadow-[0px_0px_2px_rgba(0,0,0,0.1)]">
-      <SectionHeader
-        title="작성 중인 글"
-        icon="draft"
-        onViewAll={() => {
-          navigate('/create');
-        }}
-      />
-      {loading ? (
-        <div className="flex h-[95px] w-[319px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">불러오는 중...</span>
+    <section className="w-full rounded-[4px] bg-white px-[10px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+      <button
+        type="button"
+        onClick={() => navigate('/mypage/profile/edit')}
+        className="flex w-full items-center justify-between py-[8px] text-left"
+        aria-label="프로필 수정"
+      >
+        <div className="flex items-center gap-[8px]">
+          <div className="relative flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full bg-[#F1F1F1]">
+            <img src={profile?.profileImage || avatarPlaceholderIcon} alt="" className="h-[64px] w-[64px] rounded-full object-cover" />
+            <span className="absolute left-[49.5px] top-[49px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
+              <img src={cameraIcon} alt="" className="h-[14px] w-[14px]" />
+            </span>
+          </div>
+          <div className="flex flex-col items-start">
+            <span className="font-['Pretendard'] text-[16px] font-[400] leading-[22.4px] text-[#131416]">{nickname}</span>
+            <span className="font-['Pretendard'] text-[10px] font-[400] leading-[14px] text-[#BABABA]">{email}</span>
+          </div>
         </div>
-      ) : content ? (
-        <DraftCard95 draft={content} />
-      ) : (
-        <div className="flex h-[95px] w-[319px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">작성 중인 글이 없습니다</span>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function PreviewCaseCard135({ card }: { card: PreviewCaseViewModel }) {
-  const navigate = useNavigate();
-  const statusClassName = card.statusLabel === '성공' ? 'bg-[#5A876E] text-[#FFFFFF]' : 'bg-[#C06D43] text-[#FFFFFF]';
-
-  return (
-    <button
-      type="button"
-      className="flex h-[135px] w-[319px] flex-col items-start gap-[8px] rounded-[4px] bg-[#F8F8F8] px-[16px] py-[12px] text-left"
-      onClick={() => navigate(`/experiences/${card.id}`)}
-    >
-      <div className="flex items-center gap-[4px]">
-        <span
-          className={`flex h-[18px] items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] ${statusClassName}`}
-        >
-          {card.statusLabel}
+        <span className="flex h-[20px] w-[20px] items-center justify-center">
+          <img src={chevronIcon} alt="" className="h-[9.5px] w-[5.5px] opacity-[0.58]" />
         </span>
-        <span className="flex h-[18px] items-center justify-center rounded-[4px] bg-[#CBE5D8] px-[4px] py-[2px] font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] tracking-[0px] text-[#5A876E]">
-          {card.categoryLabel}
-        </span>
-        {card.keywords.map((keyword, index) => (
-          <span
-            key={`${card.id}-${keyword}-${index}`}
-            className="flex h-[18px] items-center justify-center rounded-[4px] bg-[#D8D8D8] px-[4px] py-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF]"
+      </button>
+
+      <div className="h-px w-full bg-[#EEEEEE]" />
+
+      <div className="flex w-full items-center">
+        {statItems.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            onClick={() => navigate(item.path)}
+            className="flex flex-1 flex-col items-center gap-[10px] py-[16px]"
           >
-            {keyword}
-          </span>
+            <div className="flex items-center gap-[4px]">
+              <img src={item.icon} alt="" className={item.iconClassName} />
+              <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#8A8A8A]">{item.label}</span>
+            </div>
+            <span className="font-['Pretendard'] text-[14px] font-[500] leading-[19.6px] text-[#494949]">{item.value}</span>
+          </button>
         ))}
       </div>
-
-      <div className={`flex w-full items-start ${card.variant === 'with-thumbnail' ? 'gap-[8px]' : 'h-[60px]'}`}>
-        {card.variant === 'with-thumbnail' ? <div className="h-[60px] w-[80px] shrink-0 rounded-[4px] bg-[#8A8A8A]" /> : null}
-        <div className="flex h-[60px] min-w-0 flex-1 flex-col items-start">
-          <div className="flex min-h-0 w-full flex-1 flex-col items-start gap-[4px]">
-            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
-              {card.title}
-            </span>
-            <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] [font-feature-settings:'case'_1]">
-              {card.description}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-[4px] font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-          <span>{card.authorName}</span>
-          <span>•</span>
-          <span>{card.createdAtLabel}</span>
-          <span>•</span>
-          <div className="flex items-center gap-[2px]">
-            <span>조회</span>
-            <span>{card.viewCountLabel}</span>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          aria-label="북마크"
-          className="flex items-center gap-[2px]"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-        >
-          <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px] shrink-0" />
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-            {card.bookmarkCountLabel}
-          </span>
-        </button>
-      </div>
-    </button>
-  );
-}
-
-function WrittenPreviewSection({
-  cards,
-  loading,
-}: {
-  cards: PreviewCaseViewModel[];
-  loading: boolean;
-}) {
-  const navigate = useNavigate();
-  const content = cards;
-
-  return (
-    <section className="flex h-[331px] w-[343px] flex-col items-start gap-[10px] rounded-[4px] bg-[#FFFFFF] p-[12px] shadow-[0px_0px_2px_rgba(0,0,0,0.1)]">
-      <SectionHeader title="작성한 글" icon="written" onViewAll={() => navigate('/mypage/written')} />
-      {loading ? (
-        <div className="flex h-[280px] w-[319px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">불러오는 중...</span>
-        </div>
-      ) : content.length ? (
-        content.slice(0, 2).map((card) => <PreviewCaseCard135 key={card.id} card={card} />)
-      ) : (
-        <div className="flex h-[280px] w-[319px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">작성한 글이 없습니다</span>
-        </div>
-      )}
     </section>
   );
 }
 
-function BookmarkPreviewCardSm({ card }: { card: BookmarkPreviewViewModel }) {
+function DraftSection() {
   const navigate = useNavigate();
 
   return (
-    <button
-      type="button"
-      className="flex h-[134px] w-[96.33px] flex-col items-start overflow-hidden rounded-[4px] bg-[#FFFFFF] shadow-[0px_0px_2px_rgba(0,0,0,0.1)]"
-      onClick={() => navigate(`/experiences/${card.id}`)}
-    >
-      <div className="flex h-[80px] w-[96.33px] items-start justify-end bg-[#8A8A8A] p-[4px]">
-        <button
-          type="button"
-          aria-label="북마크"
-          className="flex h-[20px] w-[20px] items-center justify-center"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-          }}
-        >
-          <img src={bookmarkIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
-        </button>
-      </div>
-      <div className="flex w-full flex-col items-start justify-center gap-[4px] p-[8px]">
-        <span className="w-full overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-[#131416] [font-feature-settings:'case'_1]">
-          {card.title}
-        </span>
-        <span className="font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#8A8A8A] [font-feature-settings:'case'_1]">
-          {card.createdAtLabel}
-        </span>
-      </div>
-    </button>
+    <section className="w-full rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+      <SectionHeader icon="draft" title="작성 중인 글" onViewAll={() => navigate('/create')} />
+      <button
+        type="button"
+        onClick={() => navigate('/create')}
+        className="mt-[10px] block h-[95px] w-full rounded-[4px] bg-[#F8F8F8] px-[12px] py-[16px] text-left"
+      >
+        <p className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#131416]">제목입니다</p>
+        <p className="mt-[4px] line-clamp-1 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">
+          본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기
+        </p>
+        <div className="mt-[16px] flex items-center gap-[4px] font-['Pretendard'] text-[12px] leading-[16.8px]">
+          <span className="font-[400] text-[#92BFA6]">임시저장</span>
+          <span className="font-[300] text-[#8A8A8A]">•</span>
+          <span className="font-[300] text-[#8A8A8A]">2026.00.00</span>
+        </div>
+      </button>
+    </section>
   );
 }
 
-function BookmarkPreviewSection({
-  cards,
-  loading,
+function StoryPreviewCard({
+  experience,
+  showThumbnail,
 }: {
-  cards: BookmarkPreviewViewModel[];
-  loading: boolean;
+  experience: Experience;
+  showThumbnail: boolean;
 }) {
   const navigate = useNavigate();
-  const content = cards;
+  const imageMeta = getExperienceImageMeta(experience);
+  const keywords = extractKeywordTags(experience);
 
   return (
-    <section className="flex h-[185px] w-[343px] flex-col items-center gap-[10px] rounded-[4px] bg-[#FFFFFF] px-[16px] py-[12px] shadow-[0px_0px_2px_rgba(0,0,0,0.1)]">
-      <SectionHeader title="북마크" icon="bookmarked" widthClassName="w-[311px]" onViewAll={() => navigate('/mypage/bookmarks')} />
-      <div className="flex w-[311px] items-center gap-[11px]">
-        {loading ? (
-          <div className="flex h-[134px] w-[311px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-            <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">불러오는 중...</span>
+    <article className="h-[133px] w-full rounded-[4px] bg-[#F8F8F8]">
+      <button
+        type="button"
+        onClick={() => navigate(`/experiences/${experience.id}`)}
+        className="flex h-full w-full flex-col gap-[8px] px-[16px] py-[12px] text-left"
+      >
+        <div className="flex items-center gap-[4px] overflow-hidden">
+          <Tag label={experience.caseStatus === 'SUCCESS' ? '성공' : '실패'} tone={experience.caseStatus === 'SUCCESS' ? 'success' : 'failure'} />
+          <Tag label={sanitizeText(experience.category.name, '카테고리')} tone="category" />
+          {keywords.map((keyword) => (
+            <Tag key={`${experience.id}-${keyword}`} label={keyword} tone="keyword" />
+          ))}
+        </div>
+
+        <div className="flex h-[60px] items-start gap-[8px]">
+          {showThumbnail ? (
+            <div className="relative h-[60px] w-[80px] shrink-0 overflow-hidden rounded-[4px] bg-[#D8D8D8]">
+              {imageMeta.primaryImageUrl ? <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" /> : null}
+              {imageMeta.imageCount > 1 ? (
+                <span className="absolute bottom-0 right-0 flex h-[16px] w-[16px] items-center justify-center rounded-[4px] bg-[rgba(0,0,0,0.25)] font-['Pretendard'] text-[10px] font-[500] leading-[16px] text-white">
+                  {imageMeta.imageCount}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
+            <p className="line-clamp-1 font-['Pretendard'] text-[16px] font-[500] leading-[19.2px] text-[#131416]">
+              {sanitizeText(experience.title, '제목')}
+            </p>
+            <p className="line-clamp-2 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">
+              {sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
+            </p>
           </div>
-        ) : content.length ? (
-          content.slice(0, 3).map((card) => <BookmarkPreviewCardSm key={card.id} card={card} />)
+        </div>
+
+        <MetaRow experience={experience} />
+      </button>
+    </article>
+  );
+}
+
+function EmptyBlock({ message }: { message: string }) {
+  return (
+    <div className="flex h-[95px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
+      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{message}</span>
+    </div>
+  );
+}
+
+function StorySection({
+  title,
+  icon,
+  items,
+  emptyMessage,
+  onViewAll,
+}: {
+  title: string;
+  icon: 'written' | 'recent';
+  items: Experience[];
+  emptyMessage: string;
+  onViewAll: () => void;
+}) {
+  return (
+    <section className="w-full rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+      <SectionHeader icon={icon} title={title} onViewAll={onViewAll} />
+      <div className="mt-[10px] flex flex-col gap-[10px]">
+        {items.length ? (
+          items.slice(0, 2).map((experience, index) => (
+            <StoryPreviewCard key={experience.id} experience={experience} showThumbnail={index > 0} />
+          ))
         ) : (
-          <div className="flex h-[134px] w-[311px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-            <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">북마크가 없습니다</span>
-          </div>
+          <EmptyBlock message={emptyMessage} />
         )}
       </div>
     </section>
   );
 }
 
-function AnalysisPreviewSection({
-  items,
-  loading,
+function BookmarkPreviewCard({
+  experience,
+  variant,
 }: {
-  items: MyAnalysisItem[];
-  loading: boolean;
+  experience: Experience;
+  variant: 'primary' | 'secondary';
 }) {
   const navigate = useNavigate();
+  const imageHeight = variant === 'primary' ? 'h-[112px]' : 'h-[76px]';
+  const bodyHeight = variant === 'primary' ? 'h-[56px]' : 'h-[58px]';
+  const bodyPadding = variant === 'primary' ? 'px-[8px] py-[8px]' : 'px-[8px] py-[8px]';
+  const titleClassName = variant === 'primary' ? 'line-clamp-2 h-[33.6px]' : 'line-clamp-1 h-[16.8px]';
 
   return (
-    <section className="flex w-[343px] flex-col items-start gap-[10px] rounded-[4px] bg-[#FFFFFF] p-[12px] shadow-[0px_0px_2px_rgba(0,0,0,0.1)]">
-      <SectionHeader title="AI 분석 보기" icon="written" onViewAll={() => navigate('/mypage/analysis')} />
-      {loading ? (
-        <div className="flex h-[120px] w-[319px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">불러오는 중..</span>
-        </div>
-      ) : items.length ? (
-        <div className="flex w-[319px] flex-col gap-[8px]">
-          {items.slice(0, 3).map((item) => (
-            <button
-              key={`${item.experienceId}-${item.analysisId ?? 'pending'}`}
-              type="button"
-              onClick={() => navigate(`/analysis-result?experienceId=${item.experienceId}`)}
-              className="rounded-[8px] bg-[#F8F8F8] px-[12px] py-[12px] text-left"
-            >
-              <div className="flex items-center justify-between gap-[8px]">
-                <span className="text-[13px] font-[600] leading-[16px] text-[#131416]">{item.title}</span>
-                <span className={`rounded-[999px] px-[8px] py-[3px] text-[10px] font-[600] ${item.reportStatus === 'READY' ? 'bg-[#EAF5EE] text-[#3E6B52]' : 'bg-[#ECECEC] text-[#7A7A7A]'}`}>
-                  {item.reportStatus === 'READY' ? '완료' : '대기'}
-                </span>
-              </div>
-              <p className="pt-[6px] text-[12px] leading-[16px] text-[#6A6A6A]">
-                {(item.summary ?? '분석 결과를 준비 중입니다.').trim()}
-              </p>
-            </button>
-          ))}
-        </div>
-      ) : (
-        <div className="flex h-[120px] w-[319px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">아직 분석 결과가 없습니다</span>
-        </div>
-      )}
-    </section>
-  );
-}
-
-/* type FabButtonProps = {
-  variant: 'left' | 'right';
-  onClick: () => void;
-};
-
-function FabButton({ variant, onClick }: FabButtonProps) {
-  const isLeft = variant === 'left';
-
-  if (isLeft) {
-    return (
+    <article className={`w-[96.333px] ${variant === 'primary' ? 'h-[168px]' : 'h-[134px]'} overflow-hidden rounded-[4px] bg-white shadow-[0_0_2px_rgba(0,0,0,0.1)]`}>
       <button
         type="button"
-        aria-label="경험 작성"
-        onClick={onClick}
-        className="flex items-center gap-[8px] rounded-[10px] bg-[#FFFFFF] px-[10px] py-[12px] shadow-[0px_0px_4px_rgba(0,0,0,0.15)]"
+        onClick={() => navigate(`/experiences/${experience.id}`)}
+        className="flex h-full w-full flex-col text-left"
       >
-        <div className="flex h-[17px] w-[17px] items-center justify-center">
-          <img src={editIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+        <div className={`flex ${imageHeight} items-start justify-end bg-[#D8D8D8] p-[4px]`}>
+          <img src={bookmarkIcon} alt="" className="h-[20px] w-[20px]" style={{ filter: BOOKMARK_ACCENT_FILTER }} />
         </div>
-        <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-[#000000] [font-feature-settings:'case'_1]">
-          경험 작성
-        </span>
+        <div className={`flex ${bodyHeight} flex-col justify-between bg-white ${bodyPadding}`}>
+          <span className={`${titleClassName} font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#131416]`}>
+            {sanitizeText(experience.title, '제목입니다')}
+          </span>
+          <span className="font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">{formatDate(experience.createdAt)}</span>
+        </div>
       </button>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      aria-label="작성하기"
-      onClick={onClick}
-      className="flex h-[36px] w-[36px] items-center justify-center rounded-[999px] bg-[#5A876E]"
-    >
-      <img src={plusFabIcon} alt="" className="h-[20.667px] w-[20.667px] shrink-0" />
-    </button>
-  );
-} */
-
-type BottomNavItemProps = {
-  icon: 'home' | 'explore' | 'guide' | 'mypage';
-  label: string;
-  active?: boolean;
-  onClick: () => void;
-};
-
-function BottomNavItem({ icon, label, active = false, onClick }: BottomNavItemProps) {
-  const opacityClassName = active ? 'opacity-100' : 'opacity-30';
-
-  return (
-    <button type="button" onClick={onClick} className={`flex flex-col items-center gap-[4px] ${opacityClassName}`}>
-      <div className="flex h-[24px] w-[24px] items-center justify-center">
-        {icon === 'home' ? <img src={homeNavIcon} alt="" className="h-[24px] w-[24px] shrink-0" /> : null}
-        {icon === 'explore' ? <img src={searchNavIcon} alt="" className="h-[24px] w-[24px] shrink-0" /> : null}
-        {icon === 'guide' ? <img src={liveHelpNavIcon} alt="" className="h-[24px] w-[24px] shrink-0" /> : null}
-        {icon === 'mypage' ? <img src={userNavIcon} alt="" className="h-[24px] w-[24px] shrink-0" /> : null}
-      </div>
-      <span
-        className={`font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${active ? 'font-[600] text-[#131416]' : 'font-[400] text-[#BABABA]'} [font-feature-settings:'case'_1]`}
-      >
-        {label}
-      </span>
-    </button>
+    </article>
   );
 }
 
-function FixedBottomArea() {
+function BookmarkSection({ items }: { items: Experience[] }) {
   const navigate = useNavigate();
-  const [fabExpanded, setFabExpanded] = useState(false);
 
   return (
-    <div className="absolute bottom-0 left-0 flex h-[152px] w-[375px] flex-col items-center">
-      <div className="flex h-[68px] w-[375px] items-center justify-end px-[24px] py-[16px]">
-        <div className="relative h-[36px] w-[122px]">
-          {fabExpanded ? (
-            <button
-              type="button"
-              onClick={() => {
-                const token = getAccessToken();
-                setFabExpanded(false);
-
-                if (!token) {
-                  navigate(
-                    `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
-                      '경험 작성은 로그인이 필요한 서비스입니다.',
-                    )}`,
-                  );
-                  return;
-                }
-
-                navigate('/create');
-              }}
-              className="absolute right-0 top-[-49px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-              aria-label="경험 작성 열기"
-            >
-              <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-              <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-black">
-                경험 작성
-              </span>
-            </button>
-          ) : null}
-
-          <button
-            type="button"
-            onClick={() => setFabExpanded((current) => !current)}
-            className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/35 ${
-              fabExpanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E] shadow-[0_8px_16px_rgba(90,135,110,0.24)]'
-            }`}
-            aria-label={fabExpanded ? '경험 작성 닫기' : '경험 작성'}
-          >
-            <img
-              src={plusFabIcon}
-              alt=""
-              className={`transition-transform ${fabExpanded ? 'h-[22px] w-[22px] rotate-45' : 'h-[18px] w-[18px]'}`}
-            />
-          </button>
-        </div>
+    <section className="h-[185px] w-full rounded-[4px] bg-white px-[16px] pb-[12px] pt-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+      <SectionHeader icon="bookmark" title="북마크" onViewAll={() => navigate('/mypage/bookmarks')} />
+      <div className="mt-[10px] h-[168px]">
+        {items.length ? (
+          <div className="flex h-[168px] items-start gap-[11px]">
+            {items.slice(0, 3).map((experience, index) => (
+              <BookmarkPreviewCard key={experience.id} experience={experience} variant={index === 0 ? 'primary' : 'secondary'} />
+            ))}
+          </div>
+        ) : (
+          <EmptyBlock message="북마크가 없어요" />
+        )}
       </div>
-      <nav className="flex h-[84px] w-[375px] items-center justify-between rounded-tl-[20px] rounded-tr-[20px] bg-[#FFFFFF] px-[40px] pb-[32px] pt-[12px] shadow-[0px_0px_5px_rgba(0,0,0,0.15)]">
-        <BottomNavItem icon="home" label="홈" onClick={() => navigate('/')} />
-        <BottomNavItem icon="explore" label="탐색" onClick={() => navigate('/explore')} />
-        <BottomNavItem icon="guide" label="가이드" onClick={() => navigate('/faq')} />
-        <BottomNavItem icon="mypage" label="MY" active onClick={() => navigate('/mypage')} />
-      </nav>
-    </div>
+    </section>
   );
 }
 
 export default function MyPageOverview() {
   const navigate = useNavigate();
   const token = getAccessToken();
-  const storedUser = getStoredUser();
+  const storedUser = mergeProfileOverrides(getStoredUser());
+
   const [profile, setProfile] = useState<UserSummary | null>(storedUser);
   const [writtenExperiences, setWrittenExperiences] = useState<Experience[]>([]);
   const [bookmarkedExperiences, setBookmarkedExperiences] = useState<Experience[]>([]);
   const [recentExperiences, setRecentExperiences] = useState<Experience[]>([]);
-  const [analysisReports, setAnalysisReports] = useState<MyAnalysisItem[]>([]);
-  const [writtenLoading, setWrittenLoading] = useState(Boolean(token));
-  const [bookmarkLoading, setBookmarkLoading] = useState(Boolean(token));
-  const [analysisLoading, setAnalysisLoading] = useState(Boolean(token));
-  const [profileError, setProfileError] = useState('');
-  const [writtenError, setWrittenError] = useState('');
-  const [bookmarkError, setBookmarkError] = useState('');
-  const [recentError, setRecentError] = useState('');
-  const [analysisError, setAnalysisError] = useState('');
+  const [loading, setLoading] = useState(Boolean(token));
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!token) {
-      setWrittenLoading(false);
-      setBookmarkLoading(false);
+      setLoading(false);
       return;
     }
 
     let cancelled = false;
+    setLoading(true);
 
-      setWrittenLoading(true);
-      setBookmarkLoading(true);
-      setAnalysisLoading(true);
-
-    void getMe(token)
-      .then((payload) => {
-        if (cancelled) {
-          return;
-        }
-        setProfile(payload.user);
-        setProfileError('');
+    void Promise.all([getMe(token), getMyExperiences(token), getMyBookmarks(token), getMyRecentViews(token)])
+      .then(([mePayload, writtenPayload, bookmarkPayload, recentPayload]) => {
+        if (cancelled) return;
+        setProfile(mergeProfileOverrides(mePayload.user));
+        setWrittenExperiences(writtenPayload);
+        setBookmarkedExperiences(bookmarkPayload);
+        setRecentExperiences(recentPayload);
+        setError('');
       })
-      .catch((error) => {
-        if (cancelled) {
-          return;
-        }
-        if (isAuthError(error)) {
+      .catch((loadError) => {
+        if (cancelled) return;
+        if (isAuthError(loadError)) {
           clearSession();
-          navigate('/auth?next=%2Fmypage');
+          navigate('/auth?next=%2Fmypage', { replace: true });
           return;
         }
-        setProfileError(resolveErrorMessage(error, '프로필 정보를 불러오지 못했어요.'));
-      })
-    void getMyExperiences(token)
-      .then((payload) => {
-        if (cancelled) {
-          return;
-        }
-        setWrittenExperiences(payload);
-        setWrittenError('');
-      })
-      .catch((error) => {
-        if (cancelled) {
-          return;
-        }
-        setWrittenExperiences([]);
-        if (isAuthError(error)) {
-          clearSession();
-          navigate('/auth?next=%2Fmypage');
-          return;
-        }
-        setWrittenError(resolveErrorMessage(error, '작성한 글 목록을 불러오지 못했어요.'));
+        setError(resolveErrorMessage(loadError, '마이페이지 정보를 불러오지 못했어요.'));
       })
       .finally(() => {
         if (!cancelled) {
-          setWrittenLoading(false);
-        }
-      });
-
-    void getMyBookmarks(token)
-      .then((payload) => {
-        if (cancelled) {
-          return;
-        }
-        setBookmarkedExperiences(payload);
-        setBookmarkError('');
-      })
-      .catch((error) => {
-        if (cancelled) {
-          return;
-        }
-        setBookmarkedExperiences([]);
-        if (isAuthError(error)) {
-          clearSession();
-          navigate('/auth?next=%2Fmypage');
-          return;
-        }
-        setBookmarkError(resolveErrorMessage(error, '북마크 목록을 불러오지 못했어요.'));
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setBookmarkLoading(false);
-        }
-      });
-
-    void getMyRecentViews(token)
-      .then((payload) => {
-        if (cancelled) {
-          return;
-        }
-        setRecentExperiences(payload);
-        setRecentError('');
-      })
-      .catch((error) => {
-        if (cancelled) {
-          return;
-        }
-        setRecentExperiences([]);
-        if (isAuthError(error)) {
-          clearSession();
-          navigate('/auth?next=%2Fmypage');
-          return;
-        }
-        setRecentError(resolveErrorMessage(error, '최근 본 글 목록을 불러오지 못했어요.'));
-      })
-      .finally(() => {
-        if (!cancelled) {
-          // No separate recent loading UI is rendered in the overview.
-        }
-      });
-
-    void getMyAnalysisReports(token)
-      .then((payload) => {
-        if (cancelled) {
-          return;
-        }
-        setAnalysisReports(payload);
-        setAnalysisError('');
-      })
-      .catch((error) => {
-        if (cancelled) {
-          return;
-        }
-        setAnalysisReports([]);
-        if (isAuthError(error)) {
-          clearSession();
-          navigate('/auth?next=%2Fmypage');
-          return;
-        }
-        setAnalysisError(resolveErrorMessage(error, 'AI 분석 목록을 불러오지 못했습니다.'));
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setAnalysisLoading(false);
+          setLoading(false);
         }
       });
 
@@ -899,50 +456,98 @@ export default function MyPageOverview() {
     };
   }, [navigate, token]);
 
-  const viewModel = useMemo<MyPageOverviewViewModel>(() => {
-    const recentCount = recentError ? getRecentViewedExperienceIds().length || 0 : recentExperiences.length;
+  useEffect(() => {
+    if (!token) return;
+    const accessToken = token;
 
-    return {
-      profile: buildFallbackProfile(profile),
-      counts: {
-        written: writtenExperiences.length,
-        bookmarked: bookmarkedExperiences.length,
-        recent: recentCount,
-      },
-      draft: null,
-      writtenPreview: writtenExperiences.slice(0, 2).map(toPreviewCase),
-      bookmarkPreview: bookmarkedExperiences.slice(0, 3).map(toBookmarkPreview),
+    let cancelled = false;
+
+    async function reloadBookmarks(event: Event) {
+      const detail = event instanceof CustomEvent ? (event.detail as BookmarkSyncDetail) : null;
+      if (detail && !detail.bookmarked) {
+        setBookmarkedExperiences((current) => current.filter((item) => item.id !== detail.experienceId));
+        return;
+      }
+
+      try {
+        const payload = await getMyBookmarks(accessToken);
+        if (!cancelled) {
+          setBookmarkedExperiences(payload);
+        }
+      } catch {
+        // noop
+      }
+    }
+
+    window.addEventListener(BOOKMARK_SYNC_EVENT, reloadBookmarks);
+    return () => {
+      cancelled = true;
+      window.removeEventListener(BOOKMARK_SYNC_EVENT, reloadBookmarks);
     };
-  }, [bookmarkedExperiences, profile, recentExperiences, writtenExperiences]);
+  }, [token]);
 
-  const hasOverviewErrors = profileError || writtenError || bookmarkError || recentError || analysisError;
+  const counts = useMemo(
+    () => ({
+      written: writtenExperiences.length,
+      bookmarked: bookmarkedExperiences.length,
+      recent: recentExperiences.length,
+    }),
+    [bookmarkedExperiences.length, recentExperiences.length, writtenExperiences.length],
+  );
+
+  if (!token) {
+    return (
+      <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white px-[16px] py-[48px]">
+        <p className="font-['Pretendard'] text-[14px] text-[#8A8A8A]">로그인 후 마이페이지를 사용할 수 있어요.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="relative mx-auto h-[1131px] w-[375px] overflow-hidden bg-[#FFFFFF]">
-      <div className="h-[123px] w-[375px] bg-[#FFFFFF]">
-        <StatusBar />
-        <OverviewHeader />
-      </div>
+    <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
+      <header className="bg-white">
+        <IosStatusBar />
+        <div className="flex items-center justify-between px-[16px] py-[20px]">
+          <div className="h-[24px] w-[24px]" aria-hidden="true" />
+          <h1 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">마이페이지</h1>
+          <button
+            type="button"
+            onClick={() => navigate('/mypage/profile/edit')}
+            className="flex h-[20px] w-[20px] items-center justify-center"
+            aria-label="프로필 수정"
+          >
+            <img src={settingsIcon} alt="" className="h-[20px] w-[20px] opacity-[0.54]" />
+          </button>
+        </div>
+      </header>
 
-      <main className="flex h-[1008px] w-[375px] flex-col gap-[20px] overflow-y-auto px-[16px] pb-[110px] pt-[2px]">
-        <ProfileCard profile={viewModel.profile} counts={viewModel.counts} />
-        <DraftSection draft={viewModel.draft} loading={false} />
-        <WrittenPreviewSection cards={viewModel.writtenPreview} loading={writtenLoading} />
-        <BookmarkPreviewSection cards={viewModel.bookmarkPreview} loading={bookmarkLoading} />
-        <AnalysisPreviewSection items={analysisReports} loading={analysisLoading} />
+      <main className="flex flex-col gap-[20px] px-[16px] pb-[110px]">
+        <ProfileCard profile={profile} counts={counts} />
+        <DraftSection />
+        <StorySection
+          title="작성한 글"
+          icon="written"
+          items={writtenExperiences}
+          emptyMessage={loading ? '불러오는 중...' : '작성한 글이 없어요'}
+          onViewAll={() => navigate('/mypage/written')}
+        />
+        <BookmarkSection items={bookmarkedExperiences} />
+        <StorySection
+          title="최근 본 글"
+          icon="recent"
+          items={recentExperiences}
+          emptyMessage={loading ? '불러오는 중...' : '최근 본 글이 없어요'}
+          onViewAll={() => navigate('/mypage/recent')}
+        />
 
-        {hasOverviewErrors ? (
-          <div className="flex w-[343px] flex-col gap-[4px] rounded-[4px] bg-[#F8F8F8] px-[12px] py-[10px]">
-            {profileError ? <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{profileError}</span> : null}
-            {writtenError ? <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{writtenError}</span> : null}
-            {bookmarkError ? <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{bookmarkError}</span> : null}
-            {recentError ? <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{recentError}</span> : null}
-            {analysisError ? <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{analysisError}</span> : null}
+        {error ? (
+          <div className="rounded-[4px] bg-[#F8F8F8] px-[12px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+            {error}
           </div>
         ) : null}
       </main>
 
-      <FixedBottomArea />
+      <BottomNav active="mypage" showFab />
     </div>
   );
 }

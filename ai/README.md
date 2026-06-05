@@ -72,8 +72,14 @@ ANTHROPIC_API_KEY=***
 - `uvicorn[standard]`
 - `anthropic`
 - `python-dotenv`
+- `pandas`
+- `sentence-transformers`
+- `faiss-cpu`
 
 추가 추천/파이프라인 자산은 `recommender/`, `scripts/` 쪽에서 별도로 관리합니다.
+
+유사 사례 인덱스 스크립트는 모델 캐시가 이미 있으면 `local_files_only`로 먼저 로드합니다.
+운영 환경에서는 최초 1회 캐시 이후 불필요한 Hugging Face 재조회 로그를 줄이는 용도입니다.
 
 ---
 

@@ -19,6 +19,9 @@ import com.failforward.backend.domain.experience.repository.FailureExperienceRep
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +31,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -43,9 +48,13 @@ public class AIAnalysisService {
     private final MatchedCaseRepository matchedCaseRepository;
     @Qualifier("aiRestTemplate")
     private final RestTemplate aiRestTemplate;
+    @Qualifier("analysisTaskExecutor")
+    private final Executor analysisTaskExecutor;
+    private final PlatformTransactionManager transactionManager;
     private final AiServerProperties aiServerProperties;
     private final AIAnalysisSupport analysisSupport;
     private final DemoScenarioSupport demoScenarioSupport;
+    private final Set<Long> inFlightExperienceIds = ConcurrentHashMap.newKeySet();
 
     public Optional<AiAnalysis> findByExperience(FailureExperience experience) {
         return aiAnalysisRepository.findByExperience(experience);
@@ -70,11 +79,16 @@ public class AIAnalysisService {
     }
 
     @Transactional
-    public PatternAnalysisResponse createAnalysis(Long experienceId) {
+    public void createAnalysis(Long experienceId) {
         FailureExperience experience = getExperience(experienceId);
-        AiAnalysis analysis = aiAnalysisRepository.findByExperience(experience)
-                .orElseGet(() -> requestAndPersistAnalysis(experience));
-        return PatternAnalysisResponse.from(analysis);
+        if (aiAnalysisRepository.findByExperience(experience).isPresent()) {
+            return;
+        }
+        Optional<AiAnalysis> demoAnalysis = persistDemoScenarioAnalysisIfMatched(experience, null);
+        if (demoAnalysis.isPresent()) {
+            return;
+        }
+        scheduleAnalysis(experience.getId(), false);
     }
 
     public List<MatchedCaseResponse> getMatchedCases(Long analysisId) {
@@ -95,13 +109,8 @@ public class AIAnalysisService {
         if (demoAnalysis.isPresent()) {
             return demoAnalysis;
         }
-        try {
-            return Optional.of(requestAndPersistAnalysis(experience));
-        } catch (Exception exception) {
-            log.warn("AI analysis skipped for experienceId={} because AI server call failed: {}",
-                    experience.getId(), exception.getMessage());
-            return Optional.empty();
-        }
+        scheduleAnalysis(experience.getId(), false);
+        return Optional.empty();
     }
 
     @Transactional
@@ -111,13 +120,36 @@ public class AIAnalysisService {
         if (demoAnalysis.isPresent()) {
             return demoAnalysis;
         }
-        try {
-            return Optional.of(requestAndPersistAnalysis(experience, existing.orElse(null)));
-        } catch (Exception exception) {
-            log.warn("AI re-analysis skipped for experienceId={} because AI server call failed: {}",
-                    experience.getId(), exception.getMessage());
-            return existing;
+        scheduleAnalysis(experience.getId(), true);
+        return existing;
+    }
+
+    private void scheduleAnalysis(Long experienceId, boolean forceRefresh) {
+        if (!inFlightExperienceIds.add(experienceId)) {
+            log.info("ai_analysis_request_already_in_flight experienceId={}", experienceId);
+            return;
         }
+
+        analysisTaskExecutor.execute(() -> {
+            TransactionTemplate template = new TransactionTemplate(transactionManager);
+            try {
+                template.executeWithoutResult(status -> processAnalysisJob(experienceId, forceRefresh));
+            } catch (Exception exception) {
+                log.warn("AI analysis skipped for experienceId={} because AI server call failed: {}",
+                        experienceId, exception.getMessage());
+            } finally {
+                inFlightExperienceIds.remove(experienceId);
+            }
+        });
+    }
+
+    private void processAnalysisJob(Long experienceId, boolean forceRefresh) {
+        FailureExperience experience = getExperience(experienceId);
+        AiAnalysis existingAnalysis = aiAnalysisRepository.findByExperience(experience).orElse(null);
+        if (existingAnalysis != null && !forceRefresh) {
+            return;
+        }
+        requestAndPersistAnalysis(experience, existingAnalysis);
     }
 
     private AiAnalysis requestAndPersistAnalysis(FailureExperience experience) {

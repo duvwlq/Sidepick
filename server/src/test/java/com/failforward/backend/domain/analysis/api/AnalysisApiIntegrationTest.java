@@ -90,7 +90,12 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
         );
         long experienceId = createExperience(token, "Analysis target", "This experience triggers AI analysis creation.");
 
-        MvcResult createResult = mockMvc.perform(post("/api/experiences/{experienceId}/analysis", experienceId)
+        mockMvc.perform(post("/api/experiences/{experienceId}/analysis", experienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.success").value(true));
+
+        MvcResult analysisResult = mockMvc.perform(get("/api/experiences/{experienceId}/analysis", experienceId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
@@ -101,7 +106,7 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.structuredSummary").value(SUMMARY))
                 .andReturn();
 
-        long analysisId = readId(createResult);
+        long analysisId = readId(analysisResult);
 
         mockMvc.perform(get("/api/analysis/{analysisId}/matched-cases", analysisId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(token)))
