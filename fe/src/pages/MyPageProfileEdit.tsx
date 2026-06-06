@@ -364,7 +364,7 @@ export default function MyPageProfileEdit() {
               onClick={() => void handleSave()}
               disabled={saving || !hasChanges}
               className={`font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] ${
-                hasChanges ? 'text-[#5A876E]' : 'text-[#D8D8D8]'
+                hasChanges ? 'text-[#5A876E]' : 'text-[#BABABA]'
               }`}
             >
               저장
@@ -372,23 +372,23 @@ export default function MyPageProfileEdit() {
           </div>
         </header>
 
-        <main className="flex flex-col items-center pb-[110px]">
-          <button type="button" onClick={() => setSheetOpen(true)} className="mt-[2px] flex flex-col items-center justify-center">
+        <main className="flex flex-col items-center pb-[128px]">
+          <button type="button" onClick={() => setSheetOpen(true)} className="mt-[20px] flex flex-col items-center justify-center">
             <div className="relative flex h-[100px] w-[100px] items-center justify-center overflow-hidden rounded-full bg-[#F1F1F1]">
-              <img src={previewImage || avatarPlaceholderIcon} alt="" className="h-[80px] w-[80px] rounded-full object-cover" />
-              <span className="absolute left-[67.5px] top-[67px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
+              <img src={previewImage || avatarPlaceholderIcon} alt="" className="h-full w-full object-cover" />
+              <span className="absolute bottom-0 right-0 flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
                 <img src={cameraIcon} alt="" className="h-[14px] w-[14px]" />
               </span>
             </div>
           </button>
 
-          <section className="mt-[2px] flex w-full max-w-[343px] flex-col gap-[20px]">
-            <div className="flex flex-col gap-[4px]">
+          <section className="mt-[20px] flex w-full max-w-[343px] flex-col gap-[16px]">
+            <div className="flex flex-col gap-[6px]">
               <FieldLabel>닉네임</FieldLabel>
               <TextInput value={nickname} placeholder="닉네임" onChange={setNickname} />
             </div>
 
-            <div className="flex flex-col gap-[4px]">
+            <div className="flex flex-col gap-[6px]">
               <FieldLabel>부업 경험 여부</FieldLabel>
               <div className="flex gap-[4px]">
                 <ChoiceButton selected={experienceStatus === 'HAS_EXPERIENCE'} label="경험 있음" onClick={() => setExperienceStatus('HAS_EXPERIENCE')} />
@@ -396,7 +396,7 @@ export default function MyPageProfileEdit() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-[4px]">
+            <div className="flex flex-col gap-[6px]">
               <FieldLabel>거주지</FieldLabel>
               <TextInput
                 value={region}
@@ -408,7 +408,7 @@ export default function MyPageProfileEdit() {
               />
             </div>
 
-            <div className="flex flex-col gap-[4px]">
+            <div className="flex flex-col gap-[6px]">
               <FieldLabel>
                 <span className="flex items-center gap-[4px]">
                   <span>이메일</span>
@@ -418,7 +418,7 @@ export default function MyPageProfileEdit() {
               <TextInput value={email} placeholder="이메일 주소를 입력해주세요" readOnly onChange={setEmail} />
             </div>
 
-            <div className="flex flex-col gap-[4px]">
+            <div className="flex flex-col gap-[6px]">
               <FieldLabel>
                 <span className="flex items-center gap-[4px]">
                   <span>전화번호</span>
@@ -434,7 +434,7 @@ export default function MyPageProfileEdit() {
           </section>
         </main>
 
-        <BottomNav active="mypage" showFab />
+        <BottomNav active="mypage" />
       </div>
 
       <PhotoActionSheet

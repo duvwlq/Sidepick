@@ -6,6 +6,7 @@ import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
+import { KeywordChip } from '../components/common/Chip';
 import BottomNav from '../components/layout/BottomNav';
 import {
   clearRecentExploreSearches,
@@ -103,25 +104,25 @@ function RecentSearchChip({
   onRemove: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex h-[22px] items-center justify-center gap-[4px] rounded-[999px] bg-[#F8F8F8] px-[12px] py-[4px]"
-    >
-      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#BABABA]">
-        {label}
-      </span>
-      <span
-        onClick={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          onRemove();
-        }}
-        className="inline-flex h-[8px] w-[8px] items-center justify-center text-[#C8C8C8]"
-        aria-hidden="true"
-      >
-        <X size={8} strokeWidth={2} />
-      </span>
+    <button type="button" onClick={onClick} className="inline-flex">
+      <KeywordChip
+        label={label}
+        tone="secondary"
+        className="h-[26px] px-[10px] py-[6px] text-[12px] font-[400] leading-[14.4px]"
+        trailing={
+          <span
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onRemove();
+            }}
+            className="inline-flex h-[8px] w-[8px] items-center justify-center text-[#C8C8C8]"
+            aria-hidden="true"
+          >
+            <X size={8} strokeWidth={2} />
+          </span>
+        }
+      />
     </button>
   );
 }
@@ -134,14 +135,8 @@ function RecommendedChip({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="inline-flex h-[22px] items-center justify-center rounded-[999px] border border-[#92BFA6] bg-white px-[12px] py-[4px]"
-    >
-      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5A876E]">
-        {label}
-      </span>
+    <button type="button" onClick={onClick} className="inline-flex">
+      <KeywordChip label={label} tone="primary" className="h-[26px] px-[10px] py-[6px] text-[12px] font-[400] leading-[14.4px]" />
     </button>
   );
 }
@@ -185,7 +180,7 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="mx-auto min-h-screen w-full bg-white pb-[84px]">
+      <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white pb-[136px]">
         <StatusBar />
         <Header
           onBack={() => {
@@ -199,8 +194,8 @@ export default function SearchPage() {
 
         <SearchInput value={query} onChange={setQuery} onSubmit={() => submitSearch(query)} />
 
-        <main className="flex flex-col gap-[12px] pt-[12px]">
-          <section className="px-[16px] py-[16px]">
+        <main className="flex flex-col gap-[0px] pt-[16px]">
+          <section className="px-[16px] py-[20px]">
             <div className="flex items-center justify-between">
               <h2 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-black">
                 최근 검색어
@@ -216,7 +211,7 @@ export default function SearchPage() {
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-[4px] pt-[16px]">
+            <div className="flex flex-wrap gap-[6px] pt-[14px]">
               {recentLabels.map((label, index) => {
                 const recentItem = recentSearches[index];
                 return (
@@ -236,12 +231,12 @@ export default function SearchPage() {
             </div>
           </section>
 
-          <section className="px-[16px] py-[16px]">
+          <section className="px-[16px] py-[20px]">
             <h2 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-black">
               추천 키워드
             </h2>
 
-            <div className="flex flex-wrap gap-[4px] pt-[16px]">
+            <div className="flex flex-wrap gap-[6px] pt-[14px]">
               {FIXTURE_RECOMMENDED_KEYWORDS.map((keyword, index) => (
                 <RecommendedChip key={`${keyword}-${index}`} label={keyword} onClick={() => submitSearch('검색어')} />
               ))}

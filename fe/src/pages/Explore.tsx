@@ -5,6 +5,8 @@ import chevronDownIcon from '../assets/explore-figma/chevron-down.svg';
 import filterIcon from '../assets/explore-figma/filter.svg';
 import helpIcon from '../assets/explore-figma/help.svg';
 import plusIcon from '../assets/explore-figma/plus.svg';
+import { TagChip } from '../components/common/Chip';
+import CaseSegment from '../components/common/CaseSegment';
 import HorizontalScroll from '../components/common/HorizontalScroll';
 import SearchBar from '../components/common/SearchBar';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
@@ -141,34 +143,15 @@ function FilterTag({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex h-[26px] shrink-0 items-center justify-center rounded-[999px] border px-[10px] ${
-        active ? 'border-[#5A876E] bg-[#5A876E] text-white' : 'border-[#EAEAEA] bg-white text-[#6A9B7E]'
-      }`}
+      className="shrink-0"
     >
-      <span className="whitespace-nowrap text-[12px] font-[500] leading-[14.4px] tracking-[0px]">{label}</span>
-    </button>
-  );
-}
-
-function FeedSegment({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`min-w-[41px] rounded-[999px] px-[14px] py-[8px] text-[12px] font-[500] leading-[14.4px] tracking-[0px] ${
-        active ? 'bg-[#375E49] text-white shadow-[0_2px_10px_rgba(0,0,0,0.08)]' : 'bg-white text-[#1F1F1F]'
-      }`}
-    >
-      {label}
+      <TagChip
+        label={label}
+        tone={active ? 'primary' : 'secondary'}
+        className={`h-[26px] px-[10px] py-[6px] text-[12px] font-[500] leading-[14.4px] ${
+          active ? '' : 'border-[#EAEAEA] text-[#6A9B7E]'
+        }`}
+      />
     </button>
   );
 }
@@ -578,16 +561,12 @@ export default function Explore() {
           </div>
 
           <div className="pointer-events-auto flex items-center gap-[12px]">
-            <div className="flex items-center gap-[2px] rounded-[999px] bg-white p-[4px] shadow-[0_0_2px_rgba(0,0,0,0.15)]">
-              {FEED_OPTIONS.map((option) => (
-                <FeedSegment
-                  key={option.key}
-                  active={feedMode === option.key}
-                  label={option.label}
-                  onClick={() => setFeedMode(option.key)}
-                />
-              ))}
-            </div>
+            <CaseSegment
+              options={FEED_OPTIONS.map((option) => ({ key: option.key, label: option.label }))}
+              activeKey={feedMode}
+              onChange={(nextKey) => setFeedMode(nextKey as FeedMode)}
+              className="bg-white p-[4px] shadow-[0_0_2px_rgba(0,0,0,0.15)]"
+            />
 
             <button
               type="button"

@@ -7,6 +7,7 @@ import wifiIcon from '../assets/auth-figma/wifi.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import chevronDownIcon from '../assets/explore-figma/chevron-down.svg';
 import heartIcon from '../assets/mypage-figma/heart.svg';
+import { CardActionButton, CaseChip } from '../components/common/CaseUi';
 import BottomNav from '../components/layout/BottomNav';
 import { ErrorState, ListSkeleton } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
@@ -143,21 +144,13 @@ function CaseTag({
   label: string;
   tone: 'success' | 'failure' | 'category' | 'keyword';
 }) {
-  const toneClass =
-    tone === 'success'
-      ? 'bg-[#5A876E] text-white'
-      : tone === 'failure'
-        ? 'bg-[#C06D43] text-white'
-        : tone === 'category'
-          ? 'bg-[#CBE5D8] text-[#5A876E]'
-          : 'bg-[#E6E6E6] text-[#8A8A8A]';
-
   return (
-    <span
-      className={`inline-flex h-[18px] items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[10px] font-[500] leading-[12px] ${toneClass}`}
-    >
-      <span className="max-w-[116px] truncate whitespace-nowrap">{label}</span>
-    </span>
+    <CaseChip
+      label={label}
+      tone={tone === 'success' ? 'status-success' : tone === 'failure' ? 'status-failure' : tone}
+      compact
+      maxWidthClassName={tone === 'category' ? 'max-w-[108px]' : 'max-w-[58px]'}
+    />
   );
 }
 
@@ -200,7 +193,7 @@ function StoryCard({
   const keywords = extractKeywordTags(experience);
   const showImage = variant === 'media';
   const showSuccessAction = experience.caseStatus === 'FAILURE';
-  const cardHeightClassName = variant === 'media' ? 'min-h-[171px]' : 'min-h-[133px]';
+  const cardHeightClassName = 'min-h-[171px]';
   const preview = sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기');
 
   return (
@@ -280,16 +273,12 @@ function StoryCard({
 
           {showSuccessAction ? (
             <div className="flex justify-end">
-              <button
-                type="button"
+              <CardActionButton
+                label={experience.hasPatternAnalysis ? '성공 사례 보기' : '성공 사례 없음'}
                 disabled={!experience.hasPatternAnalysis}
+                className={`${!experience.hasPatternAnalysis ? 'bg-[#CBE5D8] text-[#5A876E] opacity-100' : ''} font-[500]`}
                 onClick={() => navigate(`/experiences/${experience.id}/success-comparison`)}
-                className={`inline-flex h-[32px] items-center justify-center rounded-[8px] px-[12px] py-[8px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] ${
-                  experience.hasPatternAnalysis ? 'bg-[#5A876E] text-white' : 'bg-[#CBE5D8] text-[#5A876E]'
-                }`}
-              >
-                {experience.hasPatternAnalysis ? '성공 사례 보기' : '성공 사례 없음'}
-              </button>
+              />
             </div>
           ) : null}
         </div>
@@ -475,14 +464,14 @@ export default function MyPage() {
           <div className="h-[24px] w-[24px]" aria-hidden="true" />
         </div>
 
-        <div className="flex flex-col gap-[12px] py-[12px]">
+        <div className="flex flex-col gap-[0px] py-[0px]">
           <div className="flex">
             <TabButton active={activeTab === 'written'} label="작성한 글" onClick={() => navigate('/mypage/written')} />
             <TabButton active={activeTab === 'bookmarked'} label="북마크" onClick={() => navigate('/mypage/bookmarks')} />
             <TabButton active={activeTab === 'recent'} label="최근 본 글" onClick={() => navigate('/mypage/recent')} />
           </div>
 
-          <div className="flex items-center justify-between px-[16px]">
+          <div className="flex items-center justify-between px-[16px] py-[12px]">
             <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#131416]">{currentCount}</span>
 
             <div className="relative">
@@ -559,7 +548,7 @@ export default function MyPage() {
         )}
       </main>
 
-      <BottomNav active="mypage" showFab />
+      <BottomNav active="mypage" />
     </div>
   );
 }

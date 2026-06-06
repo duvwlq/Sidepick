@@ -3,6 +3,7 @@ import arrowLeftIcon from '../../assets/auth-figma/arrow-left.svg';
 import batteryFrameIcon from '../../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../../assets/auth-figma/wifi.svg';
+import AppButton from '../common/Button';
 
 type SignupScreenProps = {
   title: string;
@@ -143,16 +144,15 @@ export function SignupButton({
   tone = 'soft',
 }: SignupButtonProps) {
   return (
-    <button
-      type="button"
+    <AppButton
       onClick={onClick}
       disabled={disabled}
-      className={`flex h-[48px] w-full items-center justify-center rounded-[10px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white disabled:opacity-60 ${
-        tone === 'primary' ? 'bg-[#5A876E]' : 'bg-[#CBE5D8]'
-      }`}
+      tone={tone === 'primary' ? 'primary' : 'soft'}
+      size="auth"
+      fullWidth
     >
       {children}
-    </button>
+    </AppButton>
   );
 }
 

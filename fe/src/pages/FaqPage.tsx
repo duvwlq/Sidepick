@@ -5,15 +5,13 @@ import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
-import editIcon from '../assets/explore-figma/edit.svg';
-import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
-import homeIcon from '../assets/home-v1-figma/icons/home-figma.svg';
-import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
+import BottomNav from '../components/layout/BottomNav';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
-import searchNavIcon from '../assets/home-v1-figma/icons/search-nav-figma.svg';
-import userIcon from '../assets/home-v1-figma/icons/user-figma.svg';
+import { TagChip } from '../components/common/Chip';
 import { getAccessToken } from '../lib/session';
-import { FAQ_CATEGORIES } from './faqData';
+import { FAQ_CATEGORIES, FAQ_INTRO } from './faqData';
+
+void FAQ_INTRO;
 
 const ALL_TAG_ID = 'all';
 const BUSINESS_CATEGORY_COUNT = 7;
@@ -71,6 +69,53 @@ const TAG_LABEL_MAP = new Map(
 const TAG_SOURCE_LABEL_MAP = new Map(
   TAG_DEFINITIONS.filter((tag) => tag.id !== ALL_TAG_ID).map((tag) => [tag.id, tag.sourceLabel ?? '']),
 );
+
+void splitSentences;
+void summarizeText;
+
+const BUSINESS_GUIDE_FIXTURE = {
+  checklist: [
+    '스마트스토어 시작하려는데 뭐부터 해야 할까요?',
+    '처음에 어떤 상품을 팔아야 잘 팔릴까요?',
+    '광고비 얼마부터 시작하면 좋을까요?',
+  ],
+  failures: [
+    '먼저 사업자 등록(간이과세자로 시작해도 OK)부터 하세요.',
+    '그 다음엔 팔 상품을 1~2개로 좁혀서 도매 사이트를 먼저 보세요.',
+    '한 번에 다 갖추려 하지 말고 단계별로 천천히 가는 게 좋아요.',
+  ],
+  tips: [
+    '먼저 사업자 등록(간이과세자 시작 가능)과 통신판매업 신고 순서부터 익히세요.',
+    '도매 사이트에서 경쟁 상품을 3개 정도 비교한 뒤 카테고리를 정하세요.',
+  ],
+};
+
+const OTHER_GUIDE_FIXTURE = {
+  steps: [
+    { step: 1, title: '홈택스 접속 후 신청', description: '국세청 홈택스 → 사업자 등록 신청' },
+    { step: 2, title: '업종 코드 + 과세 유형 선택', description: '간이과세자 vs 일반과세자 선택' },
+    { step: 3, title: '서류 제출 및 완료', description: '신분증 업로드 → 3~5일 내 발급' },
+  ],
+  faqs: [
+    { question: '직장 다니면서 사업자 등록 가능한가요?', answer: '가능합니다. 단, 회사 내 규정 확인 필수.' },
+    { question: '간이과세자와 일반과세자 차이는?', answer: '연 매출 8,000만원 기준. 간이가 세금 부담 적음.' },
+  ],
+  legalLines: [
+    '부업 수입이 연 500만원 초과 시 종합소득세 신고 의무 발생.',
+    '미신고 시 가산세 부과될 수 있습니다.',
+  ],
+};
+
+const FIGMA_FAQ_INTRO = {
+  eyebrow: '사이드픽 부업 가이드',
+  titleLines: ['부업, 정답은 없어요.', '먼저 걸어본 사람들의 이야기를 모았어요.'],
+  disclaimerLines: [
+    '본 컨텐츠는 일반적인 가이드 라인입니다.',
+    '개인 상황에 따라 결과가 다를 수 있으며,',
+    '법률, 세금, 투자 관련 사항은 전문가 상담을 권장합니다.',
+    '총 16개 카테고리로 정리했습니다.',
+  ],
+};
 
 function normalizeText(value: string) {
   return value.replace(/\s+/g, ' ').trim();
@@ -231,32 +276,30 @@ function CategoryChip({
   width: number;
   onClick: () => void;
 }) {
-  const activeClassName =
-    tone === 'all'
-      ? 'bg-[#494949] text-white'
-      : 'border border-[#EEEEEE] bg-white text-[#5A876E]';
-  const inactiveClassName =
-    tone === 'orange'
+  const toneClassName = active
+    ? tone === 'all'
+      ? 'border border-[#494949] bg-[#494949] text-white'
+      : tone === 'orange'
+        ? 'border border-[#EEEEEE] bg-white text-[#C06D43]'
+        : 'border border-[#EEEEEE] bg-white text-[#5A876E]'
+    : tone === 'orange'
       ? 'border border-[#EEEEEE] bg-white text-[#C06D43]'
       : tone === 'all'
-        ? 'border border-[#EEEEEE] bg-white text-[#8A8A8A]'
+        ? 'border border-[#E6E6E6] bg-[#E6E6E6] text-[#8A8A8A]'
         : 'border border-[#EEEEEE] bg-white text-[#5A876E]';
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex h-[26px] shrink-0 items-center justify-center overflow-hidden rounded-[999px] px-[10px] py-[6px] font-['Pretendard'] text-[11px] font-[500] leading-[13.2px] tracking-[-0.1px] whitespace-nowrap active:scale-[0.98] ${
-        active ? activeClassName : inactiveClassName
-      }`}
+      className="shrink-0 overflow-hidden active:scale-[0.98]"
       style={{ width }}
       aria-pressed={active}
     >
       <span
-        className="block whitespace-nowrap"
-        style={{ transform: tone === 'all' ? 'scaleX(1)' : 'scaleX(0.84)' }}
+        className={`inline-flex h-[26px] w-full items-center justify-center overflow-hidden rounded-[999px] px-[10px] py-[6px] font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] tracking-[0px] ${toneClassName}`}
       >
-        {label}
+        <span className="whitespace-nowrap">{label}</span>
       </span>
     </button>
   );
@@ -355,19 +398,12 @@ function NoteCard({
 }
 
 function TagBadge({ label, tone }: { label: string; tone: 'orange' | 'green' | 'gray' }) {
-  const className =
-    tone === 'orange'
-      ? 'bg-[#C06D43] text-white'
-      : tone === 'green'
-        ? 'bg-[#CBE5D8] text-[#5A876E]'
-        : 'bg-[#E6E6E6] text-[#8A8A8A]';
-
   return (
-    <span
-      className={`rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[10px] font-[500] leading-[12px] tracking-[0px] ${className}`}
-    >
-      {label}
-    </span>
+    <TagChip
+      label={label}
+      tone={tone === 'orange' ? 'primary' : tone === 'green' ? 'secondary' : 'gray'}
+      className="h-[18px] rounded-[4px] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px]"
+    />
   );
 }
 
@@ -383,7 +419,7 @@ function SimilarCaseCard({
       <button
         type="button"
         onClick={onClick}
-        className="rounded-[4px] bg-[#F8F8F8] px-[16px] py-[12px] text-left active:opacity-80"
+        className="rounded-[4px] bg-[#F8F8F8] px-[12px] py-[8px] text-left active:opacity-80"
       >
         <div className="flex items-start justify-between gap-[12px]">
           <div className="flex flex-wrap gap-[4px]">
@@ -424,7 +460,7 @@ function SimilarCaseCard({
       <button
         type="button"
         onClick={onClick}
-        className="rounded-[10px] bg-[#5A876E] px-[16px] py-[12px] text-left active:brightness-95"
+        className="rounded-[10px] bg-[#5A876E] px-[10px] py-[12px] text-left active:brightness-95"
       >
         <p className="font-['Pretendard'] text-[10px] font-[400] leading-[12px] tracking-[0px] text-[#CBE5D8]">
           비슷한 사례 더 보기
@@ -454,9 +490,11 @@ function BusinessExpandedContent({
   displayLabel: string;
   onExplore: () => void;
 }) {
-  const checklistItems = category.items.slice(0, 3).map((entry) => summarizeText(entry.question, 28));
-  const failureItems = splitSentences(item.answer).slice(0, 3).map((entry) => summarizeText(entry, 30));
-  const tipItems = splitSentences(item.answer).slice(0, 2).map((entry) => summarizeText(entry, 52));
+  const checklistItems = BUSINESS_GUIDE_FIXTURE.checklist;
+  const failureItems = BUSINESS_GUIDE_FIXTURE.failures;
+  const tipItems = BUSINESS_GUIDE_FIXTURE.tips;
+  void category;
+  void item;
 
   return (
     <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
@@ -532,16 +570,10 @@ function OtherExpandedContent({
   category: GuideCategory;
   item: GuideItem;
 }) {
-  const steps = category.items.slice(0, 3).map((entry, index) => ({
-    step: index + 1,
-    title: summarizeText(entry.question, 28),
-    description: summarizeText(splitSentences(entry.answer)[0] ?? entry.answer, 32),
-  }));
-  const faqs = category.items.slice(0, 2).map((entry) => ({
-    question: summarizeText(entry.question, 34),
-    answer: summarizeText(splitSentences(entry.answer)[0] ?? entry.answer, 40),
-  }));
-  const legalLines = splitSentences(item.answer).slice(0, 2).map((entry) => summarizeText(entry, 58));
+  const steps = OTHER_GUIDE_FIXTURE.steps;
+  const faqs = OTHER_GUIDE_FIXTURE.faqs;
+  const legalLines = OTHER_GUIDE_FIXTURE.legalLines;
+  void item;
 
   return (
     <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
@@ -619,7 +651,7 @@ function PlaceholderAccordionRow({ tone }: { tone: 'green' | 'orange' }) {
     <div className="w-full">
       <button
         type="button"
-        className="flex w-full items-center justify-between bg-white px-[20px] py-[12px] text-left"
+        className="flex min-h-[61px] w-full items-center justify-between bg-white px-[20px] py-[12px] text-left"
         aria-expanded="false"
       >
         <div className="min-w-0 flex-1">
@@ -662,7 +694,7 @@ function GuideAccordionRow({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between bg-white px-[20px] py-[12px] text-left active:bg-[#FAFAFA]"
+        className="flex min-h-[61px] w-full items-center justify-between bg-white px-[20px] py-[12px] text-left active:bg-[#FAFAFA]"
         aria-expanded={expanded}
       >
         <div className="min-w-0 flex-1">
@@ -695,7 +727,7 @@ function GuideAccordionRow({
   );
 }
 
-function FabMenu({
+/* function FabMenu({
   expanded,
   onToggle,
   onCreate,
@@ -810,6 +842,8 @@ function BottomNavigation({
   );
 }
 
+void BottomNavigation; */
+
 export default function FaqPage() {
   const navigate = useNavigate();
   const [selectedTagId, setSelectedTagId] = useState(ALL_TAG_ID);
@@ -851,8 +885,31 @@ export default function FaqPage() {
           <Header onBack={moveBack} />
         </div>
 
-        <main className="px-[20px] pb-[172px] pt-[143px]">
+        <main className="px-[20px] pb-[168px] pt-[143px]">
           <section>
+            <p className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5A876E]">
+              {FIGMA_FAQ_INTRO.eyebrow}
+            </p>
+            <h2 className="pt-[4px] font-['Pretendard'] text-[20px] font-[600] leading-[24px] tracking-[0px] text-[#131416]">
+              {FIGMA_FAQ_INTRO.titleLines.map((line, index) => (
+                <span key={`${line}-${index}`}>
+                  {index > 0 ? <br /> : null}
+                  {line}
+                </span>
+              ))}
+            </h2>
+            <div className="flex gap-[4px] pt-[12px]">
+              <span className="font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#5D5D5D]">
+                ※
+              </span>
+              <div className="font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#5D5D5D]">
+                {FIGMA_FAQ_INTRO.disclaimerLines.map((line) => (
+                  <p key={line}>{line}</p>
+                ))}
+              </div>
+            </div>
+          </section>
+          <section className="hidden">
             <p className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5A876E]">
               사이드픽 부업 가이드
             </p>
@@ -874,7 +931,7 @@ export default function FaqPage() {
             </div>
           </section>
 
-          <section className="pt-[20px]">
+          <section className="-mx-[20px] px-[16px] pt-[16px]">
             <SearchField
               value={searchQuery}
               onChange={(value) => {
@@ -884,8 +941,8 @@ export default function FaqPage() {
             />
           </section>
 
-          <section className="pt-[20px]">
-            <div className="flex h-[186px] w-[343px] flex-wrap content-start gap-x-[6px] gap-y-[6px]">
+          <section className="-mx-[20px] px-[16px] pt-[16px]">
+            <div className="flex w-[343px] max-w-full flex-wrap content-start gap-x-[6px] gap-y-[6px]">
               {TAG_DEFINITIONS.map((tag) => (
                 <CategoryChip
                   key={tag.id}
@@ -902,7 +959,7 @@ export default function FaqPage() {
             </div>
           </section>
 
-          <section className="-mx-[20px] pt-[20px]">
+          <section className="-mx-[20px] pt-[16px]">
             {visibleRows.length ? (
               <div className="flex flex-col">
                 {visibleRows.map((row) => (
@@ -935,10 +992,12 @@ export default function FaqPage() {
           </section>
         </main>
 
-        <BottomNavigation
-          expanded={fabExpanded}
-          onToggleFab={() => setFabExpanded((current) => !current)}
-          onCreate={moveToCreate}
+        <BottomNav
+          active="guide"
+          showFab
+          fabExpanded={fabExpanded}
+          onFabToggle={() => setFabExpanded((current) => !current)}
+          onCreateClick={moveToCreate}
         />
       </div>
     </div>

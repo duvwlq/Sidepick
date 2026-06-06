@@ -1,23 +1,19 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import editIcon from '../assets/explore-figma/edit.svg';
 import bellIcon from '../assets/home-v1-figma/icons/bell-figma.svg';
 import brandMarkIcon from '../assets/home-v1-figma/icons/brand-mark-figma.svg';
-import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
-import homeIcon from '../assets/home-v1-figma/icons/home-figma.svg';
-import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
-import searchNavIcon from '../assets/home-v1-figma/icons/search-nav-figma.svg';
-import userIcon from '../assets/home-v1-figma/icons/user-figma.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
 import categoryCommerceImage from '../assets/home-v1-figma/category-commerce.webp';
 import categoryContentImage from '../assets/home-v1-figma/category-content.webp';
 import categoryDigitalImage from '../assets/home-v1-figma/category-digital.webp';
 import categoryPlatformImage from '../assets/home-v1-figma/category-platform.webp';
+import CaseSegment from '../components/common/CaseSegment';
+import HorizontalScroll from '../components/common/HorizontalScroll';
 import BottomNav from '../components/layout/BottomNav';
 import { CardActionButton, CaseChip, CaseChipRow, CaseSurface, CaseTextLink, CardMetaRow } from '../components/common/CaseUi';
 import { CardSkeleton, PageMessage } from '../components/common/Skeleton';
@@ -50,7 +46,7 @@ const CATEGORY_CARDS: CategoryCardData[] = [
   },
   {
     id: 2,
-    title: '콘텐츠·SNS 기반',
+    title: '콘텐츠 · SNS 기반',
     subtitle: ['유튜브/ 블로그/ 인스타그램', '/틱톡/ 뉴스레터', '/개인 브랜딩 기반 등'],
     image: categoryContentImage,
     imageClassName: 'object-[54%_50%]',
@@ -58,14 +54,14 @@ const CATEGORY_CARDS: CategoryCardData[] = [
   {
     id: 3,
     title: '디지털 상품·지식 판매',
-    subtitle: ['전자책 판매/ 강의 제작 (클래스, 인강)/ 템플릿, 디자인 판매', '/ 노션, PDF 자료 판매 등'],
+    subtitle: ['전자책 판매/ 강의 제작 (클래스, 인', '강)/ 템플릿, 디자인 판매', '/ 노션, PDF 자료 판매 등'],
     image: categoryDigitalImage,
     imageClassName: 'object-[50%_42%]',
   },
   {
     id: 4,
     title: '플랫폼 기반 노동형',
-    subtitle: ['배달 (배민, 쿠팡이츠 등)/ 대리운전/ 쿠팡플렉스/ 단기 알바 플랫폼/ 설문 참여, 앱테크'],
+    subtitle: ['배달 (배민, 쿠팡이츠 등)/ 대리운', '전/ 쿠팡플렉스/ 단기 알바 플랫폼/', '설문 참여, 앱테크'],
     image: categoryPlatformImage,
     imageClassName: 'object-[56%_44%]',
   },
@@ -130,22 +126,22 @@ function buildStoryBadges(experience: Experience) {
     {
       label: isSuccess ? '성공' : '실패',
       className: isSuccess ? 'bg-[#5A876E] font-[400] text-white' : 'bg-[#C06D43] font-[400] text-white',
-      widthClassName: 'max-w-[44px]',
+      widthClassName: 'max-w-[40px]',
     },
     {
       label: experience.category.name || '카테고리',
       className: 'bg-[#CBE5D8] font-[500] text-[#5A876E]',
-      widthClassName: 'max-w-[116px]',
+      widthClassName: 'max-w-[108px]',
     },
     {
       label: keywordA,
       className: 'bg-[#D8D8D8] font-[400] text-white',
-      widthClassName: 'max-w-[74px]',
+      widthClassName: 'max-w-[58px]',
     },
     {
       label: keywordB,
       className: 'bg-[#D8D8D8] font-[400] text-white',
-      widthClassName: 'max-w-[74px]',
+      widthClassName: 'max-w-[58px]',
     },
   ];
 }
@@ -228,7 +224,7 @@ function SectionHeader({
         <button
           type="button"
           onClick={onAction}
-          className="translate-y-[0.35px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A]"
+          className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A]"
         >
           {normalizeHomeText(actionLabel)}
         </button>
@@ -249,11 +245,11 @@ function CategoryCardV1({ category }: { category: CategoryCardData }) {
         className={`absolute inset-0 h-full w-full object-cover ${category.imageClassName ?? 'object-center'}`}
       />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,rgba(0,0,0,1)_100%)]" />
-      <div className="relative mt-auto flex w-full flex-col gap-[3px] px-[16px] pb-[16px]">
+      <div className="relative mt-auto flex w-full flex-col gap-[4px] px-[16px] pb-[16px]">
         <h3 className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-white">
           {normalizeHomeText(category.title)}
         </h3>
-        <div className="flex flex-col gap-[0px]">
+        <div className="flex flex-col">
           {category.subtitle.map((line) => (
             <span
               key={`${category.id}-${line}`}
@@ -282,13 +278,13 @@ function PopularTabButton({
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex items-center justify-center border-b-[1.5px] px-[8px] py-[4px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 ${
-        active ? 'border-[#C98559]' : 'border-transparent'
+      className={`flex h-[25px] items-center justify-center border-b-[1.5px] px-[8px] py-[4px] transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 ${
+        active ? 'border-[#5A876E]' : 'border-transparent'
       }`}
     >
       <span
-        className={`font-['Pretendard'] text-[14px] leading-[16.8px] tracking-[0px] ${
-          active ? 'font-[600] text-[#5A876E]' : 'font-[400] text-[#BABABA]'
+        className={`font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px] ${
+        active ? 'font-[500] text-[#5A876E]' : 'font-[400] text-[#BABABA]'
         }`}
       >
         {normalizeHomeText(label)}
@@ -312,17 +308,11 @@ function StoryCardV1({
   const [fallbackKeywordA, fallbackKeywordB] = extractKeywordTags(experience);
   const hasRegisteredImage = Boolean(imageMeta.primaryImageUrl?.trim());
   const showSuccessCta = experience.caseStatus !== 'SUCCESS';
-  const isCompactHorizontal = horizontal && hasRegisteredImage && !showSuccessCta;
-
   if (horizontal) {
     return (
-      <CaseSurface
-        className={`w-[311px] shrink-0 ${
-          isCompactHorizontal ? 'h-[135px]' : 'h-[173px]'
-        }`}
-      >
-        <div className="flex h-full w-full flex-col rounded-[4px] bg-white px-[16px] py-[12px]">
-          <div className="flex w-full flex-col gap-[8px]">
+      <CaseSurface className="h-[171px] w-[311px] shrink-0">
+        <div className="flex h-full w-full flex-col rounded-[4px] bg-white px-[16px] py-[10px]">
+          <div className="flex w-full flex-col gap-[6px]">
             <div className="flex w-full items-center">
               <CaseChipRow>
                 {badges.map((badge, index) => (
@@ -341,22 +331,22 @@ function StoryCardV1({
                 <div className="h-[60px] w-[80px] shrink-0 overflow-hidden rounded-[4px] bg-[#8A8A8A]">
                   <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" />
                 </div>
-                <div className="flex h-[60px] w-[188px] shrink-0 flex-col gap-[4px]">
-                  <h3 className="line-clamp-1 w-[188px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
+                <div className="flex h-[60px] min-w-0 flex-1 flex-col gap-[3px]">
+                  <h3 className="line-clamp-2 min-h-[38px] min-w-0 font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
                     {experience.title}
                   </h3>
-                  <p className="w-[188px] overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
+                  <p className="line-clamp-1 min-w-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
                     {preview}
                   </p>
                 </div>
               </div>
             ) : (
               <div className="flex h-[60px] w-full items-start gap-[8px]">
-                <div className="flex h-[60px] w-[276px] shrink-0 flex-col gap-[3px]">
-                  <h3 className="line-clamp-1 min-h-[19px] w-[276px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
+                <div className="flex h-[60px] min-w-0 flex-1 flex-col gap-[3px]">
+                  <h3 className="line-clamp-2 min-h-[38px] min-w-0 font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
                     {experience.title}
                   </h3>
-                  <p className="w-[276px] overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
+                  <p className="line-clamp-1 min-w-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
                     {preview}
                   </p>
                 </div>
@@ -385,8 +375,8 @@ function StoryCardV1({
           />
 
           {showSuccessCta ? (
-            <div className="mt-auto flex w-full flex-col items-end justify-center pt-[2px] pr-[2px]">
-              <CardActionButton label="성공 사례 보기" onClick={() => onSuccessClick(experience)} />
+            <div className="mt-auto flex w-full flex-col items-end justify-center pt-[2px]">
+              <CardActionButton label="성공 사례 보기" className="font-[500]" onClick={() => onSuccessClick(experience)} />
             </div>
           ) : null}
         </div>
@@ -396,8 +386,8 @@ function StoryCardV1({
 
   if (!horizontal) {
     return (
-      <CaseSurface className="w-full">
-        <div className="flex w-full flex-col gap-[8px] rounded-[4px] bg-white px-[16px] py-[12px]">
+      <CaseSurface className="w-full min-h-[171px]">
+        <div className="flex h-full w-full flex-col gap-[6px] rounded-[4px] bg-white px-[16px] py-[10px]">
           <div className="flex w-full flex-col">
             <div className="flex w-full items-center">
               <CaseChipRow>
@@ -412,18 +402,18 @@ function StoryCardV1({
               </CaseChipRow>
             </div>
 
-            <div className="flex h-[60px] w-full items-start gap-[8px] pt-[8px]">
+            <div className="flex h-[60px] w-full items-start gap-[8px] pt-[6px]">
               {hasRegisteredImage ? (
                 <div className="h-[60px] w-[80px] shrink-0 overflow-hidden rounded-[4px] bg-[#8A8A8A]">
                   <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" />
                 </div>
               ) : null}
 
-              <div className={`flex h-[60px] shrink-0 flex-col gap-[4px] ${hasRegisteredImage ? 'w-[220px]' : 'w-full'}`}>
-                <h3 className={`line-clamp-1 font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416] ${hasRegisteredImage ? 'w-[220px]' : 'w-full'}`}>
+              <div className="flex h-[60px] min-w-0 flex-1 flex-col gap-[3px]">
+                <h3 className="line-clamp-2 min-h-[38px] min-w-0 font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
                   {experience.title}
                 </h3>
-                <p className={`${hasRegisteredImage ? 'w-[220px]' : 'w-full'} overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]`}>
+                <p className="line-clamp-1 min-w-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
                   {preview}
                 </p>
               </div>
@@ -451,8 +441,8 @@ function StoryCardV1({
           />
 
           {showSuccessCta ? (
-            <div className="flex w-full flex-col items-end justify-center pt-[2px] pr-[2px]">
-              <CardActionButton label="성공 사례 보기" onClick={() => onSuccessClick(experience)} />
+            <div className="mt-auto flex w-full flex-col items-end justify-center pt-[2px]">
+              <CardActionButton label="성공 사례 보기" className="font-[500]" onClick={() => onSuccessClick(experience)} />
             </div>
           ) : null}
         </div>
@@ -543,183 +533,6 @@ function StoryCardV1({
   );
 }
 
-function ExploreSegmentButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`flex h-[32px] w-[155.5px] items-center justify-center rounded-[999px] pb-[1px] transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 ${
-        active ? 'bg-white shadow-[0_0_5px_rgba(0,0,0,0.15)]' : 'bg-transparent'
-      }`}
-    >
-      <span
-        className={`translate-y-[0.5px] font-['Pretendard'] text-[14px] leading-[16.8px] tracking-[0px] ${
-          active ? 'font-[500] text-black' : 'font-[400] text-[#8A8A8A]'
-        }`}
-      >
-        {label}
-      </span>
-    </button>
-  );
-}
-
-function BottomNavV1() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const token = getAccessToken();
-
-  function move(path: string, requiresAuth?: boolean) {
-    if (!token && requiresAuth) {
-      navigate(
-        `/auth?next=${encodeURIComponent(path)}&reason=${encodeURIComponent(
-          '마이페이지는 로그인이 필요한 서비스입니다.',
-        )}`,
-      );
-      return;
-    }
-
-    navigate(path);
-  }
-
-  const menus = [
-    { label: '홈', path: '/', icon: homeIcon, iconClassName: 'h-[22px] w-[20px]', active: location.pathname === '/' || location.pathname === '/v1/home' },
-    {
-      label: '탐색',
-      path: '/explore',
-      icon: searchNavIcon,
-      iconClassName: 'h-[20px] w-[20px]',
-      active: location.pathname.startsWith('/explore') || location.pathname.startsWith('/v1/explore'),
-    },
-    {
-      label: '가이드',
-      path: '/faq',
-      icon: guideIcon,
-      iconClassName: 'h-[22px] w-[18px]',
-      active: location.pathname === '/faq' || location.pathname === '/mypage/faq',
-    },
-    {
-      label: 'MY',
-      path: '/mypage',
-      icon: userIcon,
-      iconClassName: 'h-[20px] w-[18px]',
-      active: location.pathname.startsWith('/mypage') && location.pathname !== '/mypage/faq',
-      requiresAuth: true,
-    },
-  ];
-
-  return (
-    <div className="fixed bottom-0 left-1/2 z-30 w-full max-w-[375px] -translate-x-1/2">
-      <nav className="flex h-[84px] items-start justify-between rounded-t-[24px] border border-[#F3F3F3] bg-white px-[30px] pb-[22px] pt-[12px] shadow-[0_-1px_10px_rgba(0,0,0,0.08)]">
-        {menus.map((menu) => (
-          <button
-            key={menu.path}
-            type="button"
-            onClick={() => move(menu.path, menu.requiresAuth)}
-            className="flex h-[40px] min-w-[50px] flex-col items-center justify-start gap-[3px] rounded-[10px] transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 active:opacity-70"
-            aria-current={menu.active ? 'page' : undefined}
-          >
-            <img src={menu.icon} alt="" className={menu.iconClassName} />
-            <span
-              className={`font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
-                menu.active ? 'font-[600] text-[#131416]' : 'font-[400] text-[#BABABA]'
-              }`}
-            >
-              {menu.label}
-            </span>
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
-}
-
-void BottomNavV1;
-
-function BottomNavV1Clean() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const token = getAccessToken();
-
-  function move(path: string, requiresAuth?: boolean) {
-    if (!token && requiresAuth) {
-      navigate(
-        `/auth?next=${encodeURIComponent(path)}&reason=${encodeURIComponent(
-          '마이페이지는 로그인이 필요한 서비스입니다.',
-        )}`,
-      );
-      return;
-    }
-
-    navigate(path);
-  }
-
-  const menus = [
-    {
-      label: '홈',
-      path: '/',
-      icon: homeIcon,
-      iconClassName: 'translate-y-[0.5px] h-[22px] w-[20px]',
-      active: location.pathname === '/' || location.pathname === '/v1/home',
-    },
-    {
-      label: '탐색',
-      path: '/explore',
-      icon: searchNavIcon,
-      iconClassName: 'translate-y-[1px] h-[20px] w-[20px]',
-      active: location.pathname.startsWith('/explore') || location.pathname.startsWith('/v1/explore'),
-    },
-    {
-      label: '가이드',
-      path: '/faq',
-      icon: guideIcon,
-      iconClassName: 'translate-y-[0.5px] h-[22px] w-[18px]',
-      active: location.pathname === '/faq' || location.pathname === '/mypage/faq',
-    },
-    {
-      label: 'MY',
-      path: '/mypage',
-      icon: userIcon,
-      iconClassName: 'translate-y-[1px] h-[20px] w-[18px]',
-      active: location.pathname.startsWith('/mypage') && location.pathname !== '/mypage/faq',
-      requiresAuth: true,
-    },
-  ];
-
-  return (
-    <div className="fixed bottom-0 left-1/2 z-30 w-full max-w-[375px] -translate-x-1/2">
-      <nav className="flex h-[84px] items-start justify-between rounded-t-[20px] bg-white px-[30px] pb-[22px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
-        {menus.map((menu) => (
-          <button
-            key={menu.path}
-            type="button"
-            onClick={() => move(menu.path, menu.requiresAuth)}
-            className="flex h-[40px] min-w-[50px] flex-col items-center justify-start gap-[2px] rounded-[10px] transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 active:opacity-70"
-            aria-current={menu.active ? 'page' : undefined}
-          >
-            <img src={menu.icon} alt="" className={menu.iconClassName} />
-            <span
-              className={`translate-y-[0.5px] font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
-                menu.active ? 'font-[600] text-[#131416]' : 'font-[400] text-[#BABABA]'
-              }`}
-            >
-              {menu.label}
-            </span>
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
-}
-
 export default function HomeV1() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -799,10 +612,10 @@ export default function HomeV1() {
 
         <header>
           <div className="flex h-[64px] items-center justify-between bg-white px-[16px] pb-[18px] pt-[22px]">
-            <div className="flex w-[132px] items-center gap-[4px]">
-              <img src={brandMarkIcon} alt="" className="h-[18px] w-[18px] shrink-0" />
-              <span className="font-['Bruno_Ace_SC'] text-[20px] font-[400] leading-[16px] tracking-[0px] text-[#5A876E]">
-                SIDEPICK
+            <div className="flex items-center gap-[0px]">
+              <img src={brandMarkIcon} alt="" className="h-[24px] w-[24px] shrink-0" />
+              <span className="font-['Bruno_Ace_SC'] text-[24px] font-[400] leading-[20px] tracking-[0px] text-[#5A876E]">
+                sidepick
               </span>
             </div>
 
@@ -812,7 +625,7 @@ export default function HomeV1() {
               className="flex h-[24px] w-[24px] items-center justify-center rounded-[999px] transition-colors duration-150 hover:bg-[#F5F5F5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 active:bg-[#EFEFEF]"
               aria-label="알림"
             >
-              <img src={bellIcon} alt="" className="h-[22px] w-[20px]" />
+              <img src={bellIcon} alt="" className="h-[20px] w-[20px]" />
             </button>
           </div>
 
@@ -821,29 +634,32 @@ export default function HomeV1() {
           </div>
         </header>
 
-        <main className="pb-[388px]">
-          <section className="px-[16px] pt-[18px]">
+        <main className="pb-[240px]">
+          <section className="px-[16px] pt-[16px]">
             <SectionHeader title="부업 카테고리" actionLabel="전체보기" onAction={() => navigate('/explore')} />
 
-            <div className="grid grid-cols-2 gap-[10px] pt-[16px]">
+            <div className="grid grid-cols-2 gap-[10px] pt-[12px]">
               {visibleCategories.map((category) => (
                 <CategoryCardV1 key={category.id} category={category} />
               ))}
             </div>
 
-            <div className="flex justify-center pt-[12px]">
-              <CaseTextLink
-                label={categoryExpanded ? '접기' : '전체 보기'}
+            <div className="flex justify-center pt-[10px]">
+              <button
+                type="button"
                 onClick={() => setCategoryExpanded((current) => !current)}
-              />
+                className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#757575] underline"
+              >
+                {categoryExpanded ? '접기' : '펼쳐 보기'}
+              </button>
             </div>
           </section>
 
-          <section className="px-[16px] pb-[56px] pt-[12px]">
+          <section className="px-[16px] pb-[40px] pt-[16px]">
             <SectionHeader title="인기 부업" />
 
             {!isPersonalizedFeed ? (
-              <div className="flex items-center pt-[16px]">
+              <div className="flex items-center gap-[10px] pt-[14px]">
                 {POPULAR_TOPICS.map((topic) => (
                   <PopularTabButton
                     key={topic}
@@ -855,66 +671,62 @@ export default function HomeV1() {
               </div>
             ) : null}
 
-            <div className={`overflow-x-auto ${isPersonalizedFeed ? 'pt-[12px]' : 'pt-[16px]'}`}>
-              <div className="flex h-[173px] w-max items-center gap-[10px] pr-[16px]">
-                {loading ? (
-                  <>
-                    <div className="w-[311px] shrink-0">
-                      <CardSkeleton />
-                    </div>
-                    <div className="w-[311px] shrink-0">
-                      <CardSkeleton />
-                    </div>
-                  </>
-                ) : error ? (
-                  <div className="w-[311px]">
-                    <PageMessage message={error} tone="error" />
+            <HorizontalScroll
+              scrollerClassName={isPersonalizedFeed ? 'pt-[10px]' : 'pt-[14px]'}
+              contentClassName="h-[171px] min-w-0 items-center gap-[10px] pr-[16px]"
+            >
+              {loading ? (
+                <>
+                  <div className="w-[311px] shrink-0">
+                    <CardSkeleton />
                   </div>
-                ) : popularExperiences.length ? (
-                  popularExperiences.map((experience) => (
-                    <Link
-                      key={experience.id}
-                      to={`/experiences/${experience.id}`}
-                      className="block rounded-[12px] transition-transform duration-150 hover:translate-y-[-1px] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25"
-                    >
-                      <StoryCardV1 experience={experience} horizontal onSuccessClick={moveToSuccessCases} />
-                    </Link>
-                  ))
-                ) : (
-                  <div className="w-[311px]">
-                    <PageMessage message="조건에 맞는 사례가 없습니다." />
+                  <div className="w-[311px] shrink-0">
+                    <CardSkeleton />
                   </div>
-                )}
-              </div>
-            </div>
+                </>
+              ) : error ? (
+                <div className="w-[311px]">
+                  <PageMessage message={error} tone="error" />
+                </div>
+              ) : popularExperiences.length ? (
+                popularExperiences.map((experience) => (
+                  <Link
+                    key={experience.id}
+                    to={`/experiences/${experience.id}`}
+                    className="block rounded-[12px] transition-transform duration-150 hover:translate-y-[-1px] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25"
+                  >
+                    <StoryCardV1 experience={experience} horizontal onSuccessClick={moveToSuccessCases} />
+                  </Link>
+                ))
+              ) : (
+                <div className="w-[311px]">
+                  <PageMessage message="조건에 맞는 사례가 없습니다." />
+                </div>
+              )}
+            </HorizontalScroll>
           </section>
 
-          <section className="px-[16px] pb-[120px] pt-[12px]">
+          <section className="px-[16px] pb-[112px] pt-[16px]">
             <SectionHeader title="탐색" />
 
-            <div className="flex justify-center pt-[16px]">
-              <div className="flex h-[32px] w-[311px] items-center rounded-[999px] bg-[#E1E1E1]">
-                <ExploreSegmentButton
-                  active={sort === 'latest'}
-                  label="최근 등록된 사례"
-                  onClick={() => {
-                    if (sort === 'latest') return;
-                    setSort('latest');
-                  }}
-                />
-                <ExploreSegmentButton
-                  active={sort === 'popular'}
-                  label="인기 사례"
-                  onClick={() => {
-                    if (sort === 'popular') return;
-                    setSort('popular');
-                  }}
-                />
-              </div>
+            <div className="flex justify-center pt-[14px]">
+              <CaseSegment
+                className="w-[311px]"
+                options={[
+                  { key: 'latest', label: '최근 등록된 사례' },
+                  { key: 'popular', label: '인기 사례' },
+                ]}
+                activeKey={sort}
+                onChange={(nextKey) => {
+                  if (nextKey === 'latest' || nextKey === 'popular') {
+                    setSort(nextKey);
+                  }
+                }}
+              />
             </div>
 
             <div
-              className={`flex flex-col gap-[12px] pt-[16px] transition-opacity duration-200 ${
+              className={`flex flex-col gap-[10px] pt-[14px] transition-opacity duration-200 ${
                 isRefreshing ? 'opacity-70' : 'opacity-100'
               }`}
             >
@@ -941,7 +753,7 @@ export default function HomeV1() {
               )}
             </div>
 
-            <div className="flex justify-center pt-[36px]">
+            <div className="flex justify-center pt-[24px]">
               <CaseTextLink label="모든 사례 보기" onClick={() => navigate('/explore')} />
             </div>
           </section>
@@ -971,7 +783,4 @@ export default function HomeV1() {
   );
 }
 
-void BottomNavV1Clean;
-void editIcon;
-void plusIcon;
 

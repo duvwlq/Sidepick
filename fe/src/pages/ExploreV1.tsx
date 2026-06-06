@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Bookmark } from 'lucide-react';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
@@ -8,12 +8,11 @@ import wifiIcon from '../assets/auth-figma/wifi.svg';
 import chevronDownIcon from '../assets/explore-figma/chevron-down.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
 import filterIcon from '../assets/explore-figma/filter.svg';
-import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
-import homeIcon from '../assets/home-v1-figma/icons/home-figma.svg';
 import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
-import searchNavIcon from '../assets/home-v1-figma/icons/search-nav-figma.svg';
-import userIcon from '../assets/home-v1-figma/icons/user-figma.svg';
+import { TagChip } from '../components/common/Chip';
+import CaseSegment from '../components/common/CaseSegment';
+import HorizontalScroll from '../components/common/HorizontalScroll';
 import {
   CardActionButton,
   CaseChip,
@@ -22,6 +21,7 @@ import {
   CaseSimilarityIndicator,
   CaseSurface,
 } from '../components/common/CaseUi';
+import BottomNav from '../components/layout/BottomNav';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import {
@@ -404,7 +404,7 @@ function HeaderV1({
         className="mr-[16px] flex h-[24px] w-[24px] items-center justify-center"
         aria-label={searchMode ? '검색 실행' : '검색'}
       >
-        <img src={searchIcon} alt="" className="h-[24px] w-[24px] opacity-70" />
+        <img src={searchIcon} alt="" className="h-[18px] w-[18px] opacity-70" />
       </button>
     </div>
   );
@@ -462,36 +462,36 @@ function CategoryRowV1({
       <button
         type="button"
         onClick={() => onSelect(null)}
-        className="flex h-[26px] w-[26px] shrink-0 items-center justify-center"
+        className="flex h-[24px] w-[24px] shrink-0 items-center justify-center"
         aria-label="카테고리 초기화"
       >
-        <img src={filterIcon} alt="" className="h-[26px] w-[26px]" />
+        <img src={filterIcon} alt="" className="h-[20px] w-[20px]" />
       </button>
 
-      <div className="horizontal-scroll-wrapper min-w-0 flex-1">
-        <div className="horizontal-scroll pb-[2px] pr-[28px]">
-          <div className="horizontal-scroll-content gap-[6px]">
-            {EXPLORE_CATEGORIES.map((category) => {
-              const active =
-                (selectedCategoryId === null && category.id === null) || selectedCategoryId === category.id;
-              return (
-                <button
-                  key={String(category.id)}
-                  type="button"
-                  onClick={() => onSelect(category.id)}
-                  className={`flex h-[26px] shrink-0 items-center justify-center rounded-[999px] px-[10px] py-[6px] font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] tracking-[0px] ${
-                    active
-                      ? 'bg-[#5A876E] text-white'
-                      : 'border border-[#EEEEEE] bg-white text-[#5A876E]'
-                  }`}
-                >
-                  {category.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <HorizontalScroll
+        wrapperClassName="min-w-0 flex-1"
+        scrollerClassName="pb-[2px] pr-[28px]"
+        contentClassName="gap-[6px]"
+      >
+        {EXPLORE_CATEGORIES.map((category) => {
+          const active =
+            (selectedCategoryId === null && category.id === null) || selectedCategoryId === category.id;
+          return (
+            <button
+              key={String(category.id)}
+              type="button"
+              onClick={() => onSelect(category.id)}
+              className="shrink-0"
+            >
+              <TagChip
+                label={category.label}
+                tone={active ? 'primary' : 'secondary'}
+                className="font-[500]"
+              />
+            </button>
+          );
+        })}
+      </HorizontalScroll>
     </div>
   );
 }
@@ -514,10 +514,10 @@ function SortDropdown({
       <button
         type="button"
         onClick={onToggle}
-        className="flex h-[17px] items-center gap-[0px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#131416]"
+        className="flex h-[17px] items-center gap-[0px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#131416]"
       >
         <span>{active.label}</span>
-        <img src={chevronDownIcon} alt="" className={`h-[17px] w-[17px] transition-transform ${open ? 'rotate-180' : ''}`} />
+        <img src={chevronDownIcon} alt="" className={`h-[16px] w-[16px] transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open ? (
@@ -573,35 +573,6 @@ function ExploreToolbarV1({
   );
 }
 
-function ExploreSegmentButton({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      className={`flex h-[34px] w-[45px] items-center justify-center rounded-[999px] transition-all duration-150 ${
-        active ? 'bg-[#375E49] shadow-[0_0_2px_rgba(0,0,0,0.15)]' : 'bg-transparent'
-      }`}
-    >
-      <span
-        className={`font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px] ${
-          active ? 'font-[400] text-white' : 'font-[400] text-[#131416]'
-        }`}
-      >
-        {label}
-      </span>
-    </button>
-  );
-}
-
 function ExploreFabRow({
   feedMode,
   basicMode,
@@ -618,128 +589,60 @@ function ExploreFabRow({
   onCreateClick: () => void;
 }) {
   return (
-    <div className="fixed bottom-[84px] left-1/2 z-30 flex h-[70px] w-full max-w-[375px] -translate-x-1/2 items-start justify-center px-[24px] pt-[16px]">
-      {basicMode ? <div className="absolute left-[24px] top-[15px] h-[36px] w-[36px]" aria-hidden="true" /> : null}
+    <div className="fixed bottom-[98px] left-1/2 z-30 flex h-[46px] w-full max-w-[375px] -translate-x-1/2 items-center px-[24px]">
+      <div className="flex h-[46px] w-full items-center">
+        <div className="flex h-[36px] w-[36px] shrink-0 items-center justify-start">
+          {basicMode ? <div className="h-[36px] w-[36px]" aria-hidden="true" /> : null}
+        </div>
 
-      <div className="flex h-[38px] w-[135px] items-center rounded-[999px] bg-white p-[2px] shadow-[0_0_2px_rgba(0,0,0,0.15)]">
-        {FEED_OPTIONS.map((option) => (
-          <ExploreSegmentButton
-            key={option.key}
-            active={feedMode === option.key}
-            label={option.label}
-            onClick={() => onFeedChange(option.key)}
+        <div className="flex flex-1 justify-center">
+          <CaseSegment
+            className="h-[46px] w-[143px]"
+            variant="feed"
+            options={FEED_OPTIONS.map((option) => ({ key: option.key, label: option.label }))}
+            activeKey={feedMode}
+            onChange={(value) => {
+              if (value === 'all' || value === 'failure' || value === 'success') {
+                onFeedChange(value);
+              }
+            }}
           />
-        ))}
-      </div>
+        </div>
 
-      <div className="absolute right-[24px] top-[16px] h-[36px] w-[122px]">
-        {expanded ? (
-          <button
-            type="button"
-            onClick={onCreateClick}
-            className="absolute right-0 top-[-49px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-            aria-label="경험 작성 열기"
-          >
-            <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-            <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-black">
-              경험 작성
-            </span>
-          </button>
-        ) : null}
-
-        <button
-          type="button"
-          onClick={onToggleExpanded}
-          className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full ${
-            expanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E] shadow-[0_2px_6px_rgba(90,135,110,0.14)]'
-          }`}
-          aria-label={expanded ? '경험 작성 닫기' : '경험 작성'}
-        >
-          <img
-            src={plusIcon}
-            alt=""
-            className={`transition-transform ${expanded ? 'h-[22px] w-[22px] rotate-45' : 'h-[18px] w-[18px]'}`}
-          />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function BottomNavV1() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const token = getAccessToken();
-
-  function move(path: string, requiresAuth?: boolean) {
-    if (!token && requiresAuth) {
-      navigate(
-        `/auth?next=${encodeURIComponent(path)}&reason=${encodeURIComponent('마이페이지는 로그인이 필요한 서비스입니다.')}`,
-      );
-      return;
-    }
-    navigate(path);
-  }
-
-  const menus = [
-    {
-      label: '홈',
-      path: '/',
-      icon: homeIcon,
-      iconClassName: 'translate-y-[0.5px] h-[22px] w-[20px]',
-      active: location.pathname === '/' || location.pathname === '/v1/home',
-    },
-    {
-      label: '탐색',
-      path: '/explore',
-      icon: searchNavIcon,
-      iconClassName: 'translate-y-[1px] h-[20px] w-[20px]',
-      active: location.pathname.startsWith('/explore') || location.pathname.startsWith('/v1/explore'),
-    },
-    {
-      label: '가이드',
-      path: '/faq',
-      icon: guideIcon,
-      iconClassName: 'translate-y-[0.5px] h-[22px] w-[18px]',
-      active: location.pathname === '/faq' || location.pathname === '/mypage/faq',
-    },
-    {
-      label: 'MY',
-      path: '/mypage',
-      icon: userIcon,
-      iconClassName: 'translate-y-[1px] h-[20px] w-[18px]',
-      active: location.pathname.startsWith('/mypage') && location.pathname !== '/mypage/faq',
-      requiresAuth: true,
-    },
-  ];
-
-  return (
-    <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[375px] -translate-x-1/2">
-      <nav className="flex h-[84px] items-start justify-between rounded-t-[20px] bg-white px-[30px] pb-[22px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
-        {menus.map((menu) => (
-          <button
-            key={menu.path}
-            type="button"
-            onClick={() => move(menu.path, menu.requiresAuth)}
-            className="flex h-[40px] min-w-[50px] flex-col items-center justify-start gap-[2px] rounded-[10px] transition-opacity duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5A876E]/25 active:opacity-70"
-            aria-current={menu.active ? 'page' : undefined}
-          >
-            <img src={menu.icon} alt="" className={menu.iconClassName} />
-            <span
-              className={`translate-y-[0.5px] font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
-                menu.active ? 'font-[600] text-[#131416]' : 'font-[400] text-[#BABABA]'
-              }`}
+        <div className="relative flex h-[36px] w-[36px] shrink-0 items-center justify-end">
+          {expanded ? (
+            <button
+              type="button"
+              onClick={onCreateClick}
+              className="absolute right-0 top-[-52px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
+              aria-label="경험 작성 열기"
             >
-              {menu.label}
-            </span>
+              <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
+              <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px] text-black">
+                경험 작성
+              </span>
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            onClick={onToggleExpanded}
+            className={`flex h-[36px] w-[36px] items-center justify-center rounded-full ${
+              expanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
+            }`}
+            aria-label={expanded ? '경험 작성 닫기' : '경험 작성'}
+          >
+            <img
+              src={plusIcon}
+              alt=""
+              className={`transition-transform ${expanded ? 'h-[22px] w-[22px] rotate-45' : 'h-[18px] w-[18px]'}`}
+            />
           </button>
-        ))}
-      </nav>
+        </div>
+      </div>
     </div>
   );
 }
-
-void BottomNavV1;
 
 function ExploreCardV1({
   experience,
@@ -778,7 +681,7 @@ function ExploreCardV1({
   const sourceExperienceId = Number(experience.structuredData.sourceExperienceId);
   const detailExperienceId = experience.id < 0 && Number.isFinite(sourceExperienceId) ? sourceExperienceId : experience.id;
 
-  const cardHeightClass = isSuccess ? 'h-[134px]' : 'h-[172px]';
+  const cardHeightClass = 'min-h-[171px]';
 
   const content = (
     <CaseSurface className={`flex w-full flex-col rounded-none border-0 px-[16px] py-[12px] shadow-none ${cardHeightClass}`}>
@@ -790,7 +693,7 @@ function ExploreCardV1({
               label={tag}
               tone={index === 0 ? (isSuccess ? 'status-success' : 'status-failure') : index === 1 ? 'category' : 'keyword'}
               compact
-              maxWidthClassName={index === 0 ? 'max-w-[40px]' : index === 1 ? 'max-w-[96px]' : 'max-w-[66px]'}
+              maxWidthClassName={index === 0 ? 'max-w-[40px]' : index === 1 ? 'max-w-[108px]' : 'max-w-[58px]'}
             />
           ))}
         </CaseChipRow>
@@ -871,7 +774,7 @@ function ExploreCardV1({
             <CardActionButton
               label={ctaLabel}
               disabled={ctaDisabled}
-              className={ctaDisabled ? 'bg-[#CBE5D8] text-white opacity-100' : ''}
+              className={ctaDisabled ? 'bg-[#CBE5D8] text-white opacity-100 font-[500]' : 'font-[500]'}
               onClick={(event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -941,42 +844,50 @@ function StatsUnavailableCard({ message }: { message: string }) {
 
 function FailureTopChartCard({ stats }: { stats: FailurePatternStatsPayload }) {
   const topThree = stats.patterns.slice(0, 3);
+  const maxPercent = topThree.reduce((max, item) => Math.max(max, item.percent), 0);
 
   return (
-    <div className="rounded-[8px] border border-[#F1F1F1] bg-white px-[16px] py-[16px] shadow-[0_0_4px_rgba(0,0,0,0.06)]">
-      <h3 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
-        실패 요인 TOP3
-      </h3>
-      <p className="pt-[8px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5F6662]">
-        카테고리에서 가장 많이 나타나는 실패 원인입니다.
-      </p>
+    <div className="flex flex-col gap-[12px] rounded-[4px] border border-[#F1F1F1] bg-white p-[16px] shadow-[0_0_2px_rgba(0,0,0,0.15)]">
+      <div className="flex flex-col gap-[4px]">
+        <h3 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
+          실패 요인 TOP3
+        </h3>
+        <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
+          카테고리 가장 많이 나타나는 실패 원인입니다.
+        </p>
+      </div>
 
-      <div className="pt-[18px]">
-        <div className="flex min-h-[148px] items-end justify-between gap-[16px] border-b border-[#E7E7E7] px-[6px] pb-[12px]">
+      <div className="flex flex-col gap-[12px]">
+        <div className="flex items-end justify-between px-[20px] py-[16px]">
           {topThree.map((item) => {
-            const height = Math.max((item.percent / 100) * 100, 4);
+            const normalizedHeight =
+              maxPercent > 0 ? Math.round((item.percent / maxPercent) * 88) : 0;
+            const height = Math.max(normalizedHeight, 4);
+
             return (
-              <div key={item.label} className="flex flex-1 flex-col items-center">
-                <span className="pb-[6px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#5A876E]">
-                  {item.percent.toFixed(0)}%
-                </span>
-                <div
-                  className="w-full max-w-[46px] rounded-t-[4px] bg-[linear-gradient(180deg,#6E987F_0%,#A6D0BA_100%)]"
-                  style={{ height }}
-                />
-                <span className="pt-[10px] text-center font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#4D4D4D]">
+              <div key={item.label} className="flex w-[69px] shrink-0 flex-col items-center gap-[8px]">
+                <div className="flex flex-col items-center gap-[2px]">
+                  <span className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] tracking-[0px] text-[#5A876E]">
+                    {item.percent.toFixed(0)}%
+                  </span>
+                  <div
+                    className="w-[40px] rounded-t-[4px] bg-[linear-gradient(180deg,#5A876E_0%,#92BFA6_100%)] shadow-[2px_0_4px_rgba(0,0,0,0.1)]"
+                    style={{ height }}
+                  />
+                </div>
+                <span className="text-center font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
                   {item.label}
                 </span>
               </div>
             );
           })}
         </div>
-      </div>
 
-      <div className="mt-[14px] border-t border-dashed border-[#D8E4DD] pt-[14px]">
-        <p className="font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] tracking-[0px] text-[#5A876E]">
+        <div className="flex items-center justify-center px-[16px]">
+          <p className="text-center font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] tracking-[0px] text-[#5A876E]">
           {stats.explanation}
-        </p>
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -1704,7 +1615,7 @@ export default function ExploreV1() {
             </div>
           ) : filteredExperiences.length ? (
             <div className={`transition-opacity duration-200 ${loading ? 'opacity-70' : 'opacity-100'}`}>
-              <div className="flex flex-col gap-[2px] py-[2px]">
+              <div className="flex flex-col gap-[10px] px-[16px] py-[12px]">
                 {filteredExperiences.map((experience) => (
                   <ExploreCardV1
                     key={experience.id}
@@ -1734,7 +1645,7 @@ export default function ExploreV1() {
           onToggleExpanded={() => setFabExpanded((current) => !current)}
           onCreateClick={handleCreateClick}
         />
-        <BottomNavV1 />
+        <BottomNav active="explore" />
       </div>
     </div>
   );

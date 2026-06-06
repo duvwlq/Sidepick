@@ -5,7 +5,6 @@ import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg
 import wifiIcon from '../assets/auth-figma/wifi.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import chevronIcon from '../assets/mypage-figma/chevron.svg';
-import edit2Icon from '../assets/mypage-figma/edit2.svg';
 import eyeIcon from '../assets/mypage-figma/eye.svg';
 import fileTextIcon from '../assets/mypage-figma/file-text.svg';
 import heartIcon from '../assets/mypage-figma/heart.svg';
@@ -13,6 +12,7 @@ import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeh
 import cameraIcon from '../assets/mypage-overview-figma/camera.svg';
 import sectionDraftIcon from '../assets/mypage-overview-figma/section-draft.svg';
 import settingsIcon from '../assets/mypage-overview-figma/settings.svg';
+import { CaseChip } from '../components/common/CaseUi';
 import BottomNav from '../components/layout/BottomNav';
 import {
   ApiError,
@@ -131,19 +131,13 @@ function Tag({
   label: string;
   tone: 'success' | 'failure' | 'category' | 'keyword';
 }) {
-  const toneClass =
-    tone === 'success'
-      ? 'bg-[#5A876E] text-white'
-      : tone === 'failure'
-        ? 'bg-[#C06D43] text-white'
-        : tone === 'category'
-          ? 'bg-[#CBE5D8] text-[#5A876E]'
-          : 'bg-[#E6E6E6] text-[#8A8A8A]';
-
   return (
-    <span className={`inline-flex h-[18px] items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[10px] font-[500] leading-[12px] ${toneClass}`}>
-      <span className="max-w-[120px] truncate whitespace-nowrap">{label}</span>
-    </span>
+    <CaseChip
+      label={label}
+      tone={tone === 'success' ? 'status-success' : tone === 'failure' ? 'status-failure' : tone}
+      compact
+      maxWidthClassName={tone === 'category' ? 'max-w-[108px]' : 'max-w-[58px]'}
+    />
   );
 }
 
@@ -183,7 +177,7 @@ function ProfileCard({
   const email = sanitizeText(profile?.email, '@sidepick@gmail.com');
 
   const statItems = [
-    { key: 'written', icon: edit2Icon, label: '작성한 글', value: counts.written, path: '/mypage/written', iconClassName: 'h-[14px] w-[14px]' },
+    { key: 'written', icon: fileTextIcon, label: '작성한 글', value: counts.written, path: '/mypage/written', iconClassName: 'h-[16px] w-[16px]' },
     { key: 'bookmark', icon: bookmarkIcon, label: '북마크', value: counts.bookmarked, path: '/mypage/bookmarks', iconClassName: 'h-[16px] w-[16px]' },
     { key: 'recent', icon: eyeIcon, label: '최근 본 글', value: counts.recent, path: '/mypage/recent', iconClassName: 'h-[16px] w-[16px]' },
   ] as const;
@@ -198,8 +192,8 @@ function ProfileCard({
       >
         <div className="flex items-center gap-[8px]">
           <div className="relative flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full bg-[#F1F1F1]">
-            <img src={profile?.profileImage || avatarPlaceholderIcon} alt="" className="h-[64px] w-[64px] rounded-full object-cover" />
-            <span className="absolute left-[49.5px] top-[49px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
+            <img src={profile?.profileImage || avatarPlaceholderIcon} alt="" className="h-full w-full object-cover" />
+            <span className="absolute bottom-0 right-0 flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
               <img src={cameraIcon} alt="" className="h-[14px] w-[14px]" />
             </span>
           </div>
@@ -209,7 +203,7 @@ function ProfileCard({
           </div>
         </div>
         <span className="flex h-[20px] w-[20px] items-center justify-center">
-          <img src={chevronIcon} alt="" className="h-[9.5px] w-[5.5px] opacity-[0.58]" />
+          <img src={chevronIcon} alt="" className="h-[9.5px] w-[5.5px] rotate-180 opacity-[0.58]" />
         </span>
       </button>
 
@@ -272,7 +266,7 @@ function StoryPreviewCard({
   const keywords = extractKeywordTags(experience);
 
   return (
-    <article className="h-[133px] w-full rounded-[4px] bg-[#F8F8F8]">
+    <article className="h-[171px] w-full rounded-[4px] bg-[#F8F8F8]">
       <button
         type="button"
         onClick={() => navigate(`/experiences/${experience.id}`)}
@@ -286,7 +280,7 @@ function StoryPreviewCard({
           ))}
         </div>
 
-        <div className="flex h-[60px] items-start gap-[8px]">
+        <div className="flex min-h-[60px] items-start gap-[8px]">
           {showThumbnail ? (
             <div className="relative h-[60px] w-[80px] shrink-0 overflow-hidden rounded-[4px] bg-[#D8D8D8]">
               {imageMeta.primaryImageUrl ? <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" /> : null}
@@ -302,13 +296,15 @@ function StoryPreviewCard({
             <p className="line-clamp-1 font-['Pretendard'] text-[16px] font-[500] leading-[19.2px] text-[#131416]">
               {sanitizeText(experience.title, '제목')}
             </p>
-            <p className="line-clamp-2 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">
+            <p className="line-clamp-2 min-h-[33.6px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">
               {sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
             </p>
           </div>
         </div>
 
-        <MetaRow experience={experience} />
+        <div className="mt-auto">
+          <MetaRow experience={experience} />
+        </div>
       </button>
     </article>
   );
@@ -516,12 +512,12 @@ export default function MyPageOverview() {
             className="flex h-[20px] w-[20px] items-center justify-center"
             aria-label="프로필 수정"
           >
-            <img src={settingsIcon} alt="" className="h-[20px] w-[20px] opacity-[0.54]" />
+            <img src={settingsIcon} alt="" className="h-[20px] w-[20px]" />
           </button>
         </div>
       </header>
 
-      <main className="flex flex-col gap-[20px] px-[16px] pb-[110px]">
+      <main className="flex flex-col gap-[20px] px-[16px] pb-[128px]">
         <ProfileCard profile={profile} counts={counts} />
         <DraftSection />
         <StorySection
@@ -547,7 +543,7 @@ export default function MyPageOverview() {
         ) : null}
       </main>
 
-      <BottomNav active="mypage" showFab />
+      <BottomNav active="mypage" />
     </div>
   );
 }

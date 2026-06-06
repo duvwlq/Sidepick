@@ -1,11 +1,8 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import guideNavIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
-import homeNavIcon from '../assets/home-v1-figma/icons/home-figma.svg';
-import searchNavIcon from '../assets/home-v1-figma/icons/search-nav-figma.svg';
-import userNavIcon from '../assets/home-v1-figma/icons/user-figma.svg';
 import ExampleCard from '../components/create/ExampleCard';
+import BottomNav from '../components/layout/BottomNav';
 import { useToast } from '../components/common/useToast';
 import {
   createExperience,
@@ -207,7 +204,7 @@ function buildPendingPayload(input: {
 
 function Header({ onBack }: { onBack: () => void }) {
   return (
-    <header className="flex h-[123px] w-full flex-col border-b border-[#F2F2F2] bg-white">
+    <header className="flex h-[123px] w-full flex-col bg-white">
       <div className="h-[59px] px-[16px] pt-[17px]">
         <div className="flex items-center justify-between text-[17px] font-[600] text-black">
           <span>9:41</span>
@@ -230,13 +227,13 @@ function Header({ onBack }: { onBack: () => void }) {
 function ProgressBar({ step }: { step: WizardStep }) {
   const percentage = step * 25;
   return (
-    <section className="flex w-[343px] flex-col gap-[5px] pt-[4px]">
-      <div className="flex items-center justify-between text-[14px] font-[500] leading-[20px] text-[#131416]">
-        <span>{step}/4 단계</span>
-        <span>{percentage}%</span>
+    <section className="flex w-[343px] flex-col gap-[5px]">
+      <div className="flex items-center justify-between font-['Pretendard'] text-[14px] leading-[16.8px] text-[#131416]">
+        <span className="font-[400]">{step}/4 단계</span>
+        <span className="font-[600]">{percentage}%</span>
       </div>
       <div className="h-[6px] w-full rounded-full bg-[#D8D8D8]">
-        <div className="h-full rounded-full bg-[#5A876E] transition-all" style={{ width: `${percentage}%` }} />
+        <div className="h-full rounded-full bg-[linear-gradient(90deg,#92BFA6_0%,#5A876E_100%)] transition-all" style={{ width: `${percentage}%` }} />
       </div>
     </section>
   );
@@ -244,9 +241,9 @@ function ProgressBar({ step }: { step: WizardStep }) {
 
 function SectionTitle({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="flex flex-col items-center gap-[5px] text-center">
-      <h2 className="text-[24px] font-[700] leading-[30px] text-[#131416]">{title}</h2>
-      <p className="text-[14px] font-[400] leading-[20px] text-[#6A6A6A]">{subtitle}</p>
+    <div className="flex flex-col items-start gap-[20px] text-left">
+      <h2 className="font-['Pretendard'] text-[20px] font-[600] leading-[24px] text-[#131416]">{title}</h2>
+      <p className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-[#131416]">{subtitle}</p>
     </div>
   );
 }
@@ -278,25 +275,6 @@ function MoneyField({ label, value, placeholder, onChange }: { label: string; va
         <span className="text-[#8A8A8A]">원</span>
       </label>
     </div>
-  );
-}
-
-function BottomNav() {
-  const navigate = useNavigate();
-  return (
-    <nav className="flex h-[84px] w-full items-start justify-around rounded-t-[24px] border-t border-[#F0F0F0] bg-white px-[24px] pt-[12px] shadow-[0_-6px_24px_rgba(0,0,0,0.06)]">
-      {[
-        ['홈', homeNavIcon, '/'],
-        ['탐색', searchNavIcon, '/explore'],
-        ['가이드', guideNavIcon, '/faq'],
-        ['MY', userNavIcon, '/mypage'],
-      ].map(([label, icon, path]) => (
-        <button key={String(path)} type="button" onClick={() => navigate(String(path))} className="flex flex-col items-center gap-[4px] opacity-30">
-          <img src={String(icon)} alt="" className="h-[24px] w-[24px]" />
-          <span className="text-[12px] text-[#BABABA]">{label}</span>
-        </button>
-      ))}
-    </nav>
   );
 }
 
@@ -657,15 +635,16 @@ export default function CreateWizardPage() {
           {step === 4 ? (
             <section className="flex w-[343px] flex-col gap-[20px]">
               <SectionTitle title="경험을 자유롭게 정리해볼까요?" subtitle="최소 10자 이상 작성해주세요 *" />
-              <div className="rounded-[12px] bg-[#F8F8F8] px-[12px] py-[12px]">
+              <div className="flex h-[299px] flex-col justify-between rounded-[10px] bg-[#F8F8F8] px-[16px] py-[10px]">
                 <textarea
                   value={content}
                   onChange={(event) => setContent(event.target.value.slice(0, MAX_CONTENT_LENGTH))}
-                  placeholder="어떤 계기로 시작했고, 진행하면서 어디가 어려웠는지 편하게 적어주세요"
-                  className="h-[220px] w-full resize-none bg-transparent text-[14px] leading-[20px] text-[#131416] outline-none placeholder:text-[#BABABA]"
+                  placeholder="어떤 계기로 시작했고, 진행하면서 어디서 어려움을 겪으셨는지 편하게 적어주세요."
+                  className="h-[245px] w-full resize-none bg-transparent font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#131416] outline-none placeholder:text-[#BABABA]"
                 />
-                <div className="flex justify-end pt-[8px] text-[12px] text-[#8A8A8A]">
-                  {content.length} / {MAX_CONTENT_LENGTH}
+                <div className="flex justify-end font-['Pretendard'] text-[12px] leading-[16.8px]">
+                  <span className="font-[400] text-[#8A8A8A]">{content.length}</span>
+                  <span className="font-[400] text-[#494949]">&nbsp;/ {MAX_CONTENT_LENGTH}</span>
                 </div>
               </div>
 
@@ -680,26 +659,34 @@ export default function CreateWizardPage() {
                 onNext={() => setExampleIndex((current) => (current + 1) % guideExamples.length)}
               />
 
-              <div className="flex flex-col gap-[8px]">
-                <span className="text-[14px] font-[500] leading-[16.8px] text-[#131416]">사진 등록 (선택)</span>
+              <div className="flex flex-col gap-[10px]">
+                <div className="flex items-center gap-[4px] font-['Pretendard'] leading-[16.8px]">
+                  <span className="text-[14px] font-[400] text-[#131416]">사진 등록</span>
+                  <span className="text-[12px] font-[400] text-[#5E5E5E]">(선택)</span>
+                </div>
                 <button
                   type="button"
                   onClick={() => showToast('사진 등록 기능은 준비 중입니다.', 'error')}
-                  className="flex h-[64px] w-full items-center justify-center rounded-[10px] border border-[#E9EEE9] bg-white text-[14px] text-[#6A6A6A]"
+                  className="flex w-full flex-col items-center gap-[4px] rounded-[10px] bg-white px-[16px] py-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]"
                 >
-                  사진을 추가해주세요
+                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[19.6px] text-[#494949]">사진을 추가해주세요</span>
+                  <span className="flex h-[36px] w-[36px] items-center justify-center rounded-full border-[1.5px] border-[#5A876E] p-[4px]">
+                    <svg viewBox="0 0 20 20" className="h-[20px] w-[20px] text-[#5A876E]" aria-hidden="true">
+                      <path d="M10 4v12M4 10h12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </span>
                 </button>
               </div>
             </section>
           ) : null}
         </main>
 
-        <div className="fixed bottom-[100px] left-1/2 z-20 w-full max-w-[375px] -translate-x-1/2 px-[16px]">
+        <div className="fixed bottom-[96px] left-1/2 z-20 w-full max-w-[375px] -translate-x-1/2 px-[16px]">
           <button
             type="button"
             disabled={stepDisabled || categoryLoading || submitting}
             onClick={() => void handleNext()}
-            className={`flex h-[48px] w-full items-center justify-center rounded-[8px] text-[16px] font-[600] text-white ${stepDisabled || categoryLoading || submitting ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'}`}
+            className={`flex h-[41px] w-full items-center justify-center rounded-[8px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white ${stepDisabled || categoryLoading || submitting ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'}`}
           >
             {submitting ? '처리 중...' : step === 4 ? (isEditMode ? '수정 완료' : '작성 완료') : '다음 단계'}
           </button>

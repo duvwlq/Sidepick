@@ -4,7 +4,6 @@ import ComingSoonPage from './pages/ComingSoonPage';
 import Create from './pages/Create';
 import CreateWizardPage from './pages/CreateWizardPage';
 import MyPage from './pages/MyPage';
-import MyPageAnalysis from './pages/MyPageAnalysis';
 import MyPageOverview from './pages/MyPageOverview';
 import MyPageProfileEdit from './pages/MyPageProfileEdit';
 import AiAnalysisResultPage from './pages/AiAnalysisResultPage';
@@ -61,7 +60,6 @@ export default function App() {
           <Route path="/analysis-result" element={<AiAnalysisResultPage />} />
           <Route path="/coming-soon" element={<ComingSoonPage />} />
           <Route path="/mypage" element={<MyPageOverview />} />
-          <Route path="/mypage/analysis" element={<MyPageAnalysis />} />
           <Route path="/mypage/profile/edit" element={<MyPageProfileEdit />} />
           <Route path="/mypage/written" element={<MyPage />} />
           <Route path="/mypage/bookmarks" element={<MyPage />} />

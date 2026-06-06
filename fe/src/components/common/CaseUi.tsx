@@ -1,5 +1,6 @@
 import { Heart } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
+import { buttonClassName } from './Button';
 
 type ChipTone = 'type' | 'status-success' | 'status-failure' | 'category' | 'keyword';
 
@@ -11,7 +12,7 @@ export function CaseSurface({
   className?: string;
 }) {
   return (
-    <article className={`rounded-[4px] border border-[#F2F2F2] bg-white shadow-[0_0_2px_rgba(0,0,0,0.1)] ${className}`}>
+    <article className={`rounded-[4px] border border-[#F4F4F4] bg-white shadow-[0_0_2px_rgba(0,0,0,0.1)] ${className}`}>
       {children}
     </article>
   );
@@ -43,11 +44,11 @@ export function CaseChip({
     maxWidthClassName ??
     (tone === 'category'
       ? compact
-        ? 'max-w-[96px]'
+        ? 'max-w-[92px]'
         : 'max-w-[116px]'
       : compact
-        ? 'max-w-[64px]'
-        : 'max-w-[74px]');
+        ? 'max-w-[58px]'
+        : 'max-w-[68px]');
 
   return (
     <span className={`inline-flex h-[18px] shrink-0 items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[10px] leading-[12px] ${toneClass}`}>
@@ -138,14 +139,16 @@ export function CardActionButton({
   disabled?: boolean;
   className?: string;
 }) {
-  const toneClass = tone === 'green' ? 'bg-[#5A876E] text-white' : 'bg-transparent text-[#5D5D5D] underline';
-
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex h-[36px] items-center justify-center rounded-[8px] px-[12px] py-[8px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] ${toneClass} disabled:opacity-50 ${className}`}
+      className={buttonClassName({
+        tone: tone === 'green' ? 'case' : 'ghost',
+        size: 'sm',
+        className: `min-w-[92px] ${className}`.trim(),
+      })}
     >
       {label}
     </button>
@@ -165,7 +168,7 @@ export function CaseTextLink({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center justify-center font-['Pretendard'] text-[12px] font-[400] leading-[16px] text-[#8A8A8A] underline decoration-[0.5px] decoration-[#8A8A8A] underline-offset-[2px] ${className}`}
+      className={`inline-flex items-center justify-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#757575] underline decoration-[0.5px] decoration-[#757575] underline-offset-[2px] ${className}`}
     >
       {label}
     </button>
