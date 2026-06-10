@@ -45,7 +45,21 @@
 
 ## 3. 부족 정보 감지 로직
 
-### 3.1 감지 대상 (8개 슬롯)
+### 3.1 감지 대상 8개 슬롯 (v1.1 — enum 명세 / BE-27 인계)
+
+```typescript
+// BE Java: enum Slot { CATEGORY, DURATION, DAILY_HOURS, INVEST_AMOUNT,
+//                      REVENUE_AMOUNT, FAILURE_REASONS, DIFFICULTIES, BODY_RICHNESS }
+type Slot =
+  | "category"          // 부업 분야 (PM-03 v1.6 7개 분야 + etc)
+  | "duration"          // 진행 기간 5단계 bucket
+  | "daily_hours"       // 일일 투입 시간 4단계
+  | "invest_amount"     // 투자 금액 (KRW, ≥0 허용)
+  | "revenue_amount"    // 월 평균 수익 (KRW, ≥0 허용)
+  | "failure_reasons"   // 실패 원인 (7종 화이트리스트)
+  | "difficulties"      // 어려웠던 점 (8종 화이트리스트)
+  | "body_richness";    // 본문 풍부도 (길이 + 단어 다양성)
+```
 
 | 슬롯 | 확인 방법 | 부족 판정 기준 |
 |---|---|---|
@@ -100,15 +114,64 @@
 
 ```typescript
 interface QuestionCard {
-  slot: string;              // 부족 슬롯 ID (예: "failure_reasons")
+  slot: Slot;                // 3.1 enum 8종 중 1개
   question: string;          // 사용자에게 보일 질문 (40자 이내, "~예요?" / "~인가요?" 친근체)
-  hint?: string;             // 답변 예시 (선택, AI-09 가이드 예시 참고)
-  input_type: "text" | "select" | "number" | "tag";
-  options?: string[];        // input_type=select일 때 (예: 실패 원인 7종)
+  hint?: string;             // 답변 예시 (선택, AI-09 가이드 예시 참고, 1인칭 30~60자)
+  input_type: InputType;     // 4.5 enum
+  options?: string[];        // input_type="select"일 때 필수, 4.6 화이트리스트만 허용
   required: boolean;         // true면 답변 필수, false면 스킵 가능
   placeholder?: string;
 }
+
+type InputType = "text" | "select" | "number" | "tag";
 ```
+
+### 4.5 질문 wording 룰 (v1.1 — BE-27 인계)
+
+| 항목 | 규칙 |
+|---|---|
+| **어미** | "~예요?" / "~인가요?" / "~어요?" 친근체 강제 |
+| **시점** | 2인칭 ("처음 ~하셨어요?" / "~ 알려주실 수 있어요?") |
+| **길이** | question 40자 이내 / hint 30~60자 (1인칭 예시) |
+| **금지 표현** | "반드시 / 무조건 / 100% / 절대" |
+| **광고성 금지** | 외부 서비스 / 강의 / 멘토링 언급 X |
+| **input_type 매핑** | category/duration/daily_hours/failure_reasons/difficulties → `select` / invest_amount/revenue_amount → `number` / body_richness/free_text → `text` |
+| **placeholder** | number는 "0이면 0 입력" / text는 "30자 이상 권장" |
+
+### 4.6 options 화이트리스트 (v1.1 — BE-27 인계)
+
+```typescript
+// failure_reasons 7종 (픽플리 설문 기준)
+const FAILURE_REASONS = [
+  "마케팅 부족", "수익 구조 이해 부족", "시간 관리",
+  "정보 부족", "경쟁 심화", "자본 부족", "실행력 부족",
+] as const;
+
+// difficulties 8종 (픽플리 설문 기준)
+const DIFFICULTIES = [
+  "고객 확보(마케팅)", "수익 구조 이해", "수익화 연결",
+  "시간 관리", "운영 지속성", "정보 부족",
+  "경쟁 심화", "멘탈 관리",
+] as const;
+
+// duration 5단계 bucket
+const DURATION_BUCKETS = [
+  "1개월 미만", "1~3개월", "3~6개월", "6개월~1년", "1년 이상",
+] as const;
+
+// daily_hours 4단계
+const DAILY_HOURS = [
+  "1시간 미만", "1~3시간", "3~5시간", "5시간 이상",
+] as const;
+
+// category 8종 (PM-03 v1.6 부업 분야 7 + etc)
+const CATEGORY_SLUGS = [
+  "online-commerce", "content-sns", "digital-products", "platform-labor",
+  "talent-freelance", "investment", "offline-sidejob", "etc",
+] as const;
+```
+
+**검증 룰**: Sonnet 응답에 위 화이트리스트 외 옵션이 나오면 즉시 fail + 재시도.
 
 ### 4.4 예시 출력
 
@@ -300,3 +363,4 @@ interface AnalyzeDraftFallbackResponse {
 | 버전 | 날짜 | 작성자 | 변경 |
 |---|---|---|---|
 | v1 | 2026-06-02 | 오혜림 | 초안 작성 (베타 1회차 피드백 반영) |
+| v1.1 | 2026-06-10 | 오혜림 | BE-27 회신 반영 — slot 8종 enum 명시 (3.1) + 질문 wording 룰 강화 (4.5) + options 5종 화이트리스트 (4.6) |

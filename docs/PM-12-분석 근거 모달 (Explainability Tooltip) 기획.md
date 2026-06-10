@@ -1,11 +1,19 @@
 # PM-12 — 분석 근거 모달 (Explainability Tooltip) 기획
 
-**버전**: v2
-**작성일**: 2026-05-27
+**버전**: v3
+**작성일**: 2026-05-27 (v2) / 2026-06-02 v3 갱신
 **작성자**: 오혜림 (팀장 / PM)
 **티켓**: PM-12
 **대상**: AI / BE / PD / FE (4파트 협업)
 **연관**: MVP 심사 피드백 #3 (유사 사례 매칭 정확도) + #4 (분석 흐름 구체화)
+
+### v3 변경 이력 (2026-06-02)
+
+- **P0 적용 위치 2곳 → 3곳 확장** (P0 #3 통계 그래프 영역 추가)
+  - 사례 탐색 페이지 통합 + sufficient_data 룰 도입으로 통계 영역의 explanation 필요성 부각
+  - 분석 대상 N건 / 데이터 출처 / 마지막 업데이트 / sufficient_data 표시
+- **StatsExplanation 스키마 신설** (3.6 섹션)
+- AI-22 / BE-30/31 + BE-22 통계 API / PD-23 (3곳) / FE 모든 파트 영향
 
 ### v2 변경 이력 (2026-05-27)
 
@@ -46,24 +54,24 @@ W1~W2에서 만든 안전장치를 사용자가 직접 확인 가능:
 
 ## 2. 적용 위치 5곳 (우선순위)
 
-### P0 — 핵심 (W4~W5 구현)
+### P0 — 핵심 (W4 구현, v3 — 3곳으로 확장)
 
 | # | 위치 | 트리거 | 모달 내용 |
 |---|---|---|---|
 | 1 | **AI 분석 결과 페이지** (실패 패턴 / 키워드) | "?" 아이콘 (각 패턴/키워드 옆) | 사용한 입력 데이터 / 매칭된 패턴 키워드 / 신뢰도 점수 / 분석에 사용된 유사 사례 N건 |
 | 2 | **유사 사례 매칭 결과** (사례 카드) | "?" 아이콘 (사례 카드 상단 우측) | 유사도 점수 (예: 0.87) / 매칭 키워드 / 카테고리 일치 여부 / 원본 case_id 링크 |
+| 3 | **통계 그래프 영역** (TOP3 / 실패 패턴 비중 / 시점 분포) — **v3 추가 (2026-06-02)** | "?" 아이콘 (차트 영역 옆) | 분석 대상 N건 / 데이터 출처 / 마지막 업데이트 / sufficient_data 룰 안내 |
 
 ### P1 — 보강 (W5 구현, 시간 여유 따라)
 
 | # | 위치 | 트리거 | 모달 내용 |
 |---|---|---|---|
-| 3 | **에이전트 C 챗봇 응답** | 응답 메시지 하단 "근거 보기" 버튼 | case_id 인용 / Tool 호출 흐름 (FAISS or Stats) / 신뢰도 점수 |
+| 4 | **에이전트 C 챗봇 응답** | 응답 메시지 하단 "근거 보기" 버튼 | case_id 인용 / Tool 호출 흐름 (FAISS or Stats) / 신뢰도 점수 |
 
 ### P2 — 추후 (W6 또는 V2)
 
 | # | 위치 | 트리거 | 모달 내용 |
 |---|---|---|---|
-| 4 | **통계 시각화** (실패 요인 TOP3 / 시점 분포) | 차트 옆 "?" 아이콘 | 분석 대상 N건 / 데이터 출처 / 마지막 업데이트 시점 |
 | 5 | **부업 가이드 카드** | 카드 하단 "출처" 텍스트 클릭 | PM-03 `sources` 필드 노출 (외부 자료 + 사이드픽 사례 분석 N건) |
 
 ---
@@ -159,7 +167,49 @@ interface SimilarCaseExplanation extends ExplanationBase {
 }
 ```
 
-### 3.5 P1 #3: 에이전트 C 챗봇 explanation (W5 추가 예정)
+### 3.5 P0 #3: 통계 그래프 explanation (v3 추가 — 2026-06-02)
+
+```typescript
+interface StatsExplanation extends ExplanationBase {
+  // 1) 분석 대상 N건
+  total_cases: number;              // 예: 25 (해당 카테고리 표본 수)
+
+  // 2) 데이터 출처
+  data_source: {
+    primary: "pickply_survey" | "naver_crawling" | "mixed";
+    sources_breakdown: Array<{      // 출처별 건수
+      source: string;               // "pickply" / "blog" / "kin" / "cafe" / "ppomppu" / ...
+      count: number;
+    }>;
+  };
+
+  // 3) 마지막 갱신 시점
+  last_updated: string;             // ISO 8601 KST. 예: "2026-06-02T15:30:00+09:00"
+
+  // 4) sufficient_data 룰 (AI-12/13 v1.1)
+  sufficient_data: boolean;         // total_cases >= min_sample_size
+  min_sample_size: number;          // 기본 10
+  insufficient_message?: string;    // sufficient_data=false일 때 안내 카피
+
+  // 5) 통계 종류 (어떤 차트의 explanation인지)
+  chart_type: "top3_pattern" | "pattern_ratio" | "timing_distribution";
+
+  // 6) 카테고리 슬러그 (어떤 카테고리의 통계인지)
+  category_slug: string;            // PM-03 v1.6 8개 슬러그 (7개 부업 분야 + etc)
+}
+```
+
+**활용 예시** (사용자가 "마케팅 부족 60.9%" 차트 옆 "?" 클릭):
+> 콘텐츠·SNS 카테고리 23건 분석 결과예요.
+> 출처: 픽플리 설문 23건 (`pickply_survey`)
+> 마지막 갱신: 5분 전 (2026-06-02 15:30)
+> 표본 충분 (10건 이상 ✅)
+
+**활용 예시** (sufficient_data=false 카테고리):
+> 디지털·지식판매 카테고리는 현재 1건만 수집됐어요.
+> 10건 이상 모이면 차트로 보여드릴게요.
+
+### 3.7 P1 #4: 에이전트 C 챗봇 explanation (W5 추가 예정)
 
 ```typescript
 interface ChatbotExplanation extends ExplanationBase {
