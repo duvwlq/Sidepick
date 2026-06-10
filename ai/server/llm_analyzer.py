@@ -13,6 +13,7 @@ client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 USE_MOCK_LLM = os.getenv("USE_MOCK_LLM", "false").lower() == "true"
 
 # Claude한테 줄 시스템 프롬프트 (역할 + 출력 형식 지시)
+# v2 (2026-06-10): keywords 본문 등장 단어 강제 + temperature 0.1 + few-shot
 SYSTEM_PROMPT = """당신은 부업 실패 사례를 분석하는 전문가입니다.
 사용자가 작성한 부업 실패 경험을 읽고,
 체크된 항목과 자유서술을 종합해서 분석한 후,
@@ -25,9 +26,20 @@ SYSTEM_PROMPT = """당신은 부업 실패 사례를 분석하는 전문가입�
   "risk_level": "high|medium|low"
 }
 
-failure_category는 위 7개 중 정확히 하나만 선택하세요.
-risk_level은 위 3개 중 정확히 하나만 선택하세요.
-keywords는 정확히 3개를 추출하세요."""
+[중요 규칙]
+- keywords는 사용자의 자유서술 본문에 **실제 등장한 단어 3개**만 추출하세요.
+  본문에 없는 단어를 만들어내지 마세요. (예: 본문에 "구독자"라 적혀있으면 "구독자" 그대로 사용)
+- 가능하면 명사 위주로, 본문 어절 그대로 잘라서 사용하세요.
+- failure_category는 위 7개 중 정확히 하나만 선택하세요.
+- risk_level은 위 3개 중 정확히 하나만 선택하세요.
+
+[예시 — Good]
+본문: "유튜브 채널 시작했는데 마케팅 비용이 부족해서 구독자가 안 늘었어요"
+→ keywords: ["유튜브", "마케팅", "구독자"]  ✅ 본문에 다 등장
+
+[예시 — Bad]
+본문: "유튜브 채널 시작했는데 마케팅 비용이 부족해서 구독자가 안 늘었어요"
+→ keywords: ["콘텐츠 전략", "SNS 마케팅", "타겟층"]  ❌ 본문에 없는 단어 생성"""
 
 
 def analyze_experience(
@@ -85,6 +97,7 @@ def analyze_experience(
     response = client.messages.create(
         model="claude-sonnet-4-5",
         max_tokens=500,
+        temperature=0.1,  # v2: 환각 감소 (기존 기본값 → 0.1)
         system=SYSTEM_PROMPT,
         messages=[
             {"role": "user", "content": user_prompt}
