@@ -4,6 +4,7 @@ from anthropic import Anthropic
 from dotenv import load_dotenv
 
 from server.mock_llm import get_mock_analysis
+from server.explanation_builder import build_analysis_explanation
 
 load_dotenv()
 
@@ -36,12 +37,40 @@ def analyze_experience(
     difficulty_extra: str,
     duration_months: int,
     weekly_hours: int,
-    free_text: str
+    free_text: str,
+    similar_cases_used: list[str] | None = None,
 ) -> dict:
-    """부업 실패 경험을 LLM으로 분석"""
+    """부업 실패 경험을 LLM으로 분석.
+
+    Returns:
+        {
+            "keywords": [...],
+            "failure_category": "...",
+            "summary": "...",
+            "risk_level": "...",
+            "explanation": AnalysisExplanation  # PM-12 v3 P0 #1
+        }
+    """
+
+    similar_cases_used = similar_cases_used or []
 
     if USE_MOCK_LLM:
-        return get_mock_analysis(category=category, free_text=free_text)
+        result = get_mock_analysis(category=category, free_text=free_text)
+        result["explanation"] = build_analysis_explanation(
+            input_used={
+                "category": category,
+                "body_excerpt": (free_text or "")[:120],
+                "duration_months": duration_months,
+                "weekly_hours": weekly_hours,
+            },
+            matched_patterns=result.get("keywords", []),
+            similar_cases_used=similar_cases_used,
+            confidence_score=0.5,  # Mock 응답은 신뢰도 낮게
+            is_verified=False,
+            model="mock",
+            debug={"mock": True},
+        )
+        return result
 
     user_prompt = f"""
 부업 카테고리: {category}
@@ -63,20 +92,47 @@ def analyze_experience(
     )
     
     response_text = response.content[0].text.strip()
-    
+
     # JSON 파싱 시도
     try:
         result = json.loads(response_text)
-        return result
     except json.JSONDecodeError:
         # ```json ... ``` 형식으로 감싸져 있으면 정리
         if "```json" in response_text:
             cleaned = response_text.split("```json")[1].split("```")[0].strip()
-            return json.loads(cleaned)
+            result = json.loads(cleaned)
         elif "```" in response_text:
             cleaned = response_text.split("```")[1].split("```")[0].strip()
-            return json.loads(cleaned)
-        raise
+            result = json.loads(cleaned)
+        else:
+            raise
+
+    # PM-12 v3 P0 #1 — AnalysisExplanation 필드 추가
+    result["explanation"] = build_analysis_explanation(
+        input_used={
+            "category": category,
+            "body_excerpt": (free_text or "")[:120],
+            "duration_months": duration_months,
+            "weekly_hours": weekly_hours,
+            "difficulties": difficulties or [],
+        },
+        matched_patterns=result.get("keywords", []),
+        similar_cases_used=similar_cases_used,
+        confidence_score=_risk_to_confidence(result.get("risk_level", "medium")),
+        is_verified=True,
+        model="claude-sonnet-4-5",
+        debug={
+            "failure_category": result.get("failure_category"),
+            "tokens_in": response.usage.input_tokens,
+            "tokens_out": response.usage.output_tokens,
+        },
+    )
+    return result
+
+
+def _risk_to_confidence(risk: str) -> float:
+    """risk_level → confidence_score 단순 매핑 (AI-15 에이전트 B에서 정밀 평가)."""
+    return {"high": 0.92, "medium": 0.78, "low": 0.60}.get(risk, 0.7)
 
 
 # 직접 실행하면 테스트 케이스 1개 돌림
