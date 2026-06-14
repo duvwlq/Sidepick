@@ -1,15 +1,18 @@
-import { X } from 'lucide-react';
+﻿import { X } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import editIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Edit 3.svg';
-import guideIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
-import homeIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Home.svg';
-import plusIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Plus.svg';
-import searchIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
-import userIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
+import editIcon from '../../assets/figma-downloaded-icons/home/Edit 3.svg';
+import guideIcon from '../../assets/figma-downloaded-icons/home/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
+import homeIcon from '../../assets/figma-downloaded-icons/home/Home.svg';
+import plusIcon from '../../assets/figma-downloaded-icons/home/Plus.svg';
+import searchIcon from '../../assets/figma-downloaded-icons/home/Search.svg';
+import subtractIcon from '../../assets/figma-downloaded-icons/home/Subtract.svg';
+import userIcon from '../../assets/figma-downloaded-icons/home/User.svg';
 import { getAccessToken } from '../../lib/session';
 
-type BottomNavKey = 'home' | 'explore' | 'guide' | 'mypage';
+export type BottomNavKey = 'home' | 'explore' | 'guide' | 'mypage';
+type BottomNavAccessoryLayout = 'center' | 'end' | 'between';
 
 type BottomNavProps = {
   active?: BottomNavKey;
@@ -17,6 +20,8 @@ type BottomNavProps = {
   fabExpanded?: boolean;
   onFabToggle?: () => void;
   onCreateClick?: () => void;
+  accessory?: ReactNode;
+  accessoryLayout?: BottomNavAccessoryLayout;
 };
 
 type NavItem = {
@@ -29,7 +34,6 @@ type NavItem = {
 };
 
 const NAV_CONTEXT_STORAGE_KEY = 'sidepick.bottomNav.active';
-
 const NAV_ITEMS: NavItem[] = [
   {
     key: 'home',
@@ -56,7 +60,11 @@ const NAV_ITEMS: NavItem[] = [
     label: '가이드',
     path: '/faq',
     icon: guideIcon,
-    matches: (pathname) => pathname === '/faq' || pathname.startsWith('/guide') || pathname === '/mypage/faq',
+    matches: (pathname) =>
+      pathname === '/faq' ||
+      pathname.startsWith('/guide') ||
+      pathname === '/mypage/faq' ||
+      pathname === '/analysis-result',
   },
   {
     key: 'mypage',
@@ -67,10 +75,6 @@ const NAV_ITEMS: NavItem[] = [
     matches: (pathname) => pathname === '/mypage' || pathname.startsWith('/mypage/'),
   },
 ];
-
-const ACTIVE_ICON_FILTER =
-  'brightness(0) saturate(100%) invert(45%) sepia(16%) saturate(734%) hue-rotate(94deg) brightness(92%) contrast(87%)';
-const INACTIVE_ICON_FILTER = 'brightness(0) saturate(100%)';
 
 function readStoredNavContext(): BottomNavKey | null {
   if (typeof window === 'undefined') {
@@ -89,12 +93,65 @@ function writeStoredNavContext(value: BottomNavKey) {
   window.sessionStorage.setItem(NAV_CONTEXT_STORAGE_KEY, value);
 }
 
+function buildIconFilter(isActive: boolean) {
+  return isActive
+    ? 'brightness(0) saturate(100%) invert(47%) sepia(16%) saturate(661%) hue-rotate(96deg) brightness(92%) contrast(85%)'
+    : 'brightness(0) saturate(100%) invert(0%)';
+}
+
+function DefaultFabMenu({
+  expanded,
+  onToggle,
+  onCreateClick,
+}: {
+  expanded: boolean;
+  onToggle: () => void;
+  onCreateClick: () => void;
+}) {
+  const navigate = useNavigate();
+
+  return (
+    <div className="relative flex h-[36px] w-[36px] items-center justify-center">
+      <div
+        className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+          expanded
+            ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
+            : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
+        }`}
+      >
+        <button type="button" onClick={() => navigate('/coming-soon')} className="flex items-center gap-[8px] whitespace-nowrap">
+          <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+          <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 梨쀫큸</span>
+        </button>
+        <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
+          <img src={editIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
+          <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">寃쏀뿕 ?묒꽦</span>
+        </button>
+      </div>
+
+      <button
+        type="button"
+        aria-label={expanded ? '寃쏀뿕 ?묒꽦 硫붾돱 ?リ린' : '寃쏀뿕 ?묒꽦 硫붾돱 ?닿린'}
+        aria-expanded={expanded}
+        onClick={onToggle}
+        className={`pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full ${
+          expanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
+        }`}
+      >
+        {expanded ? <X size={20} strokeWidth={2.2} color="#FFFFFF" /> : <img src={plusIcon} alt="" className="h-[18px] w-[18px]" />}
+      </button>
+    </div>
+  );
+}
+
 export default function BottomNav({
   active,
   showFab = false,
   fabExpanded = false,
   onFabToggle,
   onCreateClick,
+  accessory,
+  accessoryLayout = 'end',
 }: BottomNavProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -102,9 +159,7 @@ export default function BottomNav({
   const [internalExpanded, setInternalExpanded] = useState(false);
   const expanded = onFabToggle ? fabExpanded : internalExpanded;
 
-  const routeMatchedActive = useMemo(() => {
-    return NAV_ITEMS.find((item) => item.matches(location.pathname))?.key ?? null;
-  }, [location.pathname]);
+  const routeMatchedActive = useMemo(() => NAV_ITEMS.find((item) => item.matches(location.pathname))?.key ?? null, [location.pathname]);
 
   const visualActive = useMemo<BottomNavKey>(() => {
     if (active) {
@@ -134,7 +189,7 @@ export default function BottomNav({
 
     if (!token && item.requiresAuth) {
       navigate(
-        `/auth?next=${encodeURIComponent(item.path)}&reason=${encodeURIComponent('마이페이지는 로그인이 필요한 서비스입니다.')}`,
+        `/auth?next=${encodeURIComponent(item.path)}&reason=${encodeURIComponent('留덉씠?섏씠吏??濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.')}`,
       );
       return;
     }
@@ -152,7 +207,7 @@ export default function BottomNav({
 
     if (!token) {
       navigate(
-        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`,
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('寃쏀뿕 ?묒꽦? 濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.')}`,
       );
       return;
     }
@@ -160,49 +215,45 @@ export default function BottomNav({
     navigate('/create');
   }
 
+  const resolvedAccessory =
+    accessory ??
+    (showFab ? (
+      <DefaultFabMenu
+        expanded={expanded}
+        onToggle={() => {
+          if (onFabToggle) {
+            onFabToggle();
+            return;
+          }
+
+          setInternalExpanded((current) => !current);
+        }}
+        onCreateClick={handleCreateClick}
+      />
+    ) : null);
+
+  const hasAccessory = Boolean(resolvedAccessory);
+  const accessoryLayoutClass =
+    accessoryLayout === 'between'
+      ? 'justify-between'
+      : accessoryLayout === 'center'
+        ? 'justify-center'
+        : 'justify-end';
+
   return (
-    <div className="fixed bottom-0 left-1/2 z-40 h-[94px] w-full max-w-[375px] -translate-x-1/2">
-      {showFab ? (
-        <div className="pointer-events-none absolute bottom-[98px] left-1/2 flex w-[343px] -translate-x-1/2 justify-end">
-          <div className="pointer-events-auto relative h-[36px] w-[122px]">
-            {expanded ? (
-              <button
-                type="button"
-                onClick={handleCreateClick}
-                className="absolute right-0 top-[-52px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-                aria-label="경험 작성 열기"
-              >
-                <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
-              </button>
-            ) : null}
+    <div
+      className="pointer-events-none fixed bottom-0 left-1/2 z-40 w-full max-w-[375px] -translate-x-1/2"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
+      {hasAccessory ? <div className="absolute inset-x-0 bottom-0 h-[152px] bg-white" /> : null}
 
-            <button
-              type="button"
-              onClick={() => {
-                if (onFabToggle) {
-                  onFabToggle();
-                  return;
-                }
-
-                setInternalExpanded((current) => !current);
-              }}
-              className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full ${
-                expanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
-              }`}
-              aria-label={expanded ? '경험 작성 닫기' : '경험 작성'}
-            >
-              {expanded ? (
-                <X size={20} strokeWidth={2.2} color="#FFFFFF" />
-              ) : (
-                <img src={plusIcon} alt="" className="h-[18px] w-[18px]" />
-              )}
-            </button>
-          </div>
+      {hasAccessory ? (
+        <div className={`absolute inset-x-0 bottom-[84px] flex h-[68px] items-center px-[24px] py-[16px] ${accessoryLayoutClass}`}>
+          {resolvedAccessory}
         </div>
       ) : null}
 
-      <nav className="flex h-[84px] w-full items-start justify-between rounded-tl-[20px] rounded-tr-[20px] bg-white px-[40px] pb-[32px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
+      <nav className="pointer-events-auto relative flex h-[84px] w-full items-start justify-between rounded-t-[20px] bg-white px-[40px] pb-[32px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
         {NAV_ITEMS.map((item) => {
           const isActive = visualActive === item.key;
 
@@ -217,11 +268,12 @@ export default function BottomNav({
               <img
                 src={item.icon}
                 alt=""
-                className="h-[24px] w-[24px]"
-                style={{ filter: isActive ? ACTIVE_ICON_FILTER : INACTIVE_ICON_FILTER }}
+                aria-hidden="true"
+                className="block h-[24px] w-[24px]"
+                style={{ filter: buildIconFilter(isActive) }}
               />
               <span
-                className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-none ${
+                className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
                   isActive ? 'font-[600] text-[#5A876E]' : 'font-[400] text-black'
                 }`}
               >

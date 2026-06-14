@@ -14,6 +14,7 @@ import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import userIcon from '../assets/figma-downloaded-icons/home/User.svg';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
 import HorizontalScroll from '../components/common/HorizontalScroll';
+import BottomNav from '../components/layout/BottomNav';
 import { ErrorState, ListSkeleton } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import {
@@ -845,6 +846,60 @@ function ExploreBottomBar({
   );
 }
 
+function SharedExploreBottomBar({
+  feedMode,
+  fabExpanded,
+  onFeedChange,
+  onToggleFab,
+  onCreateClick,
+}: {
+  feedMode: FeedMode;
+  fabExpanded: boolean;
+  onFeedChange: (value: FeedMode) => void;
+  onToggleFab: () => void;
+  onCreateClick: () => void;
+}) {
+  const navigate = useNavigate();
+
+  return (
+    <BottomNav
+      active="explore"
+      accessoryLayout="between"
+      accessory={
+        <>
+          <div className="h-[36px] w-[36px]" aria-hidden="true" />
+          <div className="pointer-events-auto">
+            <FeedSegment feedMode={feedMode} onChange={onFeedChange} />
+          </div>
+          <div className="pointer-events-auto relative flex h-[36px] w-[36px] items-center justify-end">
+            {fabExpanded ? (
+              <div className="absolute bottom-[52px] right-0 flex flex-col gap-[12px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)]">
+                <button type="button" onClick={() => navigate('/coming-soon')} className="flex items-center gap-[8px] whitespace-nowrap">
+                  <img src={subtractIcon} alt="" className="h-[17px] w-[17px]" />
+                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black" style={textFeatureStyle}>
+                    AI 梨쀫큸
+                  </span>
+                </button>
+                <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
+                  <img src={edit3Icon} alt="" className="h-[20px] w-[20px]" />
+                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black" style={textFeatureStyle}>
+                    寃쏀뿕 ?묒꽦
+                  </span>
+                </button>
+              </div>
+            ) : null}
+            <button type="button" onClick={onToggleFab} className="flex h-[36px] w-[36px] items-center justify-center rounded-[999px] bg-[#5A876E] p-[2px]" aria-label="?묒꽦 硫붾돱">
+              <img src={plusIcon} alt="" className="h-[20px] w-[20px]" />
+            </button>
+          </div>
+        </>
+      }
+    />
+  );
+}
+
+void ExploreBottomBar;
+
 export default function ExploreV2() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -1241,7 +1296,7 @@ export default function ExploreV2() {
           )}
         </main>
 
-        <ExploreBottomBar
+        <SharedExploreBottomBar
           feedMode={feedMode}
           fabExpanded={fabExpanded}
           onFeedChange={setFeedMode}

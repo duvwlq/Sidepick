@@ -895,9 +895,10 @@ function FloatingActionsExact() {
   const [fabExpanded, setFabExpanded] = useState(() => new URLSearchParams(location.search).get('fab') === 'open');
 
   return (
-    <>
-      <div className="pointer-events-none fixed bottom-0 left-1/2 z-[19] h-[152px] w-full max-w-[375px] -translate-x-1/2 bg-white" />
-      <div className="pointer-events-none fixed bottom-[84px] left-1/2 z-20 flex h-[68px] w-full max-w-[375px] -translate-x-1/2 items-center justify-end px-[24px] py-[16px]">
+    <BottomNav
+      active="home"
+      accessoryLayout="end"
+      accessory={
         <div className="relative flex h-[36px] w-[36px] items-center justify-center">
           <div
             className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
@@ -925,7 +926,7 @@ function FloatingActionsExact() {
           </div>
           <button
             type="button"
-            aria-label="?뚮줈???묒꽦 硫붾돱"
+            aria-label="플로팅 액션 메뉴"
             aria-expanded={fabExpanded}
             onClick={() => setFabExpanded((prev) => !prev)}
             className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-[999px] bg-[#5A876E] p-[2px]"
@@ -933,9 +934,8 @@ function FloatingActionsExact() {
             <img src={plusIcon} alt="" className="h-[20px] w-[20px]" />
           </button>
         </div>
-      </div>
-      <BottomNav active="home" showFab={false} />
-    </>
+      }
+    />
   );
 }
 

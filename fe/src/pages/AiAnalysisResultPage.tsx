@@ -1,5 +1,5 @@
 import { LoaderCircle } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { ErrorState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
@@ -58,13 +58,13 @@ export default function AiAnalysisResultPage() {
     (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
       requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR);
 
-  const scheduleRedirect = (targetExperienceId: string) => {
+  const scheduleRedirect = useCallback((targetExperienceId: string) => {
     cleanupTimers();
     setPhase('completed');
     completeRef.current = window.setTimeout(() => {
       setRedirectTarget(targetExperienceId);
     }, completeDelayMs);
-  };
+  }, []);
 
   useEffect(() => {
     if (error) {
@@ -191,7 +191,7 @@ export default function AiAnalysisResultPage() {
       mounted = false;
       cleanupTimers();
     };
-  }, [experienceId, navigate, pendingCreate, storedUser?.nickname, token]);
+  }, [experienceId, navigate, pendingCreate, scheduleRedirect, storedUser?.nickname, token]);
 
   const displayName = useMemo(() => nickname || '사용자', [nickname]);
 

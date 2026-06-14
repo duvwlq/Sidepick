@@ -19,8 +19,8 @@ import helpIcon from '../assets/detail-v2-zip-icons/사례 탐색 v.2 - 검색�
 import moreVerticalIcon from '../assets/detail-v2-zip-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/More vertical.svg';
 import plusIcon from '../assets/detail-v2-zip-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Plus.svg';
 import uploadIcon from '../assets/detail-v2-zip-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/upload.svg';
-import type { Experience } from '../lib/api';
-import { bookmarkExperience, getBookmarkStatus, getExperience, getExperienceShare, getRelatedSuccessCases, unbookmarkExperience } from '../lib/api';
+import type { Experience, SimilarExperienceMatch } from '../lib/api';
+import { bookmarkExperience, getBookmarkStatus, getExperience, getExperienceShare, getSimilarExperiences, unbookmarkExperience } from '../lib/api';
 import { publishBookmarkSync } from '../lib/bookmark-sync';
 import { extractExperienceImageUrls } from '../lib/experience-images';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
@@ -34,7 +34,7 @@ type DetailMetric = {
 
 type RelatedCardModel = {
   id: number;
-  statusLabel: '실패' | '성공';
+  statusLabel: string;
   similarity: number;
   thumbnailUrl?: string | null;
   category: string;
@@ -62,8 +62,7 @@ type DetailViewModel = {
   guideLines: string[];
   guideClosing: string;
   patternRows: Array<{ label: string; percent: number }>;
-  failureCard: RelatedCardModel;
-  successCards: RelatedCardModel[];
+  similarCards: RelatedCardModel[];
 };
 
 const DETAIL_FIXTURE_VIEW_MODEL: DetailViewModel = {
@@ -72,7 +71,7 @@ const DETAIL_FIXTURE_VIEW_MODEL: DetailViewModel = {
   categoryName: '온라인 판매·이커머스',
   title: '온라인 판매·이커머스 경험',
   contentText:
-    '쿠팡 위탁판매를 부업으로 시작했는데 초기 고객 유입이 거의 없어서 광고와 상품 구성을 여러 번 바꿨습니다. 본업과 병행하다 보니 운영 시간이 부족했고 한 달 정도 진행한 뒤 중단했습니다.',
+    '쿠팡 위탁판매를 부업으로 시작했는데 초기 고객 유입이 거의 없어서 광고와 상품 구성을 여러 번 바꿨습니다. 본업과 병행하다 보니 운영 시간도 부족했고 결국 한 달 정도 진행한 뒤 중단했습니다.',
   imageUrls: [],
   topTags: ['온라인 판매·이커머스', '온라인 판매·이커머스', '고객 확보(마케팅)', '기타'],
   metrics: [
@@ -83,9 +82,9 @@ const DETAIL_FIXTURE_VIEW_MODEL: DetailViewModel = {
   issueChips: ['초기유입부족', '광고전략미흡', '운영시간부족', '고객 확보(마케팅)'],
   guideSummary: '쿠팡 위탁판매 초기 고객 유입 실패로 1개월 만에 중단',
   guideLines: [
-    '첫 달 목표를 매출보다 유입 30명 만들기로 좁혀 보세요. 상품 사진과 상세페이지의 첫 문장부터 먼저 다듬는 편이 낫습니다.',
-    '유사 상품 리뷰를 읽으며 사람들이 불편해하는 지점을 메모하고, 그 해결 문장을 상세페이지 첫 문단에 반영해 보세요.',
-    '하루 한 번이라도 광고와 검색 유입 키워드를 체크하면서 상품명과 썸네일 문구를 짧게 반복 보정하는 편이 좋습니다.',
+    '첫 달 목표를 매출보다 유입 30명 만들기로 좁혀 보세요. 상품 사진과 상세페이지는 첫 문장부터 먼저 손보는 편이 낫습니다.',
+    '유사 상품 리뷰를 읽으면서 사람들이 불편해하는 지점을 메모하고, 그 해결 문장을 상세페이지 첫 문단에 반영해 보세요.',
+    '하루 한 번이라도 광고와 검색 유입 키워드를 체크하면서 상품명과 썸네일 문구를 반복 보정하는 편이 좋습니다.',
   ],
   guideClosing: '처음에는 작은 시도들이 쌓이면서 변화가 생기기 때문에 하루에 한 가지씩만 꾸준히 시도해도 충분합니다.',
   patternRows: [
@@ -93,40 +92,24 @@ const DETAIL_FIXTURE_VIEW_MODEL: DetailViewModel = {
     { label: '초기유입부족', percent: 30 },
     { label: '광고전략미흡', percent: 20 },
   ],
-  failureCard: {
-    id: 10111,
-    statusLabel: '실패',
-    similarity: 99,
-    thumbnailUrl: null,
-    category: '온라인 판매·이커머스',
-    keywords: ['고객확보', '마케팅부족'],
-    title: '온라인 판매·이커머스 경험',
-    preview: '쿠팡 위탁판매를 부업으로 시작했는데 초기 고객 유입이 거의 없어서 광고와 상품 구성을 계속 바꿨습니다.',
-    nickname: 'qa324484',
-    createdAt: '2026.06.12',
-    viewCount: 36,
-    likeCount: 0,
-    bookmarkCount: 0,
-  },
-  successCards: [
+  similarCards: [
     {
-      id: 10001,
-      statusLabel: '성공',
+      id: 10111,
+      statusLabel: '실패',
       similarity: 99,
       thumbnailUrl: null,
       category: '온라인 판매·이커머스',
-      keywords: ['키워드', '키워드'],
-      title: '직장인 부업 추천',
-      preview: '40번째 답변 ej**** 지존 본인 입력 포함 정보 상세 안내를 볼 수 있습니다.',
-      nickname: 'sidepick-import',
-      createdAt: '2026.04.01',
-      viewCount: 4,
+      keywords: ['고객확보', '마케팅부족'],
+      title: '온라인 판매·이커머스 경험',
+      preview: '쿠팡 위탁판매를 부업으로 시작했는데 초기 고객 유입이 거의 없어서 광고와 상품 구성을 계속 바꿨습니다.',
+      nickname: 'qa324484',
+      createdAt: '2026.06.12',
+      viewCount: 36,
       likeCount: 0,
       bookmarkCount: 0,
     },
   ],
 };
-
 function sanitizeText(value: string | null | undefined, fallback: string) {
   const normalized = (value ?? '').replace(/\s+/g, ' ').trim();
   return normalized || fallback;
@@ -220,17 +203,22 @@ function buildTopTags(experience: Experience) {
   return tags.slice(0, 4);
 }
 
-function buildRelatedCardModel(experience: Experience, statusLabel: '실패' | '성공'): RelatedCardModel {
+function buildRelatedCardModel(
+  experience: Experience,
+  options?: {
+    similarity?: number;
+    keywords?: string[];
+  },
+): RelatedCardModel {
   const imageUrls = extractExperienceImageUrls(experience);
-  const keywords = [
-    sanitizeText(experience.analysis?.keywords?.[0], '키워드'),
-    sanitizeText(experience.analysis?.keywords?.[1], '키워드'),
-  ];
-
+  const keywords = (options?.keywords?.length ? options.keywords : experience.analysis?.keywords ?? [])
+    .map((item) => sanitizeText(item, '키워드'))
+    .filter(Boolean)
+    .slice(0, 2);
   return {
     id: experience.id,
-    statusLabel,
-    similarity: 99,
+    statusLabel: '실패',
+    similarity: options?.similarity ?? 99,
     thumbnailUrl: imageUrls[0] ?? null,
     category: sanitizeText(experience.category?.name, '카테고리'),
     keywords,
@@ -243,12 +231,10 @@ function buildRelatedCardModel(experience: Experience, statusLabel: '실패' | '
     bookmarkCount: experience.bookmarkCount ?? 0,
   };
 }
-
-function buildDetailViewModel(experience: Experience, successCases: Experience[]): DetailViewModel {
+function buildDetailViewModel(experience: Experience, similarCases: SimilarExperienceMatch[]): DetailViewModel {
   const imageUrls = extractExperienceImageUrls(experience);
   const guideLines = buildGuideLines(experience);
   const summary = sanitizeText(guideLines[0], DETAIL_FIXTURE_VIEW_MODEL.guideSummary);
-
   return {
     authorName: sanitizeText(experience.author?.nickname, '닉네임'),
     createdAt: formatDate(experience.createdAt),
@@ -267,11 +253,14 @@ function buildDetailViewModel(experience: Experience, successCases: Experience[]
     guideLines,
     guideClosing: DETAIL_FIXTURE_VIEW_MODEL.guideClosing,
     patternRows: buildPatternRows(experience),
-    failureCard: buildRelatedCardModel(experience, '실패'),
-    successCards: successCases.slice(0, 1).map((item) => buildRelatedCardModel(item, '성공')),
+    similarCards: similarCases.map((item) =>
+      buildRelatedCardModel(item.similarExperience, {
+        similarity: Math.max(0, Math.min(99, Math.round(item.similarityScore))),
+        keywords: item.matchingFactors,
+      }),
+    ),
   };
 }
-
 function StatusBar() {
   return (
     <div className="flex h-[44px] items-center justify-between px-[24px] pt-[6px]">
@@ -363,9 +352,9 @@ function SimilarCard({ card, onClick }: { card: RelatedCardModel; onClick?: () =
       <div className="mt-auto flex items-center justify-between pt-[8px]">
         <div className="flex items-start gap-[4px] font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">
           <span>{card.nickname}</span>
-          <span>•</span>
+          <span>·</span>
           <span>{card.createdAt}</span>
-          <span>•</span>
+          <span>·</span>
           <div className="flex items-center gap-[2px]">
             <span>조회</span>
             <span>{card.viewCount}</span>
@@ -400,7 +389,7 @@ export default function DetailV2() {
   const accessToken = getAccessToken();
 
   const [experience, setExperience] = useState<Experience | null>(null);
-  const [successCases, setSuccessCases] = useState<Experience[]>([]);
+  const [similarCases, setSimilarCases] = useState<SimilarExperienceMatch[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [fabExpanded, setFabExpanded] = useState(false);
@@ -409,7 +398,7 @@ export default function DetailV2() {
   useEffect(() => {
     if (isFixtureMode) {
       setExperience(null);
-      setSuccessCases([]);
+      setSimilarCases([]);
       setLoading(false);
       setError('');
       return;
@@ -417,7 +406,7 @@ export default function DetailV2() {
 
     if (!experienceId || !Number.isFinite(experienceId)) {
       setLoading(false);
-      setError('유효한 사례를 찾을 수 없습니다.');
+      setError('?좏슚???щ?瑜?李얠쓣 ???놁뒿?덈떎.');
       return;
     }
 
@@ -429,12 +418,12 @@ export default function DetailV2() {
       setError('');
       try {
         const detail = await getExperience(targetExperienceId);
-        const related = await getRelatedSuccessCases(targetExperienceId, 2).catch(() => []);
+        const related = await getSimilarExperiences(targetExperienceId, 2).catch(() => []);
         if (cancelled) {
           return;
         }
         setExperience(detail);
-        setSuccessCases(related);
+        setSimilarCases(related);
 
         if (accessToken) {
           try {
@@ -450,7 +439,7 @@ export default function DetailV2() {
         }
       } catch (requestError) {
         if (!cancelled) {
-          setError(resolveErrorMessage(requestError, '사례 상세를 불러오지 못했습니다.'));
+          setError(resolveErrorMessage(requestError, '?щ? ?곸꽭瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲??'));
         }
       } finally {
         if (!cancelled) {
@@ -470,7 +459,7 @@ export default function DetailV2() {
       return;
     }
     if (!accessToken) {
-      navigate(`/auth?next=${encodeURIComponent(`/experiences/${experience.id}`)}&reason=${encodeURIComponent('북마크는 로그인이 필요한 서비스입니다.')}`);
+      navigate(`/auth?next=${encodeURIComponent(`/experiences/${experience.id}`)}&reason=${encodeURIComponent('遺곷쭏?щ뒗 濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.')}`);
       return;
     }
 
@@ -483,9 +472,9 @@ export default function DetailV2() {
         bookmarked: payload.bookmarked,
         bookmarkCount: payload.bookmarkCount,
       });
-      showToast(payload.bookmarked ? '북마크에 저장했어요.' : '북마크를 해제했어요.');
+      showToast(payload.bookmarked ? '遺곷쭏?ъ뿉 ??ν뻽?댁슂.' : '遺곷쭏?щ? ?댁젣?덉뼱??');
     } catch (bookmarkError) {
-      showToast(resolveErrorMessage(bookmarkError, '북마크 처리에 실패했습니다.'));
+      showToast(resolveErrorMessage(bookmarkError, '遺곷쭏??泥섎━???ㅽ뙣?덉뒿?덈떎.'));
     }
   }
 
@@ -501,12 +490,12 @@ export default function DetailV2() {
       }
       if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(payload.shareUrl);
-        showToast('공유 링크를 복사했어요.');
+        showToast('怨듭쑀 留곹겕瑜?蹂듭궗?덉뼱??');
         return;
       }
       showToast(payload.shareUrl);
     } catch (shareError) {
-      showToast(resolveErrorMessage(shareError, '공유 정보를 불러오지 못했습니다.'));
+      showToast(resolveErrorMessage(shareError, '怨듭쑀 ?뺣낫瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲??'));
     }
   }
 
@@ -517,7 +506,7 @@ export default function DetailV2() {
   function handleCreateClick() {
     setFabExpanded(false);
     if (!accessToken) {
-      navigate(`/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`);
+      navigate(`/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('寃쏀뿕 ?묒꽦? 濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.')}`);
       return;
     }
     navigate('/create');
@@ -527,13 +516,13 @@ export default function DetailV2() {
     if (isFixtureMode || !experience) {
       return DETAIL_FIXTURE_VIEW_MODEL;
     }
-    return buildDetailViewModel(experience, successCases);
-  }, [experience, isFixtureMode, successCases]);
+    return buildDetailViewModel(experience, similarCases);
+  }, [experience, isFixtureMode, similarCases]);
 
   if (loading && !isFixtureMode) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white px-[16px] py-[40px]">
-        <LoadingState message="사례 상세를 불러오는 중입니다." />
+        <LoadingState message="?щ? ?곸꽭瑜?遺덈윭?ㅻ뒗 以묒엯?덈떎." />
       </div>
     );
   }
@@ -541,7 +530,7 @@ export default function DetailV2() {
   if ((error || !viewModel) && !isFixtureMode) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white px-[16px] py-[40px]">
-        <ErrorState message={error || '사례를 불러오지 못했습니다.'} />
+        <ErrorState message={error || '?щ?瑜?遺덈윭?ㅼ? 紐삵뻽?듬땲??'} />
       </div>
     );
   }
@@ -552,11 +541,11 @@ export default function DetailV2() {
         <div className="sticky top-0 z-30 bg-white">
           <StatusBar />
           <div className="flex h-[64px] items-center justify-between bg-white px-[16px] py-[20px]">
-            <button type="button" onClick={() => navigate(-1)} className="flex h-[24px] w-[24px] items-center justify-center" aria-label="뒤로가기">
+            <button type="button" onClick={() => navigate(-1)} className="flex h-[24px] w-[24px] items-center justify-center" aria-label="뒤로 가기">
               <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
             </button>
             <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">사례 상세</p>
-            <button type="button" onClick={handleBookmarkToggle} className="flex h-[24px] w-[24px] items-center justify-center" aria-label={bookmarked ? '북마크 해제' : '북마크 저장'}>
+            <button type="button" onClick={handleBookmarkToggle} className="flex h-[24px] w-[24px] items-center justify-center" aria-label={bookmarked ? '북마크 해제' : '북마크 추가'}>
               <HeaderBookmarkIcon active={bookmarked} className="h-[24px] w-[24px]" />
             </button>
           </div>
@@ -697,23 +686,18 @@ export default function DetailV2() {
                     </svg>
                   </span>
                 </div>
-                <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">이 사례와 비슷한 경험을 가진 다른 사례들을 추천해드립니다.</p>
+                <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">이 사례와 유사한 실패 경험을 가진 다른 사례를 추천해드립니다.</p>
               </div>
 
               <div className="pt-[12px]">
                 <p className="pb-[4px] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-[#5A876E]">실패 사례</p>
-                <SimilarCard card={viewModel.failureCard} onClick={() => navigate(`/experiences/${viewModel.failureCard.id}`)} />
-              </div>
-
-              <div className="pt-[12px]">
-                <p className="pb-[4px] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-[#5A876E]">성공 사례</p>
-                {viewModel.successCards.length ? (
-                  viewModel.successCards.map((card) => (
+                {viewModel.similarCards.length ? (
+                  viewModel.similarCards.map((card) => (
                     <SimilarCard key={card.id} card={card} onClick={() => navigate(`/experiences/${card.id}`)} />
                   ))
                 ) : (
                   <div className="rounded-[4px] bg-[#F8F8F8] px-[16px] py-[20px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
-                    아직 등록된 성공 사례가 없습니다.
+                    유사한 실패 사례가 아직 없습니다.
                   </div>
                 )}
               </div>
@@ -727,30 +711,38 @@ export default function DetailV2() {
           </section>
         </main>
 
-        <div className="pointer-events-none fixed bottom-0 left-1/2 z-[19] h-[152px] w-full max-w-[375px] -translate-x-1/2 bg-white" />
-        <div className="pointer-events-none fixed bottom-[84px] left-1/2 z-20 flex h-[68px] w-full max-w-[375px] -translate-x-1/2 items-center justify-between px-[24px] py-[16px]">
-          <button type="button" onClick={moveToGuide} className="pointer-events-auto inline-flex h-[36px] w-[208px] items-center justify-center gap-[4px] rounded-[999px] bg-[#375E49] px-[12px]">
-            <img src={helpIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 invert" />
-            <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#F8F8F8]">해당 부업 가이드 바로가기</span>
-            <img src={chevronIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 invert" />
-          </button>
+        <BottomNav
+          active="explore"
+          showFab={false}
+          onCreateClick={handleCreateClick}
+          accessoryLayout="between"
+          accessory={
+            <>
+              <button type="button" onClick={moveToGuide} className="pointer-events-auto inline-flex h-[36px] w-[208px] items-center justify-center gap-[4px] rounded-[999px] bg-[#5A876E] px-[12px]">
+                <img src={helpIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 invert" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#F8F8F8]">해당 부업 가이드 바로가기</span>
+                <img src={chevronIcon} alt="" className="h-[16px] w-[16px] shrink-0 brightness-0 invert" />
+              </button>
 
-          <div className="pointer-events-auto relative h-[36px] w-[36px]">
-            <button
-              type="button"
-              onClick={() => setFabExpanded((current) => !current)}
-              className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full ${
-                fabExpanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
-              }`}
-              aria-label={fabExpanded ? '경험 작성 닫기' : '경험 작성'}
-            >
-              <img src={plusIcon} alt="" className={`h-[20px] w-[20px] ${fabExpanded ? 'brightness-0 invert' : ''}`} />
-            </button>
-          </div>
-        </div>
-
-        <BottomNav active="explore" showFab={false} onCreateClick={handleCreateClick} />
+              <div className="pointer-events-auto relative h-[36px] w-[36px]">
+                <button
+                  type="button"
+                  onClick={() => setFabExpanded((current) => !current)}
+                  className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full ${
+                    fabExpanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
+                  }`}
+                  aria-label={fabExpanded ? '경험 작성 닫기' : '경험 작성'}
+                >
+                  <img src={plusIcon} alt="" className={`h-[20px] w-[20px] ${fabExpanded ? 'brightness-0 invert' : ''}`} />
+                </button>
+              </div>
+            </>
+          }
+        />
       </div>
     </div>
   );
 }
+
+
+

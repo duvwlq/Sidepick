@@ -126,6 +126,13 @@ export type MatchedCase = {
   explanation?: SimilarCaseExplanation | null;
 };
 
+export type SimilarExperienceMatch = {
+  similarExperience: Experience;
+  similarityScore: number;
+  matchingFactors: string[];
+  differenceFactors: string[];
+};
+
 export type AnalysisReportSimilarCase = {
   caseId: string;
   title: string;
@@ -466,6 +473,10 @@ export function getExperienceShare(id: number | string) {
 
 export function getRelatedSuccessCases(id: number | string, limit = 10) {
   return request<Experience[]>(`/experiences/${id}/success-cases?limit=${limit}`);
+}
+
+export function getSimilarExperiences(id: number | string, limit = 10) {
+  return request<SimilarExperienceMatch[]>(`/experiences/${id}/similar?limit=${limit}`);
 }
 
 export function compareExperiences(experienceIds: number[]) {

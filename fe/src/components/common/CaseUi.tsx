@@ -1,6 +1,6 @@
 import { Heart } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
-import { buttonClassName } from './Button';
+import { buttonClassName } from './button-class-name';
 
 type ChipTone = 'type' | 'status-success' | 'status-failure' | 'category' | 'keyword';
 

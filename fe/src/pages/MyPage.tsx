@@ -201,9 +201,9 @@ export default function MyPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const token = getAccessToken();
+  const activeTab = getTopTabFromPath(location.pathname);
 
   const [authRequired, setAuthRequired] = useState(!token);
-  const [activeTab, setActiveTab] = useState<TopTab>(() => getTopTabFromPath(location.pathname));
   const [writtenExperiences, setWrittenExperiences] = useState<Experience[]>([]);
   const [bookmarkedExperiences, setBookmarkedExperiences] = useState<Experience[]>([]);
   const [recentExperiences, setRecentExperiences] = useState<Experience[]>([]);
@@ -217,26 +217,9 @@ export default function MyPage() {
   const [sortMenuOpen, setSortMenuOpen] = useState(false);
 
   useEffect(() => {
-    setActiveTab(getTopTabFromPath(location.pathname));
-    setSortMenuOpen(false);
-  }, [location.pathname]);
-
-  useEffect(() => {
     if (!token) {
-      setAuthRequired(true);
-      setWrittenLoading(false);
-      setBookmarkLoading(false);
-      setRecentLoading(false);
       return;
     }
-
-    setAuthRequired(false);
-    setWrittenLoading(true);
-    setBookmarkLoading(true);
-    setRecentLoading(true);
-    setWrittenError('');
-    setBookmarkError('');
-    setRecentError('');
 
     void getMyExperiences(token)
       .then(setWrittenExperiences)
@@ -380,9 +363,30 @@ export default function MyPage() {
 
         <div className="border-b border-[#F1F1F1]">
           <div className="flex">
-            <TabButton active={activeTab === 'written'} label="작성한 글" onClick={() => navigate('/mypage/written')} />
-            <TabButton active={activeTab === 'bookmarked'} label="북마크" onClick={() => navigate('/mypage/bookmarks')} />
-            <TabButton active={activeTab === 'recent'} label="최근 본 글" onClick={() => navigate('/mypage/recent')} />
+            <TabButton
+              active={activeTab === 'written'}
+              label="작성한 글"
+              onClick={() => {
+                setSortMenuOpen(false);
+                navigate('/mypage/written');
+              }}
+            />
+            <TabButton
+              active={activeTab === 'bookmarked'}
+              label="북마크"
+              onClick={() => {
+                setSortMenuOpen(false);
+                navigate('/mypage/bookmarks');
+              }}
+            />
+            <TabButton
+              active={activeTab === 'recent'}
+              label="최근 본 글"
+              onClick={() => {
+                setSortMenuOpen(false);
+                navigate('/mypage/recent');
+              }}
+            />
           </div>
           <div className="flex items-center justify-between px-[16px] py-[10px]">
             <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#131416]">{currentCount}</span>

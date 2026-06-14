@@ -1,4 +1,4 @@
-import { ChevronLeft, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+﻿import { ChevronLeft, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorState, LoadingState, PageMessage } from '../common/Skeleton';
@@ -98,10 +98,10 @@ function SimilarCaseCard({
       onClick={onClick}
       className="flex w-full flex-col items-start gap-[8px] rounded-[10px] bg-[#F8F8F8] p-[16px] text-left"
     >
-      <FilledBadge text="사례" tone="green" />
+      <FilledBadge text="?щ?" tone="green" />
       <p className="text-[14px] font-[500] leading-[17px] text-[#131416]">{title}</p>
       {summary ? <p className="line-clamp-3 text-[12px] leading-[17px] text-[#494949]">{summary}</p> : null}
-      <p className="text-[12px] leading-[17px] text-[#8A8A8A]">유사도 {similarity}%</p>
+      <p className="text-[12px] leading-[17px] text-[#8A8A8A]">?좎궗??{similarity}%</p>
     </button>
   );
 }
@@ -130,7 +130,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   useEffect(() => {
     if (!experienceId) {
       setLoading(false);
-      setError('요청한 사례를 찾을 수 없어요.');
+      setError('?붿껌???щ?瑜?李얠쓣 ???놁뼱??');
       return;
     }
 
@@ -207,11 +207,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       setReport(reportPayload);
     } catch (requestError) {
       if (shouldUseDevFallback(requestError)) {
-        setError('개발 환경에서 API 서버에 연결하지 못했어요.');
+        setError('媛쒕컻 ?섍꼍?먯꽌 API ?쒕쾭???곌껐?섏? 紐삵뻽?댁슂.');
         return;
       }
 
-      setError(resolveErrorMessage(requestError, '사례 상세를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'));
+      setError(resolveErrorMessage(requestError, '?щ? ?곸꽭瑜?遺덈윭?ㅼ? 紐삵뻽?댁슂. ?좎떆 ???ㅼ떆 ?쒕룄??二쇱꽭??'));
     } finally {
       setLoading(false);
     }
@@ -224,11 +224,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
     const token = getAccessToken();
     if (!token) {
-      setError('삭제하려면 로그인이 필요합니다.');
+      setError('??젣?섎젮硫?濡쒓렇?몄씠 ?꾩슂?⑸땲??');
       return;
     }
 
-    if (!window.confirm('이 사례를 삭제할까요?')) {
+    if (!window.confirm('???щ?瑜???젣?좉퉴??')) {
       return;
     }
 
@@ -237,10 +237,10 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
     try {
       await deleteExperience(token, experience.id);
-      setFlashToast('삭제했어요.');
+      setFlashToast('??젣?덉뼱??');
       navigate('/', { replace: true });
     } catch (requestError) {
-      setError(resolveErrorMessage(requestError, '사례를 삭제하지 못했어요.'));
+      setError(resolveErrorMessage(requestError, '?щ?瑜???젣?섏? 紐삵뻽?댁슂.'));
       setDeleting(false);
     }
   }
@@ -258,7 +258,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
     const token = getAccessToken();
     if (!token) {
       navigate(
-        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 등록은 로그인이 필요한 서비스입니다.')}`,
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('寃쏀뿕 ?깅줉? 濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.')}`,
       );
       return;
     }
@@ -271,7 +271,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       return [];
     }
 
-    return [experience.businessType || '사례', experience.category.name, ...experience.failureReasons.slice(0, 2)].filter(Boolean);
+    return [experience.businessType || '?щ?', experience.category.name, ...experience.failureReasons.slice(0, 2)].filter(Boolean);
   }, [experience]);
 
   const imageUrls = useMemo(() => (experience ? extractExperienceImageUrls(experience) : []), [experience]);
@@ -283,14 +283,14 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   const issueItems = useMemo(() => (report?.reportStatus === 'READY' ? buildIssueItems(report) : []), [report]);
   const patternItems = useMemo(() => (report?.reportStatus === 'READY' ? buildPatternItems(report) : []), [report]);
   const similarCases = useMemo(() => mappedReport?.similarCases.slice(0, 2) ?? [], [mappedReport]);
-  const aiSummary = useMemo(() => report?.summary?.trim() || '아직 AI 요약이 준비되지 않았어요.', [report]);
+  const aiSummary = useMemo(() => report?.summary?.trim() || '?꾩쭅 AI ?붿빟??以鍮꾨릺吏 ?딆븯?댁슂.', [report]);
   const aiAdvice = useMemo(() => report?.advice?.slice(0, 3) ?? [], [report]);
 
   if (loading) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
         <div className="px-[16px] py-[40px]">
-          <LoadingState message="사례를 불러오는 중입니다." />
+          <LoadingState message="?щ?瑜?遺덈윭?ㅻ뒗 以묒엯?덈떎." />
         </div>
       </div>
     );
@@ -300,7 +300,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
         <div className="px-[16px] py-[40px]">
-          <ErrorState message={error || '사례를 불러오지 못했어요.'} />
+          <ErrorState message={error || '?щ?瑜?遺덈윭?ㅼ? 紐삵뻽?댁슂.'} />
         </div>
       </div>
     );
@@ -309,7 +309,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   return (
     <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
       {actionMenuOpen ? (
-        <button type="button" aria-label="메뉴 닫기" onClick={() => setActionMenuOpen(false)} className="fixed inset-0 z-40 bg-transparent" />
+        <button type="button" aria-label="硫붾돱 ?リ린" onClick={() => setActionMenuOpen(false)} className="fixed inset-0 z-40 bg-transparent" />
       ) : null}
 
       <div className="relative min-h-screen bg-white pb-[180px]">
@@ -324,13 +324,13 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                 }
                 navigate('/explore');
               }}
-              aria-label="뒤로가기"
+              aria-label="뒤로 가기"
               className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
             >
               <ChevronLeft size={24} strokeWidth={1.75} />
             </button>
 
-            <p className="text-[16px] font-[600] leading-[19px] text-[#000000]">사례 상세</p>
+            <p className="text-[16px] font-[600] leading-[19px] text-[#000000]">?щ? ?곸꽭</p>
 
             <button
               type="button"
@@ -340,7 +340,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                 if (!token) {
                   navigate(
                     `/auth?next=${encodeURIComponent(`/experiences/${experience.id}`)}&reason=${encodeURIComponent(
-                      '북마크는 로그인이 필요한 서비스입니다.',
+                      '遺곷쭏?щ뒗 濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.',
                     )}`,
                   );
                   return;
@@ -349,10 +349,10 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                 void (bookmarked ? unbookmarkExperience(token, experience.id) : bookmarkExperience(token, experience.id))
                   .then((payload) => {
                     setBookmarked(payload.bookmarked);
-                    showToast(payload.bookmarked ? '북마크에 저장했어요.' : '북마크를 해제했어요.');
+                    showToast(payload.bookmarked ? '遺곷쭏?ъ뿉 ??ν뻽?댁슂.' : '遺곷쭏?щ? ?댁젣?덉뼱??');
                   })
                   .catch((requestError) => {
-                    setError(resolveErrorMessage(requestError, '북마크를 처리하지 못했어요.'));
+                    setError(resolveErrorMessage(requestError, '遺곷쭏?щ? 泥섎━?섏? 紐삵뻽?댁슂.'));
                   });
               }}
               className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
@@ -401,7 +401,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                         className="flex items-center gap-[6px] rounded-[8px] px-[10px] py-[8px] text-left text-[12px] font-[500] leading-[17px] text-[#D33B3B] disabled:opacity-60"
                       >
                         <Trash2 size={14} strokeWidth={1.9} />
-                        <span>{deleting ? '삭제 중...' : '삭제'}</span>
+                        <span>{deleting ? '??젣 以?..' : '??젣'}</span>
                       </button>
                     </div>
                   ) : null}
@@ -448,7 +448,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
           <section className="px-[16px]">
             <div className="flex rounded-[10px] bg-white">
-              <MetricCard value={formatDuration(experience.durationMonths)} label="기간" helper="진행 기간" />
+              <MetricCard value={formatDuration(experience.durationMonths)} label="湲곌컙" helper="吏꾪뻾 湲곌컙" />
               <div className="my-[14px] w-px bg-[#E6E6E6]" />
               <MetricCard value={formatCurrency(experience.investmentAmount)} label="투자금" helper="초기 비용" />
               <div className="my-[14px] w-px bg-[#E6E6E6]" />
@@ -457,7 +457,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
           </section>
 
           <section className="px-[16px] pt-[12px]">
-            <SectionTitle title="핵심 이슈" description="이 사례에서 드러난 주요 실패 원인을 요약했어요." />
+            <SectionTitle title="?듭떖 ?댁뒋" description="???щ??먯꽌 ?쒕윭??二쇱슂 ?ㅽ뙣 ?먯씤???붿빟?덉뼱??" />
             <div className="mt-[12px] flex flex-wrap gap-[6px]">
               {issueItems.length ? (
                 issueItems.map((item) => (
@@ -466,7 +466,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   </div>
                 ))
               ) : (
-                <PageMessage message="아직 핵심 이슈를 정리하지 못했어요." />
+                <PageMessage message="?꾩쭅 ?듭떖 ?댁뒋瑜??뺣━?섏? 紐삵뻽?댁슂." />
               )}
             </div>
           </section>
@@ -475,7 +475,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             <div className="rounded-[10px] border border-[#5E5E5E] bg-white p-[16px]">
               <div className="flex items-center gap-[8px]">
                 <div className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-[#131416] text-[10px] font-[700] text-white">AI</div>
-                <p className="text-[16px] font-[600] leading-[19px] text-[#131416]">AI 가이드</p>
+                <p className="text-[16px] font-[600] leading-[19px] text-[#131416]">AI 媛?대뱶</p>
               </div>
 
               <p className="mt-[12px] text-[12px] leading-[17px] text-[#494949]">{aiSummary}</p>
@@ -491,24 +491,24 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   ))}
                 </div>
               ) : (
-                <PageMessage message="AI 조언을 준비 중입니다." />
+                <PageMessage message="AI 議곗뼵??以鍮?以묒엯?덈떎." />
               )}
             </div>
           </section>
 
           <section className="px-[16px] pt-[12px]">
-            <SectionTitle title="실패 패턴" description="어떤 패턴이 반복됐는지 비율로 보여드려요." />
+            <SectionTitle title="?ㅽ뙣 ?⑦꽩" description="?대뼡 ?⑦꽩??諛섎났?먮뒗吏 鍮꾩쑉濡?蹂댁뿬?쒕젮??" />
             <div className="mt-[12px] flex flex-col gap-[10px] rounded-[10px] bg-[#F8F8F8] p-[16px]">
               {patternItems.length ? (
                 patternItems.map((item) => <ProgressRow key={item.label} label={item.label} percent={item.percent} />)
               ) : (
-                <PageMessage message="패턴 분석이 아직 준비되지 않았어요." />
+                <PageMessage message="?⑦꽩 遺꾩꽍???꾩쭅 以鍮꾨릺吏 ?딆븯?댁슂." />
               )}
             </div>
           </section>
 
           <section className="px-[16px] pt-[12px]">
-            <SectionTitle title="유사 사례" description="비슷한 실패 흐름을 가진 사례를 함께 확인해 보세요." />
+            <SectionTitle title="?좎궗 ?щ?" description="鍮꾩듂???ㅽ뙣 ?먮쫫??媛吏??щ?瑜??④퍡 ?뺤씤??蹂댁꽭??" />
             <div className="mt-[12px] flex flex-col gap-[10px]">
               {similarCases.length ? (
                 similarCases.map((item) => (
@@ -521,7 +521,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   />
                 ))
               ) : (
-                <PageMessage message="유사 사례가 아직 없어요." />
+                <PageMessage message="?좎궗 ?щ?媛 ?꾩쭅 ?놁뼱??" />
               )}
             </div>
 
@@ -530,7 +530,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
               onClick={() => navigate('/explore')}
               className="mt-[12px] h-[42px] w-full rounded-[10px] bg-[#F8F8F8] text-[14px] font-[500] text-[#131416]"
             >
-              모든 사례 보기
+              紐⑤뱺 ?щ? 蹂닿린
             </button>
           </section>
           {experience.caseStatus !== 'SUCCESS' ? (
@@ -540,7 +540,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
           ) : null}
         </main>
 
-        <div className="pointer-events-none fixed bottom-[88px] left-1/2 z-40 flex w-full max-w-[430px] -translate-x-1/2 items-end justify-between px-[24px]">
+        <div className="hidden pointer-events-none fixed bottom-[88px] left-1/2 z-40 flex w-full max-w-[430px] -translate-x-1/2 items-end justify-between px-[24px]">
           <div className="pointer-events-auto">
             <button
               type="button"
@@ -548,7 +548,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
               className="flex h-[36px] min-w-[208px] items-center justify-center gap-[8px] rounded-[999px] bg-[#131416] px-[16px] text-white shadow-[0_6px_14px_rgba(0,0,0,0.16)]"
             >
               <Pencil size={16} strokeWidth={1.9} />
-              <span className="text-[14px] font-[500] leading-[17px]">나의 경험 분석하러 가기</span>
+              <span className="text-[14px] font-[500] leading-[17px]">경험 분석하러 가기</span>
             </button>
           </div>
 
@@ -557,7 +557,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
               type="button"
               onClick={moveToCreate}
               className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E] text-white shadow-[0_10px_22px_rgba(90,135,110,0.3)]"
-              aria-label="경험 작성"
+              aria-label="寃쏀뿕 ?묒꽦"
             >
               <span className="text-[28px] leading-none">+</span>
             </button>
@@ -565,7 +565,31 @@ export default function AiAnalysisResult({ experienceId }: Props) {
         </div>
       </div>
 
-      <BottomNav />
+      <BottomNav
+        active="guide"
+        accessoryLayout="between"
+        accessory={
+          <>
+            <button
+              type="button"
+              onClick={moveToCreate}
+              className="pointer-events-auto flex h-[36px] min-w-[208px] items-center justify-center gap-[8px] rounded-[999px] bg-[#131416] px-[16px] text-white shadow-[0_6px_14px_rgba(0,0,0,0.16)]"
+            >
+              <Pencil size={16} strokeWidth={1.9} />
+              <span className="text-[14px] font-[500] leading-[17px]">경험 작성 바로가기</span>
+            </button>
+            <button
+              type="button"
+              onClick={moveToCreate}
+              className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E] text-white shadow-[0_10px_22px_rgba(90,135,110,0.3)]"
+              aria-label="경험 작성"
+            >
+              <span className="text-[28px] leading-none">+</span>
+            </button>
+          </>
+        }
+      />
     </div>
   );
 }
+

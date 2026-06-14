@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type MouseEvent, type WheelEvent } from 'react';
+import BottomNav from '../components/layout/BottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Arrow left.svg';
 import chevronDownIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Chevron down.svg';
@@ -994,6 +995,67 @@ function FooterArea({
   );
 }
 
+function SharedFooterArea({
+  feedMode,
+  onSelectFeedMode,
+  fabOpen,
+  onToggleFab,
+}: {
+  feedMode: FeedMode;
+  onSelectFeedMode: (mode: FeedMode) => void;
+  fabOpen: boolean;
+  onToggleFab: () => void;
+}) {
+  return (
+    <BottomNav
+      active="explore"
+      accessoryLayout="between"
+      accessory={
+        <>
+          <div className="h-[36px] w-[36px] shrink-0" aria-hidden="true" />
+          <div className="pointer-events-auto flex h-[38px] w-[135px] items-center rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+            {FEED_OPTIONS.map((option) => {
+              const active = option.key === feedMode;
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => onSelectFeedMode(option.key)}
+                  className={`${FEED_SEGMENT_WIDTH_CLASS[option.key]} flex h-[26px] shrink-0 items-center justify-center rounded-[999px] px-[8px] py-[6px] ${
+                    active ? 'bg-[#375E49]' : 'bg-white'
+                  }`}
+                >
+                  <span
+                    className={`text-[12px] font-[400] leading-[14.4px] ${
+                      active ? 'text-white' : 'text-black'
+                    }`}
+                    style={textFeatureStyle}
+                  >
+                    {option.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            onClick={onToggleFab}
+            className="pointer-events-auto flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full bg-[#5A876E] shadow-[0px_4px_12px_rgba(90,135,110,0.24)]"
+          >
+            <img
+              src={plusIcon}
+              alt=""
+              className={`h-[20px] w-[20px] transition-transform ${fabOpen ? 'rotate-45' : ''}`}
+            />
+          </button>
+        </>
+      }
+    />
+  );
+}
+
+void FooterArea;
+
 export default function ExploreV3() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -1317,7 +1379,7 @@ export default function ExploreV3() {
           ) : null}
         </div>
 
-        <FooterArea
+        <SharedFooterArea
           feedMode={feedMode}
           onSelectFeedMode={setFeedMode}
           fabOpen={fabOpen}

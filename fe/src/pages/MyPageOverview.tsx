@@ -438,14 +438,10 @@ export default function MyPageOverview() {
 
   useEffect(() => {
     if (!token) {
-      setAuthRequired(true);
-      setLoading(false);
       return;
     }
 
-    setAuthRequired(false);
     let cancelled = false;
-    setLoading(true);
 
     void Promise.all([getMe(token), getMyExperiences(token), getMyBookmarks(token), getMyRecentViews(token)])
       .then(([mePayload, writtenPayload, bookmarkPayload, recentPayload]) => {
@@ -570,7 +566,7 @@ export default function MyPageOverview() {
         ) : null}
       </main>
 
-      <div className="fixed bottom-[110px] left-1/2 z-30 flex w-full max-w-[375px] -translate-x-1/2 justify-end px-[24px] py-[16px]">
+      <div className="hidden fixed bottom-[110px] left-1/2 z-30 w-full max-w-[375px] -translate-x-1/2 justify-end px-[24px] py-[16px]">
         <button
           type="button"
           onClick={() => navigate('/create')}
@@ -581,7 +577,20 @@ export default function MyPageOverview() {
         </button>
       </div>
 
-      <BottomNav active="mypage" />
+      <BottomNav
+        active="mypage"
+        accessoryLayout="end"
+        accessory={
+          <button
+            type="button"
+            onClick={() => navigate('/create')}
+            className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E]"
+            aria-label="경험 작성"
+          >
+            <Plus size={20} strokeWidth={2.2} color="#FFFFFF" />
+          </button>
+        }
+      />
     </div>
   );
 }
