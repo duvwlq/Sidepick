@@ -15,14 +15,19 @@ import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import KakaoCallbackPage from './pages/auth/KakaoCallbackPage';
 import NaverCallbackPage from './pages/auth/NaverCallbackPage';
 import SignupEmailPage from './pages/auth/SignupEmailPage';
+import SignupIdentityPage from './pages/auth/SignupIdentityPage';
+import SignupIdentityDetailsPage from './pages/auth/SignupIdentityDetailsPage';
+import SignupUsernamePage from './pages/auth/SignupUsernamePage';
 import SignupExperiencePage from './pages/auth/SignupExperiencePage';
 import SignupNicknameStepPage from './pages/auth/SignupNicknameStepPage';
 import SignupVerifyPage from './pages/auth/SignupVerifyPage';
 import SignupPasswordPage from './pages/auth/SignupPasswordPage';
 import SignupPurposePage from './pages/auth/SignupPurposePage';
 import SignupRegionPage from './pages/auth/SignupRegionPage';
-import HomeV1 from './pages/HomeV1';
-import ExploreV1 from './pages/ExploreV1';
+import Home from './pages/Home';
+import HomeV2 from './pages/HomeV2';
+import ExploreV2 from './pages/ExploreV2';
+import ExploreV3 from './pages/ExploreV3';
 import ExploreFigmaMainPage from './pages/ExploreFigmaMainPage';
 import SearchPage from './pages/SearchPage';
 import SuccessComparisonPage from './pages/SuccessComparisonPage';
@@ -33,9 +38,11 @@ export default function App() {
       <AuthFlowProvider>
         <FlashToastListener />
         <Routes>
-          <Route path="/" element={<HomeV1 />} />
-          <Route path="/v1/home" element={<HomeV1 />} />
-          <Route path="/v1/explore" element={<ExploreV1 />} />
+          <Route path="/" element={<HomeV2 />} />
+          <Route path="/v1/home" element={<HomeV2 />} />
+          <Route path="/home-legacy" element={<Home />} />
+          <Route path="/v1/explore" element={<ExploreV2 />} />
+          <Route path="/v3/explore" element={<ExploreV3 />} />
           <Route path="/explore-figma" element={<ExploreFigmaMainPage />} />
           <Route path="/auth" element={<AuthEntryPage />} />
           <Route path="/login" element={<AuthEntryPage />} />
@@ -43,13 +50,16 @@ export default function App() {
           <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
           <Route path="/auth/naver/callback" element={<NaverCallbackPage />} />
           <Route path="/signup/email" element={<SignupEmailPage />} />
+          <Route path="/signup/identity" element={<SignupIdentityPage />} />
+          <Route path="/signup/identity/details" element={<SignupIdentityDetailsPage />} />
+          <Route path="/signup/username" element={<SignupUsernamePage />} />
           <Route path="/signup/verify" element={<SignupVerifyPage />} />
           <Route path="/signup/password" element={<SignupPasswordPage />} />
           <Route path="/signup/nickname" element={<SignupNicknameStepPage />} />
           <Route path="/signup/region" element={<SignupRegionPage />} />
           <Route path="/signup/employment" element={<SignupExperiencePage />} />
           <Route path="/signup/purpose" element={<SignupPurposePage />} />
-          <Route path="/explore" element={<ExploreV1 />} />
+          <Route path="/explore" element={<ExploreV3 />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/faq" element={<FaqPage />} />
           <Route path="/create" element={<CreateWizardPage />} />

@@ -49,7 +49,7 @@ export default function KakaoCallbackPage() {
           return;
         }
 
-        setFlashToast(`환영해요, ${payload.user.nickname}님!`);
+        setFlashToast(`환영해요, ${payload.user.nickname}님`);
         navigate(callbackParams.nextPath, { replace: true });
       } catch (callbackError) {
         if (!cancelled) {
@@ -57,7 +57,7 @@ export default function KakaoCallbackPage() {
           setError(
             resolveErrorMessage(
               callbackError,
-              '카카오 로그인 처리 중 문제가 발생했어요. 다시 시도해주세요.',
+              '카카오 로그인 처리 중 문제가 발생했어요. 다시 시도해 주세요.',
             ),
           );
         }
@@ -86,13 +86,13 @@ export default function KakaoCallbackPage() {
         <div className="space-y-4 rounded-2xl border border-[#EAEAEA] bg-white px-4 py-6 text-center">
           {callbackParams.immediateError || error ? (
             <>
-              <p className="text-base font-medium text-black">로그인에 실패했어요</p>
+              <p className="text-base font-medium text-black">로그인에 실패했어요.</p>
               <ErrorState message={callbackParams.immediateError || error} />
             </>
           ) : (
             <>
               <p className="text-base font-medium text-black">카카오 로그인을 처리 중입니다.</p>
-              <LoadingState message="잠시만 기다려주세요." />
+              <LoadingState message="잠시만 기다려 주세요." />
             </>
           )}
         </div>

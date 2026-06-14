@@ -45,7 +45,7 @@ export default function SignupVerifyPage() {
       updateField('verificationConfirmed', true);
       updateField('verificationMessage', '이메일 인증이 완료되었어요.');
       setFlashToast('이메일 인증이 완료되었어요.');
-      navigate(`/signup/password?next=${encodeURIComponent(nextPath)}`);
+      navigate(`/signup/username?next=${encodeURIComponent(nextPath)}`);
     } catch (confirmError) {
       const message = resolveErrorMessage(confirmError, '인증번호가 일치하지 않아요. 다시 확인해 주세요.');
       setError(message);
@@ -70,7 +70,7 @@ export default function SignupVerifyPage() {
         'verificationMessage',
         payload.verificationCode
           ? `개발용 인증코드: ${payload.verificationCode}`
-          : '인증 메일을 다시 발송했어요.',
+          : '인증 메일이 다시 발송되었어요.',
       );
       showToast('인증번호를 다시 발송했어요.');
     } catch (requestError) {
@@ -86,7 +86,7 @@ export default function SignupVerifyPage() {
     <SignupScreen
       title="이메일 인증"
       headline="이메일로 발송한 인증 번호를 입력해 주세요"
-      onBack={() => navigate(`/signup/email?next=${encodeURIComponent(nextPath)}`)}
+      onBack={() => navigate(`/signup/identity/details?next=${encodeURIComponent(nextPath)}`)}
     >
       <SignupFieldGroup>
         <SignupField
@@ -97,6 +97,8 @@ export default function SignupVerifyPage() {
             updateField('verificationCode', event.target.value.replace(/\D/g, '').slice(0, 6))
           }
           suffix={<span>00:00</span>}
+          inputMode="numeric"
+          autoComplete="one-time-code"
           fieldHeight={40}
         />
 

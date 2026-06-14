@@ -5,12 +5,15 @@ import com.failforward.backend.domain.stats.dto.StatsDtos.FailurePatternItem;
 import com.failforward.backend.domain.stats.dto.StatsDtos.FailurePatternStatsResponse;
 import com.failforward.backend.domain.stats.dto.StatsDtos.FailureTimingItem;
 import com.failforward.backend.domain.stats.dto.StatsDtos.FailureTimingStatsResponse;
+import com.failforward.backend.domain.stats.dto.StatsDtos.StatsExplanation;
+import com.failforward.backend.domain.stats.dto.StatsDtos.StatsExplanationDebug;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Component;
 public class StatsFixtureLoader {
 
     private static final int MINIMUM_SUFFICIENT_SAMPLE = 5;
+    private static final String DEFAULT_INSUFFICIENT_MESSAGE = "데이터를 더 수집하면 차트가 표시됩니다.";
 
     private final ObjectMapper objectMapper;
     private final StatsProperties statsProperties;
@@ -40,17 +44,17 @@ public class StatsFixtureLoader {
 
         boolean sufficientData = fixture.total() >= MINIMUM_SUFFICIENT_SAMPLE;
         FailurePatternItem primary = fixture.patterns().isEmpty() ? null : fixture.patterns().get(0);
-        String explanation = sufficientData && primary != null
-                ? "%s 카테고리의 %.1f%%가 %s을 주요 실패 원인으로 나타내고 있어요."
-                        .formatted(fixture.labelKo(), primary.percent(), primary.label())
-                : "아직 통계 데이터를 더 수집하고 있어요. 사례가 쌓이면 차트가 자동으로 채워집니다.";
+        String summary = sufficientData && primary != null
+                ? "%s 카테고리에서는 %s 비중이 가장 높습니다.".formatted(fixture.labelKo(), primary.label())
+                : "아직 통계 데이터가 충분하지 않습니다.";
 
         return new FailurePatternStatsResponse(
                 categorySlug,
                 fixture.labelKo(),
                 fixture.total(),
                 sufficientData,
-                explanation,
+                summary,
+                buildStatsExplanation("pattern_ratio", categorySlug, fixture.total(), sufficientData, "fixture", null, null),
                 fixture.patterns()
         );
     }
@@ -67,16 +71,17 @@ public class StatsFixtureLoader {
         }
 
         boolean sufficientData = fixture.total() >= MINIMUM_SUFFICIENT_SAMPLE;
-        String explanation = sufficientData
-                ? "%s 카테고리는 %s 구간에서 실패 비중이 가장 높게 나타났어요."
+        String summary = sufficientData
+                ? "%s 카테고리는 %s 구간에 실패가 집중됩니다."
                         .formatted(resolveLabel(categorySlug), resolvePeakLabel(fixture.distribution(), fixture.peakBucket()))
-                : "아직 실패 시점 분포를 보여주기에는 표본이 부족해요.";
+                : "아직 실패 시점 분포를 보여주기에는 표본이 부족합니다.";
 
         return new FailureTimingStatsResponse(
                 categorySlug,
                 fixture.total(),
                 sufficientData,
-                explanation,
+                summary,
+                buildStatsExplanation("timing_distribution", categorySlug, fixture.total(), sufficientData, "fixture", null, null),
                 fixture.peakBucket(),
                 fixture.distribution()
         );
@@ -96,19 +101,30 @@ public class StatsFixtureLoader {
         List<FailurePatternItem> patterns = Optional.ofNullable(category.patterns()).orElse(List.of()).stream()
                 .map(item -> new FailurePatternItem(item.label(), item.count(), item.percent()))
                 .toList();
-        boolean sufficientData = category.total() >= statsProperties.minimumSufficientSample();
+        int minimumSample = resolveMinimumSample(root.displayPolicy());
+        boolean sufficientData = category.sufficientData() != null
+                ? category.sufficientData()
+                : category.total() >= minimumSample;
         FailurePatternItem primary = patterns.isEmpty() ? null : patterns.get(0);
-        String explanation = sufficientData && primary != null
-                ? "%s 카테고리의 %.1f%%가 %s을 주요 실패 원인으로 나타내고 있어요."
-                        .formatted(category.labelKo(), primary.percent(), primary.label())
-                : "아직 통계 데이터를 더 수집하고 있어요. 사례가 쌓이면 차트가 자동으로 채워집니다.";
+        String summary = sufficientData && primary != null
+                ? "%s 카테고리에서는 %s 비중이 가장 높습니다.".formatted(category.labelKo(), primary.label())
+                : "아직 통계 데이터가 충분하지 않습니다.";
 
         return new FailurePatternStatsResponse(
                 categorySlug,
                 category.labelKo(),
                 category.total(),
                 sufficientData,
-                explanation,
+                summary,
+                buildStatsExplanation(
+                        "pattern_ratio",
+                        categorySlug,
+                        category.total(),
+                        sufficientData,
+                        statsProperties.failurePatternPath(),
+                        root.generatedAt(),
+                        root.displayPolicy()
+                ),
                 patterns
         );
     }
@@ -130,23 +146,35 @@ public class StatsFixtureLoader {
                 .map(item -> new FailureTimingItem(
                         item.bucket(),
                         item.label(),
-                        orderMap.getOrDefault(item.bucket(), 0),
+                        orderMap.getOrDefault(item.bucket(), item.order() == null ? 0 : item.order()),
                         item.count(),
                         item.percent()
                 ))
                 .toList();
 
-        boolean sufficientData = category.total() >= statsProperties.minimumSufficientSample();
-        String explanation = sufficientData
-                ? "%s 카테고리는 %s 구간에서 실패 비중이 가장 높게 나타났어요."
+        int minimumSample = resolveMinimumSample(root.displayPolicy());
+        boolean sufficientData = category.sufficientData() != null
+                ? category.sufficientData()
+                : category.total() >= minimumSample;
+        String summary = sufficientData
+                ? "%s 카테고리는 %s 구간에 실패가 집중됩니다."
                         .formatted(resolveLabel(categorySlug), resolvePeakLabel(distribution, category.peakBucket()))
-                : "아직 실패 시점 분포를 보여주기에는 표본이 부족해요.";
+                : "아직 실패 시점 분포를 보여주기에는 표본이 부족합니다.";
 
         return new FailureTimingStatsResponse(
                 categorySlug,
                 category.total(),
                 sufficientData,
-                explanation,
+                summary,
+                buildStatsExplanation(
+                        "timing_distribution",
+                        categorySlug,
+                        category.total(),
+                        sufficientData,
+                        statsProperties.failureTimingPath(),
+                        root.generatedAt(),
+                        root.displayPolicy()
+                ),
                 category.peakBucket(),
                 distribution
         );
@@ -180,7 +208,54 @@ public class StatsFixtureLoader {
         if (configuredPath == null || configuredPath.isBlank()) {
             return null;
         }
-        return Path.of(configuredPath).normalize();
+
+        Path direct = Path.of(configuredPath).normalize();
+        if (Files.exists(direct)) {
+            return direct;
+        }
+
+        Path cwd = Path.of("").toAbsolutePath().normalize();
+        List<Path> candidates = new ArrayList<>();
+        candidates.add(cwd.resolve(configuredPath).normalize());
+        candidates.add(cwd.resolve("server").resolve(configuredPath).normalize());
+        candidates.add(cwd.resolve("..").resolve(configuredPath).normalize());
+
+        return candidates.stream()
+                .filter(Files::exists)
+                .findFirst()
+                .orElse(direct);
+    }
+
+    private StatsExplanation buildStatsExplanation(
+            String chartType,
+            String categorySlug,
+            int totalCases,
+            boolean sufficientData,
+            String dataSource,
+            String lastUpdated,
+            StatsDisplayPolicy displayPolicy
+    ) {
+        int minimumSample = resolveMinimumSample(displayPolicy);
+        String insufficientMessage = displayPolicy != null && displayPolicy.insufficientMessage() != null
+                ? displayPolicy.insufficientMessage()
+                : DEFAULT_INSUFFICIENT_MESSAGE;
+        return new StatsExplanation(
+                chartType,
+                totalCases,
+                dataSource,
+                lastUpdated,
+                sufficientData,
+                minimumSample,
+                sufficientData ? null : insufficientMessage,
+                new StatsExplanationDebug(categorySlug, dataSource == null ? "unknown" : dataSource)
+        );
+    }
+
+    private int resolveMinimumSample(StatsDisplayPolicy displayPolicy) {
+        if (displayPolicy != null && displayPolicy.minSampleSize() != null && displayPolicy.minSampleSize() > 0) {
+            return displayPolicy.minSampleSize();
+        }
+        return statsProperties.minimumSufficientSample();
     }
 
     private String resolveLabel(String categorySlug) {
@@ -222,68 +297,68 @@ public class StatsFixtureLoader {
     private static final Map<String, FailurePatternFixture> FAILURE_PATTERNS = Map.of(
             "online-commerce",
             new FailurePatternFixture(
-                    "온라인 판매·이커머스",
+                    "온라인 판매/이커머스",
                     12,
                     List.of(
                             new FailurePatternItem("마케팅 부족", 6, 50.0),
                             new FailurePatternItem("수익 구조 이해 부족", 4, 33.3),
-                            new FailurePatternItem("재고 과잉", 3, 25.0),
+                            new FailurePatternItem("광고 과지출", 3, 25.0),
                             new FailurePatternItem("시장 조사 부족", 3, 25.0),
                             new FailurePatternItem("운영 자동화 미흡", 2, 16.7)
                     )
             ),
             "content-sns",
             new FailurePatternFixture(
-                    "콘텐츠·SNS 기반",
+                    "콘텐츠/SNS 기반",
                     23,
                     List.of(
                             new FailurePatternItem("수익화 전략 부재", 9, 39.1),
-                            new FailurePatternItem("꾸준함 부족", 7, 30.4),
-                            new FailurePatternItem("차별화 부족", 6, 26.1),
+                            new FailurePatternItem("콘셉트 부족", 7, 30.4),
+                            new FailurePatternItem("채널성 부족", 6, 26.1),
                             new FailurePatternItem("채널 운영 피로", 5, 21.7),
                             new FailurePatternItem("타깃 설정 미흡", 4, 17.4)
                     )
             ),
             "digital-products",
             new FailurePatternFixture(
-                    "디지털 상품·지식 판매",
+                    "디지털 상품/지식 판매",
                     1,
                     List.of(new FailurePatternItem("시장 검증 부족", 1, 100.0))
             ),
             "platform-labor",
             new FailurePatternFixture(
-                    "플랫폼 기반 노동형",
+                    "플랫폼 기반 노동",
                     25,
                     List.of(
-                            new FailurePatternItem("낮은 단가", 11, 44.0),
-                            new FailurePatternItem("지속 가능성 부족", 9, 36.0),
+                            new FailurePatternItem("단가 압박", 11, 44.0),
+                            new FailurePatternItem("지역 가용성 부족", 9, 36.0),
                             new FailurePatternItem("체력 소진", 7, 28.0),
-                            new FailurePatternItem("플랫폼 의존도 과다", 6, 24.0),
+                            new FailurePatternItem("플랫폼 수수료 과다", 6, 24.0),
                             new FailurePatternItem("시간 관리 실패", 4, 16.0)
                     )
             ),
             "talent-freelance",
             new FailurePatternFixture(
-                    "재능 판매·프리랜서",
+                    "재능 판매/프리랜서",
                     9,
                     List.of(
                             new FailurePatternItem("고객 확보 어려움", 4, 44.4),
                             new FailurePatternItem("포트폴리오 부족", 3, 33.3),
                             new FailurePatternItem("가격 책정 실패", 3, 33.3),
-                            new FailurePatternItem("재계약 저조", 2, 22.2),
+                            new FailurePatternItem("관계자 대응", 2, 22.2),
                             new FailurePatternItem("업무 범위 관리 실패", 2, 22.2)
                     )
             ),
             "investment",
             new FailurePatternFixture(
-                    "투자·재테크",
+                    "투자/재테크",
                     25,
                     List.of(
                             new FailurePatternItem("리스크 관리 부족", 10, 40.0),
-                            new FailurePatternItem("조급한 매매", 8, 32.0),
+                            new FailurePatternItem("종목 쏠림", 8, 32.0),
                             new FailurePatternItem("정보 과신", 6, 24.0),
                             new FailurePatternItem("분산 투자 부족", 5, 20.0),
-                            new FailurePatternItem("원칙 없는 대응", 4, 16.0)
+                            new FailurePatternItem("근거 없는 추정", 4, 16.0)
                     )
             ),
             "offline-sidejob",
@@ -403,6 +478,10 @@ public class StatsFixtureLoader {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record FailurePatternJsonRoot(
+            @JsonProperty("generated_at")
+            String generatedAt,
+            @JsonProperty("display_policy")
+            StatsDisplayPolicy displayPolicy,
             Map<String, FailurePatternJsonCategory> categories
     ) {
     }
@@ -412,6 +491,8 @@ public class StatsFixtureLoader {
             @JsonProperty("label_ko")
             String labelKo,
             int total,
+            @JsonProperty("sufficient_data")
+            Boolean sufficientData,
             List<FailurePatternJsonItem> patterns
     ) {
     }
@@ -426,6 +507,10 @@ public class StatsFixtureLoader {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record FailureTimingJsonRoot(
+            @JsonProperty("generated_at")
+            String generatedAt,
+            @JsonProperty("display_policy")
+            StatsDisplayPolicy displayPolicy,
             List<FailureTimingBucketDefinition> buckets,
             Map<String, FailureTimingJsonCategory> categories
     ) {
@@ -441,6 +526,8 @@ public class StatsFixtureLoader {
     @JsonIgnoreProperties(ignoreUnknown = true)
     private record FailureTimingJsonCategory(
             int total,
+            @JsonProperty("sufficient_data")
+            Boolean sufficientData,
             @JsonProperty("peak_bucket")
             String peakBucket,
             List<FailureTimingJsonItem> distribution
@@ -451,8 +538,18 @@ public class StatsFixtureLoader {
     private record FailureTimingJsonItem(
             String bucket,
             String label,
+            Integer order,
             int count,
             double percent
+    ) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    private record StatsDisplayPolicy(
+            @JsonProperty("min_sample_size")
+            Integer minSampleSize,
+            @JsonProperty("insufficient_message")
+            String insufficientMessage
     ) {
     }
 }

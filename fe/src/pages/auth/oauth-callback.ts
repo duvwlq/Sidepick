@@ -1,4 +1,5 @@
 import { clearOAuthState, getOAuthState } from '../../lib/oauth-state';
+import { buildOAuthRedirectUri } from '../../lib/oauth-redirect';
 
 type Provider = 'KAKAO' | 'GOOGLE' | 'NAVER';
 
@@ -6,6 +7,7 @@ export function readOAuthCallbackParams(provider: Provider, callbackPath: string
   const params = new URLSearchParams(window.location.search);
   const state = params.get('state') || '';
   const storedState = getOAuthState(provider);
+  const redirectUri = buildOAuthRedirectUri(callbackPath);
   const immediateError = params.get('error')
     ? '소셜 로그인에 실패했어요.'
     : !params.get('code')
@@ -13,10 +15,10 @@ export function readOAuthCallbackParams(provider: Provider, callbackPath: string
       : !state
         ? 'OAuth state가 누락되었어요.'
         : !storedState
-          ? '로그인 세션이 만료되었어요. 다시 시도해주세요.'
+          ? '로그인 요청이 만료되었어요. 다시 시도해 주세요.'
           : storedState.state !== state
-            ? 'OAuth state 검증에 실패했어요. 다시 시도해주세요.'
-            : storedState.redirectUri !== `${window.location.origin}${callbackPath}`
+            ? 'OAuth state 검증에 실패했어요. 다시 시도해 주세요.'
+            : storedState.redirectUri !== redirectUri
               ? 'OAuth redirect 검증에 실패했어요.'
               : '';
 
@@ -25,7 +27,7 @@ export function readOAuthCallbackParams(provider: Provider, callbackPath: string
     state,
     oauthError: params.get('error'),
     nextPath: storedState?.nextPath || '/',
-    redirectUri: `${window.location.origin}${callbackPath}`,
+    redirectUri,
     immediateError,
   };
 }

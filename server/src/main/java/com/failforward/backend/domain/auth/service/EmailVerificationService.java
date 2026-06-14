@@ -48,9 +48,6 @@ public class EmailVerificationService {
         String code = generateVerificationCode();
         LocalDateTime expiresAt = LocalDateTime.now().plusMinutes(emailVerificationExpirationMinutes);
         emailVerificationTokenRepository.save(EmailVerificationToken.issue(request.email(), code, expiresAt));
-        if (!mailProperties.enabled() && !exposeVerificationCode) {
-            throw new BadRequestException("Email delivery is disabled on the server.");
-        }
         if (mailProperties.enabled()) {
             emailVerificationMailService.sendVerificationCode(request.email(), code, expiresAt);
         }
@@ -58,7 +55,7 @@ public class EmailVerificationService {
         return new EmailVerificationPayload(
                 request.email(),
                 "PENDING",
-                exposeVerificationCode ? code : null,
+                mailProperties.enabled() ? (exposeVerificationCode ? code : null) : code,
                 expiresAt
         );
     }

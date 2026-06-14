@@ -1,19 +1,14 @@
+import { Bookmark, Edit, Eye, FileText, Plus, Settings } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
-import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
-import chevronIcon from '../assets/mypage-figma/chevron.svg';
-import eyeIcon from '../assets/mypage-figma/eye.svg';
-import fileTextIcon from '../assets/mypage-figma/file-text.svg';
-import heartIcon from '../assets/mypage-figma/heart.svg';
-import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.png';
+import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.svg';
 import cameraIcon from '../assets/mypage-overview-figma/camera.svg';
-import sectionDraftIcon from '../assets/mypage-overview-figma/section-draft.svg';
-import settingsIcon from '../assets/mypage-overview-figma/settings.svg';
-import { CaseChip } from '../components/common/CaseUi';
+import chevronIcon from '../assets/mypage-overview-figma/chevron.svg';
 import BottomNav from '../components/layout/BottomNav';
+import { CaseTextLink } from '../components/common/CaseUi';
 import {
   ApiError,
   getMe,
@@ -24,7 +19,7 @@ import {
   type UserSummary,
 } from '../lib/api';
 import { BOOKMARK_SYNC_EVENT, type BookmarkSyncDetail } from '../lib/bookmark-sync';
-import { getExperienceImageMeta } from '../lib/experience-images';
+import { extractExperienceImageUrls } from '../lib/experience-images';
 import { mergeProfileOverrides } from '../lib/profile-overrides';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { clearSession, getAccessToken, getStoredUser } from '../lib/session';
@@ -66,15 +61,12 @@ function extractKeywordTags(experience: Experience) {
 }
 
 function resolveBookmarkCount(experience: Experience) {
-  return (experience as Experience & { bookmarkCount?: number }).bookmarkCount ?? experience.likeCount;
+  return experience.bookmarkCount ?? 0;
 }
-
-const BOOKMARK_ACCENT_FILTER =
-  'invert(48%) sepia(12%) saturate(901%) hue-rotate(97deg) brightness(92%) contrast(88%)';
 
 function IosStatusBar() {
   return (
-    <div className="flex h-[59px] items-center justify-between bg-white px-[24px] pb-[19px] pt-[21px]">
+    <div className="flex h-[59px] items-center bg-white px-[24px] pb-[19px] pt-[21px]">
       <div className="flex min-w-0 flex-1 justify-center pt-[1.5px] font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">
         9:41
       </div>
@@ -97,71 +89,128 @@ function SectionHeader({
   onViewAll: () => void;
 }) {
   const iconNode =
-    icon === 'bookmark' ? (
-      <img src={bookmarkIcon} alt="" className="h-[16px] w-[16px]" />
-    ) : icon === 'draft' ? (
-      <img src={sectionDraftIcon} alt="" className="h-[16px] w-[16px]" />
+    icon === 'draft' ? (
+      <Edit size={16} strokeWidth={1.9} color="#5A876E" />
     ) : icon === 'written' ? (
-      <img src={fileTextIcon} alt="" className="h-[16px] w-[16px]" />
+      <FileText size={16} strokeWidth={1.9} color="#5A876E" />
+    ) : icon === 'bookmark' ? (
+      <Bookmark size={16} strokeWidth={1.9} color="#5A876E" />
     ) : (
-      <img src={eyeIcon} alt="" className="h-[16px] w-[16px]" />
+      <Eye size={16} strokeWidth={1.9} color="#5A876E" />
     );
 
   return (
-    <div className="flex w-full items-center justify-between">
+    <div className="flex items-center justify-between">
       <div className="flex items-center gap-[6px]">
         {iconNode}
         <span className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-[#494949]">{title}</span>
       </div>
-      <button
-        type="button"
-        onClick={onViewAll}
-        className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#8A8A8A]"
-      >
-        전체보기
-      </button>
+      <CaseTextLink label="전체보기" onClick={onViewAll} />
     </div>
   );
 }
 
-function Tag({
+function Badge({
   label,
   tone,
 }: {
   label: string;
-  tone: 'success' | 'failure' | 'category' | 'keyword';
+  tone: 'status' | 'category' | 'keyword';
 }) {
+  const toneClass =
+    tone === 'status'
+      ? 'bg-[#C06D43] text-white'
+      : tone === 'category'
+        ? 'bg-[#CBE5D8] text-[#5A876E]'
+        : 'bg-[#E6E6E6] text-[#8A8A8A]';
+
   return (
-    <CaseChip
-      label={label}
-      tone={tone === 'success' ? 'status-success' : tone === 'failure' ? 'status-failure' : tone}
-      compact
-      maxWidthClassName={tone === 'category' ? 'max-w-[108px]' : 'max-w-[58px]'}
-    />
+    <span className={`inline-flex h-[16px] items-center rounded-[4px] px-[4px] font-['Pretendard'] text-[10px] font-[500] leading-[12px] ${toneClass}`}>
+      {label}
+    </span>
   );
 }
 
 function MetaRow({ experience }: { experience: Experience }) {
   return (
-    <div className="flex w-full items-center justify-between">
-      <div className="flex min-w-0 items-center gap-[4px] overflow-hidden font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">
+    <div className="flex items-center justify-between gap-[8px]">
+      <div className="min-w-0 flex items-center gap-[4px] overflow-hidden font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">
         <span className="truncate">{sanitizeText(experience.author.nickname, '닉네임')}</span>
         <span>•</span>
         <span>{formatDate(experience.createdAt)}</span>
         <span>•</span>
         <span>{`조회 ${experience.viewCount}`}</span>
       </div>
-      <div className="ml-[8px] flex shrink-0 items-center gap-[4px]">
+      <div className="flex shrink-0 items-center gap-[4px]">
         <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
-          <img src={heartIcon} alt="" className="h-[14px] w-[14px]" />
+          <span className="translate-y-[0.25px]">
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M10 17.5L8.79167 16.4C4.5 12.5083 1.66667 9.94167 1.66667 6.79167C1.66667 4.225 3.675 2.21667 6.24167 2.21667C7.69167 2.21667 9.08333 2.89167 10 3.95833C10.9167 2.89167 12.3083 2.21667 13.7583 2.21667C16.325 2.21667 18.3333 4.225 18.3333 6.79167C18.3333 9.94167 15.5 12.5083 11.2083 16.4083L10 17.5Z" stroke="#8A8A8A" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
           <span>{experience.likeCount}</span>
         </div>
         <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
-          <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
+          <Bookmark size={14} strokeWidth={1.7} color="#8A8A8A" />
           <span>{resolveBookmarkCount(experience)}</span>
         </div>
       </div>
     </div>
+  );
+}
+
+function StoryPreviewCard({
+  experience,
+  showThumbnail,
+}: {
+  experience: Experience;
+  showThumbnail: boolean;
+}) {
+  const navigate = useNavigate();
+  const imageUrls = extractExperienceImageUrls(experience);
+  const keywords = extractKeywordTags(experience);
+  const preview = sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기');
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(`/experiences/${experience.id}`)}
+      className="block w-full rounded-[4px] bg-[#F8F8F8] px-[16px] py-[12px] text-left"
+    >
+      <div className="flex flex-col gap-[8px]">
+        <div className="flex items-center gap-[4px] overflow-hidden">
+          <Badge label={experience.caseStatus === 'SUCCESS' ? '성공' : '실패'} tone="status" />
+          <Badge label={sanitizeText(experience.category.name, '카테고리')} tone="category" />
+          {keywords.map((keyword) => (
+            <Badge key={`${experience.id}-${keyword}`} label={keyword} tone="keyword" />
+          ))}
+        </div>
+
+        <div className="flex h-[60px] items-start gap-[8px]">
+          {showThumbnail ? (
+            <div className="relative h-[60px] w-[80px] shrink-0 rounded-[4px] bg-[#D8D8D8]">
+              {imageUrls[0] ? <img src={imageUrls[0]} alt="" className="h-full w-full rounded-[4px] object-cover" /> : null}
+              {imageUrls.length > 1 ? (
+                <span className="absolute bottom-0 right-0 flex h-[16px] w-[16px] items-center justify-center rounded-[4px] bg-[rgba(0,0,0,0.25)] font-['Pretendard'] text-[12px] font-[500] leading-[16px] text-white">
+                  {imageUrls.length}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
+
+          <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
+            <p className="line-clamp-1 font-['Pretendard'] text-[16px] font-[500] leading-[19.2px] text-[#131416]">
+              {sanitizeText(experience.title, '제목')}
+            </p>
+            <p className={`${showThumbnail ? 'line-clamp-2' : 'line-clamp-1'} font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]`}>
+              {preview}
+            </p>
+          </div>
+        </div>
+
+        <MetaRow experience={experience} />
+      </div>
+    </button>
   );
 }
 
@@ -175,11 +224,12 @@ function ProfileCard({
   const navigate = useNavigate();
   const nickname = sanitizeText(profile?.nickname, '닉네임');
   const email = sanitizeText(profile?.email, '@sidepick@gmail.com');
+  const profileImage = profile?.profileImage?.trim() || '';
 
   const statItems = [
-    { key: 'written', icon: fileTextIcon, label: '작성한 글', value: counts.written, path: '/mypage/written', iconClassName: 'h-[16px] w-[16px]' },
-    { key: 'bookmark', icon: bookmarkIcon, label: '북마크', value: counts.bookmarked, path: '/mypage/bookmarks', iconClassName: 'h-[16px] w-[16px]' },
-    { key: 'recent', icon: eyeIcon, label: '최근 본 글', value: counts.recent, path: '/mypage/recent', iconClassName: 'h-[16px] w-[16px]' },
+    { key: 'written', icon: <Edit size={16} strokeWidth={1.9} color="#5A876E" />, label: '작성한 글', value: counts.written, path: '/mypage/written' },
+    { key: 'bookmark', icon: <Bookmark size={16} strokeWidth={1.9} color="#5A876E" />, label: '북마크', value: counts.bookmarked, path: '/mypage/bookmarks' },
+    { key: 'recent', icon: <Eye size={16} strokeWidth={1.9} color="#5A876E" />, label: '최근 본 글', value: counts.recent, path: '/mypage/recent' },
   ] as const;
 
   return (
@@ -188,22 +238,29 @@ function ProfileCard({
         type="button"
         onClick={() => navigate('/mypage/profile/edit')}
         className="flex w-full items-center justify-between py-[8px] text-left"
-        aria-label="프로필 수정"
       >
         <div className="flex items-center gap-[8px]">
-          <div className="relative flex h-[80px] w-[80px] items-center justify-center overflow-hidden rounded-full bg-[#F1F1F1]">
-            <img src={profile?.profileImage || avatarPlaceholderIcon} alt="" className="h-full w-full object-cover" />
-            <span className="absolute bottom-0 right-0 flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
+          <div className="relative flex h-[80px] w-[80px] items-center justify-center">
+            <div className="flex h-[80px] w-[80px] items-center justify-center p-[8px]">
+              {profileImage ? (
+                <img src={profileImage} alt="" className="h-[64px] w-[64px] rounded-full bg-[#F8F8F8] object-contain" />
+              ) : (
+                <img src={avatarPlaceholderIcon} alt="" className="h-[64px] w-[64px]" />
+              )}
+            </div>
+            <span className="absolute left-[49.5px] top-[49px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
               <img src={cameraIcon} alt="" className="h-[14px] w-[14px]" />
             </span>
           </div>
-          <div className="flex flex-col items-start">
-            <span className="font-['Pretendard'] text-[16px] font-[400] leading-[22.4px] text-[#131416]">{nickname}</span>
-            <span className="font-['Pretendard'] text-[10px] font-[400] leading-[14px] text-[#BABABA]">{email}</span>
+
+          <div className="min-w-0">
+            <p className="font-['Pretendard'] text-[16px] font-[400] leading-[22.4px] text-[#131416]">{nickname}</p>
+            <p className="truncate font-['Pretendard'] text-[10px] font-[400] leading-[14px] text-[#BABABA]">{email}</p>
           </div>
         </div>
+
         <span className="flex h-[20px] w-[20px] items-center justify-center">
-          <img src={chevronIcon} alt="" className="h-[9.5px] w-[5.5px] rotate-180 opacity-[0.58]" />
+          <img src={chevronIcon} alt="" className="h-[8px] w-[4px] rotate-180" />
         </span>
       </button>
 
@@ -218,7 +275,7 @@ function ProfileCard({
             className="flex flex-1 flex-col items-center gap-[10px] py-[16px]"
           >
             <div className="flex items-center gap-[4px]">
-              <img src={item.icon} alt="" className={item.iconClassName} />
+              {item.icon}
               <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#8A8A8A]">{item.label}</span>
             </div>
             <span className="font-['Pretendard'] text-[14px] font-[500] leading-[19.6px] text-[#494949]">{item.value}</span>
@@ -238,83 +295,27 @@ function DraftSection() {
       <button
         type="button"
         onClick={() => navigate('/create')}
-        className="mt-[10px] block h-[95px] w-full rounded-[4px] bg-[#F8F8F8] px-[12px] py-[16px] text-left"
+        className="mt-[10px] block w-full rounded-[4px] bg-[#F8F8F8] px-[16px] py-[12px] text-left"
       >
-        <p className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#131416]">제목입니다</p>
-        <p className="mt-[4px] line-clamp-1 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">
-          본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기
-        </p>
-        <div className="mt-[16px] flex items-center gap-[4px] font-['Pretendard'] text-[12px] leading-[16.8px]">
-          <span className="font-[400] text-[#92BFA6]">임시저장</span>
-          <span className="font-[300] text-[#8A8A8A]">•</span>
-          <span className="font-[300] text-[#8A8A8A]">2026.00.00</span>
+        <div className="flex flex-col gap-[16px]">
+          <div className="flex flex-col gap-[8px]">
+            <div className="flex items-center">
+              <div className="min-w-0 flex-1">
+                <p className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#131416]">제목입니다</p>
+                <p className="line-clamp-1 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">
+                  본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-[4px] font-['Pretendard'] text-[12px] leading-[16.8px]">
+            <span className="font-[400] text-[#5A876E]">임시저장</span>
+            <span className="font-[300] text-[#8A8A8A]">•</span>
+            <span className="font-[300] text-[#8A8A8A]">2026.00.00</span>
+          </div>
         </div>
       </button>
     </section>
-  );
-}
-
-function StoryPreviewCard({
-  experience,
-  showThumbnail,
-}: {
-  experience: Experience;
-  showThumbnail: boolean;
-}) {
-  const navigate = useNavigate();
-  const imageMeta = getExperienceImageMeta(experience);
-  const keywords = extractKeywordTags(experience);
-
-  return (
-    <article className="h-[171px] w-full rounded-[4px] bg-[#F8F8F8]">
-      <button
-        type="button"
-        onClick={() => navigate(`/experiences/${experience.id}`)}
-        className="flex h-full w-full flex-col gap-[8px] px-[16px] py-[12px] text-left"
-      >
-        <div className="flex items-center gap-[4px] overflow-hidden">
-          <Tag label={experience.caseStatus === 'SUCCESS' ? '성공' : '실패'} tone={experience.caseStatus === 'SUCCESS' ? 'success' : 'failure'} />
-          <Tag label={sanitizeText(experience.category.name, '카테고리')} tone="category" />
-          {keywords.map((keyword) => (
-            <Tag key={`${experience.id}-${keyword}`} label={keyword} tone="keyword" />
-          ))}
-        </div>
-
-        <div className="flex min-h-[60px] items-start gap-[8px]">
-          {showThumbnail ? (
-            <div className="relative h-[60px] w-[80px] shrink-0 overflow-hidden rounded-[4px] bg-[#D8D8D8]">
-              {imageMeta.primaryImageUrl ? <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" /> : null}
-              {imageMeta.imageCount > 1 ? (
-                <span className="absolute bottom-0 right-0 flex h-[16px] w-[16px] items-center justify-center rounded-[4px] bg-[rgba(0,0,0,0.25)] font-['Pretendard'] text-[10px] font-[500] leading-[16px] text-white">
-                  {imageMeta.imageCount}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-
-          <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-            <p className="line-clamp-1 font-['Pretendard'] text-[16px] font-[500] leading-[19.2px] text-[#131416]">
-              {sanitizeText(experience.title, '제목')}
-            </p>
-            <p className="line-clamp-2 min-h-[33.6px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]">
-              {sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-auto">
-          <MetaRow experience={experience} />
-        </div>
-      </button>
-    </article>
-  );
-}
-
-function EmptyBlock({ message }: { message: string }) {
-  return (
-    <div className="flex h-[95px] items-center justify-center rounded-[4px] bg-[#F8F8F8]">
-      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{message}</span>
-    </div>
   );
 }
 
@@ -340,44 +341,62 @@ function StorySection({
             <StoryPreviewCard key={experience.id} experience={experience} showThumbnail={index > 0} />
           ))
         ) : (
-          <EmptyBlock message={emptyMessage} />
+          <div className="flex h-[95px] items-center justify-center rounded-[4px] bg-[#F8F8F8] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+            {emptyMessage}
+          </div>
         )}
       </div>
     </section>
   );
 }
 
-function BookmarkPreviewCard({
-  experience,
-  variant,
-}: {
-  experience: Experience;
-  variant: 'primary' | 'secondary';
-}) {
+export function BookmarkPreviewCard({ experience }: { experience: Experience }) {
   const navigate = useNavigate();
-  const imageHeight = variant === 'primary' ? 'h-[112px]' : 'h-[76px]';
-  const bodyHeight = variant === 'primary' ? 'h-[56px]' : 'h-[58px]';
-  const bodyPadding = variant === 'primary' ? 'px-[8px] py-[8px]' : 'px-[8px] py-[8px]';
-  const titleClassName = variant === 'primary' ? 'line-clamp-2 h-[33.6px]' : 'line-clamp-1 h-[16.8px]';
 
   return (
-    <article className={`w-[96.333px] ${variant === 'primary' ? 'h-[168px]' : 'h-[134px]'} overflow-hidden rounded-[4px] bg-white shadow-[0_0_2px_rgba(0,0,0,0.1)]`}>
-      <button
-        type="button"
-        onClick={() => navigate(`/experiences/${experience.id}`)}
-        className="flex h-full w-full flex-col text-left"
-      >
-        <div className={`flex ${imageHeight} items-start justify-end bg-[#D8D8D8] p-[4px]`}>
-          <img src={bookmarkIcon} alt="" className="h-[20px] w-[20px]" style={{ filter: BOOKMARK_ACCENT_FILTER }} />
-        </div>
-        <div className={`flex ${bodyHeight} flex-col justify-between bg-white ${bodyPadding}`}>
-          <span className={`${titleClassName} font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#131416]`}>
-            {sanitizeText(experience.title, '제목입니다')}
-          </span>
-          <span className="font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">{formatDate(experience.createdAt)}</span>
-        </div>
-      </button>
-    </article>
+    <button
+      type="button"
+      onClick={() => navigate(`/experiences/${experience.id}`)}
+      className="flex w-[98px] shrink-0 flex-col overflow-hidden rounded-[4px] bg-white text-left"
+    >
+      <div className="relative h-[92px] bg-[#D8D8D8]">
+        <span className="absolute right-[6px] top-[6px]">
+          <Bookmark size={14} strokeWidth={1.9} color="#A8D3BD" fill="#A8D3BD" />
+        </span>
+      </div>
+      <div className="flex h-[56px] flex-col justify-between px-[8px] py-[6px]">
+        <span className="line-clamp-2 font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] text-[#131416]">
+          {sanitizeText(experience.title, '제목입니다')}
+        </span>
+        <span className="font-['Pretendard'] text-[10px] font-[300] leading-[14px] text-[#8A8A8A]">{formatDate(experience.createdAt)}</span>
+      </div>
+    </button>
+  );
+}
+
+function BookmarkPreviewCardFigma({ experience }: { experience: Experience }) {
+  const navigate = useNavigate();
+  const imageUrls = extractExperienceImageUrls(experience);
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(`/experiences/${experience.id}`)}
+      className="flex w-[96.333px] shrink-0 flex-col overflow-hidden rounded-[4px] bg-white text-left shadow-[0_0_2px_rgba(0,0,0,0.1)]"
+    >
+      <div className="relative flex h-[80px] w-full items-start justify-end bg-[#D8D8D8] p-[4px]">
+        {imageUrls[0] ? <img src={imageUrls[0]} alt="" className="absolute inset-0 h-full w-full object-cover" /> : null}
+        <span className="relative z-10">
+          <Bookmark size={24} strokeWidth={1.9} color="#92BFA6" fill="#92BFA6" />
+        </span>
+      </div>
+      <div className="flex w-full flex-col gap-[4px] bg-white px-[8px] py-[8px]">
+        <span className="truncate font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#131416]">
+          {sanitizeText(experience.title, '제목입니다')}
+        </span>
+        <span className="font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">{formatDate(experience.createdAt)}</span>
+      </div>
+    </button>
   );
 }
 
@@ -385,17 +404,19 @@ function BookmarkSection({ items }: { items: Experience[] }) {
   const navigate = useNavigate();
 
   return (
-    <section className="h-[185px] w-full rounded-[4px] bg-white px-[16px] pb-[12px] pt-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+    <section className="w-full rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
       <SectionHeader icon="bookmark" title="북마크" onViewAll={() => navigate('/mypage/bookmarks')} />
-      <div className="mt-[10px] h-[168px]">
+      <div className="mt-[10px]">
         {items.length ? (
-          <div className="flex h-[168px] items-start gap-[11px]">
-            {items.slice(0, 3).map((experience, index) => (
-              <BookmarkPreviewCard key={experience.id} experience={experience} variant={index === 0 ? 'primary' : 'secondary'} />
+          <div className="flex gap-[8px]">
+            {items.slice(0, 3).map((experience) => (
+              <BookmarkPreviewCardFigma key={experience.id} experience={experience} />
             ))}
           </div>
         ) : (
-          <EmptyBlock message="북마크가 없어요" />
+          <div className="flex h-[95px] items-center justify-center rounded-[4px] bg-[#F8F8F8] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+            북마크가 없습니다
+          </div>
         )}
       </div>
     </section>
@@ -407,6 +428,7 @@ export default function MyPageOverview() {
   const token = getAccessToken();
   const storedUser = mergeProfileOverrides(getStoredUser());
 
+  const [authRequired, setAuthRequired] = useState(!token);
   const [profile, setProfile] = useState<UserSummary | null>(storedUser);
   const [writtenExperiences, setWrittenExperiences] = useState<Experience[]>([]);
   const [bookmarkedExperiences, setBookmarkedExperiences] = useState<Experience[]>([]);
@@ -416,10 +438,12 @@ export default function MyPageOverview() {
 
   useEffect(() => {
     if (!token) {
+      setAuthRequired(true);
       setLoading(false);
       return;
     }
 
+    setAuthRequired(false);
     let cancelled = false;
     setLoading(true);
 
@@ -435,6 +459,8 @@ export default function MyPageOverview() {
       .catch((loadError) => {
         if (cancelled) return;
         if (isAuthError(loadError)) {
+          setAuthRequired(true);
+          setLoading(false);
           clearSession();
           navigate('/auth?next=%2Fmypage', { replace: true });
           return;
@@ -455,7 +481,6 @@ export default function MyPageOverview() {
   useEffect(() => {
     if (!token) return;
     const accessToken = token;
-
     let cancelled = false;
 
     async function reloadBookmarks(event: Event) {
@@ -491,7 +516,7 @@ export default function MyPageOverview() {
     [bookmarkedExperiences.length, recentExperiences.length, writtenExperiences.length],
   );
 
-  if (!token) {
+  if (!token || authRequired) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white px-[16px] py-[48px]">
         <p className="font-['Pretendard'] text-[14px] text-[#8A8A8A]">로그인 후 마이페이지를 사용할 수 있어요.</p>
@@ -512,36 +537,49 @@ export default function MyPageOverview() {
             className="flex h-[20px] w-[20px] items-center justify-center"
             aria-label="프로필 수정"
           >
-            <img src={settingsIcon} alt="" className="h-[20px] w-[20px]" />
+            <Settings size={20} strokeWidth={1.9} color="#131416" />
           </button>
         </div>
       </header>
 
-      <main className="flex flex-col gap-[20px] px-[16px] pb-[128px]">
-        <ProfileCard profile={profile} counts={counts} />
-        <DraftSection />
-        <StorySection
-          title="작성한 글"
-          icon="written"
-          items={writtenExperiences}
-          emptyMessage={loading ? '불러오는 중...' : '작성한 글이 없어요'}
-          onViewAll={() => navigate('/mypage/written')}
-        />
-        <BookmarkSection items={bookmarkedExperiences} />
-        <StorySection
-          title="최근 본 글"
-          icon="recent"
-          items={recentExperiences}
-          emptyMessage={loading ? '불러오는 중...' : '최근 본 글이 없어요'}
-          onViewAll={() => navigate('/mypage/recent')}
-        />
+      <main className="isolate flex flex-col items-start px-[16px] pb-[110px]">
+        <div className="flex w-full flex-col gap-[20px]">
+          <ProfileCard profile={profile} counts={counts} />
+          <DraftSection />
+          <StorySection
+            title="작성한 글"
+            icon="written"
+            items={writtenExperiences}
+            emptyMessage={loading ? '불러오는 중...' : '작성한 글이 없어요'}
+            onViewAll={() => navigate('/mypage/written')}
+          />
+          <BookmarkSection items={bookmarkedExperiences} />
+          <StorySection
+            title="최근 본 글"
+            icon="recent"
+            items={recentExperiences}
+            emptyMessage={loading ? '불러오는 중...' : '최근 본 글이 없어요'}
+            onViewAll={() => navigate('/mypage/recent')}
+          />
+        </div>
 
         {error ? (
-          <div className="rounded-[4px] bg-[#F8F8F8] px-[12px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+          <div className="mt-[12px] w-full rounded-[4px] bg-[#F8F8F8] px-[12px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
             {error}
           </div>
         ) : null}
       </main>
+
+      <div className="fixed bottom-[110px] left-1/2 z-30 flex w-full max-w-[375px] -translate-x-1/2 justify-end px-[24px] py-[16px]">
+        <button
+          type="button"
+          onClick={() => navigate('/create')}
+          className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E]"
+          aria-label="경험 작성"
+        >
+          <Plus size={20} strokeWidth={2.2} color="#FFFFFF" />
+        </button>
+      </div>
 
       <BottomNav active="mypage" />
     </div>

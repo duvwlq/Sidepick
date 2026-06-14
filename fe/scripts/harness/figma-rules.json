@@ -1,0 +1,26 @@
+{
+  "purpose": "Lock Figma comparison conditions so repeated implementation work does not drift on layout or pixel values.",
+  "rules": {
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "deviceScaleFactor": 1,
+    "locale": "ko-KR",
+    "timezoneId": "Asia/Seoul",
+    "colorScheme": "light",
+    "reducedMotion": "reduce",
+    "disableAnimations": true,
+    "hideCaret": true,
+    "waitForFonts": true,
+    "waitForImages": true,
+    "settleDelayMs": 150
+  },
+  "notes": [
+    "Use fixed mobile viewport instead of current window size.",
+    "Do not compare before web fonts finish loading.",
+    "Do not compare while transitions or skeleton states are active.",
+    "Prefer mocked deterministic data for design review harnesses.",
+    "Use the same browser engine and DPR on every run."
+  ]
+}

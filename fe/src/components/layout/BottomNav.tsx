@@ -1,12 +1,12 @@
 import { X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import editIcon from '../../assets/explore-figma/edit.svg';
-import guideIcon from '../../assets/home-v1-figma/icons/guide-figma.svg';
-import homeIcon from '../../assets/home-v1-figma/icons/home-figma.svg';
-import plusIcon from '../../assets/home-v1-figma/icons/plus-figma.svg';
-import searchIcon from '../../assets/home-v1-figma/icons/search-nav-figma.svg';
-import userIcon from '../../assets/home-v1-figma/icons/user-figma.svg';
+import editIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Edit 3.svg';
+import guideIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
+import homeIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Home.svg';
+import plusIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Plus.svg';
+import searchIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
+import userIcon from '../../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
 import { getAccessToken } from '../../lib/session';
 
 type BottomNavKey = 'home' | 'explore' | 'guide' | 'mypage';
@@ -28,27 +28,35 @@ type NavItem = {
   matches: (pathname: string) => boolean;
 };
 
+const NAV_CONTEXT_STORAGE_KEY = 'sidepick.bottomNav.active';
+
 const NAV_ITEMS: NavItem[] = [
   {
     key: 'home',
     label: '홈',
     path: '/',
     icon: homeIcon,
-    matches: (pathname) => pathname === '/' || pathname === '/v1/home',
+    matches: (pathname) => pathname === '/' || pathname === '/v1/home' || pathname === '/home-legacy',
   },
   {
     key: 'explore',
     label: '탐색',
     path: '/explore',
     icon: searchIcon,
-    matches: (pathname) => pathname.startsWith('/explore') || pathname === '/search' || pathname === '/v1/explore',
+    matches: (pathname) =>
+      pathname === '/explore' ||
+      pathname === '/v1/explore' ||
+      pathname === '/v3/explore' ||
+      pathname === '/search' ||
+      pathname === '/explore-figma' ||
+      pathname.startsWith('/experiences/'),
   },
   {
     key: 'guide',
     label: '가이드',
     path: '/faq',
     icon: guideIcon,
-    matches: (pathname) => pathname === '/faq' || pathname === '/mypage/faq',
+    matches: (pathname) => pathname === '/faq' || pathname.startsWith('/guide') || pathname === '/mypage/faq',
   },
   {
     key: 'mypage',
@@ -56,9 +64,30 @@ const NAV_ITEMS: NavItem[] = [
     path: '/mypage',
     icon: userIcon,
     requiresAuth: true,
-    matches: (pathname) => pathname.startsWith('/mypage') && pathname !== '/mypage/faq',
+    matches: (pathname) => pathname === '/mypage' || pathname.startsWith('/mypage/'),
   },
 ];
+
+const ACTIVE_ICON_FILTER =
+  'brightness(0) saturate(100%) invert(45%) sepia(16%) saturate(734%) hue-rotate(94deg) brightness(92%) contrast(87%)';
+const INACTIVE_ICON_FILTER = 'brightness(0) saturate(100%)';
+
+function readStoredNavContext(): BottomNavKey | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const stored = window.sessionStorage.getItem(NAV_CONTEXT_STORAGE_KEY);
+  return stored === 'home' || stored === 'explore' || stored === 'guide' || stored === 'mypage' ? stored : null;
+}
+
+function writeStoredNavContext(value: BottomNavKey) {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.sessionStorage.setItem(NAV_CONTEXT_STORAGE_KEY, value);
+}
 
 export default function BottomNav({
   active,
@@ -73,21 +102,44 @@ export default function BottomNav({
   const [internalExpanded, setInternalExpanded] = useState(false);
   const expanded = onFabToggle ? fabExpanded : internalExpanded;
 
-  function resolveActive(item: NavItem) {
+  const routeMatchedActive = useMemo(() => {
+    return NAV_ITEMS.find((item) => item.matches(location.pathname))?.key ?? null;
+  }, [location.pathname]);
+
+  const visualActive = useMemo<BottomNavKey>(() => {
     if (active) {
-      return item.key === active;
+      return active;
     }
 
-    return item.matches(location.pathname);
-  }
+    if (routeMatchedActive) {
+      return routeMatchedActive;
+    }
 
-  function move(path: string, requiresAuth?: boolean) {
-    if (!token && requiresAuth) {
-      navigate(`/auth?next=${encodeURIComponent(path)}&reason=${encodeURIComponent('마이페이지는 로그인이 필요한 서비스입니다.')}`);
+    return readStoredNavContext() ?? 'home';
+  }, [active, routeMatchedActive]);
+
+  useEffect(() => {
+    if (active) {
+      writeStoredNavContext(active);
       return;
     }
 
-    navigate(path);
+    if (routeMatchedActive) {
+      writeStoredNavContext(routeMatchedActive);
+    }
+  }, [active, routeMatchedActive]);
+
+  function move(item: NavItem) {
+    writeStoredNavContext(item.key);
+
+    if (!token && item.requiresAuth) {
+      navigate(
+        `/auth?next=${encodeURIComponent(item.path)}&reason=${encodeURIComponent('마이페이지는 로그인이 필요한 서비스입니다.')}`,
+      );
+      return;
+    }
+
+    navigate(item.path);
   }
 
   function handleCreateClick() {
@@ -99,7 +151,9 @@ export default function BottomNav({
     }
 
     if (!token) {
-      navigate(`/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`);
+      navigate(
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`,
+      );
       return;
     }
 
@@ -130,6 +184,7 @@ export default function BottomNav({
                   onFabToggle();
                   return;
                 }
+
                 setInternalExpanded((current) => !current);
               }}
               className={`absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full ${
@@ -147,22 +202,27 @@ export default function BottomNav({
         </div>
       ) : null}
 
-      <nav className="flex h-[94px] w-full items-center justify-between rounded-tl-[20px] rounded-tr-[20px] bg-white px-[40px] pb-[32px] pt-[12px] shadow-[0_0_10px_rgba(0,0,0,0.15)]">
+      <nav className="flex h-[84px] w-full items-start justify-between rounded-tl-[20px] rounded-tr-[20px] bg-white px-[40px] pb-[32px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
         {NAV_ITEMS.map((item) => {
-          const isActive = resolveActive(item);
+          const isActive = visualActive === item.key;
 
           return (
             <button
               key={item.key}
               type="button"
-              onClick={() => move(item.path, item.requiresAuth)}
-              className="flex w-[24px] flex-col items-center justify-start gap-[4px]"
+              onClick={() => move(item)}
+              className={`flex w-[40px] flex-col items-center justify-start gap-[4px] ${isActive ? 'opacity-100' : 'opacity-30'}`}
               aria-current={isActive ? 'page' : undefined}
             >
-              <img src={item.icon} alt="" className={`h-[24px] w-[24px] ${isActive ? 'opacity-100' : 'opacity-30'}`} />
+              <img
+                src={item.icon}
+                alt=""
+                className="h-[24px] w-[24px]"
+                style={{ filter: isActive ? ACTIVE_ICON_FILTER : INACTIVE_ICON_FILTER }}
+              />
               <span
-                className={`whitespace-nowrap font-['Pretendard'] text-center text-[12px] leading-[14.4px] ${
-                  isActive ? 'font-[500] text-[#5A876E]' : 'font-[400] text-[rgba(0,0,0,0.3)]'
+                className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-none ${
+                  isActive ? 'font-[600] text-[#5A876E]' : 'font-[400] text-black'
                 }`}
               >
                 {item.label}

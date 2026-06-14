@@ -1,8 +1,8 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
+import { X } from 'lucide-react';
+import { useRef } from 'react';
 import ExampleCard from '../components/create/ExampleCard';
-import BottomNav from '../components/layout/BottomNav';
 import { useToast } from '../components/common/useToast';
 import {
   createExperience,
@@ -13,6 +13,12 @@ import {
   type ExperienceUpsertInput,
 } from '../lib/api';
 import { CATEGORY_VISUALS } from '../lib/category-visuals';
+import {
+  clearCreateExperienceDraft,
+  readCreateExperienceDraft,
+  resolveCreateExperienceDraftScope,
+  writeCreateExperienceDraft,
+} from '../lib/create-experience-draft';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
@@ -81,6 +87,18 @@ const CATEGORY_SLUG_BY_KEY: Record<string, string> = {
   investment: 'investment',
   offline: 'offline-sidejob',
 };
+
+function buildFallbackCategories(): Category[] {
+  return CATEGORY_VISUALS.map((item) => ({
+    id: item.id,
+    name: item.label,
+    description: item.descriptionLines.join(' '),
+    icon: '',
+    color: '#5A876E',
+    slug: CATEGORY_SLUG_BY_KEY[item.key] ?? null,
+    type: 'business_field',
+  }));
+}
 
 function parseAmount(value: string) {
   const digits = value.replace(/[^\d]/g, '');
@@ -202,7 +220,7 @@ function buildPendingPayload(input: {
   };
 }
 
-function Header({ onBack }: { onBack: () => void }) {
+function Header({ onClose }: { onClose: () => void }) {
   return (
     <header className="flex h-[123px] w-full flex-col bg-white">
       <div className="h-[59px] px-[16px] pt-[17px]">
@@ -214,8 +232,8 @@ function Header({ onBack }: { onBack: () => void }) {
         </div>
       </div>
       <div className="flex h-[64px] items-center px-[16px]">
-        <button type="button" onClick={onBack} className="flex h-[24px] w-[24px] items-center justify-center">
-          <img src={arrowLeftIcon} alt="뒤로가기" className="h-[24px] w-[24px]" />
+        <button type="button" onClick={onClose} className="flex h-[24px] w-[24px] items-center justify-center">
+          <X size={24} strokeWidth={2.1} color="#131416" />
         </button>
         <div className="flex-1 text-center text-[16px] font-[600] leading-[19.2px] text-[#131416]">경험 등록</div>
         <div className="w-[24px]" />
@@ -282,6 +300,7 @@ export default function CreateWizardPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { showToast } = useToast();
+  const draftHydratedRef = useRef(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryLoading, setCategoryLoading] = useState(true);
   const [step, setStep] = useState<WizardStep>(1);
@@ -310,6 +329,7 @@ export default function CreateWizardPage() {
   }, [searchParams]);
 
   const isEditMode = editingExperienceId !== null;
+  const draftScope = useMemo(() => resolveCreateExperienceDraftScope(getStoredUser()), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -319,7 +339,10 @@ export default function CreateWizardPage() {
         if (!cancelled) setCategories(items);
       })
       .catch((error) => {
-        if (!cancelled) showToast(resolveErrorMessage(error, '카테고리를 불러오지 못했어요.'), 'error');
+        if (!cancelled) {
+          setCategories(buildFallbackCategories());
+          showToast(resolveErrorMessage(error, '카테고리를 불러오지 못했어요.'), 'error');
+        }
       })
       .finally(() => {
         if (!cancelled) setCategoryLoading(false);
@@ -390,6 +413,61 @@ export default function CreateWizardPage() {
   }, [editingExperienceId, showToast]);
 
   useEffect(() => {
+    if (isEditMode || draftHydratedRef.current) {
+      return;
+    }
+
+    const draft = readCreateExperienceDraft(draftScope);
+    draftHydratedRef.current = true;
+    if (!draft) {
+      return;
+    }
+
+    setStep(draft.data.step);
+    setSelectedCategoryKey(draft.data.selectedCategoryKey);
+    setDuration(draft.data.duration);
+    setDailyTime(draft.data.dailyTime);
+    setInvestmentAmount(draft.data.investmentAmount);
+    setMonthlyRevenue(draft.data.monthlyRevenue);
+    setIsConcurrentWithMainJob(draft.data.isConcurrentWithMainJob);
+    setDifficulties(draft.data.difficulties);
+    setDifficultyEtc(draft.data.difficultyEtc);
+    setContent(draft.data.content);
+  }, [draftScope, isEditMode]);
+
+  useEffect(() => {
+    if (isEditMode || !draftHydratedRef.current) {
+      return;
+    }
+
+    writeCreateExperienceDraft(draftScope, {
+      step,
+      selectedCategoryKey,
+      duration,
+      dailyTime,
+      investmentAmount,
+      monthlyRevenue,
+      isConcurrentWithMainJob,
+      difficulties,
+      difficultyEtc,
+      content,
+    });
+  }, [
+    content,
+    dailyTime,
+    difficulties,
+    difficultyEtc,
+    draftScope,
+    duration,
+    investmentAmount,
+    isConcurrentWithMainJob,
+    isEditMode,
+    monthlyRevenue,
+    selectedCategoryKey,
+    step,
+  ]);
+
+  useEffect(() => {
     if (!openSheet) return undefined;
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpenSheet(null);
@@ -451,7 +529,14 @@ export default function CreateWizardPage() {
     setDifficulties((current) => (current.includes(value) ? current.filter((item) => item !== value) : [...current, value]));
   }
 
-  function handleBack() {
+  function closeWizard() {
+    if (!isEditMode) {
+      clearCreateExperienceDraft(draftScope);
+    }
+    navigate(-1);
+  }
+
+  function handleStepBack() {
     if (openSheet) {
       setOpenSheet(null);
       return;
@@ -460,7 +545,7 @@ export default function CreateWizardPage() {
       setStep((current) => (current - 1) as WizardStep);
       return;
     }
-    navigate(-1);
+    closeWizard();
   }
 
   async function handleNext() {
@@ -510,7 +595,7 @@ export default function CreateWizardPage() {
           categoryId: matchedCategory.id,
         });
         showToast('경험을 수정했어요.', 'success');
-        navigate(`/detail/${editingExperienceId}`);
+        navigate(`/experiences/${editingExperienceId}`);
         return;
       }
 
@@ -518,6 +603,7 @@ export default function CreateWizardPage() {
         ...payload,
         categoryId: matchedCategory.id,
       });
+      clearCreateExperienceDraft(draftScope);
       showToast('경험을 등록했어요. AI 분석을 시작합니다.', 'success');
       navigate(`/analysis-result?experienceId=${created.id}`);
     } catch (error) {
@@ -530,9 +616,9 @@ export default function CreateWizardPage() {
   return (
     <>
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
-        <Header onBack={handleBack} />
+        <Header onClose={closeWizard} />
 
-        <main className="flex flex-col items-center gap-[24px] px-[16px] pb-[180px] pt-[16px]">
+        <main className="flex flex-col items-center gap-[24px] px-[16px] pb-[128px] pt-[16px]">
           <ProgressBar step={step} />
 
           {step === 1 ? (
@@ -542,13 +628,14 @@ export default function CreateWizardPage() {
               <div className="grid grid-cols-2 gap-[10px]">
                 {CATEGORY_VISUALS.map((category) => {
                   const selected = selectedCategoryKey === category.key;
-                  const hasSelection = Boolean(selectedCategoryKey);
                   return (
                     <button
                       key={category.id}
                       type="button"
                       onClick={() => setSelectedCategoryKey(category.key)}
-                      className={`flex h-[151px] flex-col rounded-[16px] border px-[14px] py-[16px] text-left transition ${selected ? 'border-[#5A876E] bg-[#F4F8F5]' : 'border-[#E6E6E6] bg-white'} ${hasSelection && !selected ? 'opacity-[0.38]' : 'opacity-100'}`}
+                      className={`flex h-[151px] flex-col rounded-[16px] border bg-white px-[14px] py-[16px] text-left transition ${
+                        selected ? 'border-[#5A876E] shadow-[0_0_0_1px_rgba(90,135,110,0.08)]' : 'border-[#E6E6E6]'
+                      }`}
                     >
                       <div className="flex h-[50px] w-[50px] items-center justify-center">{category.icon}</div>
                       <div className="pt-[14px]">
@@ -681,19 +768,28 @@ export default function CreateWizardPage() {
           ) : null}
         </main>
 
-        <div className="fixed bottom-[96px] left-1/2 z-20 w-full max-w-[375px] -translate-x-1/2 px-[16px]">
-          <button
-            type="button"
-            disabled={stepDisabled || categoryLoading || submitting}
-            onClick={() => void handleNext()}
-            className={`flex h-[41px] w-full items-center justify-center rounded-[8px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white ${stepDisabled || categoryLoading || submitting ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'}`}
-          >
-            {submitting ? '처리 중...' : step === 4 ? (isEditMode ? '수정 완료' : '작성 완료') : '다음 단계'}
-          </button>
-        </div>
-
-        <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[375px] -translate-x-1/2">
-          <BottomNav />
+        <div className="fixed bottom-0 left-1/2 z-20 w-full max-w-[375px] -translate-x-1/2 border-t border-[#F1F1F1] bg-white px-[16px] pb-[24px] pt-[12px]">
+          <div className="flex items-center gap-[8px]">
+            {step > 1 ? (
+              <button
+                type="button"
+                onClick={handleStepBack}
+                className="flex h-[41px] min-w-[92px] items-center justify-center rounded-[8px] border border-[#D8D8D8] bg-white px-[16px] font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#494949]"
+              >
+                뒤로가기
+              </button>
+            ) : null}
+            <button
+              type="button"
+              disabled={stepDisabled || categoryLoading || submitting}
+              onClick={() => void handleNext()}
+              className={`flex h-[41px] flex-1 items-center justify-center rounded-[8px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white ${
+                stepDisabled || categoryLoading || submitting ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'
+              }`}
+            >
+              {submitting ? '처리 중...' : step === 4 ? (isEditMode ? '수정 완료' : '작성 완료') : '다음 단계'}
+            </button>
+          </div>
         </div>
       </div>
 

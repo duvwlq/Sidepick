@@ -153,7 +153,11 @@ public class UserActivityService {
     }
 
     private ExperienceResponse toResponse(FailureExperience experience) {
-        return ExperienceResponse.from(experience, aiAnalysisService.findByExperience(experience).orElse(null));
+        return ExperienceResponse.from(
+                experience,
+                aiAnalysisService.findByExperience(experience).orElse(null),
+                bookmarkRepository.countByExperienceId(experience.getId())
+        );
     }
 
     private void accumulateCategoryWeights(

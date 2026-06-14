@@ -12,6 +12,7 @@ import naverIcon from '../../assets/auth-figma/naver-icon.svg';
 import wifiIcon from '../../assets/auth-figma/wifi.svg';
 import { issueOAuthState, login } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
+import { buildOAuthRedirectUri } from '../../lib/oauth-redirect';
 import { saveOAuthState } from '../../lib/oauth-state';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
@@ -67,7 +68,7 @@ export default function AuthEntryPage() {
   async function startOAuthLogin(provider: OAuthProvider) {
     const clientId = import.meta.env[`VITE_${provider}_CLIENT_ID`];
     const providerPath = provider.toLowerCase();
-    const redirectUri = `${window.location.origin}/auth/${providerPath}/callback`;
+    const redirectUri = buildOAuthRedirectUri(`/auth/${providerPath}/callback`);
 
     if (!clientId) {
       const message = '소셜 로그인 설정을 찾을 수 없어요. 잠시 후 다시 시도해 주세요.';
@@ -96,7 +97,7 @@ export default function AuthEntryPage() {
       const authUrl = buildOAuthAuthorizeUrl(provider, clientId, redirectUri, payload.state);
       window.location.href = authUrl;
     } catch (error) {
-      const message = resolveErrorMessage(error, '소셜 로그인을 준비하는 중 문제가 발생했어요. 다시 시도해 주세요.');
+      const message = resolveErrorMessage(error, '소셜 로그인을 준비하던 중 문제가 발생했어요. 다시 시도해 주세요.');
       setOauthError(message);
       setOauthLoading(null);
       showToast(message);
@@ -140,7 +141,7 @@ export default function AuthEntryPage() {
             </div>
             <div className="flex w-full items-center justify-center px-[16px]">
               <p className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#494949]">
-                서비스 이용을 위해 로그인해 주세요
+                서비스를 이용하려면 로그인해 주세요
               </p>
             </div>
           </div>

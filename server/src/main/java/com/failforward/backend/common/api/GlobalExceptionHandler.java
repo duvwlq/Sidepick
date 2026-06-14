@@ -244,7 +244,7 @@ public class GlobalExceptionHandler {
         fields.put("status", status.value());
         fields.put("errorCode", errorCode.name());
         fields.put("externalApiStatus", externalApiStatus);
-        fields.put("elapsedTimeMs", null);
+        fields.put("elapsedTimeMs", resolveElapsedTimeMs(request));
         fields.put("traceId", resolveTraceId(request));
         fields.put("timestamp", OffsetDateTime.now().toString());
         fields.put("detail", detail);
@@ -254,6 +254,11 @@ public class GlobalExceptionHandler {
     private String resolveTraceId(HttpServletRequest request) {
         Object traceId = request.getAttribute(RequestTraceFilter.TRACE_ID_ATTRIBUTE);
         return traceId instanceof String value ? value : null;
+    }
+
+    private Long resolveElapsedTimeMs(HttpServletRequest request) {
+        Object elapsedTimeMs = request.getAttribute(RequestLatencyMetricsInterceptor.ELAPSED_TIME_MS_ATTRIBUTE);
+        return elapsedTimeMs instanceof Long value ? value : null;
     }
 
     private Long resolveUserId() {

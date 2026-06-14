@@ -169,7 +169,7 @@ function HomeStoryCard({ experience, compact = false }: { experience: Experience
 function CategoryGridCard({ category }: { category: HomeCategoryCard }) {
   return (
     <Link
-      to={`/explore?tag=${category.id}`}
+      to={`/explore?categoryId=${category.id}`}
       className={`relative flex h-[160px] min-h-[160px] flex-col justify-end overflow-hidden rounded-[16px] p-[16px] text-white ${category.theme}`}
     >
       <div

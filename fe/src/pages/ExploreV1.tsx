@@ -1,6 +1,5 @@
 ﻿import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Bookmark } from 'lucide-react';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
@@ -10,17 +9,10 @@ import editIcon from '../assets/explore-figma/edit.svg';
 import filterIcon from '../assets/explore-figma/filter.svg';
 import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
+import CaseCard from '../components/common/CaseCard';
 import { TagChip } from '../components/common/Chip';
 import CaseSegment from '../components/common/CaseSegment';
 import HorizontalScroll from '../components/common/HorizontalScroll';
-import {
-  CardActionButton,
-  CaseChip,
-  CaseChipRow,
-  CaseReactionCount,
-  CaseSimilarityIndicator,
-  CaseSurface,
-} from '../components/common/CaseUi';
 import BottomNav from '../components/layout/BottomNav';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
@@ -44,7 +36,7 @@ import {
   unbookmarkExperience,
 } from '../lib/api';
 import { publishBookmarkSync } from '../lib/bookmark-sync';
-import { getExperienceImageMeta } from '../lib/experience-images';
+import { extractExperienceImageUrls } from '../lib/experience-images';
 import { readRecentExploreSearches, saveRecentExploreSearch } from '../lib/recent-explore-searches';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken } from '../lib/session';
@@ -486,7 +478,7 @@ function CategoryRowV1({
               <TagChip
                 label={category.label}
                 tone={active ? 'primary' : 'secondary'}
-                className="font-[500]"
+                className="h-[24px] px-[8px] text-[10px] font-[500] leading-[12px]"
               />
             </button>
           );
@@ -661,15 +653,16 @@ function ExploreCardV1({
   reactionSummary: ReactionSummaryPayload | null;
   onReactionToggle: (experience: Experience, reactionType: ReactionType) => void;
 }) {
-  const imageMeta = getExperienceImageMeta(experience);
   const tags = buildCardTags(experience);
   const isSuccess = experience.caseStatus === 'SUCCESS';
-  const hasImage = Boolean(imageMeta.primaryImageUrl);
+  const imageUrls = extractExperienceImageUrls(experience);
+  const hasImage = Boolean(imageUrls[0]);
   const showThumbnail = experience.structuredData.figmaCardShowThumbnail === true || hasImage;
   const ctaLabel = typeof experience.structuredData.figmaCardCtaLabel === 'string'
     ? experience.structuredData.figmaCardCtaLabel
     : '성공 사례 보기';
   const ctaDisabled = experience.structuredData.figmaCardCtaDisabled === true;
+  const similarityPercent = 99;
   const safeTitle = sanitizeDisplayText(experience.title, `${experience.category.name} 사례`);
   const safePreview = sanitizeDisplayText(
     experience.content.replace(/!\[[^\]]*]\(([^)]+)\)/g, '').replace(/\s+/g, ' ').trim(),
@@ -680,114 +673,40 @@ function ExploreCardV1({
   const heartCount = experience.id < 0 ? experience.likeCount : reactionSummary?.heartCount ?? 0;
   const sourceExperienceId = Number(experience.structuredData.sourceExperienceId);
   const detailExperienceId = experience.id < 0 && Number.isFinite(sourceExperienceId) ? sourceExperienceId : experience.id;
-
-  const cardHeightClass = 'min-h-[171px]';
-
   const content = (
-    <CaseSurface className={`flex w-full flex-col rounded-none border-0 px-[16px] py-[12px] shadow-none ${cardHeightClass}`}>
-      <div className="flex w-full items-start justify-between gap-[8px]">
-        <CaseChipRow className="max-w-full flex-1 pr-[8px]">
-          {tags.map((tag, index) => (
-            <CaseChip
-              key={`${experience.id}-${tag}-${index}`}
-              label={tag}
-              tone={index === 0 ? (isSuccess ? 'status-success' : 'status-failure') : index === 1 ? 'category' : 'keyword'}
-              compact
-              maxWidthClassName={index === 0 ? 'max-w-[40px]' : index === 1 ? 'max-w-[108px]' : 'max-w-[58px]'}
-            />
-          ))}
-        </CaseChipRow>
-        {showSimilarity ? <CaseSimilarityIndicator tone={isSuccess ? 'success' : 'failure'} /> : null}
-      </div>
-
-      <div className="flex h-[60px] w-full items-start gap-[8px] pt-[8px]">
-        {showThumbnail ? (
-          <div className="h-[60px] w-[80px] shrink-0 overflow-hidden rounded-[4px] bg-[#A8A8A8]">
-            {hasImage ? <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" /> : null}
-          </div>
-        ) : null}
-
-        <div className="flex min-w-0 flex-1 flex-col gap-[4px]">
-          <h3
-            className="line-clamp-1 font-['Pretendard'] text-[16px] font-[500] leading-[19.2px] tracking-[0px] text-[#131416]"
-          >
-            {safeTitle}
-          </h3>
-          <p
-            className={`font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949] ${
-              showThumbnail ? 'line-clamp-1' : 'line-clamp-2'
-            }`}
-          >
-            {safePreview}
-          </p>
-        </div>
-      </div>
-
-      <div className={`mt-auto flex w-full flex-col ${showThumbnail ? 'pt-[8px]' : 'pt-[12px]'}`}>
-        <div className="flex items-center justify-between gap-[8px]">
-          <div className="min-w-0 flex-1 truncate font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-            <span>{safeNickname}</span>
-            <span className="mx-[4px]">{'·'}</span>
-            <span>{formatDate(experience.createdAt)}</span>
-            <span className="mx-[4px]">{'·'}</span>
-            <span>{`조회 ${experience.viewCount.toLocaleString()}`}</span>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-[8px]">
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onReactionToggle(experience, 'HEART');
-              }}
-              className="flex items-center gap-[2px]"
-              aria-label={heartActive ? '공감 취소' : '공감해요'}
-            >
-              <CaseReactionCount count={heartCount} active={heartActive} />
-            </button>
-            <button
-              type="button"
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onBookmarkToggle(experience);
-              }}
-              className="translate-y-[0.25px] flex shrink-0 items-center gap-[2px]"
-              aria-label={bookmarked ? '북마크 해제' : '북마크 저장'}
-            >
-              <Bookmark
-                size={14}
-                strokeWidth={1.75}
-                fill={bookmarked ? '#5A876E' : 'none'}
-                color={bookmarked ? '#5A876E' : '#8A8A8A'}
-              />
-              <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-                {((experience as Experience & { bookmarkCount?: number }).bookmarkCount ?? experience.likeCount).toLocaleString()}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <div className={`flex w-full items-center pt-[8px] ${!isSuccess ? 'justify-end' : 'justify-end'}`}>
-          {!isSuccess ? (
-            <CardActionButton
-              label={ctaLabel}
-              disabled={ctaDisabled}
-              className={ctaDisabled ? 'bg-[#CBE5D8] text-white opacity-100 font-[500]' : 'font-[500]'}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                if (ctaDisabled) {
-                  return;
-                }
-                onSuccessClick(experience);
-              }}
-            />
-          ) : null}
-        </div>
-      </div>
-    </CaseSurface>
+    <CaseCard
+      tags={tags.map((tag, index) => ({
+        label: tag,
+        tone: (index === 0 ? (isSuccess ? 'status-success' : 'status-failure') : index === 1 ? 'category' : 'keyword') as
+          | 'status-success'
+          | 'status-failure'
+          | 'category'
+          | 'keyword',
+        maxWidthClassName: index === 0 ? 'max-w-[40px]' : index === 1 ? 'max-w-[108px]' : 'max-w-[58px]',
+      }))}
+      title={safeTitle}
+      preview={safePreview}
+      nickname={safeNickname}
+      createdAt={formatDate(experience.createdAt)}
+      viewCount={experience.viewCount}
+      thumbnailUrl={showThumbnail ? imageUrls[0] ?? null : null}
+      thumbnailCount={imageUrls.length}
+      previewLinesWithoutThumbnail={2}
+      showSimilarity={showSimilarity}
+      similarityPercent={similarityPercent}
+      similarityTone={isSuccess ? 'success' : 'failure'}
+      heartCount={heartCount}
+      heartActive={heartActive}
+      onHeartClick={() => onReactionToggle(experience, 'HEART')}
+      bookmarkCount={experience.bookmarkCount ?? 0}
+      bookmarkActive={bookmarked}
+      onBookmarkClick={() => onBookmarkToggle(experience)}
+      showCta={!isSuccess}
+      ctaLabel={ctaLabel}
+      ctaDisabled={ctaDisabled}
+      onCtaClick={() => onSuccessClick(experience)}
+      surfaceClassName="flex w-full flex-col min-h-[171px]"
+    />
   );
 
   return (
@@ -842,6 +761,124 @@ function StatsUnavailableCard({ message }: { message: string }) {
   );
 }
 
+function StatsExplanationModal({
+  open,
+  categoryLabel,
+  patternStats,
+  timingStats,
+  onClose,
+}: {
+  open: boolean;
+  categoryLabel: string;
+  patternStats: FailurePatternStatsPayload | null;
+  timingStats: FailureTimingStatsPayload | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!open) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
+  if (!open) {
+    return null;
+  }
+
+  const minSampleSize =
+    patternStats?.explanation.minSampleSize ??
+    timingStats?.explanation.minSampleSize ??
+    10;
+  const lastUpdated =
+    patternStats?.explanation.lastUpdated ??
+    timingStats?.explanation.lastUpdated ??
+    null;
+  const dataSource =
+    patternStats?.explanation.dataSource ??
+    timingStats?.explanation.dataSource ??
+    null;
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/40 px-[16px] pb-[24px] pt-[80px]">
+      <button type="button" className="absolute inset-0" aria-label="통계 설명 닫기" onClick={onClose} />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`${categoryLabel} 통계 설명`}
+        className="relative w-full max-w-[343px] rounded-[20px] bg-white px-[20px] py-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+      >
+        <div className="flex items-start justify-between gap-[12px]">
+          <div>
+            <h3 className="font-['Pretendard'] text-[16px] font-[700] leading-[19.2px] text-[#131416]">
+              {categoryLabel} 통계 안내
+            </h3>
+            <p className="pt-[6px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#5F6662]">
+              차트는 AI 통계 JSON을 기준으로 집계됩니다.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex h-[28px] w-[28px] items-center justify-center rounded-full bg-[#F3F6F4] text-[16px] font-[600] leading-none text-[#5A876E]"
+            aria-label="닫기"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="mt-[16px] flex flex-col gap-[10px] rounded-[16px] bg-[#F8FBF9] px-[14px] py-[14px]">
+          <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] text-[#375E49]">
+            표시 기준
+          </p>
+          <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#4D5B53]">
+            표본이 {minSampleSize}건 이상이면 차트를 표시하고, 부족하면 안내 카드로 전환합니다.
+          </p>
+          {lastUpdated ? (
+            <p className="font-['Pretendard'] text-[11px] font-[400] leading-[15.4px] text-[#6F7C75]">
+              마지막 반영 시각: {lastUpdated}
+            </p>
+          ) : null}
+          {dataSource ? (
+            <p className="font-['Pretendard'] text-[11px] font-[400] leading-[15.4px] text-[#6F7C75]">
+              데이터 소스: {dataSource}
+            </p>
+          ) : null}
+        </div>
+
+        {patternStats ? (
+          <div className="mt-[14px] rounded-[16px] border border-[#E5EEE8] px-[14px] py-[14px]">
+            <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] text-[#131416]">
+              실패 패턴 차트
+            </p>
+            <p className="pt-[6px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#5F6662]">
+              {patternStats.summary}
+            </p>
+          </div>
+        ) : null}
+
+        {timingStats ? (
+          <div className="mt-[10px] rounded-[16px] border border-[#E5EEE8] px-[14px] py-[14px]">
+            <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] text-[#131416]">
+              실패 시점 분포 차트
+            </p>
+            <p className="pt-[6px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#5F6662]">
+              {timingStats.summary}
+            </p>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function FailureTopChartCard({ stats }: { stats: FailurePatternStatsPayload }) {
   const topThree = stats.patterns.slice(0, 3);
   const maxPercent = topThree.reduce((max, item) => Math.max(max, item.percent), 0);
@@ -885,7 +922,7 @@ function FailureTopChartCard({ stats }: { stats: FailurePatternStatsPayload }) {
 
         <div className="flex items-center justify-center px-[16px]">
           <p className="text-center font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] tracking-[0px] text-[#5A876E]">
-          {stats.explanation}
+            {stats.summary}
           </p>
         </div>
       </div>
@@ -1105,6 +1142,16 @@ function ExploreStatsSection({
   error: string;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [explanationOpen, setExplanationOpen] = useState(false);
+  const isInsufficient =
+    (patternStats && !patternStats.sufficientData) ||
+    (timingStats && !timingStats.sufficientData);
+  const insufficientMessage =
+    patternStats?.explanation.insufficientMessage ??
+    timingStats?.explanation.insufficientMessage ??
+    patternStats?.summary ??
+    timingStats?.summary ??
+    '데이터를 더 수집하면 차트가 표시됩니다.';
 
   return (
     <section className="bg-white">
@@ -1118,9 +1165,17 @@ function ExploreStatsSection({
           <h2 className="font-['Pretendard'] text-[14px] font-[700] leading-[19.6px] tracking-[0px] text-[#5A876E]">
             {categoryLabel} 통계
           </h2>
-          <span className="inline-flex h-[18px] w-[18px] translate-y-[-0.5px] items-center justify-center rounded-full border border-[#B8CABE] text-[11px] font-[700] leading-none text-[#839487]">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              setExplanationOpen(true);
+            }}
+            className="inline-flex h-[18px] w-[18px] translate-y-[-0.5px] items-center justify-center rounded-full border border-[#B8CABE] text-[11px] font-[700] leading-none text-[#839487]"
+            aria-label={`${categoryLabel} 통계 설명 열기`}
+          >
             ?
-          </span>
+          </button>
         </div>
         <img
           src={chevronDownIcon}
@@ -1137,8 +1192,10 @@ function ExploreStatsSection({
             <div className="rounded-[16px] bg-white px-[18px] py-[20px] shadow-[0_0_10px_rgba(0,0,0,0.06)]">
               <ErrorState message={error} />
             </div>
-          ) : patternStats && !patternStats.sufficientData ? (
-            <StatsUnavailableCard message={patternStats.explanation} />
+          ) : isInsufficient ? (
+            <StatsUnavailableCard
+              message={insufficientMessage}
+            />
           ) : patternStats && timingStats ? (
             <div className="flex flex-col gap-[12px]">
               <FailureTopChartCard stats={patternStats} />
@@ -1148,6 +1205,14 @@ function ExploreStatsSection({
           ) : null}
         </div>
       ) : null}
+
+      <StatsExplanationModal
+        open={explanationOpen}
+        categoryLabel={categoryLabel}
+        patternStats={patternStats}
+        timingStats={timingStats}
+        onClose={() => setExplanationOpen(false)}
+      />
     </section>
   );
 }
@@ -1388,7 +1453,7 @@ export default function ExploreV1() {
           item.id === experience.id
             ? {
                 ...item,
-                likeCount: payload.bookmarkCount,
+                bookmarkCount: payload.bookmarkCount,
               }
             : item,
         ),
@@ -1621,7 +1686,7 @@ export default function ExploreV1() {
                     key={experience.id}
                     experience={experience}
                     bookmarked={bookmarkedById[experience.id] ?? false}
-                    showSimilarity={searchMode || keyword.trim().length > 0}
+                    showSimilarity
                     onBookmarkToggle={handleBookmarkToggle}
                     onSuccessClick={moveToSuccessCases}
                     reactionSummary={reactionSummaryById[experience.id] ?? null}

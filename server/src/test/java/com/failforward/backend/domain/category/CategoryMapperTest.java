@@ -17,13 +17,16 @@ class CategoryMapperTest {
 
     @Test
     void normalizesSlashWhenLookingUpKoreanName() {
-        assertEquals("tax", CategoryMapper.toSlug("세금/사업자").orElseThrow());
-        assertEquals("digital-product", CategoryMapper.toSlug("디지털·지식판매").orElseThrow());
+        String taxDisplayName = CategoryMapper.mappings().get("tax-business").replace('\uCA0C', '/');
+        String digitalProductsDisplayName = CategoryMapper.mappings().get("digital-products");
+
+        assertEquals("tax-business", CategoryMapper.toSlug(taxDisplayName).orElseThrow());
+        assertEquals("digital-products", CategoryMapper.toSlug(digitalProductsDisplayName).orElseThrow());
     }
 
     @Test
     void returnsEmptyForUnknownValues() {
         assertTrue(CategoryMapper.toKorean("unknown").isEmpty());
-        assertTrue(CategoryMapper.toSlug("없는 카테고리").isEmpty());
+        assertTrue(CategoryMapper.toSlug("unknown category").isEmpty());
     }
 }

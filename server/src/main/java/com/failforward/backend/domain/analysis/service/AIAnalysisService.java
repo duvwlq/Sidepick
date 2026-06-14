@@ -32,6 +32,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientException;
@@ -134,6 +135,7 @@ public class AIAnalysisService {
 
         analysisTaskExecutor.execute(() -> {
             TransactionTemplate template = new TransactionTemplate(transactionManager);
+            template.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
             try {
                 template.executeWithoutResult(status -> processAnalysisJob(experienceId, forceRefresh));
             } catch (Exception exception) {

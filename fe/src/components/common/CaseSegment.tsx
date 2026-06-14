@@ -8,7 +8,7 @@ type Props = {
   activeKey?: string;
   onChange?: (key: string) => void;
   className?: string;
-  variant?: 'default' | 'feed';
+  variant?: 'default' | 'feed' | 'home';
 };
 
 export default function CaseSegment({
@@ -23,13 +23,16 @@ export default function CaseSegment({
 }: Props) {
   const resolvedActiveKey = activeKey ?? options[0]?.key;
   const isFeedVariant = variant === 'feed';
+  const isHomeVariant = variant === 'home';
 
   return (
     <div
       className={`rounded-full ${
         isFeedVariant
           ? 'bg-white px-[8px] py-[6px] shadow-[0_0_4px_rgba(0,0,0,0.15)]'
-          : 'bg-[#E1E1E1] p-[2px]'
+          : isHomeVariant
+            ? 'bg-[#DEDEDE]'
+            : 'bg-[#E1E1E1] p-[2px]'
       } ${className}`}
     >
       <div
@@ -44,11 +47,15 @@ export default function CaseSegment({
               key={option.key}
               type="button"
               onClick={() => onChange?.(option.key)}
-              className={`flex items-center justify-center rounded-full font-['Pretendard'] text-[12px] leading-[14.4px] ${
+              className={`flex items-center justify-center whitespace-nowrap rounded-full font-['Pretendard'] text-[12px] leading-[14.4px] ${
                 isFeedVariant
                   ? active
-                    ? 'h-[34px] bg-[#5A876E] px-[10px] font-[500] text-white'
-                    : 'h-[34px] px-0 font-[400] text-black'
+                    ? 'h-[34px] min-w-[36px] bg-[#5A876E] px-[10px] font-[500] text-white'
+                    : 'h-[34px] min-w-[36px] px-[10px] font-[500] text-black'
+                  : isHomeVariant
+                    ? active
+                      ? 'h-[32px] rounded-[999px] border-2 border-[#DEDEDE] bg-white font-[500] text-black shadow-none'
+                      : 'h-[32px] rounded-[4px] bg-transparent font-[500] text-[#5D5D5D]'
                   : active
                     ? 'h-[32px] bg-white font-[500] text-black shadow-[0_0_4px_rgba(0,0,0,0.15)]'
                     : 'h-[32px] bg-transparent font-[400] text-[#5D5D5D]'

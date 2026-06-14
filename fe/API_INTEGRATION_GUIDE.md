@@ -66,6 +66,9 @@ FE `AnalysisReport` 타입은 현재 BE 응답 기준으로 맞춥니다.
 - `similarCases[].summary`
 - `similarCases[].keyLesson`
 - `similarCases[].matchRate`
+- `explanation.inputUsed`
+- `explanation.matchedPatterns`
+- `explanation.similarCasesUsed`
 - `processedAt`
 
 아래 필드는 현재 필수 계약이 아니며 후속 확장 후보입니다.
@@ -75,6 +78,24 @@ FE `AnalysisReport` 타입은 현재 BE 응답 기준으로 맞춥니다.
 - `similarCases[].durationMonths`
 - `similarCases[].monthlyRevenue`
 - `structuredSummary`
+
+## Explanation Contract
+
+- `AnalysisReport.explanation` is available when `reportStatus === "READY"`.
+- `similarCases[].explanation` is available on both report payloads and matched-case payloads.
+- FE should treat explanation as optional for rendering, but the backend contract now includes:
+  - `inputUsed.category`
+  - `inputUsed.bodyExcerpt`
+  - `matchedPatterns[]`
+  - `similarCasesUsed[]`
+  - `confidenceScore`
+  - `debug.source`
+
+## Matched Cases Endpoint
+
+- Endpoint: `GET /api/analysis/{analysisId}/matched-cases`
+- This is the current source of truth for detailed similar-case explanation payloads.
+- FE should not depend on `/api/experiences/{id}/similar` because that endpoint is not the active backend contract.
 
 ## analysisMapper Rules
 

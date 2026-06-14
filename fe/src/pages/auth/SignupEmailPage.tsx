@@ -12,6 +12,8 @@ import { useAuthFlow } from '../../context/useAuthFlow';
 import { requestEmailVerification } from '../../lib/api';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function SignupEmailPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,8 +27,11 @@ export default function SignupEmailPage() {
     return params.get('next') || '/';
   }, [location.search]);
 
+  const normalizedEmail = form.email.trim();
+  const isEmailValid = EMAIL_PATTERN.test(normalizedEmail);
+
   async function handleNext() {
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+    if (!isEmailValid) {
       setError('이메일 형식에 맞게 다시 입력해 주세요.');
       return;
     }
@@ -35,16 +40,16 @@ export default function SignupEmailPage() {
     setError('');
 
     try {
-      const payload = await requestEmailVerification({ email: form.email.trim() });
-      updateField('email', form.email.trim());
+      const payload = await requestEmailVerification({ email: normalizedEmail });
+      updateField('email', normalizedEmail);
       updateField('verificationSent', true);
       updateField(
         'verificationMessage',
         payload.verificationCode
           ? `개발용 인증코드: ${payload.verificationCode}`
-          : '인증 메일을 발송했어요.',
+          : '인증 메일이 발송되었어요.',
       );
-      navigate(`/signup/verify?next=${encodeURIComponent(nextPath)}`);
+      navigate(`/signup/identity?next=${encodeURIComponent(nextPath)}`);
     } catch (requestError) {
       const message = resolveErrorMessage(requestError, '이메일 형식에 맞게 다시 입력해 주세요.');
       setError(message);
@@ -57,7 +62,7 @@ export default function SignupEmailPage() {
   return (
     <SignupScreen
       title="개인 정보 등록"
-      headline="이메일로 본인 확인을 진행할게요"
+      headlineLines={['휴대폰 번호로', '본인 확인을 진행할게요']}
       onBack={() =>
         navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
           replace: true,
@@ -68,16 +73,17 @@ export default function SignupEmailPage() {
         <SignupField
           label="이메일"
           type="email"
-          placeholder="이메일을 입력해 주세요"
+          placeholder="이메일을 입력해주세요."
           value={form.email}
           onChange={(event) => updateField('email', event.target.value)}
+          autoComplete="email"
           fieldHeight={40}
         />
 
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-        <SignupButton onClick={() => void handleNext()} disabled={loading} tone="soft">
-          {loading ? '인증 메일 발송 중...' : '다음으로'}
+        <SignupButton onClick={() => void handleNext()} disabled={loading || !isEmailValid} tone="soft">
+          {loading ? '인증 요청 중...' : '본인 인증하기'}
         </SignupButton>
       </SignupFieldGroup>
     </SignupScreen>

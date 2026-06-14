@@ -27,12 +27,12 @@ public class BookmarkService {
         FailureExperience experience = getExperience(experienceId);
         Optional<ExperienceBookmark> existing = bookmarkRepository.findByExperienceAndUserId(experience, user.getId());
         if (existing.isPresent()) {
-            return new BookmarkStatusResponse(experienceId, true, experience.getLikeCount());
+            return new BookmarkStatusResponse(experienceId, true, bookmarkRepository.countByExperienceId(experienceId));
         }
 
         bookmarkRepository.save(ExperienceBookmark.create(experience, user));
         experience.increaseLikeCount();
-        return new BookmarkStatusResponse(experienceId, true, experience.getLikeCount());
+        return new BookmarkStatusResponse(experienceId, true, bookmarkRepository.countByExperienceId(experienceId));
     }
 
     @Transactional
@@ -43,7 +43,7 @@ public class BookmarkService {
             bookmarkRepository.delete(bookmark);
             experience.decreaseLikeCount();
         });
-        return new BookmarkStatusResponse(experienceId, false, experience.getLikeCount());
+        return new BookmarkStatusResponse(experienceId, false, bookmarkRepository.countByExperienceId(experienceId));
     }
 
     public BookmarkStatusResponse getStatus(Long experienceId) {
@@ -52,7 +52,7 @@ public class BookmarkService {
         return new BookmarkStatusResponse(
                 experienceId,
                 bookmarkRepository.existsByExperienceIdAndUserId(experienceId, user.getId()),
-                experience.getLikeCount()
+                bookmarkRepository.countByExperienceId(experienceId)
         );
     }
 

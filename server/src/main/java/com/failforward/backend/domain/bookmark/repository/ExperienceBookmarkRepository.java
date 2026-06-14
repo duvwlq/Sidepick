@@ -13,6 +13,8 @@ public interface ExperienceBookmarkRepository extends JpaRepository<ExperienceBo
 
     boolean existsByExperienceIdAndUserId(Long experienceId, Long userId);
 
+    int countByExperienceId(Long experienceId);
+
     @EntityGraph(attributePaths = {"experience", "experience.user", "experience.category"})
     List<ExperienceBookmark> findAllByUserIdOrderByCreatedAtDesc(Long userId);
 }

@@ -3,6 +3,8 @@ import { createContext, useCallback, useMemo, useState, type ReactNode } from 'r
 type AuthFlowData = {
   signupMode: 'local' | 'social';
   email: string;
+  identityCode: string;
+  username: string;
   password: string;
   passwordConfirm: string;
   fullName: string;
@@ -14,6 +16,7 @@ type AuthFlowData = {
   region: string;
   experienceStatus: string;
   signupPurposes: string[];
+  usernameChecked: boolean;
   nicknameChecked: boolean;
   verificationSent: boolean;
   verificationConfirmed: boolean;
@@ -29,6 +32,8 @@ type AuthFlowContextValue = {
 const initialForm: AuthFlowData = {
   signupMode: 'local',
   email: '',
+  identityCode: '',
+  username: '',
   password: '',
   passwordConfirm: '',
   fullName: '',
@@ -40,16 +45,50 @@ const initialForm: AuthFlowData = {
   region: '',
   experienceStatus: '',
   signupPurposes: [],
+  usernameChecked: false,
   nicknameChecked: false,
   verificationSent: false,
   verificationConfirmed: false,
   verificationMessage: '',
 };
 
+const HARNESS_STORAGE_KEY = 'sidepick.authFlowHarnessSeed';
+
+function readHarnessSeed(): Partial<AuthFlowData> {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(HARNESS_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return Object.fromEntries(
+      Object.entries(parsed).filter(([key]) => key in initialForm),
+    ) as Partial<AuthFlowData>;
+  } catch {
+    return {};
+  }
+}
+
+function createInitialForm(): AuthFlowData {
+  return {
+    ...initialForm,
+    ...readHarnessSeed(),
+  };
+}
+
 const AuthFlowContext = createContext<AuthFlowContextValue | null>(null);
 
 export function AuthFlowProvider({ children }: { children: ReactNode }) {
-  const [form, setForm] = useState<AuthFlowData>(initialForm);
+  const [form, setForm] = useState<AuthFlowData>(createInitialForm);
 
   const updateField = useCallback(<K extends keyof AuthFlowData>(key: K, value: AuthFlowData[K]) => {
     setForm((prev) => {

@@ -23,11 +23,13 @@ export function CaseChip({
   tone,
   compact = false,
   maxWidthClassName,
+  className = '',
 }: {
   label: string;
   tone: ChipTone;
   compact?: boolean;
   maxWidthClassName?: string;
+  className?: string;
 }) {
   const toneClass =
     tone === 'type'
@@ -51,7 +53,7 @@ export function CaseChip({
         : 'max-w-[68px]');
 
   return (
-    <span className={`inline-flex h-[18px] shrink-0 items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[10px] leading-[12px] ${toneClass}`}>
+    <span className={`inline-flex h-[18px] shrink-0 items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[10px] leading-[12px] ${toneClass} ${className}`}>
       <span className={`${widthClass} truncate whitespace-nowrap leading-[12px]`}>{label}</span>
     </span>
   );
@@ -117,10 +119,14 @@ export function CaseSimilarityIndicator({
   tone?: 'failure' | 'success';
 }) {
   const textClass = tone === 'success' ? 'text-[#5A876E]' : 'text-[#C06D43]';
+  const fillClass = tone === 'success' ? 'bg-[#5A876E]' : 'bg-[#AF633D]';
+  const fillWidth = Math.max(4, Math.min(30, Math.round((percent / 100) * 30)));
 
   return (
     <div className={`flex h-[18px] shrink-0 items-center gap-[4px] font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] ${textClass}`}>
-      <span className="h-[4px] w-[30px] rounded-[999px] bg-current" aria-hidden="true" />
+      <span className="h-[4px] w-[30px] rounded-[999px] bg-[#EEEEEE]" aria-hidden="true">
+        <span className={`block h-[4px] rounded-[999px] ${fillClass}`} style={{ width: `${fillWidth}px` }} />
+      </span>
       <span>{percent}%</span>
     </div>
   );
@@ -147,7 +153,7 @@ export function CardActionButton({
       className={buttonClassName({
         tone: tone === 'green' ? 'case' : 'ghost',
         size: 'sm',
-        className: `min-w-[92px] ${className}`.trim(),
+        className: `min-w-[106px] ${className}`.trim(),
       })}
     >
       {label}
@@ -168,7 +174,8 @@ export function CaseTextLink({
     <button
       type="button"
       onClick={onClick}
-      className={`inline-flex items-center justify-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#757575] underline decoration-[0.5px] decoration-[#757575] underline-offset-[2px] ${className}`}
+      className={`inline-flex h-[14px] shrink-0 items-center justify-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A] ${className}`}
+      style={{ fontFeatureSettings: '"case" on' }}
     >
       {label}
     </button>

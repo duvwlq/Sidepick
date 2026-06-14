@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "qa:home:review": "node ./scripts/harness/home-review.mjs",
+    "qa:signup:review": "node ./scripts/harness/signup-review.mjs",
+    "qa:signup:smoke": "node ./scripts/harness/signup-smoke.mjs",
+    "qa:explore-stats:review": "node ./scripts/harness/explore-stats-review.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.8.0",

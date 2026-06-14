@@ -1,8 +1,9 @@
-import { Bookmark, ChevronLeft, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorState, LoadingState, PageMessage } from '../common/Skeleton';
 import { useToast } from '../common/useToast';
+import HeaderBookmarkIcon from '../common/HeaderBookmarkIcon';
 import BottomNav from '../layout/BottomNav';
 import {
   ApiError,
@@ -356,7 +357,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
               }}
               className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
             >
-              <Bookmark size={24} strokeWidth={1.75} fill={bookmarked ? '#5A876E' : 'none'} color={bookmarked ? '#5A876E' : '#000000'} />
+              <HeaderBookmarkIcon active={bookmarked} className="h-[24px] w-[24px]" />
             </button>
           </div>
         </header>
