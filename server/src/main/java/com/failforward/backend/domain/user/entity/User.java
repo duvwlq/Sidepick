@@ -158,6 +158,10 @@ public class User extends BaseTimeEntity {
         this.password = encodedPassword;
     }
 
+    public void updateProfileImage(String profileImage) {
+        this.profileImage = normalize(profileImage);
+    }
+
     public void updateProfile(
             String nickname,
             String fullName,

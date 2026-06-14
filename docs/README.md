@@ -27,6 +27,7 @@ Sidepick의 공식 문서 허브입니다.
 | [03_frontend_structure.md](./03_frontend_structure.md) | 프론트엔드 구조와 화면 책임 |
 | [04_backend_structure.md](./04_backend_structure.md) | 백엔드 모듈 구조와 도메인 책임 |
 | [05_ai_integration_contract.md](./05_ai_integration_contract.md) | 백엔드-AI 서버 연동 방식 |
+| [BE-FE-AI-연결-하네스-설계.md](./BE-FE-AI-연결-하네스-설계.md) | 현재 FE/BE 실행 범위와 하네스 우선순위 정리 |
 | [06_demo_seed_and_scenario.md](./06_demo_seed_and_scenario.md) | 데모/시드 데이터 운영 메모 |
 | [07_deployment.md](./07_deployment.md) | 실제 운영 배포 경로와 배포 절차 |
 | [db-schema.md](./db-schema.md) | DB 스키마와 마이그레이션 기준 |
@@ -38,6 +39,7 @@ Sidepick의 공식 문서 허브입니다.
 | 문서 | 설명 |
 | --- | --- |
 | [../server/README.md](../server/README.md) | 백엔드 실행/운영 기준 문서 |
+| [../server/HARNESS.md](../server/HARNESS.md) | 백엔드 smoke/ai/full 하네스 실행 기준 |
 | [AWS-재배포-정리-체크리스트.md](./AWS-재배포-정리-체크리스트.md) | 운영 서버 재배포 체크리스트 |
 | [../배포_준비_전체_가이드.md](../배포_준비_전체_가이드.md) | 배포 준비 전체 가이드 |
 
@@ -46,6 +48,7 @@ Sidepick의 공식 문서 허브입니다.
 ## Notes
 
 - 현재 운영 기준은 `infra/docker-compose.prod.yml`과 서버의 `/home/ubuntu/sidepick-docker/.env`를 중심으로 봅니다.
+- API 계약은 현재 `share-page`, `share-image`, 프로필 이미지 업로드, admin ops API까지 반영된 상태를 기준으로 봅니다.
 - 문서 간 내용이 충돌할 경우, 운영 경로와 Compose 기준이 명시된 최신 문서를 우선합니다.
 - `archive/` 아래 문서는 과거 참고용이며 현재 운영 구조와 다를 수 있습니다.
 

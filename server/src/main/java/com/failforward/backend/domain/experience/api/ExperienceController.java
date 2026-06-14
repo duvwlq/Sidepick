@@ -6,15 +6,21 @@ import com.failforward.backend.domain.experience.dto.ExperienceDtos.CompareRespo
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceCreateRequest;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceListPayload;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceResponse;
+import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceSharePageResponse;
+import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceShareResponse;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceUpdateRequest;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.SimilarityMatchResponse;
 import com.failforward.backend.domain.experience.service.ExperienceService;
+import com.failforward.backend.domain.experience.service.ExperienceSharePageRenderer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,6 +40,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ExperienceController {
 
     private final ExperienceService experienceService;
+    private final ExperienceSharePageRenderer experienceSharePageRenderer;
 
     @Operation(summary = "List experiences")
     @GetMapping
@@ -102,6 +109,37 @@ public class ExperienceController {
     @GetMapping("/{experienceId}")
     public ApiResponse<ExperienceResponse> getExperience(@PathVariable Long experienceId) {
         return ApiResponse.ok("Experience loaded.", experienceService.getDetail(experienceId));
+    }
+
+    @Operation(summary = "Get experience share payload")
+    @GetMapping("/{experienceId}/share")
+    public ApiResponse<ExperienceShareResponse> getExperienceShare(@PathVariable Long experienceId) {
+        return ApiResponse.ok("Experience share payload loaded.", experienceService.getShare(experienceId));
+    }
+
+    @Operation(summary = "Get experience share page with OG metadata")
+    @GetMapping(value = "/{experienceId}/share-page", produces = MediaType.TEXT_HTML_VALUE)
+    public ResponseEntity<String> getExperienceSharePage(@PathVariable Long experienceId) {
+        ExperienceSharePageResponse page = experienceService.getSharePage(experienceId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.TEXT_HTML)
+                .body(experienceSharePageRenderer.render(page));
+    }
+
+    @Operation(summary = "Download experience share image")
+    @GetMapping(value = "/{experienceId}/share-image", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> downloadExperienceShareImage(@PathVariable Long experienceId) {
+        byte[] image = experienceService.createShareImage(experienceId);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .header(
+                        "Content-Disposition",
+                        ContentDisposition.attachment()
+                                .filename("sidepick-share-" + experienceId + ".png")
+                                .build()
+                                .toString()
+                )
+                .body(image);
     }
 
     @Operation(summary = "Update experience")

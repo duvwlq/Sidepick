@@ -8,7 +8,7 @@ import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg
 import wifiIcon from '../assets/auth-figma/wifi.svg';
 import checkIcon from '../assets/mypage-figma/check.svg';
 import checkSelectedIcon from '../assets/mypage-figma/check-selected.svg';
-import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.png';
+import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.svg';
 import cameraIcon from '../assets/mypage-overview-figma/camera.svg';
 import chevronDownIcon from '../assets/explore-figma/chevron-down.svg';
 import BottomNav from '../components/layout/BottomNav';
@@ -17,6 +17,7 @@ import {
   ApiError,
   getMe,
   updateMyAccountSettings,
+  uploadMyProfileImage,
   type UserSummary,
 } from '../lib/api';
 import { getProfileOverrides, mergeProfileOverrides, saveProfileOverrides } from '../lib/profile-overrides';
@@ -207,6 +208,8 @@ async function fileToDataUrl(file: File) {
   });
 }
 
+void fileToDataUrl;
+
 export default function MyPageProfileEdit() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -280,9 +283,20 @@ export default function MyPageProfileEdit() {
     }
 
     try {
-      const dataUrl = await fileToDataUrl(file);
-      setPreviewImage(dataUrl);
+      const payload = await uploadMyProfileImage(token!, file);
+      const mergedUser = mergeProfileOverrides(payload.user);
+      setCurrentUser(mergedUser);
+      setPreviewImage(payload.imageUrl);
+      if (mergedUser) {
+        saveStoredUser(mergedUser);
+      }
+      saveProfileOverrides({
+        phone,
+        region,
+        profileImage: payload.imageUrl,
+      });
       setSheetOpen(false);
+      showToast('?꾨줈???대?吏瑜??낅줈?쒖뻽?댁슂.', 'success');
     } catch (error) {
       showToast(resolveErrorMessage(error, '이미지를 불러오지 못했어요.'), 'error');
     }
@@ -330,7 +344,7 @@ export default function MyPageProfileEdit() {
       if (mergedUser) {
         saveStoredUser(mergedUser);
       }
-      showToast('프로필 수정이 완료되었어요.', 'success');
+      showToast('프로필 수정이 완료됐어요.', 'success');
       navigate('/mypage');
     } catch (error) {
       if (isAuthError(error)) {
@@ -364,7 +378,7 @@ export default function MyPageProfileEdit() {
               onClick={() => void handleSave()}
               disabled={saving || !hasChanges}
               className={`font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] ${
-                hasChanges ? 'text-[#5A876E]' : 'text-[#BABABA]'
+                hasChanges ? 'text-[#5A876E]' : 'text-[#D9D9D9]'
               }`}
             >
               저장
@@ -374,9 +388,15 @@ export default function MyPageProfileEdit() {
 
         <main className="flex flex-col items-center pb-[128px]">
           <button type="button" onClick={() => setSheetOpen(true)} className="mt-[20px] flex flex-col items-center justify-center">
-            <div className="relative flex h-[100px] w-[100px] items-center justify-center overflow-hidden rounded-full bg-[#F1F1F1]">
-              <img src={previewImage || avatarPlaceholderIcon} alt="" className="h-full w-full object-cover" />
-              <span className="absolute bottom-0 right-0 flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
+            <div className="relative flex h-[80px] w-[80px] items-center justify-center">
+              <div className="flex h-[80px] w-[80px] items-center justify-center p-[8px]">
+                {previewImage ? (
+                  <img src={previewImage} alt="" className="h-[64px] w-[64px] rounded-full bg-[#F8F8F8] object-contain" />
+                ) : (
+                  <img src={avatarPlaceholderIcon} alt="" className="h-[64px] w-[64px]" />
+                )}
+              </div>
+              <span className="absolute left-[49.5px] top-[49px] flex h-[24px] w-[24px] items-center justify-center rounded-full bg-[#8A8A8A]">
                 <img src={cameraIcon} alt="" className="h-[14px] w-[14px]" />
               </span>
             </div>
@@ -400,7 +420,7 @@ export default function MyPageProfileEdit() {
               <FieldLabel>거주지</FieldLabel>
               <TextInput
                 value={region}
-                placeholder="지역을 선택해주세요"
+                placeholder="지역을 선택해 주세요"
                 readOnly
                 onClick={() => setRegionSheetOpen(true)}
                 onChange={setRegion}
@@ -415,21 +435,17 @@ export default function MyPageProfileEdit() {
                   <span className="text-[10px] leading-[12px] text-[#5E5E5E]">(선택)</span>
                 </span>
               </FieldLabel>
-              <TextInput value={email} placeholder="이메일 주소를 입력해주세요" readOnly onChange={setEmail} />
+              <TextInput value={email} placeholder="이메일 주소를 입력해 주세요" readOnly onChange={setEmail} />
             </div>
 
             <div className="flex flex-col gap-[6px]">
               <FieldLabel>
                 <span className="flex items-center gap-[4px]">
-                  <span>전화번호</span>
+                  <span>휴대폰 번호</span>
                   <span className="text-[10px] leading-[12px] text-[#5E5E5E]">(선택)</span>
                 </span>
               </FieldLabel>
-              <TextInput
-                value={phone}
-                placeholder="- 없이 숫자만 입력해주세요"
-                onChange={(value) => setPhone(value.replace(/\D/g, ''))}
-              />
+              <TextInput value={phone} placeholder="- 없이 숫자만 입력해 주세요" onChange={(value) => setPhone(value.replace(/\D/g, ''))} />
             </div>
           </section>
         </main>

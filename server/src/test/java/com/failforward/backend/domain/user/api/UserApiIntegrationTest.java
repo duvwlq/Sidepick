@@ -2,6 +2,7 @@ package com.failforward.backend.domain.user.api;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -10,9 +11,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.failforward.backend.support.ApiIntegrationTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -98,6 +101,49 @@ class UserApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.user.nickname").value("settingsUser2"))
                 .andExpect(jsonPath("$.data.user.experienceStatus").value("NO_EXPERIENCE"));
+    }
+
+    @Test
+    void uploadProfileImageStoresPublicUrlAndReturnsUpdatedUser() throws Exception {
+        String token = registerAndLogin("image_me@sidepick.dev", "password123", "imageUser", "20s");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "avatar.png",
+                MediaType.IMAGE_PNG_VALUE,
+                "png-bytes".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/users/me/profile-image")
+                        .file(file)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .with(request -> {
+                            request.setMethod("POST");
+                            return request;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.imageUrl").value(org.hamcrest.Matchers.containsString("/uploads/profile/")))
+                .andExpect(jsonPath("$.data.user.profileImage").value(org.hamcrest.Matchers.containsString("/uploads/profile/")));
+    }
+
+    @Test
+    void uploadProfileImageRejectsNonImageFile() throws Exception {
+        String token = registerAndLogin("image_invalid@sidepick.dev", "password123", "imageInvalid", "20s");
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "notes.txt",
+                MediaType.TEXT_PLAIN_VALUE,
+                "not-an-image".getBytes()
+        );
+
+        mockMvc.perform(multipart("/api/users/me/profile-image")
+                        .file(file)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .with(request -> {
+                            request.setMethod("POST");
+                            return request;
+                        }))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 
     @Test

@@ -6,12 +6,14 @@ import com.failforward.backend.domain.auth.dto.AuthDtos.UserSummary;
 import com.failforward.backend.domain.user.dto.UserDtos.AccountSettingsUpdateRequest;
 import com.failforward.backend.domain.user.dto.UserDtos.MeResponse;
 import com.failforward.backend.domain.user.dto.UserDtos.PasswordChangeRequest;
+import com.failforward.backend.domain.user.dto.UserDtos.ProfileImageUploadResponse;
 import com.failforward.backend.domain.user.dto.UserDtos.UserProfileUpdateRequest;
 import com.failforward.backend.domain.user.entity.User;
 import com.failforward.backend.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final CurrentUserProvider currentUserProvider;
     private final PasswordEncoder passwordEncoder;
+    private final UserProfileImageService userProfileImageService;
 
     public MeResponse getCurrentUser() {
         return new MeResponse(UserSummary.from(getCurrentUserEntity()));
@@ -63,6 +66,12 @@ public class UserService {
         }
         user.changePassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
+    }
+
+    public ProfileImageUploadResponse uploadCurrentUserProfileImage(MultipartFile file, String publicBaseUrl) {
+        User user = getCurrentUserEntity();
+        String imageUrl = userProfileImageService.store(user, file, publicBaseUrl);
+        return new ProfileImageUploadResponse(imageUrl, UserSummary.from(user));
     }
 
     private User getCurrentUserEntity() {

@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.failforward.backend.domain.user.entity.User;
@@ -321,6 +322,72 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].id").value(successExperienceId))
                 .andExpect(jsonPath("$.data[0].caseStatus").value("SUCCESS"));
+    }
+
+    @Test
+    void detailExposesSharePayload() throws Exception {
+        String token = registerAndLogin("share@sidepick.dev", "password123", "shareUser", "20s");
+
+        MvcResult createResult = mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Share target",
+                                  "content": "Share body with image ![thumb](https://images.example.com/thumb.png) and enough text to summarize.",
+                                  "categoryId": 1,
+                                  "failureReason": "Share test",
+                                  "failureReasons": ["Share test"]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long experienceId = readId(createResult);
+
+        mockMvc.perform(get("/api/experiences/{experienceId}/share", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experienceId").value(experienceId))
+                .andExpect(jsonPath("$.data.title").value("Share target"))
+                .andExpect(jsonPath("$.data.shareUrl").value("http://localhost:8081/api/experiences/" + experienceId + "/share-page"))
+                .andExpect(jsonPath("$.data.imageUrl").value("https://images.example.com/thumb.png"))
+                .andExpect(jsonPath("$.data.downloadImageUrl").value("http://localhost:8081/api/experiences/" + experienceId + "/share-image"))
+                .andExpect(jsonPath("$.data.webUrl").value("http://localhost:4173/experiences/" + experienceId))
+                .andExpect(jsonPath("$.data.description").isNotEmpty());
+    }
+
+    @Test
+    void sharePageExposesOgMetadataAndRedirectTarget() throws Exception {
+        String token = registerAndLogin("share-page@sidepick.dev", "password123", "sharePageUser", "20s");
+        long experienceId = createExperience(token, "Share page target", "Share page body for metadata checks.");
+
+        mockMvc.perform(get("/api/experiences/{experienceId}/share-page", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("property=\"og:title\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Sidepick")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("http://localhost:8081/api/experiences/" + experienceId + "/share-image")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("http://localhost:4173/experiences/" + experienceId)));
+    }
+
+    @Test
+    void shareImageDownloadReturnsPngAttachment() throws Exception {
+        String token = registerAndLogin("share-image@sidepick.dev", "password123", "shareImageUser", "20s");
+        long experienceId = createExperience(token, "Share image target", "Share image body for png generation.");
+
+        MvcResult result = mockMvc.perform(get("/api/experiences/{experienceId}/share-image", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Content-Disposition", org.hamcrest.Matchers.containsString("sidepick-share-" + experienceId + ".png")))
+                .andReturn();
+
+        byte[] bytes = result.getResponse().getContentAsByteArray();
+        org.junit.jupiter.api.Assertions.assertTrue(bytes.length > 8);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x89, bytes[0]);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x50, bytes[1]);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x4E, bytes[2]);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x47, bytes[3]);
     }
 
     @Test

@@ -4,17 +4,22 @@ import com.failforward.backend.common.api.ApiResponse;
 import com.failforward.backend.domain.user.dto.UserDtos.AccountSettingsUpdateRequest;
 import com.failforward.backend.domain.user.dto.UserDtos.MeResponse;
 import com.failforward.backend.domain.user.dto.UserDtos.PasswordChangeRequest;
+import com.failforward.backend.domain.user.dto.UserDtos.ProfileImageUploadResponse;
 import com.failforward.backend.domain.user.dto.UserDtos.UserProfileUpdateRequest;
 import com.failforward.backend.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/users")
@@ -47,5 +52,32 @@ public class UserController {
     public ApiResponse<Void> changePassword(@Valid @RequestBody PasswordChangeRequest request) {
         userService.changePassword(request);
         return ApiResponse.ok("Password changed.", null);
+    }
+
+    @PostMapping("/me/profile-image")
+    public ApiResponse<ProfileImageUploadResponse> uploadProfileImage(
+            @RequestParam("file") MultipartFile file,
+            HttpServletRequest request
+    ) {
+        return ApiResponse.ok(
+                "Profile image uploaded.",
+                userService.uploadCurrentUserProfileImage(file, resolvePublicBaseUrl(request))
+        );
+    }
+
+    private String resolvePublicBaseUrl(HttpServletRequest request) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(request.getScheme())
+                .append("://")
+                .append(request.getServerName());
+        if (!isDefaultPort(request.getScheme(), request.getServerPort())) {
+            builder.append(":").append(request.getServerPort());
+        }
+        return builder.toString();
+    }
+
+    private boolean isDefaultPort(String scheme, int port) {
+        return ("http".equalsIgnoreCase(scheme) && port == 80)
+                || ("https".equalsIgnoreCase(scheme) && port == 443);
     }
 }

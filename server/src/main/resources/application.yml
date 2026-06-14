@@ -101,15 +101,34 @@ app:
       expose-code: ${APP_EMAIL_VERIFICATION_EXPOSE_CODE:false}
   security:
     admin-emails: ${APP_SECURITY_ADMIN_EMAILS:}
+  file-storage:
+    upload-dir: ${APP_FILE_STORAGE_UPLOAD_DIR:${java.io.tmpdir}/sidepick-uploads}
+    public-path: ${APP_FILE_STORAGE_PUBLIC_PATH:/uploads}
+    max-profile-image-bytes: ${APP_FILE_STORAGE_MAX_PROFILE_IMAGE_BYTES:5242880}
+  share:
+    web-base-url: ${APP_SHARE_WEB_BASE_URL:http://localhost:5173}
+    public-base-url: ${APP_SHARE_PUBLIC_BASE_URL:http://localhost:8081}
   agent-c:
     prompt-path: ${AGENT_C_PROMPT_PATH:ai/prompts/AI-04-agent_c_v1.md}
   agent-a:
     timeout-sec: ${AGENT_A_TIMEOUT_SEC:10}
     rate-limit-per-min: ${AGENT_A_RATE_LIMIT_PER_MIN:5}
+  analysis-cache:
+    ttl-hours: ${APP_ANALYSIS_CACHE_TTL_HOURS:24}
+    max-entries: ${APP_ANALYSIS_CACHE_MAX_ENTRIES:1000}
+  chatbot:
+    rate-limit-per-min: ${APP_CHATBOT_RATE_LIMIT_PER_MIN:10}
+    max-message-length: ${APP_CHATBOT_MAX_MESSAGE_LENGTH:500}
+    minimum-guide-message-length: ${APP_CHATBOT_MIN_GUIDE_MESSAGE_LENGTH:50}
+    queue-capacity: ${APP_CHATBOT_QUEUE_CAPACITY:20}
+    daily-token-limit: ${APP_CHATBOT_DAILY_TOKEN_LIMIT:12000}
+  latency-metrics:
+    max-samples-per-endpoint: ${APP_LATENCY_METRICS_MAX_SAMPLES_PER_ENDPOINT:200}
+    max-endpoints: ${APP_LATENCY_METRICS_MAX_ENDPOINTS:128}
   stats:
-    failure-pattern-path: ${APP_STATS_FAILURE_PATTERN_PATH:../ai/data/failure_pattern.json}
-    failure-timing-path: ${APP_STATS_FAILURE_TIMING_PATH:../ai/data/failure_timing.json}
-    minimum-sufficient-sample: ${APP_STATS_MINIMUM_SUFFICIENT_SAMPLE:5}
+    failure-pattern-path: ${APP_STATS_FAILURE_PATTERN_PATH:ai/data/failure_pattern.json}
+    failure-timing-path: ${APP_STATS_FAILURE_TIMING_PATH:ai/data/failure_timing.json}
+    minimum-sufficient-sample: ${APP_STATS_MINIMUM_SUFFICIENT_SAMPLE:10}
   oauth:
     kakao:
       client-id: ${APP_OAUTH_KAKAO_CLIENT_ID:}

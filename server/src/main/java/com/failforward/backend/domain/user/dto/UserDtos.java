@@ -59,6 +59,12 @@ public final class UserDtos {
     ) {
     }
 
+    public record ProfileImageUploadResponse(
+            String imageUrl,
+            UserSummary user
+    ) {
+    }
+
     public record HomeFeedResponse(
             String strategy,
             List<Long> preferredCategoryIds,

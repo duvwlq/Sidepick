@@ -1,4 +1,5 @@
 import { ERROR_CODES } from './error-codes';
+import { clearSession } from './session';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081/api';
@@ -34,7 +35,8 @@ type RequestOptions = {
 
 export async function request<T>(path: string, options: RequestOptions = {}) {
   const headers: Record<string, string> = {};
-  if (options.body !== undefined) {
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  if (options.body !== undefined && !isFormData) {
     headers['Content-Type'] = 'application/json';
   }
   if (options.token) {
@@ -46,7 +48,12 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method: options.method ?? 'GET',
       headers,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body:
+        options.body === undefined
+          ? undefined
+          : isFormData
+            ? (options.body as FormData)
+            : JSON.stringify(options.body),
     });
   } catch (networkError) {
     throw new ApiError(
@@ -65,6 +72,10 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
   }
 
   if (!response.ok || !json?.success) {
+    if (response.status === 401 && options.token) {
+      clearSession();
+    }
+
     const detail =
       json &&
       typeof json.data === 'object' &&

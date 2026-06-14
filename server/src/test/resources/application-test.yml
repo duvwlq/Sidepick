@@ -19,11 +19,34 @@ spring:
 app:
   cors:
     allowed-origins: http://localhost:5173
+  analysis-cache:
+    ttl-hours: 24
+    max-entries: 100
   auth:
     email-verification:
       expose-code: true
+  chatbot:
+    rate-limit-per-min: 10
+    max-message-length: 500
+    minimum-guide-message-length: 50
+    queue-capacity: 4
+    daily-token-limit: 2000
+  stats:
+    failure-pattern-path: ai/data/failure_pattern.json
+    failure-timing-path: ai/data/failure_timing.json
+    minimum-sufficient-sample: 10
+  latency-metrics:
+    max-samples-per-endpoint: 50
+    max-endpoints: 32
   security:
     admin-emails: admin@sidepick.dev
+  file-storage:
+    upload-dir: ${java.io.tmpdir}/sidepick-test-uploads
+    public-path: /uploads
+    max-profile-image-bytes: 1048576
+  share:
+    web-base-url: http://localhost:4173
+    public-base-url: http://localhost:8081
   jwt:
     secret: sidepick-test-jwt-secret-key-must-be-32bytes
     access-token-expiration-seconds: 3600

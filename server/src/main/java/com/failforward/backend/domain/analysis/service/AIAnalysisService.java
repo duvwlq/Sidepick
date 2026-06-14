@@ -54,6 +54,7 @@ public class AIAnalysisService {
     private final AiServerProperties aiServerProperties;
     private final AIAnalysisSupport analysisSupport;
     private final DemoScenarioSupport demoScenarioSupport;
+    private final AnalysisResultCache analysisResultCache;
     private final Set<Long> inFlightExperienceIds = ConcurrentHashMap.newKeySet();
 
     public Optional<AiAnalysis> findByExperience(FailureExperience experience) {
@@ -94,8 +95,9 @@ public class AIAnalysisService {
     public List<MatchedCaseResponse> getMatchedCases(Long analysisId) {
         AiAnalysis analysis = aiAnalysisRepository.findById(analysisId)
                 .orElseThrow(() -> new NotFoundException("Analysis result not found."));
+        List<String> keywords = PatternAnalysisResponse.from(analysis).keywords();
         return matchedCaseRepository.findByAnalysis(analysis).stream()
-                .map(MatchedCaseResponse::from)
+                .map(matchedCase -> MatchedCaseResponse.from(matchedCase, keywords))
                 .toList();
     }
 
@@ -303,15 +305,22 @@ public class AIAnalysisService {
 
     private AiAnalysisResponse requestAnalysis(FailureExperience experience) {
         String endpoint = aiServerProperties.url() + "/analyze";
+        AiAnalysisRequest payload = AiAnalysisRequest.from(experience);
+        Optional<AiAnalysisResponse> cached = analysisResultCache.get(payload);
+        if (cached.isPresent()) {
+            return cached.get();
+        }
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AiAnalysisRequest> request = new HttpEntity<>(AiAnalysisRequest.from(experience), headers);
+        HttpEntity<AiAnalysisRequest> request = new HttpEntity<>(payload, headers);
 
         try {
             AiAnalysisResponse response = aiRestTemplate.postForObject(endpoint, request, AiAnalysisResponse.class);
             if (response == null) {
                 throw new AiServerException("AI server returned an empty response.");
             }
+            analysisResultCache.put(payload, response);
             log.info("ai_analysis_response_received {}", analysisSupport.buildAiLogFields(experience.getId(), null, null, null));
             return response;
         } catch (ResourceAccessException exception) {

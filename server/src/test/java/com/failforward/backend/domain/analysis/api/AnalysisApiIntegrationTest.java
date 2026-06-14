@@ -20,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.test.web.client.response.DefaultResponseCreator;
 import org.springframework.test.web.servlet.MvcResult;
@@ -72,6 +73,9 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.experienceId").value(experienceId))
                 .andExpect(jsonPath("$.data.reportStatus").value("NOT_READY"))
                 .andExpect(jsonPath("$.data.analysisId").isEmpty())
+                .andExpect(jsonPath("$.data.keywords.length()").value(0))
+                .andExpect(jsonPath("$.data.riskFactors.length()").value(0))
+                .andExpect(jsonPath("$.data.explanation").isEmpty())
                 .andExpect(jsonPath("$.data.similarCases.length()").value(0));
 
         mockServer.verify();
@@ -104,6 +108,15 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.failureCategory").value(FAILURE_CATEGORY))
                 .andExpect(jsonPath("$.data.riskLevel").value("high"))
                 .andExpect(jsonPath("$.data.structuredSummary").value(SUMMARY))
+                .andExpect(jsonPath("$.data.explanation").exists())
+                .andExpect(jsonPath("$.data.explanation.inputUsed.category").isNotEmpty())
+                .andExpect(jsonPath("$.data.explanation.inputUsed.bodyExcerpt").isNotEmpty())
+                .andExpect(jsonPath("$.data.explanation.matchedPatterns[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data.explanation.similarCasesUsed.length()").value(0))
+                .andExpect(jsonPath("$.data.explanation.isVerified").value(true))
+                .andExpect(jsonPath("$.data.explanation.confidenceScore").isNumber())
+                .andExpect(jsonPath("$.data.explanation.debug.totalSimilarCases").value(0))
+                .andExpect(jsonPath("$.data.explanation.debug.source").value("server-generated"))
                 .andReturn();
 
         long analysisId = readId(analysisResult);
@@ -116,7 +129,12 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data[0].caseId").value(String.valueOf(similarExperienceId)))
                 .andExpect(jsonPath("$.data[0].caseTitle").isNotEmpty())
                 .andExpect(jsonPath("$.data[0].matchRate").isNumber())
-                .andExpect(jsonPath("$.data[0].caseId").value(org.hamcrest.Matchers.not(String.valueOf(experienceId))));
+                .andExpect(jsonPath("$.data[0].caseId").value(org.hamcrest.Matchers.not(String.valueOf(experienceId))))
+                .andExpect(jsonPath("$.data[0].explanation.similarityScore").value(0.8))
+                .andExpect(jsonPath("$.data[0].explanation.matchedKeywords[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data[0].explanation.caseId").value(String.valueOf(similarExperienceId)))
+                .andExpect(jsonPath("$.data[0].explanation.source").value("matched-case"))
+                .andExpect(jsonPath("$.data[0].explanation.debug.source").value("server-generated"));
 
         mockServer.verify();
     }
@@ -140,11 +158,51 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.reportStatus").value("READY"))
                 .andExpect(jsonPath("$.data.summary").value(SUMMARY))
                 .andExpect(jsonPath("$.data.extractedPatterns[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data.keywords[0]").value("market research gap"))
                 .andExpect(jsonPath("$.data.riskFactors.length()").value(0))
                 .andExpect(jsonPath("$.data.similarCases[0].caseId").value(String.valueOf(similarExperienceId)))
                 .andExpect(jsonPath("$.data.similarCases[0].title").isNotEmpty())
                 .andExpect(jsonPath("$.data.similarCases[0].matchRate").isNumber())
-                .andExpect(jsonPath("$.data.similarCases[0].caseId").value(org.hamcrest.Matchers.not(String.valueOf(experienceId))));
+                .andExpect(jsonPath("$.data.similarCases[0].caseId").value(org.hamcrest.Matchers.not(String.valueOf(experienceId))))
+                .andExpect(jsonPath("$.data.explanation.inputUsed.category").isNotEmpty())
+                .andExpect(jsonPath("$.data.explanation.inputUsed.bodyExcerpt").isNotEmpty())
+                .andExpect(jsonPath("$.data.explanation.matchedPatterns[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data.explanation.similarCasesUsed[0]").value(String.valueOf(similarExperienceId)))
+                .andExpect(jsonPath("$.data.explanation.confidenceScore").isNumber())
+                .andExpect(jsonPath("$.data.explanation.debug.totalSimilarCases").value(1))
+                .andExpect(jsonPath("$.data.explanation.debug.source").value("server-generated"))
+                .andExpect(jsonPath("$.data.similarCases[0].explanation.similarityScore").value(0.8))
+                .andExpect(jsonPath("$.data.similarCases[0].explanation.matchedKeywords[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data.similarCases[0].explanation.caseId").value(String.valueOf(similarExperienceId)))
+                .andExpect(jsonPath("$.data.similarCases[0].explanation.debug.source").value("server-generated"));
+
+        mockServer.verify();
+    }
+
+    @Test
+    void analysisCacheReusesAiResponseForSamePayload() throws Exception {
+        String token = registerAndLogin("analysis_cache@sidepick.dev", "password123", "analysisCache", "20s");
+        mockServer.expect(ExpectedCount.once(), requestTo("http://localhost:8001/analyze"))
+                .andExpect(method(POST))
+                .andRespond(withSuccess("""
+                        {
+                          "keywords": ["market research gap", "validation gap"],
+                          "failure_category": "market_validation_gap",
+                          "summary": "The team failed because customer validation and early promotion were both insufficient.",
+                          "risk_level": "high"
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        long firstExperienceId = createExperience(token, "Cache first", "Same payload for cache reuse.");
+        long secondExperienceId = createExperience(token, "Cache second", "Same payload for cache reuse.");
+
+        mockMvc.perform(get("/api/experiences/{experienceId}/analysis", firstExperienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.structuredSummary").value(SUMMARY));
+
+        mockMvc.perform(get("/api/experiences/{experienceId}/analysis", secondExperienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.structuredSummary").value(SUMMARY));
 
         mockServer.verify();
     }

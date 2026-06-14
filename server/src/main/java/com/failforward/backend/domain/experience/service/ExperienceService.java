@@ -3,10 +3,12 @@ package com.failforward.backend.domain.experience.service;
 import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.api.PageInfo;
+import com.failforward.backend.common.config.ShareProperties;
 import com.failforward.backend.common.privacy.SensitiveDataMaskingService;
 import com.failforward.backend.common.security.AdminAccessPolicy;
 import com.failforward.backend.common.security.CurrentUserProvider;
 import com.failforward.backend.domain.analysis.service.AIAnalysisService;
+import com.failforward.backend.domain.bookmark.repository.ExperienceBookmarkRepository;
 import com.failforward.backend.domain.category.entity.BusinessCategory;
 import com.failforward.backend.domain.category.service.CategoryService;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos;
@@ -39,6 +41,9 @@ public class ExperienceService {
     private final SensitiveDataMaskingService maskingService;
     private final UserExperienceViewService userExperienceViewService;
     private final EntityManager entityManager;
+    private final ExperienceBookmarkRepository bookmarkRepository;
+    private final ShareProperties shareProperties;
+    private final ExperienceShareImageService experienceShareImageService;
 
     @Transactional
     public ExperienceDtos.ExperienceResponse create(ExperienceDtos.ExperienceCreateRequest request) {
@@ -74,7 +79,7 @@ public class ExperienceService {
 
         var analysis = aiAnalysisService.analyzeAfterExperienceCreate(saved).orElse(null);
         log.info("Experience created successfully with id={}", saved.getId());
-        return ExperienceDtos.ExperienceResponse.from(saved, analysis);
+        return ExperienceDtos.ExperienceResponse.from(saved, analysis, resolveBookmarkCount(saved.getId()));
     }
 
     @Transactional
@@ -109,7 +114,11 @@ public class ExperienceService {
         );
 
         FailureExperience saved = experienceRepository.save(experience);
-        return ExperienceDtos.ExperienceResponse.from(saved, aiAnalysisService.reanalyzeAfterExperienceUpdate(saved).orElse(null));
+        return ExperienceDtos.ExperienceResponse.from(
+                saved,
+                aiAnalysisService.reanalyzeAfterExperienceUpdate(saved).orElse(null),
+                resolveBookmarkCount(saved.getId())
+        );
     }
 
     @Transactional
@@ -178,7 +187,11 @@ public class ExperienceService {
         experience.increaseViewCount();
         userExperienceViewService.recordView(experience);
         FailureExperience saved = experienceRepository.save(experience);
-        return ExperienceDtos.ExperienceResponse.from(saved, aiAnalysisService.findByExperience(saved).orElse(null));
+        return ExperienceDtos.ExperienceResponse.from(
+                saved,
+                aiAnalysisService.findByExperience(saved).orElse(null),
+                resolveBookmarkCount(saved.getId())
+        );
     }
 
     public List<ExperienceDtos.SimilarityMatchResponse> getSimilar(Long experienceId, int limit) {
@@ -202,7 +215,8 @@ public class ExperienceService {
                 ).stream()
                 .map(experience -> ExperienceDtos.ExperienceResponse.from(
                         experience,
-                        aiAnalysisService.findByExperience(experience).orElse(null)
+                        aiAnalysisService.findByExperience(experience).orElse(null),
+                        resolveBookmarkCount(experience.getId())
                 ))
                 .toList();
     }
@@ -220,7 +234,8 @@ public class ExperienceService {
         List<ExperienceDtos.ExperienceResponse> payload = experiences.stream()
                 .map(experience -> ExperienceDtos.ExperienceResponse.from(
                         experience,
-                        aiAnalysisService.findByExperience(experience).orElse(null)
+                        aiAnalysisService.findByExperience(experience).orElse(null),
+                        resolveBookmarkCount(experience.getId())
                 ))
                 .toList();
 
@@ -239,6 +254,48 @@ public class ExperienceService {
         );
     }
 
+    public ExperienceDtos.ExperienceShareResponse getShare(Long experienceId) {
+        FailureExperience experience = getExperienceEntity(experienceId);
+        List<String> imageUrls = ExperienceDtos.extractImageUrls(experience);
+        String shareUrl = buildSharePageUrl(experienceId);
+        String downloadImageUrl = buildShareImageUrl(experienceId);
+        String webUrl = buildWebDetailUrl(experienceId);
+
+        return new ExperienceDtos.ExperienceShareResponse(
+                experience.getId(),
+                sanitizeShareTitle(experience),
+                buildShareDescription(experience),
+                shareUrl,
+                imageUrls.isEmpty() ? null : imageUrls.get(0),
+                downloadImageUrl,
+                webUrl,
+                experience.getCaseStatus(),
+                experience.getCategory().getName()
+        );
+    }
+
+    public ExperienceDtos.ExperienceSharePageResponse getSharePage(Long experienceId) {
+        ExperienceDtos.ExperienceShareResponse share = getShare(experienceId);
+        return new ExperienceDtos.ExperienceSharePageResponse(
+                share.experienceId(),
+                share.title(),
+                share.description(),
+                share.shareUrl(),
+                share.downloadImageUrl(),
+                share.webUrl(),
+                share.categoryName()
+        );
+    }
+
+    public byte[] createShareImage(Long experienceId) {
+        FailureExperience experience = getExperienceEntity(experienceId);
+        return experienceShareImageService.renderPng(
+                experience,
+                sanitizeShareTitle(experience),
+                buildShareDescription(experience)
+        );
+    }
+
     public FailureExperience getExperienceEntity(Long experienceId) {
         return experienceRepository.findWithUserAndCategoryById(experienceId)
                 .orElseThrow(() -> new NotFoundException("Experience not found."));
@@ -248,9 +305,65 @@ public class ExperienceService {
         return experiences.stream()
                 .map(experience -> ExperienceDtos.ExperienceResponse.from(
                         experience,
-                        aiAnalysisService.findByExperience(experience).orElse(null)
+                        aiAnalysisService.findByExperience(experience).orElse(null),
+                        resolveBookmarkCount(experience.getId())
                 ))
                 .toList();
+    }
+
+    private int resolveBookmarkCount(Long experienceId) {
+        return bookmarkRepository.countByExperienceId(experienceId);
+    }
+
+    private String sanitizeShareTitle(FailureExperience experience) {
+        String title = experience.getTitle() == null ? "" : experience.getTitle().trim();
+        if (!title.isBlank()) {
+            return title;
+        }
+        return experience.getCategory().getName() + " 실패 사례";
+    }
+
+    private String buildShareDescription(FailureExperience experience) {
+        String content = experience.getContent() == null ? "" : experience.getContent();
+        String noMarkdownImages = content.replaceAll("!\\[[^\\]]*]\\(([^)]+)\\)", " ");
+        String noHtmlImages = noMarkdownImages.replaceAll("<img[^>]+>", " ");
+        String normalized = noHtmlImages.replaceAll("\\s+", " ").trim();
+        if (normalized.isBlank()) {
+            normalized = "실패 경험과 다음 시도를 위한 핵심 포인트를 확인해보세요.";
+        }
+        if (normalized.length() <= 120) {
+            return normalized;
+        }
+        return normalized.substring(0, 117) + "...";
+    }
+
+    private String buildSharePageUrl(Long experienceId) {
+        String baseUrl = trimTrailingSlash(shareProperties.publicBaseUrl(), "http://localhost:8081");
+        return baseUrl + "/api/experiences/" + experienceId + "/share-page";
+    }
+
+    private String buildShareImageUrl(Long experienceId) {
+        String baseUrl = trimTrailingSlash(shareProperties.publicBaseUrl(), "http://localhost:8081");
+        return baseUrl + "/api/experiences/" + experienceId + "/share-image";
+    }
+
+    private String buildWebDetailUrl(Long experienceId) {
+        String baseUrl = trimTrailingSlash(shareProperties.webBaseUrl());
+        return baseUrl + "/experiences/" + experienceId;
+    }
+
+    private String trimTrailingSlash(String value) {
+        return trimTrailingSlash(value, "http://localhost:5173");
+    }
+
+    private String trimTrailingSlash(String value, String fallback) {
+        if (value == null || value.isBlank()) {
+            return fallback;
+        }
+        if (value.endsWith("/")) {
+            return value.substring(0, value.length() - 1);
+        }
+        return value;
     }
 
     private PaginationWindow buildPagination(int page, int size, int totalElements) {
@@ -398,7 +511,8 @@ public class ExperienceService {
         return new ExperienceDtos.SimilarityMatchResponse(
                 ExperienceDtos.ExperienceResponse.from(
                         candidate,
-                        aiAnalysisService.findByExperience(candidate).orElse(null)
+                        aiAnalysisService.findByExperience(candidate).orElse(null),
+                        resolveBookmarkCount(candidate.getId())
                 ),
                 similarity.score(),
                 similarity.matching(),

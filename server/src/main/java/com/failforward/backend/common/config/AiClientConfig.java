@@ -19,7 +19,12 @@ import org.springframework.web.client.RestTemplate;
         MailProperties.class,
         AuthFeatureProperties.class,
         AgentAProperties.class,
-        StatsProperties.class
+        StatsProperties.class,
+        AnalysisCacheProperties.class,
+        ChatbotProperties.class,
+        LatencyMetricsProperties.class,
+        FileStorageProperties.class,
+        ShareProperties.class
 })
 public class AiClientConfig {
 

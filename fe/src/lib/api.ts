@@ -83,6 +83,7 @@ export type Experience = {
   structuredData: Record<string, unknown>;
   viewCount: number;
   likeCount: number;
+  bookmarkCount?: number | null;
   hasPatternAnalysis: boolean;
   createdAt: string;
   updatedAt: string;
@@ -111,6 +112,7 @@ export type PatternAnalysis = {
   structuredSummary: string;
   confidenceScore: number | null;
   processedAt: string;
+  explanation?: AnalysisExplanation | null;
 };
 
 export type MatchedCase = {
@@ -121,6 +123,7 @@ export type MatchedCase = {
   keyLesson: string;
   matchRate: number;
   createdAt: string;
+  explanation?: SimilarCaseExplanation | null;
 };
 
 export type AnalysisReportSimilarCase = {
@@ -129,6 +132,7 @@ export type AnalysisReportSimilarCase = {
   summary: string | null;
   keyLesson: string | null;
   matchRate: number;
+  explanation?: SimilarCaseExplanation | null;
 };
 
 export type AnalysisReport = {
@@ -146,6 +150,34 @@ export type AnalysisReport = {
   confidenceScore: number | null;
   processedAt: string | null;
   similarCases: AnalysisReportSimilarCase[];
+  explanation?: AnalysisExplanation | null;
+};
+
+export type AnalysisExplanation = {
+  inputUsed: {
+    category: string | null;
+    bodyExcerpt: string | null;
+  } | null;
+  matchedPatterns: string[];
+  similarCasesUsed: string[];
+  isVerified: boolean;
+  confidenceScore: number | null;
+  debug?: {
+    totalSimilarCases?: number | null;
+    source?: string | null;
+  } | null;
+};
+
+export type SimilarCaseExplanation = {
+  similarityScore: number | null;
+  matchedKeywords: string[];
+  categoryMatch?: boolean | null;
+  source?: string | null;
+  caseId?: string | null;
+  debug?: {
+    totalSimilarCases?: number | null;
+    source?: string | null;
+  } | null;
 };
 
 export type ExperienceComparePayload = {
@@ -194,6 +226,21 @@ export type HomeFeedPayload = {
   experiences: Experience[];
 };
 
+export type ProfileImageUploadPayload = {
+  imageUrl: string;
+  user: UserSummary;
+};
+
+export type ExperienceSharePayload = {
+  experienceId: number;
+  title: string;
+  description: string;
+  shareUrl: string;
+  imageUrl: string | null;
+  caseStatus: string;
+  categoryName: string;
+};
+
 export type FailurePatternStatItem = {
   label: string;
   count: number;
@@ -205,7 +252,8 @@ export type FailurePatternStatsPayload = {
   labelKo: string;
   total: number;
   sufficientData: boolean;
-  explanation: string;
+  summary: string;
+  explanation: StatsExplanation;
   patterns: FailurePatternStatItem[];
 };
 
@@ -221,9 +269,24 @@ export type FailureTimingStatsPayload = {
   category: string;
   total: number;
   sufficientData: boolean;
-  explanation: string;
+  summary: string;
+  explanation: StatsExplanation;
   peakBucket: string;
   distribution: FailureTimingStatItem[];
+};
+
+export type StatsExplanation = {
+  chartType: string;
+  totalCases: number;
+  dataSource: string | null;
+  lastUpdated: string | null;
+  sufficientData: boolean;
+  minSampleSize: number;
+  insufficientMessage?: string | null;
+  debug?: {
+    category?: string | null;
+    source?: string | null;
+  } | null;
 };
 
 export type ExperienceUpsertInput = {
@@ -395,6 +458,10 @@ export function searchCases(params?: {
 
 export function getExperience(id: number | string) {
   return request<Experience>(`/experiences/${id}`);
+}
+
+export function getExperienceShare(id: number | string) {
+  return request<ExperienceSharePayload>(`/experiences/${id}/share`);
 }
 
 export function getRelatedSuccessCases(id: number | string, limit = 10) {
@@ -581,6 +648,16 @@ export function updateMyAccountSettings(
     method: 'PATCH',
     token,
     body: input,
+  });
+}
+
+export function uploadMyProfileImage(token: string, file: File) {
+  const formData = new FormData();
+  formData.append('file', file);
+  return request<ProfileImageUploadPayload>('/users/me/profile-image', {
+    method: 'POST',
+    token,
+    body: formData,
   });
 }
 
