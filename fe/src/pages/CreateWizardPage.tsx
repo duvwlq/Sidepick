@@ -5,10 +5,12 @@ import { useRef } from 'react';
 import ExampleCard from '../components/create/ExampleCard';
 import { useToast } from '../components/common/useToast';
 import {
+  analyzeDraftWithAgentA,
   createExperience,
   getCategories,
   getExperience,
   updateExperience,
+  type AgentAAnalyzeDraftPayload,
   type Category,
   type ExperienceUpsertInput,
 } from '../lib/api';
@@ -320,6 +322,8 @@ export default function CreateWizardPage() {
   const [guideError, setGuideError] = useState<string | null>(null);
   const [exampleIndex, setExampleIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
+  const [agentAResult, setAgentAResult] = useState<AgentAAnalyzeDraftPayload | null>(null);
+  const [agentALoading, setAgentALoading] = useState(false);
 
   const editingExperienceId = useMemo(() => {
     const raw = searchParams.get('experienceId') ?? searchParams.get('id') ?? searchParams.get('editId');
@@ -519,6 +523,10 @@ export default function CreateWizardPage() {
     }
   }, [exampleIndex, guideExamples.length]);
 
+  useEffect(() => {
+    setAgentAResult(null);
+  }, [content, matchedCategory?.slug, selectedCategoryKey]);
+
   const stepDisabled =
     (step === 1 && !selectedCategoryKey)
     || (step === 2 && (!duration || !dailyTime || isConcurrentWithMainJob === null))
@@ -546,6 +554,48 @@ export default function CreateWizardPage() {
       return;
     }
     closeWizard();
+  }
+
+  async function handleRecommendQuestions() {
+    const token = getAccessToken();
+    const categorySlug = matchedCategory?.slug ?? (selectedCategoryKey ? CATEGORY_SLUG_BY_KEY[selectedCategoryKey] : null);
+
+    if (!token) {
+      navigate('/auth?next=%2Fcreate');
+      return;
+    }
+
+    if (!categorySlug || content.trim().length < MIN_CONTENT_LENGTH) {
+      showToast('카테고리와 본문을 먼저 입력해 주세요.', 'error');
+      return;
+    }
+
+    try {
+      setAgentALoading(true);
+      const result = await analyzeDraftWithAgentA(token, {
+        draft: {
+          category_slug: categorySlug,
+          body: content.trim(),
+          title: selectedCategory ? `${selectedCategory} 경험` : undefined,
+        },
+      });
+      setAgentAResult(result);
+    } catch (error) {
+      setAgentAResult({
+        status: 'fallback',
+        needs_questions: false,
+        questions: [],
+        meta: {
+          input_tokens: 0,
+          output_tokens: 0,
+          elapsed_ms: 0,
+          used_template: true,
+        },
+        message: resolveErrorMessage(error, '질문 카드를 불러오지 못했어요. 지금 내용으로 계속 작성해도 됩니다.'),
+      });
+    } finally {
+      setAgentALoading(false);
+    }
   }
 
   async function handleNext() {
@@ -733,6 +783,78 @@ export default function CreateWizardPage() {
                   <span className="font-[400] text-[#8A8A8A]">{content.length}</span>
                   <span className="font-[400] text-[#494949]">&nbsp;/ {MAX_CONTENT_LENGTH}</span>
                 </div>
+              </div>
+
+              <div className="flex flex-col gap-[10px]">
+                <button
+                  type="button"
+                  onClick={() => void handleRecommendQuestions()}
+                  disabled={agentALoading || content.trim().length < MIN_CONTENT_LENGTH}
+                  className={`flex h-[44px] items-center justify-center rounded-[10px] border text-[14px] font-[600] ${
+                    agentALoading || content.trim().length < MIN_CONTENT_LENGTH
+                      ? 'border-[#DDE7E0] bg-[#F4F7F5] text-[#A0ACA5]'
+                      : 'border-[#5A876E] bg-[#F4F8F5] text-[#2F5C46]'
+                  }`}
+                >
+                  {agentALoading ? '질문 카드 생성 중...' : 'AI 보완 질문 받기'}
+                </button>
+
+                {agentAResult?.status === 'fallback' ? (
+                  <div className="rounded-[10px] border border-[#E6E6E6] bg-[#FAFAFA] px-[14px] py-[12px] text-[13px] leading-[18px] text-[#5E5E5E]">
+                    {agentAResult.message ?? '질문 카드를 만들지 못했어요. 지금 내용으로 계속 작성해도 됩니다.'}
+                  </div>
+                ) : null}
+
+                {agentAResult?.status === 'ok' && !agentAResult.needs_questions ? (
+                  <div className="rounded-[10px] border border-[#D9E8DF] bg-[#F4F8F5] px-[14px] py-[12px] text-[13px] leading-[18px] text-[#2F5C46]">
+                    지금 초안은 추가 질문 없이도 진행 가능한 상태예요.
+                  </div>
+                ) : null}
+
+                {agentAResult?.status === 'ok' && agentAResult.needs_questions ? (
+                  <div className="flex flex-col gap-[10px] rounded-[12px] bg-[#F8F8F8] p-[12px]">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[14px] font-[600] leading-[16.8px] text-[#131416]">보완 질문 카드</p>
+                        <p className="pt-[4px] text-[12px] leading-[16px] text-[#6D6D6D]">답을 그대로 본문에 반영하면 분석 품질을 높일 수 있어요.</p>
+                      </div>
+                      <span className="text-[11px] leading-[13px] text-[#8A8A8A]">{agentAResult.questions.length}개</span>
+                    </div>
+
+                    {agentAResult.questions.map((question) => (
+                      <div key={question.slot} className="rounded-[10px] bg-white px-[12px] py-[12px] shadow-[0_0_2px_rgba(0,0,0,0.08)]">
+                        <div className="flex items-start justify-between gap-[12px]">
+                          <p className="flex-1 text-[14px] font-[600] leading-[19.6px] text-[#131416]">{question.question}</p>
+                          {question.required ? (
+                            <span className="shrink-0 rounded-full bg-[#F4F8F5] px-[8px] py-[3px] text-[11px] font-[600] leading-none text-[#2F5C46]">
+                              필수
+                            </span>
+                          ) : (
+                            <span className="shrink-0 rounded-full bg-[#F3F3F3] px-[8px] py-[3px] text-[11px] font-[500] leading-none text-[#7A7A7A]">
+                              선택
+                            </span>
+                          )}
+                        </div>
+                        <p className="pt-[6px] text-[12px] leading-[16px] text-[#6D6D6D]">
+                          입력 유형: {question.input_type}
+                          {question.hint ? ` · ${question.hint}` : ''}
+                        </p>
+                        {question.options?.length ? (
+                          <div className="mt-[10px] flex flex-wrap gap-[6px]">
+                            {question.options.map((option) => (
+                              <span
+                                key={`${question.slot}-${option}`}
+                                className="rounded-full bg-[#F8F8F8] px-[10px] py-[5px] text-[12px] leading-none text-[#494949]"
+                              >
+                                {option}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <ExampleCard

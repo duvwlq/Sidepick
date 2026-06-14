@@ -1,17 +1,14 @@
 ﻿import { useEffect, useMemo, useState, type MouseEvent, type WheelEvent } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import categoryCommerceImage from '../assets/home-v1-figma/category-commerce.webp';
 import categoryContentImage from '../assets/home-v1-figma/category-content.webp';
 import categoryDigitalImage from '../assets/home-v1-figma/category-digital.webp';
 import categoryPlatformImage from '../assets/home-v1-figma/category-platform.webp';
 import brandMarkIcon from '../assets/home-v1-figma/icons/brand-mark-figma.svg';
 import bookmarkIcon from '../assets/figma-downloaded-icons/home/Bookmark.svg';
-import edit3Icon from '../assets/figma-downloaded-icons/home/Edit 3.svg';
 import heartIcon from '../assets/figma-downloaded-icons/home/Heart.svg';
 import bellIcon from '../assets/figma-downloaded-icons/home/Notification.svg';
-import plusIcon from '../assets/figma-downloaded-icons/home/Plus.svg';
 import searchIcon from '../assets/figma-downloaded-icons/home/Search.svg';
-import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import BottomNav from '../components/layout/BottomNav';
 import { useToast } from '../components/common/useToast';
 import {
@@ -891,50 +888,13 @@ function ExploreSection({
 
 function FloatingActionsExact() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [fabExpanded, setFabExpanded] = useState(() => new URLSearchParams(location.search).get('fab') === 'open');
+  const accessToken = getAccessToken();
 
   return (
     <BottomNav
       active="home"
-      accessoryLayout="end"
-      accessory={
-        <div className="relative flex h-[36px] w-[36px] items-center justify-center">
-          <div
-            className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
-              fabExpanded
-                ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
-                : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
-            }`}
-          >
-            <button type="button" onClick={() => navigate('/coming-soon')} className="flex items-center gap-[8px] whitespace-nowrap">
-              <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
-              <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black" style={textFeatureStyle}>
-                AI 챗봇
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/auth?next=%2Fcreate')}
-              className="flex items-center gap-[8px] whitespace-nowrap"
-            >
-              <img src={edit3Icon} alt="" className="h-[20px] w-[20px] shrink-0" />
-              <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black" style={textFeatureStyle}>
-                경험 작성
-              </span>
-            </button>
-          </div>
-          <button
-            type="button"
-            aria-label="플로팅 액션 메뉴"
-            aria-expanded={fabExpanded}
-            onClick={() => setFabExpanded((prev) => !prev)}
-            className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-[999px] bg-[#5A876E] p-[2px]"
-          >
-            <img src={plusIcon} alt="" className="h-[20px] w-[20px]" />
-          </button>
-        </div>
-      }
+      showFab
+      onCreateClick={() => navigate(accessToken ? '/create' : '/auth?next=%2Fcreate')}
     />
   );
 }

@@ -4,6 +4,7 @@ import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.security.CurrentUserProvider;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
+import com.failforward.backend.domain.notification.service.NotificationService;
 import com.failforward.backend.domain.reaction.dto.ReactionDtos.ReactionSummaryResponse;
 import com.failforward.backend.domain.reaction.entity.ExperienceReaction;
 import com.failforward.backend.domain.reaction.entity.ReactionType;
@@ -22,13 +23,27 @@ public class ReactionService {
     private final ExperienceReactionRepository reactionRepository;
     private final FailureExperienceRepository experienceRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final NotificationService notificationService;
 
     @Transactional
     public ReactionSummaryResponse react(Long experienceId, ReactionType reactionType) {
         User user = currentUserProvider.getCurrentUserEntity();
-        ensureExperienceExists(experienceId);
-        reactionRepository.findByExperienceIdAndUserIdAndReactionType(experienceId, user.getId(), reactionType)
-                .orElseGet(() -> reactionRepository.save(ExperienceReaction.create(getExperience(experienceId), user, reactionType)));
+        FailureExperience experience = getExperience(experienceId);
+        boolean created = reactionRepository.findByExperienceIdAndUserIdAndReactionType(experienceId, user.getId(), reactionType)
+                .map(existing -> false)
+                .orElseGet(() -> {
+                    reactionRepository.save(ExperienceReaction.create(experience, user, reactionType));
+                    return true;
+                });
+
+        if (created && reactionType == ReactionType.HEART) {
+            notificationService.createExperienceLikeNotification(
+                    experience.getUser(),
+                    user,
+                    experience.getId(),
+                    experience.getTitle()
+            );
+        }
         return getSummary(experienceId);
     }
 

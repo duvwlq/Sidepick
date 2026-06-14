@@ -318,6 +318,28 @@ export type ExperienceUpsertInput = {
   wouldRetry?: boolean;
 };
 
+export type AgentAQuestionCard = {
+  slot: string;
+  question: string;
+  input_type: 'text' | 'select' | 'number' | 'tag';
+  options: string[] | null;
+  required: boolean;
+  hint: string | null;
+};
+
+export type AgentAAnalyzeDraftPayload = {
+  status: 'ok' | 'fallback';
+  needs_questions: boolean;
+  questions: AgentAQuestionCard[];
+  meta: {
+    input_tokens: number;
+    output_tokens: number;
+    elapsed_ms: number;
+    used_template: boolean;
+  };
+  message: string | null;
+};
+
 export function register(input: {
   email: string;
   password: string;
@@ -567,6 +589,25 @@ export function getMyAnalysisReports(token: string) {
 export function getMyHomeFeed(token: string) {
   return request<HomeFeedPayload>('/users/me/home-feed', {
     token,
+  });
+}
+
+export function analyzeDraftWithAgentA(
+  token: string,
+  input: {
+    draft: {
+      category_slug: string;
+      body: string;
+      title?: string;
+      tone?: string;
+      audience?: string;
+    };
+  },
+) {
+  return request<AgentAAnalyzeDraftPayload>('/agent-a/analyze-draft', {
+    method: 'POST',
+    token,
+    body: input,
   });
 }
 

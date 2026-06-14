@@ -123,6 +123,30 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
             from FailureExperience e
             where e.isPublic = true
               and e.caseStatus = 'SUCCESS'
+            order by e.createdAt desc
+            """)
+    List<FailureExperience> findPublicSuccessCasesLatest(Pageable pageable);
+
+    @EntityGraph(attributePaths = {"user", "category"})
+    @Query("""
+            select e
+            from FailureExperience e
+            where e.isPublic = true
+              and e.caseStatus = 'SUCCESS'
+              and (:categoryId is null or e.category.id = :categoryId)
+            order by e.createdAt desc
+            """)
+    List<FailureExperience> findPublicSuccessCasesLatestByCategory(
+            @Param("categoryId") Long categoryId,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"user", "category"})
+    @Query("""
+            select e
+            from FailureExperience e
+            where e.isPublic = true
+              and e.caseStatus = 'SUCCESS'
               and e.id <> :experienceId
               and e.category.id = :categoryId
             order by e.viewCount desc, e.likeCount desc, e.createdAt desc

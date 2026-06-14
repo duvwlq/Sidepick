@@ -311,6 +311,35 @@ public class ExperienceService {
                 .toList();
     }
 
+    public List<ExperienceDtos.ExperienceResponse> getSuccessCases(Long categoryId, int limit) {
+        int safeLimit = Math.max(limit, 1);
+        entityManager.clear();
+        List<FailureExperience> experiences = categoryId == null
+                ? experienceRepository.findPublicSuccessCasesLatest(PageRequest.of(0, safeLimit))
+                : experienceRepository.findPublicSuccessCasesLatestByCategory(categoryId, PageRequest.of(0, safeLimit));
+
+        return experiences.stream()
+                .map(experience -> ExperienceDtos.ExperienceResponse.from(
+                        experience,
+                        aiAnalysisService.findByExperience(experience).orElse(null),
+                        resolveBookmarkCount(experience.getId())
+                ))
+                .toList();
+    }
+
+    public ExperienceDtos.ExperienceResponse getSuccessCaseDetail(Long successCaseId) {
+        FailureExperience experience = getExperienceEntity(successCaseId);
+        if (!"SUCCESS".equalsIgnoreCase(experience.getCaseStatus())) {
+            throw new NotFoundException("Success case not found.");
+        }
+
+        return ExperienceDtos.ExperienceResponse.from(
+                experience,
+                aiAnalysisService.findByExperience(experience).orElse(null),
+                resolveBookmarkCount(experience.getId())
+        );
+    }
+
     private int resolveBookmarkCount(Long experienceId) {
         return bookmarkRepository.countByExperienceId(experienceId);
     }

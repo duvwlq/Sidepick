@@ -28,6 +28,10 @@ Sidepick의 공식 문서 허브입니다.
 | [04_backend_structure.md](./04_backend_structure.md) | 백엔드 모듈 구조와 도메인 책임 |
 | [05_ai_integration_contract.md](./05_ai_integration_contract.md) | 백엔드-AI 서버 연동 방식 |
 | [BE-FE-AI-연결-하네스-설계.md](./BE-FE-AI-연결-하네스-설계.md) | 현재 FE/BE 실행 범위와 하네스 우선순위 정리 |
+| [BE-37 알림 MVP 계약.md](./BE-37%20알림%20MVP%20계약.md) | 알림 MVP 범위와 API/이벤트 규칙 |
+| [BE-40 에이전트 A 연결 계약.md](./BE-40%20에이전트%20A%20연결%20계약.md) | 질문 카드/Plan B 연결 계약 |
+| [BE-41 성공사례 MVP 계약.md](./BE-41%20성공사례%20MVP%20계약.md) | 성공사례 리스트/상세 MVP 계약 |
+| [BE-42 FAB 동작 규칙.md](./BE-42%20FAB%20동작%20규칙.md) | FAB 상태/라우팅 규칙 |
 | [06_demo_seed_and_scenario.md](./06_demo_seed_and_scenario.md) | 데모/시드 데이터 운영 메모 |
 | [07_deployment.md](./07_deployment.md) | 실제 운영 배포 경로와 배포 절차 |
 | [db-schema.md](./db-schema.md) | DB 스키마와 마이그레이션 기준 |

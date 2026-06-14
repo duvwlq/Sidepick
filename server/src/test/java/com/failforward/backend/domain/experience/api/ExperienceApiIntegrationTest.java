@@ -325,6 +325,30 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void standaloneSuccessCaseApisReturnOnlySuccessEntries() throws Exception {
+        String token = registerAndLogin("success-list@sidepick.dev", "password123", "successListUser", "20s");
+        long failureExperienceId = createExperience(token, "Failure case", "Failure case content");
+        long successExperienceId = createExperience(token, "Standalone success", "Standalone success content");
+
+        jdbcTemplate.update("UPDATE failure_experiences SET case_status = 'SUCCESS' WHERE id = ?", successExperienceId);
+
+        mockMvc.perform(get("/api/success-cases")
+                        .param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(successExperienceId))
+                .andExpect(jsonPath("$.data[0].caseStatus").value("SUCCESS"));
+
+        mockMvc.perform(get("/api/success-cases/{successCaseId}", successExperienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(successExperienceId))
+                .andExpect(jsonPath("$.data.caseStatus").value("SUCCESS"));
+
+        mockMvc.perform(get("/api/success-cases/{successCaseId}", failureExperienceId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void detailExposesSharePayload() throws Exception {
         String token = registerAndLogin("share@sidepick.dev", "password123", "shareUser", "20s");
 
