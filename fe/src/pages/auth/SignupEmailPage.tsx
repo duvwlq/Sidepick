@@ -13,6 +13,8 @@ import { requestEmailVerification } from '../../lib/api';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const INVALID_EMAIL_MESSAGE = '\uC62C\uBC14\uB978 \uC774\uBA54\uC77C \uD615\uC2DD\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694.';
+const VERIFICATION_SENT_MESSAGE = '\uC778\uC99D \uBA54\uC77C\uC774 \uBC1C\uC1A1\uB418\uC5C8\uC5B4\uC694.';
 
 export default function SignupEmailPage() {
   const navigate = useNavigate();
@@ -32,7 +34,7 @@ export default function SignupEmailPage() {
 
   async function handleNext() {
     if (!isEmailValid) {
-      setError('?대찓???뺤떇??留욊쾶 ?ㅼ떆 ?낅젰??二쇱꽭??');
+      setError(INVALID_EMAIL_MESSAGE);
       return;
     }
 
@@ -42,14 +44,16 @@ export default function SignupEmailPage() {
     try {
       const payload = await requestEmailVerification({ email: normalizedEmail });
       const verificationMessage = payload.verificationCode
-        ? `媛쒕컻???몄쬆肄붾뱶: ${payload.verificationCode}`
-        : '?몄쬆 硫붿씪??諛쒖넚?섏뿀?댁슂.';
+        ? `\uAC1C\uBC1C\uC6A9 \uC778\uC99D\uCF54\uB4DC: ${payload.verificationCode}`
+        : VERIFICATION_SENT_MESSAGE;
+
       updateField('email', normalizedEmail);
       updateField('verificationSent', true);
       updateField('verificationMessage', verificationMessage);
+      showToast(verificationMessage);
       navigate(`/signup/identity?next=${encodeURIComponent(nextPath)}`);
     } catch (requestError) {
-      const message = resolveErrorMessage(requestError, '?대찓???뺤떇??留욊쾶 ?ㅼ떆 ?낅젰??二쇱꽭??');
+      const message = resolveErrorMessage(requestError, INVALID_EMAIL_MESSAGE);
       setError(message);
       showToast(message);
     } finally {
@@ -59,8 +63,11 @@ export default function SignupEmailPage() {
 
   return (
     <SignupScreen
-      title="개인 정보 등록"
-      headlineLines={['이메일 주소로', '본인 인증을 진행할게요']}
+      title="\uAC1C\uC778 \uC815\uBCF4 \uB4F1\uB85D"
+      headlineLines={[
+        '\uC774\uBA54\uC77C \uC8FC\uC18C\uB85C,',
+        '\uBCF8\uC778 \uC778\uC99D\uC744 \uC9C4\uD589\uD560\uAC8C\uC694',
+      ]}
       onBack={() =>
         navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
           replace: true,
@@ -69,9 +76,9 @@ export default function SignupEmailPage() {
     >
       <SignupFieldGroup>
         <SignupField
-          label="이메일"
+          label="\uC774\uBA54\uC77C"
           type="email"
-          placeholder="이메일을 입력해 주세요."
+          placeholder="\uC774\uBA54\uC77C\uC744 \uC785\uB825\uD574 \uC8FC\uC138\uC694"
           value={form.email}
           onChange={(event) => updateField('email', event.target.value)}
           autoComplete="email"
@@ -81,7 +88,9 @@ export default function SignupEmailPage() {
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
         <SignupButton onClick={() => void handleNext()} disabled={loading || !isEmailValid} tone="soft">
-          {loading ? '인증 요청 중...' : '본인 인증하기'}
+          {loading
+            ? '\uC778\uC99D \uC694\uCCAD \uC911...'
+            : '\uBCF8\uC778 \uC778\uC99D\uD558\uAE30'}
         </SignupButton>
       </SignupFieldGroup>
     </SignupScreen>

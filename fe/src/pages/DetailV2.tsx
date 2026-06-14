@@ -203,6 +203,37 @@ function buildTopTags(experience: Experience) {
   return tags.slice(0, 4);
 }
 
+function normalizeSimilarityPercent(value: number | null | undefined) {
+  if (typeof value !== 'number' || Number.isNaN(value)) {
+    return 99;
+  }
+
+  const normalized = value <= 1 ? value * 100 : value;
+  return Math.max(0, Math.min(99, Math.round(normalized)));
+}
+
+function localizeMatchingFactor(value: string) {
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized === 'same business type') {
+    return '업종 일치';
+  }
+  if (normalized === 'same failure reason') {
+    return '실패 원인 일치';
+  }
+  if (normalized === 'similar investment amount') {
+    return '투자금 유사';
+  }
+  if (normalized === 'business type differs') {
+    return '업종 차이';
+  }
+  if (normalized === 'failure reason differs') {
+    return '실패 원인 차이';
+  }
+
+  return value;
+}
+
 function buildRelatedCardModel(
   experience: Experience,
   options?: {
@@ -253,12 +284,21 @@ function buildDetailViewModel(experience: Experience, similarCases: SimilarExper
     guideLines,
     guideClosing: DETAIL_FIXTURE_VIEW_MODEL.guideClosing,
     patternRows: buildPatternRows(experience),
-    similarCards: similarCases.map((item) =>
-      buildRelatedCardModel(item.similarExperience, {
-        similarity: Math.max(0, Math.min(99, Math.round(item.similarityScore))),
-        keywords: item.matchingFactors,
-      }),
-    ),
+    similarCards: similarCases.map((item) => {
+      const previewSource = sanitizeText(
+        stripImageMarkdown(item.similarExperience.content) ||
+          item.similarExperience.lessonsLearned ||
+          item.similarExperience.analysis?.structuredSummary,
+        'Preview',
+      );
+      return {
+        ...buildRelatedCardModel(item.similarExperience, {
+          similarity: normalizeSimilarityPercent(item.similarityScore),
+          keywords: (item.matchingFactors ?? []).map(localizeMatchingFactor),
+        }),
+        preview: clampText(previewSource, 60),
+      };
+    }),
   };
 }
 function StatusBar() {
@@ -319,18 +359,21 @@ function SimilarCard({ card, onClick }: { card: RelatedCardModel; onClick?: () =
             <span className={`inline-flex h-[16px] shrink-0 items-center rounded-[4px] px-[4px] text-[10px] font-[500] leading-[12px] text-white ${isSuccess ? 'bg-[#5A876E]' : 'bg-[#C06D43]'}`}>
               {card.statusLabel}
             </span>
-            <span className="inline-flex h-[16px] max-w-[84px] shrink-0 items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#CBE5D8] px-[4px] text-[10px] font-[500] leading-[12px] text-[#5A876E]">
+            <span className="inline-flex h-[16px] max-w-[96px] shrink-0 items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#CBE5D8] px-[4px] text-[10px] font-[500] leading-[12px] text-[#5A876E]">
               {card.category}
             </span>
             {card.keywords.map((keyword, index) => (
-              <span key={`${keyword}-${index}`} className="inline-flex h-[16px] max-w-[52px] shrink-0 items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#E6E6E6] px-[4px] text-[10px] font-[500] leading-[12px] text-[#8A8A8A]">
+              <span key={`${keyword}-${index}`} className="inline-flex h-[16px] max-w-[72px] shrink-0 items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-[4px] bg-[#E6E6E6] px-[4px] text-[10px] font-[500] leading-[12px] text-[#8A8A8A]">
                 {keyword}
               </span>
             ))}
           </div>
           <div className="flex shrink-0 items-center gap-[4px]">
             <div className="h-[4px] w-[30px] rounded-[999px] bg-[#EEEEEE]">
-              <div className={`h-[4px] rounded-[999px] ${isSuccess ? 'bg-[#4CAF50]' : 'bg-[#FFC13B]'}`} style={{ width: '16px' }} />
+              <div
+                className={`h-[4px] rounded-[999px] ${isSuccess ? 'bg-[#4CAF50]' : 'bg-[#FFC13B]'}`}
+                style={{ width: `${Math.max(8, Math.round((card.similarity / 99) * 30))}px` }}
+              />
             </div>
             <span className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] text-[#8A8A8A]">{card.similarity}%</span>
           </div>

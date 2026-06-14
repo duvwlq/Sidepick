@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,6 +68,15 @@ public class GlobalExceptionHandler {
                 .orElse("Request validation failed.");
         logWarn(request, HttpStatus.UNPROCESSABLE_ENTITY, ErrorCode.VALIDATION_ERROR, detail, null, exception);
         return build(request, HttpStatus.UNPROCESSABLE_ENTITY, "입력한 내용을 다시 확인해주세요.", ErrorCode.VALIDATION_ERROR);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnreadableMessage(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request
+    ) {
+        logWarn(request, HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, exception.getMessage(), null, exception);
+        return build(request, HttpStatus.BAD_REQUEST, "?낅젰???댁슜???ㅼ떆 ?뺤씤?댁＜?몄슂.", ErrorCode.VALIDATION_ERROR);
     }
 
     @ExceptionHandler(UnauthorizedException.class)

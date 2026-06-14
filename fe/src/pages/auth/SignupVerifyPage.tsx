@@ -102,6 +102,12 @@ export default function SignupVerifyPage() {
           fieldHeight={40}
         />
 
+        {form.verificationMessage ? (
+          <p className="w-full rounded-[10px] bg-[#F4F8F6] px-[16px] py-[12px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#2F6B50]">
+            {form.verificationMessage}
+          </p>
+        ) : null}
+
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
         <SignupButton onClick={() => void handleNext()} disabled={loading} tone="soft">

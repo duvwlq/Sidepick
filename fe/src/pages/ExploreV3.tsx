@@ -22,6 +22,7 @@ import {
   getFailurePatternStats,
   getFailureTimingStats,
   getReactionSummary,
+  getRelatedSuccessCases,
   reactToExperience,
   type Experience,
   type FailurePatternStatsPayload,
@@ -715,11 +716,13 @@ function ReviewCardRow({
   interaction,
   onHeartToggle,
   onBookmarkToggle,
+  onCtaClick,
 }: {
   experience: Experience;
   interaction?: CardInteractionState;
   onHeartToggle: (experience: Experience) => void;
   onBookmarkToggle: (experience: Experience) => void;
+  onCtaClick: (experience: Experience) => void;
 }) {
   const previewClampStyle = {
     overflow: 'hidden',
@@ -873,7 +876,7 @@ function ReviewCardRow({
                 className="relative z-[1] flex h-[30px] w-[48px] shrink-0 items-start justify-start rounded-[8px] bg-[#5A876E] px-[12px] py-[8px]"
                 onClick={(event) => {
                   stopEvent(event);
-                  navigate(detailPath);
+                  onCtaClick(experience);
                 }}
               >
                 <div
@@ -1313,6 +1316,25 @@ export default function ExploreV3() {
     }
   }
 
+  async function handleCardCta(experience: Experience) {
+    if (experience.caseStatus !== 'FAILURE') {
+      navigate(`/experiences/${experience.id}`);
+      return;
+    }
+
+    try {
+      const related = await getRelatedSuccessCases(experience.id, 1);
+      const target = related[0];
+      if (!target) {
+        showToast('연결된 성공 사례가 아직 없어요.');
+        return;
+      }
+      navigate(`/experiences/${target.id}`);
+    } catch (error) {
+      showToast(resolveErrorMessage(error, '성공 사례를 불러오지 못했습니다.'));
+    }
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto w-full max-w-[375px]">
@@ -1373,6 +1395,7 @@ export default function ExploreV3() {
                   interaction={interactionById[experience.id]}
                   onHeartToggle={handleHeartToggle}
                   onBookmarkToggle={handleBookmarkToggle}
+                  onCtaClick={handleCardCta}
                 />
               ))}
             </section>

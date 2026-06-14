@@ -19,6 +19,7 @@ import {
   getCategories,
   getExperiences,
   getReactionSummary,
+  getRelatedSuccessCases,
   reactToExperience,
   type ReactionSummaryPayload,
   unbookmarkExperience,
@@ -42,6 +43,7 @@ type CategoryCardData = {
 type StoryCardData = {
   id: number;
   href: string;
+  ctaHref?: string;
   status: { label: string; tone: 'failure' | 'success' };
   category: string;
   keywords: string[];
@@ -170,10 +172,15 @@ function toStoryCardData(experience: Experience, compact = false): StoryCardData
   const ctaLabel =
     typeof experience.structuredData.figmaCardCtaLabel === 'string' ? experience.structuredData.figmaCardCtaLabel : 'CTA';
   const ctaDisabled = experience.structuredData.figmaCardCtaDisabled === true;
+  const ctaHref =
+    experience.caseStatus === 'FAILURE'
+      ? `/experiences/${experience.id}/success-comparison`
+      : `/experiences/${experience.id}`;
 
   return {
     id: experience.id,
     href: `/experiences/${experience.id}`,
+    ctaHref,
     status: {
       label: experience.caseStatus === 'FAILURE' ? '실패' : '성공',
       tone: experience.caseStatus === 'FAILURE' ? 'failure' : 'success',
@@ -573,6 +580,7 @@ function StoryCard({
   heartCountText,
   onBookmarkClick,
   onHeartClick,
+  onCtaClick,
 }: {
   card: StoryCardData;
   widthClass: string;
@@ -583,6 +591,7 @@ function StoryCard({
   heartCountText?: string;
   onBookmarkClick?: () => void;
   onHeartClick?: () => void;
+  onCtaClick?: (card: StoryCardData) => void;
 }) {
   const navigate = useNavigate();
   const heightClass = card.compact ? 'h-[149px]' : 'h-[187px]';
@@ -659,7 +668,11 @@ function StoryCard({
               onClick={(event) => {
                 stopCardEvent(event);
                 if (!card.ctaDisabled) {
-                  navigate(card.href);
+                  if (onCtaClick) {
+                    onCtaClick(card);
+                    return;
+                  }
+                  navigate(card.ctaHref ?? card.href);
                 }
               }}
               disabled={card.ctaDisabled}
@@ -689,6 +702,7 @@ function PopularSection({
   interactionById,
   onBookmarkToggle,
   onHeartToggle,
+  onCtaClick,
 }: {
   topic: PopularTopic;
   onChangeTopic: (value: PopularTopic) => void;
@@ -696,6 +710,7 @@ function PopularSection({
   interactionById: Record<number, HomeCardInteraction>;
   onBookmarkToggle: (card: StoryCardData) => void;
   onHeartToggle: (card: StoryCardData) => void;
+  onCtaClick: (card: StoryCardData) => void;
 }) {
   const topics: PopularTopic[] = ['유튜브', '쇼핑몰', '블로그', '주식'];
 
@@ -741,6 +756,7 @@ function PopularSection({
               bookmarkCountText={interactionById[cards[0].id]?.bookmarkCountText ?? cards[0].bookmarks}
               onBookmarkClick={cards[0].isFixture ? undefined : () => onBookmarkToggle(cards[0])}
               onHeartClick={cards[0].isFixture ? undefined : () => onHeartToggle(cards[0])}
+              onCtaClick={cards[0].isFixture ? undefined : onCtaClick}
             />
             <StoryCard
               card={cards[1]}
@@ -752,6 +768,7 @@ function PopularSection({
               bookmarkCountText={interactionById[cards[1].id]?.bookmarkCountText ?? cards[1].bookmarks}
               onBookmarkClick={cards[1].isFixture ? undefined : () => onBookmarkToggle(cards[1])}
               onHeartClick={cards[1].isFixture ? undefined : () => onHeartToggle(cards[1])}
+              onCtaClick={cards[1].isFixture ? undefined : onCtaClick}
             />
             <StoryCard
               card={cards[2]}
@@ -762,6 +779,7 @@ function PopularSection({
               bookmarkCountText={interactionById[cards[2].id]?.bookmarkCountText ?? cards[2].bookmarks}
               onBookmarkClick={cards[2].isFixture ? undefined : () => onBookmarkToggle(cards[2])}
               onHeartClick={cards[2].isFixture ? undefined : () => onHeartToggle(cards[2])}
+              onCtaClick={cards[2].isFixture ? undefined : onCtaClick}
             />
           </div>
         </div>
@@ -823,6 +841,7 @@ function ExploreSection({
   interactionById,
   onBookmarkToggle,
   onHeartToggle,
+  onCtaClick,
 }: {
   sort: ExploreSort;
   onChangeSort: (value: ExploreSort) => void;
@@ -830,6 +849,7 @@ function ExploreSection({
   interactionById: Record<number, HomeCardInteraction>;
   onBookmarkToggle: (card: StoryCardData) => void;
   onHeartToggle: (card: StoryCardData) => void;
+  onCtaClick: (card: StoryCardData) => void;
 }) {
   return (
     <section className="flex w-full flex-col items-center bg-white px-[16px] pb-[12px] pt-[12px]">
@@ -848,6 +868,7 @@ function ExploreSection({
               bookmarkCountText={interactionById[cards[0].id]?.bookmarkCountText ?? cards[0].bookmarks}
               onBookmarkClick={cards[0].isFixture ? undefined : () => onBookmarkToggle(cards[0])}
               onHeartClick={cards[0].isFixture ? undefined : () => onHeartToggle(cards[0])}
+              onCtaClick={cards[0].isFixture ? undefined : onCtaClick}
             />
             <StoryCard
               card={cards[1]}
@@ -858,6 +879,7 @@ function ExploreSection({
               bookmarkCountText={interactionById[cards[1].id]?.bookmarkCountText ?? cards[1].bookmarks}
               onBookmarkClick={cards[1].isFixture ? undefined : () => onBookmarkToggle(cards[1])}
               onHeartClick={cards[1].isFixture ? undefined : () => onHeartToggle(cards[1])}
+              onCtaClick={cards[1].isFixture ? undefined : onCtaClick}
             />
             <StoryCard
               card={cards[2]}
@@ -868,6 +890,7 @@ function ExploreSection({
               bookmarkCountText={interactionById[cards[2].id]?.bookmarkCountText ?? cards[2].bookmarks}
               onBookmarkClick={cards[2].isFixture ? undefined : () => onBookmarkToggle(cards[2])}
               onHeartClick={cards[2].isFixture ? undefined : () => onHeartToggle(cards[2])}
+              onCtaClick={cards[2].isFixture ? undefined : onCtaClick}
             />
         </div>
         <div className="flex w-[343px] justify-center pt-[16px]">
@@ -1119,6 +1142,25 @@ export default function HomeV2() {
     }
   }
 
+  async function handleCardCta(card: StoryCardData) {
+    if (card.status.tone !== 'failure') {
+      navigate(card.href);
+      return;
+    }
+
+    try {
+      const related = await getRelatedSuccessCases(card.id, 1);
+      const target = related[0];
+      if (!target) {
+        showToast('연결된 성공 사례가 아직 없어요.');
+        return;
+      }
+      navigate(`/experiences/${target.id}`);
+    } catch (error) {
+      showToast(resolveErrorMessage(error, '성공 사례를 불러오지 못했습니다.'));
+    }
+  }
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-white">
       <div className="relative mx-auto w-full max-w-[375px] bg-white pt-[116px]" style={textFeatureStyle}>
@@ -1134,6 +1176,7 @@ export default function HomeV2() {
             interactionById={interactionById}
             onBookmarkToggle={handleBookmarkToggle}
             onHeartToggle={handleHeartToggle}
+            onCtaClick={handleCardCta}
           />
           <ExploreSection
             sort={exploreSort}
@@ -1142,6 +1185,7 @@ export default function HomeV2() {
             interactionById={interactionById}
             onBookmarkToggle={handleBookmarkToggle}
             onHeartToggle={handleHeartToggle}
+            onCtaClick={handleCardCta}
           />
           {!listLoading && listError ? (
             <div className="px-[16px] pb-[12px] text-[12px] font-[400] leading-[16.8px] text-[#C06D43]">{listError}</div>

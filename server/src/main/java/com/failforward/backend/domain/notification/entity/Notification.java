@@ -62,6 +62,30 @@ public class Notification extends BaseTimeEntity {
         return new Notification(user, actorUser, type, targetType, targetId, message);
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public String getTargetType() {
+        return targetType;
+    }
+
+    public Long getTargetId() {
+        return targetId;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public Boolean getIsRead() {
+        return isRead;
+    }
+
     public void markRead() {
         this.isRead = true;
     }
