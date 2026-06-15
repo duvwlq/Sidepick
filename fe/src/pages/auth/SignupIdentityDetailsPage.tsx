@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ChangeEvent, type HTMLInputTypeAttribute } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   SignupButton,
@@ -69,10 +69,63 @@ function parseIdentityCode(identityCode: string) {
   };
 }
 
-const EMAIL_REQUIRED_MESSAGE = '\uC774\uBA54\uC77C \uC815\uBCF4\uB97C \uBA3C\uC800 \uD655\uC778\uD574 \uC8FC\uC138\uC694.';
-const IDENTITY_REQUIRED_MESSAGE =
-  '\uC0DD\uB144\uC6D4\uC77C \uD3EC\uD568 \uC55E 7\uC790\uB9AC\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694.';
-const NAME_REQUIRED_MESSAGE = '\uC774\uB984\uC740 2\uC790 \uC774\uC0C1 \uC785\uB825\uD574 \uC8FC\uC138\uC694.';
+const EMAIL_REQUIRED_MESSAGE = '이메일 정보를 먼저 확인해 주세요.';
+const IDENTITY_REQUIRED_MESSAGE = '생년월일 포함 앞 7자리를 입력해 주세요.';
+const NAME_REQUIRED_MESSAGE = '이름은 2자 이상 입력해 주세요.';
+const SCREEN_TITLE = '개인 정보 등록';
+const HEADLINE_LINES = ['생년월일 포함', '앞 7자리를 입력해 주세요'];
+const EMAIL_LABEL = '이메일';
+const EMAIL_PLACEHOLDER = '이메일을 입력해주세요.';
+const IDENTITY_LABEL = '생년월일 및 성별';
+const NAME_LABEL = '이름';
+const NAME_PLACEHOLDER = '이름을 입력해주세요';
+const VERIFY_BUTTON_LABEL = '본인 인증하기';
+
+function InlineSignupField({
+  label,
+  placeholder,
+  value,
+  onChange,
+  type = 'text',
+  autoComplete,
+}: {
+  label: string;
+  placeholder: string;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  type?: HTMLInputTypeAttribute;
+  autoComplete?: string;
+}) {
+  const hasValue = value.length > 0;
+
+  return (
+    <div className="flex w-full flex-col gap-[4px]">
+      <span className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-black">{label}</span>
+
+      <label className="relative block w-full">
+        <div
+          className="flex h-[40px] w-full items-center justify-between rounded-[10px] bg-[#F8F8F8] px-[16px] py-[10px]"
+        >
+          <span
+            className={`pointer-events-none min-w-0 flex-1 truncate font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] ${
+              hasValue ? 'text-[#494949]' : 'text-[#BABABA]'
+            }`}
+          >
+            {hasValue ? value : placeholder}
+          </span>
+        </div>
+
+        <input
+          type={type}
+          value={value}
+          onChange={onChange}
+          autoComplete={autoComplete}
+          className="absolute inset-0 h-full w-full border-0 bg-transparent px-[16px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-transparent caret-black outline-none placeholder:text-transparent"
+        />
+      </label>
+    </div>
+  );
+}
 
 export default function SignupIdentityDetailsPage() {
   const navigate = useNavigate();
@@ -121,18 +174,15 @@ export default function SignupIdentityDetailsPage() {
 
   return (
     <SignupScreen
-      title="\uAC1C\uC778 \uC815\uBCF4 \uB4F1\uB85D"
-      headlineLines={[
-        '\uC0DD\uB144\uC6D4\uC77C \uD3EC\uD568',
-        '\uC55E 7\uC790\uB9AC\uB97C \uC785\uB825\uD574 \uC8FC\uC138\uC694',
-      ]}
+      title={SCREEN_TITLE}
+      headlineLines={HEADLINE_LINES}
       onBack={() => navigate(`/signup/identity?next=${encodeURIComponent(nextPath)}`)}
     >
       <SignupFieldGroup>
         <SignupField
-          label="\uC774\uBA54\uC77C"
+          label={EMAIL_LABEL}
           type="email"
-          placeholder="\uC774\uBA54\uC77C\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694."
+          placeholder={EMAIL_PLACEHOLDER}
           value={form.email}
           onChange={(event) => updateField('email', event.target.value)}
           autoComplete="email"
@@ -140,7 +190,7 @@ export default function SignupIdentityDetailsPage() {
         />
 
         <SignupField
-          label="\uC0DD\uB144\uC6D4\uC77C \uBC0F \uC131\uBCC4"
+          label={IDENTITY_LABEL}
           type="text"
           placeholder="000000 - 0 * * * * * *"
           value={formatIdentityPreview(form.identityCode)}
@@ -149,20 +199,19 @@ export default function SignupIdentityDetailsPage() {
           fieldHeight={40}
         />
 
-        <SignupField
-          label="\uC774\uB984"
+        <InlineSignupField
+          label={NAME_LABEL}
           type="text"
-          placeholder="\uC774\uB984\uC744 \uC785\uB825\uD574\uC8FC\uC138\uC694"
+          placeholder={NAME_PLACEHOLDER}
           value={form.fullName}
           onChange={(event) => updateField('fullName', event.target.value)}
           autoComplete="name"
-          fieldHeight={40}
         />
 
         {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
         <SignupButton onClick={handleNext} disabled={!canContinue} tone="primary">
-          \uBCF8\uC778 \uC778\uC99D\uD558\uAE30
+          {VERIFY_BUTTON_LABEL}
         </SignupButton>
       </SignupFieldGroup>
     </SignupScreen>
