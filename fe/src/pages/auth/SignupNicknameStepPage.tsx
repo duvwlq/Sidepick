@@ -87,7 +87,7 @@ export default function SignupNicknameStepPage() {
 
     updateField('nicknameChecked', true);
     setError('');
-    showToast('사용 가능한 닉네임으로 확인되었어요.');
+    showToast('사용 가능한 닉네임으로 확인했어요.');
   }
 
   function handleNext() {
@@ -108,7 +108,7 @@ export default function SignupNicknameStepPage() {
   return (
     <SignupScreen
       title="프로필 설정"
-      headlineLines={['사이드픽에서 사용할', '프로필을 등록 해볼까요?']}
+      headlineLines={['사이드픽에서 사용할', '프로필을 등록해볼까요?']}
       onBack={() =>
         navigate(
           signupMode === 'social'

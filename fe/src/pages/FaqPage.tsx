@@ -151,20 +151,8 @@ function getDisplayLabel(category: GuideCategory) {
   return TAG_LABEL_MAP.get(category.id) ?? category.label;
 }
 
-function buildPlaceholderRows() {
-  return Array.from({ length: DEFAULT_PLACEHOLDER_COUNT }, (_, index) => ({
-    key: `placeholder-${index}`,
-    mode: 'placeholder' as const,
-    tone: index < 3 ? 'green' as const : 'orange' as const,
-  }));
-}
-
 function buildVisibleRows(selectedTagId: string, searchQuery: string) {
   const normalizedQuery = normalizeSearchText(searchQuery);
-
-  if (selectedTagId === ALL_TAG_ID && !normalizedQuery) {
-    return buildPlaceholderRows();
-  }
 
   const scopedCategories =
     selectedTagId === ALL_TAG_ID
@@ -201,7 +189,7 @@ function buildVisibleRows(selectedTagId: string, searchQuery: string) {
         item,
         displayLabel,
       }));
-  });
+  }).slice(0, selectedTagId === ALL_TAG_ID && !normalizedQuery ? DEFAULT_PLACEHOLDER_COUNT : undefined);
 }
 
 function StatusBar() {
@@ -968,9 +956,6 @@ export default function FaqPage() {
                     row={row}
                     expanded={row.mode === 'data' && expandedKey === row.key}
                     onToggle={() => {
-                      if (row.mode === 'placeholder') {
-                        return;
-                      }
                       setExpandedKey((current) => (current === row.key ? null : row.key));
                     }}
                     onExploreCategory={() => {

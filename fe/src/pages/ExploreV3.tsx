@@ -80,9 +80,9 @@ const FEED_OPTIONS: Array<{ key: FeedMode; label: string }> = [
 ];
 
 const FEED_SEGMENT_WIDTH_CLASS: Record<FeedMode, string> = {
-  all: 'w-[37px]',
-  failure: 'w-[37px]',
-  success: 'w-[37px]',
+  all: 'w-[46px]',
+  failure: 'w-[46px]',
+  success: 'w-[46px]',
 };
 
 const DEFAULT_STATS_SLUG = 'online-commerce';
@@ -189,11 +189,11 @@ function buildTopItems(stats: FailurePatternStatsPayload | null) {
 }
 
 function buildTimingPoints(distribution: FailureTimingStatItem[]) {
-  const bucketToMonths: Record<string, number[]> = {
-    'under-1m': [1],
-    '1-3m': [2, 3],
-    '3-6m': [4, 5, 6],
-    '6-12m': [7, 8, 9, 10, 11],
+    const bucketToMonths: Record<string, number[]> = {
+      'under-1m': [0],
+      '1-3m': [1, 2, 3],
+      '3-6m': [4, 5, 6],
+      '6-12m': [7, 8, 9, 10, 11],
     'over-1y': [12],
   };
   const monthMap = new Map<number, number>();
@@ -270,23 +270,6 @@ function NeutralBadge({ label }: { label: string }) {
     >
       {label}
     </span>
-  );
-}
-
-function SimilarityMeter() {
-  return (
-    <div className="flex items-center gap-[4px]">
-      <div className="h-[4px] w-[30px] rounded-[999px] bg-[#E6E6E6]">
-        <div className="h-[4px] w-[21px] rounded-[999px] bg-[#FFC13B]" />
-      </div>
-      <div
-        className="flex items-center text-[12px] font-[600] leading-[16.8px] text-[#8A8A8A]"
-        style={textFeatureStyle}
-      >
-        <span>--</span>
-        <span>%</span>
-      </div>
-    </div>
   );
 }
 
@@ -770,7 +753,6 @@ function ReviewCardRow({
               ))}
               {overflowKeywordCount > 0 ? <OverflowBadge count={overflowKeywordCount} /> : null}
             </div>
-            <SimilarityMeter />
           </div>
 
           <div className="flex h-[60px] w-full items-start gap-[8px]">
@@ -883,7 +865,7 @@ function ReviewCardRow({
                   className="flex flex-col justify-center text-center text-[12px] font-[600] leading-[0] text-white"
                   style={textFeatureStyle}
                 >
-                  <span className="leading-[14.4px]">CTA</span>
+                  <span className="leading-[14.4px]">성공</span>
                 </div>
               </button>
             </div>
@@ -1016,7 +998,7 @@ function SharedFooterArea({
       accessory={
         <>
           <div className="h-[36px] w-[36px] shrink-0" aria-hidden="true" />
-          <div className="pointer-events-auto flex h-[38px] w-[135px] items-center rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+          <div className="pointer-events-auto flex h-[38px] w-[162px] items-center rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
             {FEED_OPTIONS.map((option) => {
               const active = option.key === feedMode;
               return (

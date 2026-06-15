@@ -214,68 +214,40 @@ const homeReviewCategoryCardsExact: CategoryCardData[] = [
   {
     id: 1,
     title: '온라인 판매·이커머스',
-    lines: ['스마트스토어/ 쿠팡, 오픈마켓', '/구매대행, 위탁판매', '/재고 기반 쇼핑몰 등'],
+    lines: ['스마트스토어, 쿠팡, 오픈마켓', '구매대행, 위탁판매', '재고 기반 쇼핑몰 등'],
     image: categoryCommerceImage,
   },
   {
     id: 2,
     title: '콘텐츠·SNS 기반',
-    lines: ['유튜브, 블로그, 인스타그램, 릴스,', '/뉴스레터, 개인 브랜딩 기반 활동'],
+    lines: ['유튜브, 블로그, 인스타그램, 릴스', '뉴스레터, 개인 브랜딩 기반 활동'],
     image: categoryContentImage,
   },
   {
     id: 3,
     title: '디지털 상품·지식 판매',
-    lines: ['전자책, 강의 제작 (클래스, 인', '강) 템플릿, 디자인 판매', '/ 노션, PDF 자료 판매 등'],
+    lines: ['전자책, 강의 제작, 템플릿', '디자인 판매, 노션', 'PDF 자료 판매 등'],
     image: categoryDigitalImage,
   },
   {
     id: 4,
     title: '플랫폼 기반 노동형',
-    lines: ['배달, 대리운전, 쿠팡플렉스, 설문', '참여, 테스트 작업 등 플랫폼 기반', '활동'],
+    lines: ['배달, 대리운전, 쿠팡플렉스', '설문 참여, 테스트 작업 등', '플랫폼 기반 활동'],
     image: categoryPlatformImage,
   },
   {
     id: 5,
     title: '재능 판매·프리랜서',
-    lines: ['디자인/영상 편집/글쓰기, 카메라', '이커머스 개발/ 번역 / 코딩 등 플', '랫폼 활동'],
+    lines: ['디자인, 영상 편집, 글쓰기', '개발, 번역, 코딩 등', '플랫폼 기반 활동'],
     image: categoryDigitalImage,
   },
   {
     id: 6,
     title: '오프라인 기반 부업',
-    lines: ['공방, 핸드메이드/ 플리마켓 판매/', '클래스 운영 (오프라인) 등'],
+    lines: ['공방, 핸드메이드, 플리마켓 판매', '오프라인 클래스 운영 등'],
     image: categoryCommerceImage,
   },
 ];
-
-const makeStoryCard = (
-  id: number,
-  status: StoryCardData['status'],
-  keyword2: string,
-  compact = false,
-): StoryCardData => ({
-  id,
-  href: `/experiences/${id}`,
-  status,
-  category: '카테고리',
-  keywords: ['키워드', keyword2],
-  hiddenKeywordCount: 0,
-  title: '제목',
-  preview: '본문 텍스트 미리보기 본문 텍스트 미리보기 본문 텍스트 미리보기',
-  nickname: '닉네임',
-  date: '2026.00.00',
-  views: '999',
-  likes: '999',
-  bookmarks: '999',
-  imageUrl: null,
-  showImagePlaceholder: true,
-  showCta: !compact,
-  ctaLabel: 'CTA',
-  ctaDisabled: false,
-  isFixture: true,
-  compact,
-});
 
 function stopCardEvent(event: MouseEvent<HTMLElement>) {
   event.preventDefault();
@@ -283,39 +255,15 @@ function stopCardEvent(event: MouseEvent<HTMLElement>) {
 }
 
 const popularCardsByTopic: Record<PopularTopic, StoryCardData[]> = {
-  유튜브: [
-    makeStoryCard(101, { label: '실패', tone: 'failure' }, '키워드'),
-    makeStoryCard(102, { label: '성공', tone: 'success' }, '키워드', true),
-    makeStoryCard(103, { label: '실패', tone: 'failure' }, '키워드'),
-  ],
-  쇼핑몰: [
-    makeStoryCard(111, { label: '실패', tone: 'failure' }, '쇼핑몰'),
-    makeStoryCard(112, { label: '성공', tone: 'success' }, '쇼핑몰', true),
-    makeStoryCard(113, { label: '실패', tone: 'failure' }, '쇼핑몰'),
-  ],
-  블로그: [
-    makeStoryCard(121, { label: '실패', tone: 'failure' }, '블로그'),
-    makeStoryCard(122, { label: '성공', tone: 'success' }, '블로그', true),
-    makeStoryCard(123, { label: '실패', tone: 'failure' }, '블로그'),
-  ],
-  주식: [
-    makeStoryCard(131, { label: '실패', tone: 'failure' }, '주식'),
-    makeStoryCard(132, { label: '성공', tone: 'success' }, '주식', true),
-    makeStoryCard(133, { label: '실패', tone: 'failure' }, '주식'),
-  ],
+  유튜브: [],
+  쇼핑몰: [],
+  블로그: [],
+  주식: [],
 };
 
 const exploreCardsBySort: Record<ExploreSort, StoryCardData[]> = {
-  latest: [
-    makeStoryCard(201, { label: '실패', tone: 'failure' }, '키워드'),
-    makeStoryCard(202, { label: '성공', tone: 'success' }, '키워드', true),
-    makeStoryCard(203, { label: '실패', tone: 'failure' }, '블로그'),
-  ],
-  popular: [
-    makeStoryCard(211, { label: '성공', tone: 'success' }, '유튜브'),
-    makeStoryCard(212, { label: '실패', tone: 'failure' }, '쇼핑몰'),
-    makeStoryCard(213, { label: '성공', tone: 'success' }, '블로그', true),
-  ],
+  latest: [],
+  popular: [],
 };
 
 function HomeHeader({ hasUnreadNotifications = true }: { hasUnreadNotifications?: boolean }) {
@@ -448,7 +396,7 @@ function CategorySection({
           type="button"
           aria-expanded={expanded}
           onClick={onToggleExpanded}
-          className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#757575] underline underline-offset-[1px]"
+          className="inline-flex min-w-[88px] items-center justify-center font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] text-[#757575] underline underline-offset-[1px]"
           style={textFeatureStyle}
         >
           {expanded ? '접기' : '펼쳐 보기'}
@@ -713,6 +661,7 @@ function PopularSection({
   onCtaClick: (card: StoryCardData) => void;
 }) {
   const topics: PopularTopic[] = ['유튜브', '쇼핑몰', '블로그', '주식'];
+  const sectionCards = cards.filter((card) => !card.isFixture);
 
   return (
     <section className="flex h-[287px] w-full flex-col items-center bg-white px-[16px] py-[12px]">
@@ -720,20 +669,19 @@ function PopularSection({
         <h2 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]" style={textFeatureStyle}>
           인기 부업
         </h2>
-        <div className="flex h-[25px] w-[343px] items-start">
-          {topics.map((item, index) => {
+        <div className="flex h-[29px] w-[343px] items-end gap-[14px]">
+          {topics.map((item) => {
             const active = item === topic;
-            const widthClass = index === 3 ? 'w-[41px]' : 'w-[53px]';
             return (
               <button
                 key={item}
                 type="button"
                 aria-pressed={active}
                 onClick={() => onChangeTopic(item)}
-                className={`${widthClass} box-border flex h-[25px] items-start justify-center whitespace-nowrap px-[8px] pt-[4px] font-['Pretendard'] text-[14px] leading-[16.8px] ${
+                className={`inline-flex h-[29px] items-center justify-center whitespace-nowrap border-b-[1.5px] px-[2px] pb-[6px] font-['Pretendard'] text-[14px] leading-[16.8px] ${
                   active
-                    ? 'border-b-[1.5px] border-[#5A876E] font-[600] text-[#5A876E]'
-                    : 'font-[400] text-[#BABABA]'
+                    ? 'border-[#5A876E] font-[600] text-[#5A876E]'
+                    : 'border-transparent font-[500] text-[#BABABA]'
                 }`}
                 style={textFeatureStyle}
               >
@@ -746,41 +694,28 @@ function PopularSection({
           className="w-[343px] snap-x snap-mandatory overflow-x-auto overflow-y-hidden [overscroll-behavior-x:contain] [overscroll-behavior-y:contain] [scrollbar-width:none] [-ms-overflow-style:none] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
           onWheel={handleHorizontalWheelScroll}
         >
-          <div className="flex w-[953px]">
-            <StoryCard
-              card={cards[0]}
-              widthClass="w-[311px] shrink-0 snap-start"
-              heartActive={interactionById[cards[0].id]?.myReactions.includes('HEART') ?? false}
-              heartCountText={(interactionById[cards[0].id]?.heartCount ?? Number(cards[0].likes.replace(/,/g, ''))).toLocaleString()}
-              bookmarkActive={interactionById[cards[0].id]?.bookmarked ?? false}
-              bookmarkCountText={interactionById[cards[0].id]?.bookmarkCountText ?? cards[0].bookmarks}
-              onBookmarkClick={cards[0].isFixture ? undefined : () => onBookmarkToggle(cards[0])}
-              onHeartClick={cards[0].isFixture ? undefined : () => onHeartToggle(cards[0])}
-              onCtaClick={cards[0].isFixture ? undefined : onCtaClick}
-            />
-            <StoryCard
-              card={cards[1]}
-              widthClass="ml-[10px] w-[311px] shrink-0 snap-start"
-              offsetTop
-              heartActive={interactionById[cards[1].id]?.myReactions.includes('HEART') ?? false}
-              heartCountText={(interactionById[cards[1].id]?.heartCount ?? Number(cards[1].likes.replace(/,/g, ''))).toLocaleString()}
-              bookmarkActive={interactionById[cards[1].id]?.bookmarked ?? false}
-              bookmarkCountText={interactionById[cards[1].id]?.bookmarkCountText ?? cards[1].bookmarks}
-              onBookmarkClick={cards[1].isFixture ? undefined : () => onBookmarkToggle(cards[1])}
-              onHeartClick={cards[1].isFixture ? undefined : () => onHeartToggle(cards[1])}
-              onCtaClick={cards[1].isFixture ? undefined : onCtaClick}
-            />
-            <StoryCard
-              card={cards[2]}
-              widthClass="ml-[10px] w-[311px] shrink-0 snap-start"
-              heartActive={interactionById[cards[2].id]?.myReactions.includes('HEART') ?? false}
-              heartCountText={(interactionById[cards[2].id]?.heartCount ?? Number(cards[2].likes.replace(/,/g, ''))).toLocaleString()}
-              bookmarkActive={interactionById[cards[2].id]?.bookmarked ?? false}
-              bookmarkCountText={interactionById[cards[2].id]?.bookmarkCountText ?? cards[2].bookmarks}
-              onBookmarkClick={cards[2].isFixture ? undefined : () => onBookmarkToggle(cards[2])}
-              onHeartClick={cards[2].isFixture ? undefined : () => onHeartToggle(cards[2])}
-              onCtaClick={cards[2].isFixture ? undefined : onCtaClick}
-            />
+          <div className="flex w-max min-w-full">
+            {sectionCards.length ? (
+              sectionCards.map((card, index) => (
+                <StoryCard
+                  key={card.id}
+                  card={card}
+                  widthClass={`${index > 0 ? 'ml-[10px] ' : ''}w-[311px] shrink-0 snap-start`}
+                  offsetTop={index === 1}
+                  heartActive={interactionById[card.id]?.myReactions.includes('HEART') ?? false}
+                  heartCountText={(interactionById[card.id]?.heartCount ?? Number(card.likes.replace(/,/g, ''))).toLocaleString()}
+                  bookmarkActive={interactionById[card.id]?.bookmarked ?? false}
+                  bookmarkCountText={interactionById[card.id]?.bookmarkCountText ?? card.bookmarks}
+                  onBookmarkClick={() => onBookmarkToggle(card)}
+                  onHeartClick={() => onHeartToggle(card)}
+                  onCtaClick={onCtaClick}
+                />
+              ))
+            ) : (
+              <div className="flex h-[187px] w-[311px] shrink-0 items-center justify-center rounded-[4px] bg-[#F8F8F8] px-[20px] text-center font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+                아직 노출할 사례가 없습니다.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -799,7 +734,7 @@ function ExploreSegmentExact({
   const popularActive = sort === 'popular';
 
   return (
-    <div className="ml-[16px] flex h-[32px] w-[311px] items-start rounded-[99px] bg-[#DEDEDE]">
+    <div className="mx-auto flex h-[32px] w-[311px] items-start rounded-[99px] bg-[#DEDEDE]">
       <button
         type="button"
         aria-pressed={latestActive}
@@ -851,6 +786,8 @@ function ExploreSection({
   onHeartToggle: (card: StoryCardData) => void;
   onCtaClick: (card: StoryCardData) => void;
 }) {
+  const sectionCards = cards.filter((card) => !card.isFixture);
+
   return (
     <section className="flex w-full flex-col items-center bg-white px-[16px] pb-[12px] pt-[12px]">
       <h2 className="w-[343px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]" style={textFeatureStyle}>
@@ -859,39 +796,26 @@ function ExploreSection({
       <div className="mt-[10px] flex w-[343px] flex-col">
         <ExploreSegmentExact sort={sort} onChangeSort={onChangeSort} />
         <div className="mt-[12px] flex flex-col gap-[10px]">
-            <StoryCard
-              card={cards[0]}
-              widthClass="w-[343px]"
-              heartActive={interactionById[cards[0].id]?.myReactions.includes('HEART') ?? false}
-              heartCountText={(interactionById[cards[0].id]?.heartCount ?? Number(cards[0].likes.replace(/,/g, ''))).toLocaleString()}
-              bookmarkActive={interactionById[cards[0].id]?.bookmarked ?? false}
-              bookmarkCountText={interactionById[cards[0].id]?.bookmarkCountText ?? cards[0].bookmarks}
-              onBookmarkClick={cards[0].isFixture ? undefined : () => onBookmarkToggle(cards[0])}
-              onHeartClick={cards[0].isFixture ? undefined : () => onHeartToggle(cards[0])}
-              onCtaClick={cards[0].isFixture ? undefined : onCtaClick}
-            />
-            <StoryCard
-              card={cards[1]}
-              widthClass="w-[343px]"
-              heartActive={interactionById[cards[1].id]?.myReactions.includes('HEART') ?? false}
-              heartCountText={(interactionById[cards[1].id]?.heartCount ?? Number(cards[1].likes.replace(/,/g, ''))).toLocaleString()}
-              bookmarkActive={interactionById[cards[1].id]?.bookmarked ?? false}
-              bookmarkCountText={interactionById[cards[1].id]?.bookmarkCountText ?? cards[1].bookmarks}
-              onBookmarkClick={cards[1].isFixture ? undefined : () => onBookmarkToggle(cards[1])}
-              onHeartClick={cards[1].isFixture ? undefined : () => onHeartToggle(cards[1])}
-              onCtaClick={cards[1].isFixture ? undefined : onCtaClick}
-            />
-            <StoryCard
-              card={cards[2]}
-              widthClass="w-[343px]"
-              heartActive={interactionById[cards[2].id]?.myReactions.includes('HEART') ?? false}
-              heartCountText={(interactionById[cards[2].id]?.heartCount ?? Number(cards[2].likes.replace(/,/g, ''))).toLocaleString()}
-              bookmarkActive={interactionById[cards[2].id]?.bookmarked ?? false}
-              bookmarkCountText={interactionById[cards[2].id]?.bookmarkCountText ?? cards[2].bookmarks}
-              onBookmarkClick={cards[2].isFixture ? undefined : () => onBookmarkToggle(cards[2])}
-              onHeartClick={cards[2].isFixture ? undefined : () => onHeartToggle(cards[2])}
-              onCtaClick={cards[2].isFixture ? undefined : onCtaClick}
-            />
+          {sectionCards.length ? (
+            sectionCards.map((card) => (
+              <StoryCard
+                key={card.id}
+                card={card}
+                widthClass="w-[343px]"
+                heartActive={interactionById[card.id]?.myReactions.includes('HEART') ?? false}
+                heartCountText={(interactionById[card.id]?.heartCount ?? Number(card.likes.replace(/,/g, ''))).toLocaleString()}
+                bookmarkActive={interactionById[card.id]?.bookmarked ?? false}
+                bookmarkCountText={interactionById[card.id]?.bookmarkCountText ?? card.bookmarks}
+                onBookmarkClick={() => onBookmarkToggle(card)}
+                onHeartClick={() => onHeartToggle(card)}
+                onCtaClick={onCtaClick}
+              />
+            ))
+          ) : (
+            <div className="flex h-[160px] w-[343px] items-center justify-center rounded-[4px] bg-[#F8F8F8] px-[20px] text-center font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+              아직 노출할 사례가 없습니다.
+            </div>
+          )}
         </div>
         <div className="flex w-[343px] justify-center pt-[16px]">
           <Link

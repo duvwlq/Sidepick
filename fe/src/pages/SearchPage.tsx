@@ -17,8 +17,18 @@ import {
 } from '../lib/recent-explore-searches';
 
 const SEARCH_PLACEHOLDER = '원하는 실패 사례를 검색해보세요!';
-const FIXTURE_RECENT_SEARCHES = ['Chip', 'Chip', 'Chip'];
-const FIXTURE_RECOMMENDED_KEYWORDS = ['Chip', 'Chip', 'Chip', 'Chip', 'Chip', 'Chip', 'Chip', 'Chip', 'Chip'];
+const FIXTURE_RECENT_SEARCHES = ['유튜브', '쇼핑몰', '블로그'];
+const FIXTURE_RECOMMENDED_KEYWORDS = [
+  '온라인 판매',
+  '스마트스토어',
+  '유튜브',
+  '블로그',
+  '디자인',
+  '배달',
+  '주식',
+  '전자책',
+  '프리랜서',
+];
 
 function StatusBar() {
   return (
@@ -218,7 +228,7 @@ export default function SearchPage() {
                   <RecentSearchChip
                     key={`${label}-${index}`}
                     label={label}
-                    onClick={() => submitSearch(recentItem ? toRecentSearchLabel(recentItem) : '검색어')}
+                    onClick={() => submitSearch(recentItem ? toRecentSearchLabel(recentItem) : label)}
                     onRemove={() => {
                       if (!recentItem) {
                         return;
@@ -237,8 +247,8 @@ export default function SearchPage() {
             </h2>
 
             <div className="flex flex-wrap gap-[6px] pt-[14px]">
-              {FIXTURE_RECOMMENDED_KEYWORDS.map((keyword, index) => (
-                <RecommendedChip key={`${keyword}-${index}`} label={keyword} onClick={() => submitSearch('검색어')} />
+              {FIXTURE_RECOMMENDED_KEYWORDS.map((keyword) => (
+                <RecommendedChip key={keyword} label={keyword} onClick={() => submitSearch(keyword)} />
               ))}
             </div>
           </section>

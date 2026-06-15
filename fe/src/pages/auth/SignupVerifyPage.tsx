@@ -70,7 +70,7 @@ export default function SignupVerifyPage() {
         'verificationMessage',
         payload.verificationCode
           ? `개발용 인증코드: ${payload.verificationCode}`
-          : '인증 메일이 다시 발송되었어요.',
+          : '인증 메일을 다시 발송했어요.',
       );
       showToast('인증번호를 다시 발송했어요.');
     } catch (requestError) {
@@ -85,7 +85,7 @@ export default function SignupVerifyPage() {
   return (
     <SignupScreen
       title="이메일 인증"
-      headline="이메일로 발송한 인증 번호를 입력해 주세요"
+      headline="이메일로 발송된 인증 번호를 입력해 주세요"
       onBack={() => navigate(`/signup/identity/details?next=${encodeURIComponent(nextPath)}`)}
     >
       <SignupFieldGroup>
@@ -117,7 +117,7 @@ export default function SignupVerifyPage() {
         <button type="button" onClick={() => void handleResend()} disabled={resending} className="w-full">
           <InlineHelperRow>
             <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#5D5D5D]">
-              인증번호가 오지 않으셨나요?
+              인증번호가 오지 않았나요?
             </span>
             <span className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-black">
               {resending ? '재발송 중' : '재발송'}

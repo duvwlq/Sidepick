@@ -97,7 +97,7 @@ export default function AuthEntryPage() {
       const authUrl = buildOAuthAuthorizeUrl(provider, clientId, redirectUri, payload.state);
       window.location.href = authUrl;
     } catch (error) {
-      const message = resolveErrorMessage(error, '소셜 로그인을 준비하던 중 문제가 발생했어요. 다시 시도해 주세요.');
+      const message = resolveErrorMessage(error, '소셜 로그인을 준비하는 중 문제가 발생했어요. 다시 시도해 주세요.');
       setOauthError(message);
       setOauthLoading(null);
       showToast(message);

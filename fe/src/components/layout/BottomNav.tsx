@@ -121,17 +121,17 @@ function DefaultFabMenu({
       >
         <button type="button" onClick={() => navigate('/coming-soon')} className="flex items-center gap-[8px] whitespace-nowrap">
           <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
-          <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 梨쀫큸</span>
+          <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
         </button>
         <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
           <img src={editIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
-          <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">寃쏀뿕 ?묒꽦</span>
+          <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
         </button>
       </div>
 
       <button
         type="button"
-        aria-label={expanded ? '寃쏀뿕 ?묒꽦 硫붾돱 ?リ린' : '寃쏀뿕 ?묒꽦 硫붾돱 ?닿린'}
+        aria-label={expanded ? '경험 작성 메뉴 닫기' : '경험 작성 메뉴 열기'}
         aria-expanded={expanded}
         onClick={onToggle}
         className={`pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full ${
@@ -189,7 +189,7 @@ export default function BottomNav({
 
     if (!token && item.requiresAuth) {
       navigate(
-        `/auth?next=${encodeURIComponent(item.path)}&reason=${encodeURIComponent('留덉씠?섏씠吏??濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.')}`,
+        `/auth?next=${encodeURIComponent(item.path)}&reason=${encodeURIComponent('마이페이지는 로그인이 필요한 서비스입니다.')}`,
       );
       return;
     }
@@ -207,7 +207,7 @@ export default function BottomNav({
 
     if (!token) {
       navigate(
-        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('寃쏀뿕 ?묒꽦? 濡쒓렇?몄씠 ?꾩슂???쒕퉬?ㅼ엯?덈떎.')}`,
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`,
       );
       return;
     }
@@ -245,8 +245,6 @@ export default function BottomNav({
       className="pointer-events-none fixed bottom-0 left-1/2 z-40 w-full max-w-[375px] -translate-x-1/2"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      {hasAccessory ? <div className="absolute inset-x-0 bottom-0 h-[152px] bg-white" /> : null}
-
       {hasAccessory ? (
         <div className={`absolute inset-x-0 bottom-[84px] flex h-[68px] items-center px-[24px] py-[16px] ${accessoryLayoutClass}`}>
           {resolvedAccessory}

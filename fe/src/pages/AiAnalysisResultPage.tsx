@@ -16,7 +16,11 @@ import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
 type AnalysisPhase = 'analyzing' | 'completed';
+
 const PENDING_EXPERIENCE_CREATE_KEY = 'pendingExperienceCreate';
+const COMPLETE_DELAY_MS = 1200;
+const MAX_POLL_ATTEMPTS = 15;
+const DEFAULT_NICKNAME = '사용자';
 
 type PendingExperienceCreate = {
   payload: ExperienceUpsertInput;
@@ -30,18 +34,19 @@ export default function AiAnalysisResultPage() {
   const token = getAccessToken();
   const storedUser = getStoredUser();
   const { showToast } = useToast();
+
   const startedRef = useRef(false);
   const pollRef = useRef<number | null>(null);
   const completeRef = useRef<number | null>(null);
+  const pollCountRef = useRef(0);
+
   const [experienceId, setExperienceId] = useState<string | null>(initialExperienceId);
-  const [nickname, setNickname] = useState(storedUser?.nickname ?? '사용자');
+  const [nickname, setNickname] = useState(storedUser?.nickname ?? DEFAULT_NICKNAME);
   const [error, setError] = useState('');
   const [phase, setPhase] = useState<AnalysisPhase>('analyzing');
   const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
 
-  const completeDelayMs = 1200;
-
-  const cleanupTimers = () => {
+  const cleanupTimers = useCallback(() => {
     if (pollRef.current != null) {
       window.clearInterval(pollRef.current);
       pollRef.current = null;
@@ -51,20 +56,35 @@ export default function AiAnalysisResultPage() {
       window.clearTimeout(completeRef.current);
       completeRef.current = null;
     }
-  };
+  }, []);
 
   const shouldContinuePolling = (requestError: unknown) =>
     requestError instanceof ApiError &&
     (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
       requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR);
 
-  const scheduleRedirect = useCallback((targetExperienceId: string) => {
-    cleanupTimers();
-    setPhase('completed');
-    completeRef.current = window.setTimeout(() => {
-      setRedirectTarget(targetExperienceId);
-    }, completeDelayMs);
-  }, []);
+  const scheduleRedirect = useCallback(
+    (targetExperienceId: string) => {
+      cleanupTimers();
+      setError('');
+      setPhase('completed');
+      completeRef.current = window.setTimeout(() => {
+        setRedirectTarget(targetExperienceId);
+      }, COMPLETE_DELAY_MS);
+    },
+    [cleanupTimers],
+  );
+
+  const fallbackToDetail = useCallback(
+    (targetExperienceId: string, message?: string) => {
+      cleanupTimers();
+      if (message) {
+        showToast(message);
+      }
+      navigate(`/experiences/${targetExperienceId}`, { replace: true });
+    },
+    [cleanupTimers, navigate, showToast],
+  );
 
   useEffect(() => {
     if (error) {
@@ -82,15 +102,31 @@ export default function AiAnalysisResultPage() {
     async function checkReportStatus(targetExperienceId: string) {
       try {
         const report = await getReport(targetExperienceId);
+
+        if (!mounted) {
+          return true;
+        }
+
         if (report.reportStatus === 'READY') {
-          if (mounted) {
-            scheduleRedirect(targetExperienceId);
-          }
+          scheduleRedirect(targetExperienceId);
+          return true;
+        }
+
+        if (report.reportStatus === 'ERROR') {
+          fallbackToDetail(
+            targetExperienceId,
+            'AI 분석이 아직 준비되지 않아 상세 페이지로 먼저 이동합니다.',
+          );
           return true;
         }
       } catch (reportError) {
         if (mounted) {
-          setError(resolveErrorMessage(reportError, '응답이 지연되고 있어요. 잠시 후 다시 시도해주세요.'));
+          setError(
+            resolveErrorMessage(
+              reportError,
+              '분석 응답이 지연되고 있어요. 잠시 후 다시 시도해 주세요.',
+            ),
+          );
         }
       }
 
@@ -103,7 +139,7 @@ export default function AiAnalysisResultPage() {
       if (!targetExperienceId && pendingCreate) {
         if (!token) {
           if (mounted) {
-            setError('로그인 정보가 없어요. 다시 로그인해주세요.');
+            setError('로그인 정보가 없어 다시 로그인해 주세요.');
           }
           return;
         }
@@ -111,7 +147,7 @@ export default function AiAnalysisResultPage() {
         const pendingPayload = readPendingExperienceCreate();
         if (!pendingPayload) {
           if (mounted) {
-            setError('등록할 경험 정보를 찾을 수 없어요. 다시 작성해주세요.');
+            setError('등록할 경험 정보가 없어 다시 작성해 주세요.');
           }
           return;
         }
@@ -131,7 +167,7 @@ export default function AiAnalysisResultPage() {
             setError(
               resolveErrorMessage(
                 requestError,
-                '경험 등록 중 문제가 발생했어요. 잠시 후 다시 시도해주세요.',
+                '경험 등록 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.',
               ),
             );
           }
@@ -149,11 +185,11 @@ export default function AiAnalysisResultPage() {
       try {
         const experience = await getExperience(targetExperienceId);
         if (mounted) {
-          setNickname(experience.author.nickname || storedUser?.nickname || '사용자');
+          setNickname(experience.author.nickname || storedUser?.nickname || DEFAULT_NICKNAME);
         }
       } catch {
         if (mounted) {
-          setNickname(storedUser?.nickname ?? '사용자');
+          setNickname(storedUser?.nickname ?? DEFAULT_NICKNAME);
         }
       }
 
@@ -173,14 +209,30 @@ export default function AiAnalysisResultPage() {
         } catch (requestError) {
           if (!shouldContinuePolling(requestError)) {
             if (mounted) {
-              setError(resolveErrorMessage(requestError, '응답이 지연되고 있어요. 잠시 후 다시 시도해주세요.'));
+              setError(
+                resolveErrorMessage(
+                  requestError,
+                  '분석 생성 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.',
+                ),
+              );
             }
             return;
           }
         }
       }
 
+      pollCountRef.current = 0;
       pollRef.current = window.setInterval(() => {
+        pollCountRef.current += 1;
+
+        if (pollCountRef.current >= MAX_POLL_ATTEMPTS) {
+          fallbackToDetail(
+            targetExperienceId,
+            'AI 분석이 길어지고 있어 상세 페이지로 먼저 이동합니다.',
+          );
+          return;
+        }
+
         void checkReportStatus(targetExperienceId);
       }, 1000);
     }
@@ -191,9 +243,18 @@ export default function AiAnalysisResultPage() {
       mounted = false;
       cleanupTimers();
     };
-  }, [experienceId, navigate, pendingCreate, scheduleRedirect, storedUser?.nickname, token]);
+  }, [
+    cleanupTimers,
+    experienceId,
+    fallbackToDetail,
+    navigate,
+    pendingCreate,
+    scheduleRedirect,
+    storedUser?.nickname,
+    token,
+  ]);
 
-  const displayName = useMemo(() => nickname || '사용자', [nickname]);
+  const displayName = useMemo(() => nickname || DEFAULT_NICKNAME, [nickname]);
 
   if (!experienceId && !pendingCreate) {
     return <Navigate to="/" replace />;
@@ -277,7 +338,7 @@ function AnalyzingScreen({ nickname }: { nickname: string }) {
 
       <div className="flex flex-col items-center gap-5">
         <LoaderCircle size={24} strokeWidth={2.2} className="animate-spin text-[#5E5E5E]" />
-        <p className="text-[12px] leading-[1.4] text-[#8A8A8A]">잠시만 기다려주세요.</p>
+        <p className="text-[12px] leading-[1.4] text-[#8A8A8A]">잠시만 기다려 주세요.</p>
       </div>
     </div>
   );
