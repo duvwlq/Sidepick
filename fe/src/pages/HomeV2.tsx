@@ -625,7 +625,7 @@ function StoryCard({
               }}
               disabled={card.ctaDisabled}
               aria-label={`${card.ctaLabel} 이동`}
-              className={`flex h-[30px] w-[48px] items-start justify-start rounded-[8px] px-[12px] py-[8px] ${
+              className={`inline-flex h-[30px] min-w-[48px] items-center justify-center rounded-[8px] px-[12px] py-[8px] ${
                 card.ctaDisabled ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'
               }`}
             >

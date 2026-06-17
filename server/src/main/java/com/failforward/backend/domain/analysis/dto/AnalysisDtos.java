@@ -214,6 +214,11 @@ public final class AnalysisDtos {
         List<String> extractedPatterns = parseJsonList(analysis.getFailReasonTags());
         String category = experience.getCategory() == null ? null : experience.getCategory().getName();
         String bodyExcerpt = abbreviate(experience.getContent(), 140);
+        String source = similarCases.isEmpty()
+                ? "analysis-only"
+                : similarCases.stream().map(MatchedCase::getCaseId).anyMatch(AnalysisDtos::isAiSimilarCaseId)
+                ? "ai-similar-search"
+                : "db-fallback";
 
         return new AnalysisExplanation(
                 new InputUsed(category, bodyExcerpt),
@@ -221,7 +226,7 @@ public final class AnalysisDtos {
                 similarCases.stream().map(MatchedCase::getCaseId).toList(),
                 true,
                 analysis.getRiskScore(),
-                new DebugInfo(similarCases.size(), "server-generated")
+                new DebugInfo(similarCases.size(), source)
         );
     }
 
@@ -232,14 +237,22 @@ public final class AnalysisDtos {
         BigDecimal similarityScore = matchedCase.getMatchRate() == null
                 ? null
                 : BigDecimal.valueOf(matchedCase.getMatchRate() / 100.0d);
+        String source = isAiSimilarCaseId(matchedCase.getCaseId()) ? "ai-similar-search" : "db-fallback";
         return new SimilarCaseExplanation(
                 similarityScore,
-                matchedKeywords,
+                matchedKeywords.stream().filter(keyword -> keyword != null && !keyword.isBlank()).distinct().limit(3).toList(),
                 null,
-                "matched-case",
+                source,
                 matchedCase.getCaseId(),
-                new DebugInfo(null, "server-generated")
+                new DebugInfo(null, source)
         );
+    }
+
+    private static boolean isAiSimilarCaseId(String caseId) {
+        if (caseId == null || caseId.isBlank()) {
+            return false;
+        }
+        return caseId.startsWith("pickply_") || caseId.startsWith("blog_");
     }
 
     private static List<String> parseJsonList(String value) {

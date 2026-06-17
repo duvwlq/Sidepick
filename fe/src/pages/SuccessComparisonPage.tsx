@@ -5,6 +5,7 @@ import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
+import { CaseBookmarkCount } from '../components/common/CaseUi';
 import { ErrorState, LoadingState, PageMessage } from '../components/common/Skeleton';
 import {
   compareExperiences,
@@ -196,6 +197,7 @@ function CompareInsightSection({
 function SuccessCaseCard({ experience }: { experience: Experience }) {
   const tags = buildTags(experience);
   const imageMeta = getExperienceImageMeta(experience);
+  const recommendationReason = (experience as Experience & { recommendationReason?: string | null }).recommendationReason?.trim();
   const preview =
     experience.content.replace(/!\[[^\]]*]\(([^)]+)\)/g, '').replace(/\s+/g, ' ').trim() || '본문 미리보기를 준비 중입니다.';
 
@@ -237,6 +239,11 @@ function SuccessCaseCard({ experience }: { experience: Experience }) {
           <h2 className="line-clamp-2 font-['Pretendard'] text-[20px] font-[700] leading-[26px] tracking-[0px] text-[#131416]">
             {experience.title}
           </h2>
+          {recommendationReason ? (
+            <p className="mt-[8px] rounded-[12px] bg-[#F6FAF7] px-[10px] py-[8px] text-[12px] leading-[18px] text-[#4E6A59]">
+              {recommendationReason}
+            </p>
+          ) : null}
           <p
             className={`mt-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[22px] tracking-[0px] text-[#494949] ${
               imageMeta.primaryImageUrl ? 'line-clamp-3' : 'line-clamp-4'
@@ -254,12 +261,7 @@ function SuccessCaseCard({ experience }: { experience: Experience }) {
           <span>{formatDate(experience.createdAt)}</span>
         </div>
 
-        <div className="flex items-center gap-[1px]">
-          <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-            {experience.likeCount.toLocaleString()}
-          </span>
-        </div>
+        <CaseBookmarkCount count={experience.likeCount} />
       </div>
     </Link>
   );

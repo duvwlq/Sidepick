@@ -1,73 +1,174 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 from typing import List, Optional
+import time
+
+from server.agent_pipeline import DraftMeta, detect_missing_slots, make_analysis_id, needs_questions
 from server.llm_analyzer import analyze_experience
 
 app = FastAPI(
     title="Sidepick AI Server",
-    description="ë¶€ì—… ì‹¤íŒ¨ ê²½í—˜ ë¶„ì„ AI ì„œë²„",
-    version="0.1.0"
+    description="Sidepick AI server",
+    version="0.1.0",
 )
 
 
-# ===== ìš”ì²­ ë°ì´í„° ëª¨ë¸ =====
 class AnalyzeRequest(BaseModel):
-    """ë¶„ì„ ìš”ì²­ ë°ì´í„°"""
-    category: str = Field(..., description="ë¶€ì—… ì¹´í…Œê³ ë¦¬ (ì˜ˆ: ìœ íŠœë¸Œ, ì˜¨ë¼ì¸ ì‡¼í•‘ëª°)")
-    difficulties: List[str] = Field(default=[], description="ì–´ë ¤ì› ë˜ ì  ì²´í¬ í•­ëª©")
-    difficulty_etc: Optional[str] = Field(default="", description="ì–´ë ¤ì› ë˜ ì  - ê¸°íƒ€ ì„œìˆ ")
-    difficulty_extra: Optional[str] = Field(default="", description="ë³´ì¡° ì„œìˆ ")
-    duration_months: int = Field(..., ge=1, description="ë¶€ì—… ê¸°ê°„ (ê°œì›”)")
-    weekly_hours: int = Field(..., ge=1, description="ì£¼ë‹¹ í• ì•  ì‹œê°„")
-    free_text: str = Field(..., min_length=10, description="ììœ ì„œìˆ  (ìµœì†Œ 10ì)")
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "category": "ìœ íŠœë¸Œ",
-                "difficulties": ["ë§ˆì¼€íŒ…/í™ë³´", "íƒ€ê²Ÿ ë¶„ì„"],
-                "difficulty_etc": "",
-                "difficulty_extra": "êµ¬ë…ìê°€ 100ëª…ì—ì„œ ì•ˆ ëŠ˜ì–´ë‚¨",
-                "duration_months": 6,
-                "weekly_hours": 10,
-                "free_text": "ìœ íŠœë¸Œ ì±„ë„ì„ ì‹œì‘í–ˆëŠ”ë° ì˜ìƒì€ ê°€ë” ì˜¬ë¦¬ê³  êµ¬ë…ìë„ ì˜ ì•ˆ ëŠ˜ì—ˆì–´ìš”."
-            }
-        }
+    category: str = Field(..., description="Side business category")
+    difficulties: List[str] = Field(default_factory=list, description="Selected difficulties")
+    difficulty_etc: Optional[str] = Field(default="", description="Difficulty etc field")
+    difficulty_extra: Optional[str] = Field(default="", description="Extra difficulty detail")
+    duration_months: int = Field(..., ge=1, description="Duration in months")
+    weekly_hours: int = Field(..., ge=1, description="Weekly hours")
+    free_text: str = Field(..., min_length=10, description="Free text body")
 
 
-# ===== ì‘ë‹µ ë°ì´í„° ëª¨ë¸ =====
 class AnalyzeResponse(BaseModel):
-    """ë¶„ì„ ê²°ê³¼ ì‘ë‹µ"""
-    keywords: List[str] = Field(..., description="ì¶”ì¶œëœ í‚¤ì›Œë“œ 3ê°œ")
-    failure_category: str = Field(..., description="ì‹¤íŒ¨ ì¹´í…Œê³ ë¦¬")
-    summary: str = Field(..., description="1ì¤„ ìš”ì•½")
-    risk_level: str = Field(..., description="ìœ„í—˜ë„ (high/medium/low)")
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "keywords": ["ë¹„ì •ê¸°ì  ì—…ë¡œë“œ", "êµ¬ë…ì ì •ì²´", "ì§€ì†ì„± ë¶€ì¡±"],
-                "failure_category": "ì‹œê°„ê´€ë¦¬",
-                "summary": "ë¹„ì •ê¸°ì  ì—…ë¡œë“œë¡œ ì¸í•œ ì±„ë„ ì„±ì¥ ì •ì²´",
-                "risk_level": "medium"
-            }
-        }
+    keywords: List[str] = Field(..., description="Extracted keywords")
+    failure_category: str = Field(..., description="Failure category")
+    summary: str = Field(..., description="One-line summary")
+    risk_level: str = Field(..., description="Risk level")
 
 
-# ===== API ì—”ë“œí¬ì¸íŠ¸ =====
+class AgentADraftRequest(BaseModel):
+    category_slug: str = Field(..., description="Category slug")
+    body: str = Field(..., min_length=1, description="Draft body")
+    title: Optional[str] = None
+    tone: Optional[str] = None
+    audience: Optional[str] = None
+    duration_months: Optional[int] = Field(default=None, ge=1)
+    weekly_hours: Optional[int] = Field(default=None, ge=1)
+    invest_amount: Optional[int] = Field(default=None, ge=0)
+    revenue_amount: Optional[int] = Field(default=None, ge=0)
+    has_main_job: Optional[bool] = None
+    difficulties: List[str] = Field(default_factory=list)
+    failure_reasons: List[str] = Field(default_factory=list)
 
-@app.get("/health", summary="ì„œë²„ ìƒíƒœ í™•ì¸")
+
+class AgentAAnalyzeDraftRequest(BaseModel):
+    draft: AgentADraftRequest
+
+
+class AgentAQuestionCard(BaseModel):
+    slot: str
+    question: str
+    input_type: str
+    options: Optional[List[str]] = None
+    required: bool
+    hint: Optional[str] = None
+
+
+class AgentAMeta(BaseModel):
+    input_tokens: int
+    output_tokens: int
+    elapsed_ms: int
+    used_template: bool
+    analysis_id: Optional[str] = None
+    cache_hit: Optional[bool] = None
+    confidence: Optional[float] = None
+    plan_b_triggered: Optional[bool] = None
+
+
+class AgentAAnalyzeDraftResponse(BaseModel):
+    status: str
+    needs_questions: bool
+    questions: List[AgentAQuestionCard]
+    meta: AgentAMeta
+    message: Optional[str] = None
+
+
+QUESTION_CARD_BY_SLOT = {
+    "duration": AgentAQuestionCard(
+        slot="duration",
+        question="ÀÌ ºÎ¾÷À» ¾ó¸¶³ª ¿À·¡ ½ÃµµÇß³ª¿ä?",
+        input_type="select",
+        options=["1°³¿ù ¹Ì¸¸", "1~3°³¿ù", "3~6°³¿ù", "6°³¿ù ÀÌ»ó"],
+        required=True,
+        hint="´ë·«ÀûÀÎ ±â°£¸¸ ÀÖ¾îµµ ±¦Âú½À´Ï´Ù.",
+    ),
+    "daily_hours": AgentAQuestionCard(
+        slot="daily_hours",
+        question="ÇÏ·ç Æò±Õ ¾î´À Á¤µµ ½Ã°£À» ½è³ª¿ä?",
+        input_type="select",
+        options=["1½Ã°£ ¹Ì¸¸", "1~3½Ã°£", "3~5½Ã°£", "5½Ã°£ ÀÌ»ó"],
+        required=True,
+        hint="º»¾÷°ú º´ÇàÇß´Ù¸é Ã¼°¨ ±âÁØÀ¸·Î Àû¾îÁÖ¼¼¿ä.",
+    ),
+    "invest_amount": AgentAQuestionCard(
+        slot="invest_amount",
+        question="½ÃÀÛÇÒ ¶§ µé¾î°£ ºñ¿ëÀº ¾î´À Á¤µµ¿´³ª¿ä?",
+        input_type="number",
+        options=None,
+        required=False,
+        hint="´ë·«ÀûÀÎ ÃÑ¾×ÀÌ¸é ÃæºĞÇÕ´Ï´Ù.",
+    ),
+    "revenue_amount": AgentAQuestionCard(
+        slot="revenue_amount",
+        question="¿ù ¼öÀÍÀÌ³ª ½ÇÁ¦·Î ¹ú¾îµéÀÎ ±İ¾×ÀÌ ÀÖ¾ú³ª¿ä?",
+        input_type="number",
+        options=None,
+        required=False,
+        hint="¾ø¾ú´Ù¸é 0À¸·Î »ı°¢ÇØµµ µË´Ï´Ù.",
+    ),
+    "failure_reasons": AgentAQuestionCard(
+        slot="failure_reasons",
+        question="°á±¹ °¡Àå Å©°Ô ½ÇÆĞÇß´Ù°í ´À³¤ ÀÌÀ¯´Â ¹«¾ùÀÌ¾ú³ª¿ä?",
+        input_type="tag",
+        options=None,
+        required=True,
+        hint="¸¶ÄÉÆÃ, ÀÚ±İ, ½ÇÇà·Â, °æÀï, ½Ã°£ °°Àº ´Ü¾î·Î Àû¾îµµ µË´Ï´Ù.",
+    ),
+    "difficulties": AgentAQuestionCard(
+        slot="difficulties",
+        question="ÁøÇà Áß Æ¯È÷ ¾î·Á¿ü´ø Á¡À» 2~3°³¸¸ ´õ Àû¾îÁÖ¼¼¿ä.",
+        input_type="tag",
+        options=None,
+        required=True,
+        hint="°í°´ È®º¸, ¼öÀÍÈ­, Á¤º¸ ºÎÁ·, ¿î¿µ Áö¼Ó¼º °°Àº Ç¥ÇöÀÌ¸é ÃæºĞÇÕ´Ï´Ù.",
+    ),
+    "body_richness": AgentAQuestionCard(
+        slot="body_richness",
+        question="½ÃÀÛ °è±â, ÁøÇà ¹æ½Ä, ¸·Èù ÁöÁ¡À» ÇÑµÎ ¹®Àå¸¸ ´õ ÀÚ¼¼È÷ Àû¾îÁÙ ¼ö ÀÖ³ª¿ä?",
+        input_type="text",
+        options=None,
+        required=True,
+        hint="±¸Ã¼ÀûÀÎ »óÈ²ÀÌ µé¾î°¡¸é ºĞ¼® Ç°ÁúÀÌ ÁÁ¾ÆÁı´Ï´Ù.",
+    ),
+}
+
+
+def _estimate_tokens(text_length: int) -> int:
+    return max(1, (text_length + 3) // 4)
+
+
+def _estimate_output_tokens(questions: List[AgentAQuestionCard]) -> int:
+    total_characters = sum(
+        len(question.question) + (len(question.hint) if question.hint else 0)
+        for question in questions
+    )
+    return 0 if not questions else max(1, (total_characters + 3) // 4)
+
+
+def _build_agent_a_questions(missing_slots: List[str]) -> List[AgentAQuestionCard]:
+    prioritized = [
+        "failure_reasons",
+        "difficulties",
+        "body_richness",
+        "duration",
+        "daily_hours",
+        "invest_amount",
+        "revenue_amount",
+    ]
+    ordered_slots = [slot for slot in prioritized if slot in missing_slots]
+    return [QUESTION_CARD_BY_SLOT[slot] for slot in ordered_slots[:5] if slot in QUESTION_CARD_BY_SLOT]
+
+
+@app.get("/health", summary="Health check")
 async def health_check():
-    """ì„œë²„ê°€ ì‚´ì•„ìˆëŠ”ì§€ í™•ì¸í•˜ëŠ” í—¬ìŠ¤ì²´í¬"""
     return {"status": "ok", "service": "sidepick-ai"}
 
 
-@app.post(
-    "/analyze",
-    response_model=AnalyzeResponse,
-    summary="ë¶€ì—… ì‹¤íŒ¨ ê²½í—˜ ë¶„ì„",
-    description="ì‚¬ìš©ìì˜ ë¶€ì—… ì‹¤íŒ¨ ê²½í—˜ì„ LLMìœ¼ë¡œ ë¶„ì„í•˜ì—¬ í‚¤ì›Œë“œ, ì‹¤íŒ¨ ì¹´í…Œê³ ë¦¬, ìš”ì•½, ìœ„í—˜ë„ë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤."
-)
+@app.post("/analyze", response_model=AnalyzeResponse, summary="Analyze experience")
 async def analyze(req: AnalyzeRequest):
     try:
         result = analyze_experience(
@@ -77,16 +178,51 @@ async def analyze(req: AnalyzeRequest):
             difficulty_extra=req.difficulty_extra or "",
             duration_months=req.duration_months,
             weekly_hours=req.weekly_hours,
-            free_text=req.free_text
+            free_text=req.free_text,
         )
         return result
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"AI ë¶„ì„ ì‹¤íŒ¨: {type(e).__name__}: {str(e)}"
+        raise HTTPException(status_code=500, detail=f"AI analysis failed: {type(e).__name__}: {str(e)}")
+
+
+@app.post(
+    "/agent-a/analyze-draft",
+    response_model=AgentAAnalyzeDraftResponse,
+    summary="Generate Agent A follow-up questions",
+)
+async def analyze_draft_with_agent_a(req: AgentAAnalyzeDraftRequest):
+    started_at = time.time()
+    try:
+        draft = req.draft
+        analysis_id = make_analysis_id(draft.category_slug, draft.body)
+        draft_meta = DraftMeta(
+            category=draft.category_slug,
+            duration=str(draft.duration_months) if draft.duration_months is not None else None,
+            daily_hours=str(draft.weekly_hours) if draft.weekly_hours is not None else None,
+            invest_amount=draft.invest_amount,
+            revenue_amount=draft.revenue_amount,
+            has_main_job=draft.has_main_job,
+            body=draft.body,
         )
-
-
-# ===== ì¶”í›„ ì¶”ê°€ë  ì—”ë“œí¬ì¸íŠ¸ =====
-# @app.post("/similar") - SBERT/FAISS ìœ ì‚¬ ì‚¬ë¡€ ê²€ìƒ‰ (ë‚´ì¼ ì¶”ê°€)
-# @app.post("/guide") - ì„±ê³µ ê°€ì´ë“œ ë§¤ì¹­ (ë‚´ì¼ ì¶”ê°€)
+        missing_slots = detect_missing_slots(draft_meta)
+        should_ask = needs_questions(draft_meta)
+        questions = _build_agent_a_questions(missing_slots) if should_ask else []
+        elapsed_ms = int((time.time() - started_at) * 1000)
+        return AgentAAnalyzeDraftResponse(
+            status="ok",
+            needs_questions=should_ask,
+            questions=questions,
+            meta=AgentAMeta(
+                input_tokens=_estimate_tokens(len(draft.body)),
+                output_tokens=_estimate_output_tokens(questions),
+                elapsed_ms=elapsed_ms,
+                used_template=False,
+                analysis_id=analysis_id,
+                cache_hit=False,
+                confidence=None,
+                plan_b_triggered=False,
+            ),
+            message=None if should_ask else "ÃÊ¾È Á¤º¸°¡ ÃæºĞÇØ¼­ Ãß°¡ Áú¹® ¾øÀÌ ÁøÇàÇÒ ¼ö ÀÖ½À´Ï´Ù.",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Agent A draft analysis failed: {type(e).__name__}: {str(e)}")

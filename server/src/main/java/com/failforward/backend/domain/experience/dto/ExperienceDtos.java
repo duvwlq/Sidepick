@@ -6,6 +6,7 @@ import com.failforward.backend.domain.analysis.entity.AiAnalysis;
 import com.failforward.backend.domain.auth.dto.AuthDtos.UserSummary;
 import com.failforward.backend.domain.category.dto.CategoryResponse;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
@@ -105,6 +106,8 @@ public final class ExperienceDtos {
             Integer likeCount,
             Integer bookmarkCount,
             boolean hasPatternAnalysis,
+            @JsonInclude(JsonInclude.Include.NON_NULL)
+            String recommendationReason,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -113,6 +116,15 @@ public final class ExperienceDtos {
         }
 
         public static ExperienceResponse from(FailureExperience experience, AiAnalysis analysis, Integer bookmarkCount) {
+            return from(experience, analysis, bookmarkCount, null);
+        }
+
+        public static ExperienceResponse from(
+                FailureExperience experience,
+                AiAnalysis analysis,
+                Integer bookmarkCount,
+                String recommendationReason
+        ) {
             Map<String, Object> structured = parseObject(experience.getStructuredData());
             return new ExperienceResponse(
                     experience.getId(),
@@ -143,6 +155,7 @@ public final class ExperienceDtos {
                     experience.getLikeCount(),
                     bookmarkCount,
                     analysis != null,
+                    recommendationReason,
                     experience.getCreatedAt(),
                     experience.getUpdatedAt()
             );

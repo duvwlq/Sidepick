@@ -561,21 +561,38 @@ export default function DetailV2() {
         </section>
 
         <section className="px-[16px] py-[12px]">
-          <div className="rounded-[10px] border border-[#EEEEEE] border-b-[2px] border-b-[#5A876E] bg-white px-[16px] py-[16px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
-            <SectionTitle title="AI 가이드" description="실패 경험을 바탕으로 다음 시도를 위한 방향을 정리했어요." />
-            <p className="mt-[12px] text-[12px] leading-[16.8px] text-[#5E5E5E]">{guideSummary}</p>
+          <div className="rounded-[10px] border border-[#E6E6E6] bg-white px-[16px] py-[16px] shadow-[0_4px_12px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center gap-[4px]">
+              <div className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-[#D8EEE1] text-[11px] font-[700] leading-none text-[#131416]">
+                AI
+              </div>
+              <p className="text-[20px] font-[600] leading-[24px] text-[#131416]">AI 가이드</p>
+            </div>
+
+            <p className="mt-[12px] text-[12px] leading-[16.8px] text-[#494949]">{guideSummary}</p>
+
             <div className="my-[12px] h-px w-full bg-[#D8D8D8]" />
+
             <div className="flex flex-col gap-[10px]">
               {guideLines.length ? (
                 guideLines.map((line, index) => (
-                  <p key={`${index}-${line.slice(0, 8)}`} className="text-[12px] leading-[16.8px] text-[#494949]">
-                    {line}
+                  <p key={`${index}-${line.slice(0, 8)}`} className="text-[14px] leading-[24px] text-[#494949]">
+                    {index + 1}. {line}
                   </p>
                 ))
               ) : (
                 <p className="text-[12px] leading-[16.8px] text-[#8A8A8A]">아직 준비된 AI 가이드가 없습니다.</p>
               )}
             </div>
+
+            {guideLines.length ? (
+              <>
+                <div className="my-[12px] h-px w-full bg-[#D8D8D8]" />
+                <p className="text-[12px] leading-[16.8px] text-[#5E5E5E]">
+                  처음에는 작은 시도들이 쌓이면서 변화가 생기기 때문에 하루에 한 가지씩만 꾸준히 시도해도 충분합니다.
+                </p>
+              </>
+            ) : null}
           </div>
         </section>
 

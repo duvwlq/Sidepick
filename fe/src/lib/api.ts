@@ -336,6 +336,10 @@ export type AgentAAnalyzeDraftPayload = {
     output_tokens: number;
     elapsed_ms: number;
     used_template: boolean;
+    analysis_id?: string | null;
+    cache_hit?: boolean | null;
+    confidence?: number | null;
+    plan_b_triggered?: boolean | null;
   };
   message: string | null;
 };

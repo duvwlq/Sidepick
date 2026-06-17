@@ -2,6 +2,7 @@ package com.failforward.backend.domain.agenta.service;
 
 import com.failforward.backend.common.api.InvalidRequestException;
 import com.failforward.backend.common.config.AgentAProperties;
+import com.failforward.backend.common.config.AiServerProperties;
 import com.failforward.backend.common.security.CurrentUserProvider;
 import com.failforward.backend.domain.agenta.dto.AgentADtos.AnalyzeDraftRequest;
 import com.failforward.backend.domain.agenta.dto.AgentADtos.AnalyzeDraftResponse;
@@ -11,7 +12,13 @@ import com.failforward.backend.domain.category.CategoryMapper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class AgentAService {
@@ -19,37 +26,43 @@ public class AgentAService {
     private static final String STATUS_OK = "ok";
     private static final String STATUS_FALLBACK = "fallback";
     private static final String FALLBACK_MESSAGE =
-            "ì§ˆë¬¸ ì¹´ë“œë¥¼ ìƒì„±í•˜ì§€ ëª»í–ˆì–´ìš”. ê·¸ëŒ€ë¡œ ì €ì¥í•˜ì‹œê±°ë‚˜ ë‹¤ì‹œ ì‹œë„í•´ì£¼ì„¸ìš”.";
+            "Áú¹® Ä«µå¸¦ »ı¼ºÇÏÁö ¸øÇß¾î¿ä. ±×´ë·Î ÁøÇàÇÏ°Å³ª Àá½Ã ÈÄ ´Ù½Ã ½ÃµµÇØ ÁÖ¼¼¿ä.";
     private static final int QUESTION_TRIGGER_BODY_LENGTH = 180;
     private static final List<QuestionTemplate> QUESTION_TEMPLATES = List.of(
-            new QuestionTemplate("goal", "ì´ë²ˆ ê¸€ì—ì„œ ì–»ê³  ì‹¶ì€ ê²°ê³¼ëŠ”?", "text", null, true, "ì˜ˆ: ì‹¤íŒ¨ ì›ì¸ ë¶„ì„, ë°©í–¥ ì ê²€"),
-            new QuestionTemplate("timeline", "ì–¼ë§ˆ ë™ì•ˆ ì‹œë„í–ˆëŠ”ì§€ ì•Œë ¤ì£¼ì„¸ìš”.", "select",
-                    List.of("1ê°œì›” ë¯¸ë§Œ", "1~3ê°œì›”", "3~6ê°œì›”", "6ê°œì›” ì´ìƒ"), true, null),
-            new QuestionTemplate("budget", "íˆ¬ì…í•œ ë¹„ìš©ì€ ì–´ëŠ ì •ë„ì˜€ë‚˜ìš”?", "number", null, false,
-                    "ëŒ€ëµì ì¸ ì´ì•¡ë§Œ ì ì–´ë„ ì¶©ë¶„í•©ë‹ˆë‹¤."),
-            new QuestionTemplate("target_customer", "ì£¼ìš” ê³ ê°ì´ë‚˜ íƒ€ê¹ƒì€ ëˆ„êµ¬ì˜€ë‚˜ìš”?", "text", null, true, null),
-            new QuestionTemplate("obstacle", "ê°€ì¥ í¬ê²Œ ë§‰í˜”ë˜ ì§€ì ì„ ì ì–´ì£¼ì„¸ìš”.", "tag", null, true,
-                    "ì—¬ëŸ¬ ê°œë¼ë©´ í•µì‹¬ 2~3ê°œë§Œ ì ì–´ì£¼ì„¸ìš”."),
-            new QuestionTemplate("market", "ì‹œì¥ ì¡°ì‚¬ë‚˜ ê²½ìŸ ê²€í† ëŠ” í–ˆë‚˜ìš”?", "select",
-                    List.of("ì¶©ë¶„íˆ í–ˆë‹¤", "ê°„ë‹¨íˆ í–ˆë‹¤", "ì•„ì§ ëª»í–ˆë‹¤"), false, null),
-            new QuestionTemplate("channel", "í™œìš©í•œ ìœ ì… ì±„ë„ì„ ì•Œë ¤ì£¼ì„¸ìš”.", "tag", null, false,
-                    "SNS, ë¸”ë¡œê·¸, ì§€ì¸ ì†Œê°œì²˜ëŸ¼ ì ì–´ë„ ë©ë‹ˆë‹¤."),
-            new QuestionTemplate("result", "ì„ì‹œ ê²°ê³¼ë‚˜ ë°˜ì‘ì€ ì–´ë• ë‚˜ìš”?", "text", null, false,
-                    "ë§¤ì¶œ, ë¬¸ì˜, ë°˜ì‘ ìˆ˜ì¹˜ ì¤‘ ì•„ëŠ” ì •ë„ë§Œ ì ì–´ì£¼ì„¸ìš”.")
+            new QuestionTemplate("goal", "ÀÌ¹ø ±Û¿¡¼­ ¾ò°í ½ÍÀº °á°ú°¡ ¹«¾ùÀÎ°¡¿ä?", "text", null, true, "¿¹: ½ÇÆĞ ¿øÀÎ ºĞ¼®, ´ÙÀ½ ¹æÇâ Á¤¸®"),
+            new QuestionTemplate("timeline", "¾ó¸¶ µ¿¾È ½ÃµµÇß´ÂÁö ¾Ë·ÁÁÖ¼¼¿ä.", "select",
+                    List.of("1°³¿ù ¹Ì¸¸", "1~3°³¿ù", "3~6°³¿ù", "6°³¿ù ÀÌ»ó"), true, null),
+            new QuestionTemplate("budget", "½ÃÀÛÇÒ ¶§ µé¾î°£ ºñ¿ëÀº ¾î´À Á¤µµ¿´³ª¿ä?", "number", null, false,
+                    "´ë·«ÀûÀÎ ÃÑ¾×¸¸ Àû¾îµµ ÃæºĞÇÕ´Ï´Ù."),
+            new QuestionTemplate("target_customer", "ÁÖ¿ä °í°´ÀÌ³ª Å¸±êÀº ´©±¸¿´³ª¿ä?", "text", null, true, null),
+            new QuestionTemplate("obstacle", "°¡Àå Å©°Ô ¸·Çû´ø ÁöÁ¡À» Àû¾îÁÖ¼¼¿ä.", "tag", null, true,
+                    "¿©·¯ °³¶ó¸é ´ëÇ¥ 2~3°³¸¸ Àû¾îÁÖ¼¼¿ä."),
+            new QuestionTemplate("market", "½ÃÀå Á¶»ç³ª °æÀï ºĞ¼®Àº ¾î´À Á¤µµ Çß³ª¿ä?", "select",
+                    List.of("ÃæºĞÈ÷ Çß´Ù", "°£´ÜÈ÷ Çß´Ù", "°ÅÀÇ ¸ø Çß´Ù"), false, null),
+            new QuestionTemplate("channel", "»ç¿ëÇß´ø À¯ÀÔ Ã¤³ÎÀ» ¾Ë·ÁÁÖ¼¼¿ä.", "tag", null, false,
+                    "SNS, ºí·Î±×, ÁöÀÎ ¼Ò°³Ã³·³ Àû¾îµµ µË´Ï´Ù."),
+            new QuestionTemplate("result", "ÀÓ½Ã °á°ú³ª ¹İÀÀÀº ¾î¶®³ª¿ä?", "text", null, false,
+                    "¸ÅÃâ, ¹®ÀÇ, ¹İÀÀ ¼öÄ¡ Áß ¾Æ´Â Á¤µµ¸¸ Àû¾îÁÖ¼¼¿ä.")
     );
 
     private final CurrentUserProvider currentUserProvider;
     private final AgentARateLimiter rateLimiter;
     private final AgentAProperties properties;
+    private final RestTemplate aiRestTemplate;
+    private final AiServerProperties aiServerProperties;
 
     public AgentAService(
             CurrentUserProvider currentUserProvider,
             AgentARateLimiter rateLimiter,
-            AgentAProperties properties
+            AgentAProperties properties,
+            @Qualifier("aiRestTemplate") RestTemplate aiRestTemplate,
+            AiServerProperties aiServerProperties
     ) {
         this.currentUserProvider = currentUserProvider;
         this.rateLimiter = rateLimiter;
         this.properties = properties;
+        this.aiRestTemplate = aiRestTemplate;
+        this.aiServerProperties = aiServerProperties;
     }
 
     public AnalyzeDraftResponse analyzeDraft(AnalyzeDraftRequest request) {
@@ -59,6 +72,15 @@ public class AgentAService {
         rateLimiter.checkLimit(userId);
 
         long startedAt = System.currentTimeMillis();
+        try {
+            AnalyzeDraftResponse upstream = requestAiAgentA(request);
+            if (upstream != null) {
+                return upstream;
+            }
+        } catch (RestClientException exception) {
+            // fall through to local fallback
+        }
+
         try {
             String body = request.draft().body().trim();
             boolean needsQuestions = body.length() < QUESTION_TRIGGER_BODY_LENGTH;
@@ -72,9 +94,13 @@ public class AgentAService {
                             estimateTokens(body.length()),
                             estimateOutputTokens(questions),
                             System.currentTimeMillis() - startedAt,
-                            true
+                            true,
+                            null,
+                            null,
+                            null,
+                            false
                     ),
-                    null
+                    needsQuestions ? null : "Áö±İ ÃÊ¾ÈÀº Ãß°¡ Áú¹® ¾øÀÌµµ ÁøÇà °¡´ÉÇÑ »óÅÂ¿¹¿ä."
             );
         } catch (RuntimeException exception) {
             return new AnalyzeDraftResponse(
@@ -85,11 +111,26 @@ public class AgentAService {
                             0,
                             0,
                             Math.min(System.currentTimeMillis() - startedAt, properties.timeoutSec() * 1000L),
-                            true
+                            true,
+                            null,
+                            null,
+                            null,
+                            false
                     ),
                     FALLBACK_MESSAGE
             );
         }
+    }
+
+    private AnalyzeDraftResponse requestAiAgentA(AnalyzeDraftRequest request) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AnalyzeDraftRequest> entity = new HttpEntity<>(request, headers);
+        return aiRestTemplate.postForObject(
+                aiServerProperties.url() + "/agent-a/analyze-draft",
+                entity,
+                AnalyzeDraftResponse.class
+        );
     }
 
     private void validateRequest(AnalyzeDraftRequest request) {
@@ -114,22 +155,22 @@ public class AgentAService {
         ranked.add(findTemplate("goal"));
         ranked.add(findTemplate("obstacle"));
 
-        if (!containsAny(normalized, "ê°œì›”", "month", "ê¸°ê°„", "ì˜¤ë˜", "timeline")) {
+        if (!containsAny(normalized, "°³¿ù", "month", "±â°£", "¿À·¡", "timeline")) {
             ranked.add(findTemplate("timeline"));
         }
-        if (!containsAny(normalized, "ì›", "ë§Œì›", "íˆ¬ì", "ë¹„ìš©", "budget")) {
+        if (!containsAny(normalized, "¿ø", "¸¸¿ø", "ÅõÀÚ", "ºñ¿ë", "budget")) {
             ranked.add(findTemplate("budget"));
         }
-        if (!containsAny(normalized, "ê³ ê°", "íƒ€ê¹ƒ", "íƒ€ê²Ÿ", "buyer", "target")) {
+        if (!containsAny(normalized, "°í°´", "Å¸±ê", "´ë»ó", "buyer", "target")) {
             ranked.add(findTemplate("target_customer"));
         }
-        if (!containsAny(normalized, "ì‹œì¥", "ê²½ìŸ", "ì¡°ì‚¬", "market")) {
+        if (!containsAny(normalized, "½ÃÀå", "°æÀï", "Á¶»ç", "market")) {
             ranked.add(findTemplate("market"));
         }
-        if (!containsAny(normalized, "ê´‘ê³ ", "ë§ˆì¼€íŒ…", "ì±„ë„", "sns", "ë¸”ë¡œê·¸")) {
+        if (!containsAny(normalized, "±¤°í", "¸¶ÄÉÆÃ", "Ã¤³Î", "sns", "ºí·Î±×")) {
             ranked.add(findTemplate("channel"));
         }
-        if (!containsAny(normalized, "ë§¤ì¶œ", "ê²°ê³¼", "ì„±ê³¼", "ë°˜ì‘", "ë¬¸ì˜")) {
+        if (!containsAny(normalized, "¸ÅÃâ", "°á°ú", "¼º°ú", "¹İÀÀ", "¹®ÀÇ")) {
             ranked.add(findTemplate("result"));
         }
 

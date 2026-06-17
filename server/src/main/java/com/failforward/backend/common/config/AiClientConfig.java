@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 @EnableConfigurationProperties({
         AiServerProperties.class,
+        AiAssetProperties.class,
         OAuthProperties.class,
         MailProperties.class,
         AuthFeatureProperties.class,

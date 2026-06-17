@@ -49,6 +49,23 @@ Sidepick의 공식 문서 허브입니다.
 
 ---
 
+## AI Asset Map
+
+| 경로 | 설명 |
+| --- | --- |
+| [../ai/data/case_metadata_v2.json](../ai/data/case_metadata_v2.json) | FAISS 검색 대상 케이스 메타데이터 |
+| [../ai/data/faiss_index_v2.bin](../ai/data/faiss_index_v2.bin) | SBERT 기반 유사 사례 검색 인덱스 |
+| [../ai/data/success_analysis_drafts.json](../ai/data/success_analysis_drafts.json) | 성공사례 추천 설명 자산 |
+| [../ai/data/failure_pattern.json](../ai/data/failure_pattern.json) | 실패 패턴 통계 집계 데이터 |
+| [../ai/data/failure_timing.json](../ai/data/failure_timing.json) | 실패 시점 통계 집계 데이터 |
+| [../ai/pipeline/25_rebuild_faiss_v2.py](../ai/pipeline/25_rebuild_faiss_v2.py) | v2 인덱스 재생성 파이프라인 |
+| [../ai/pipeline/26_generate_success_analysis_full.py](../ai/pipeline/26_generate_success_analysis_full.py) | 성공사례 분석글 생성 파이프라인 |
+| [../ai/pipeline/27_generate_explanation_samples.py](../ai/pipeline/27_generate_explanation_samples.py) | explanation 샘플 생성 파이프라인 |
+| [../ai/server/explanation_builder.py](../ai/server/explanation_builder.py) | 분석/유사사례/통계 explanation 빌더 |
+| [../ai/server/chatbot_api.py](../ai/server/chatbot_api.py) | 챗봇 API 진입점 |
+
+---
+
 ## Notes
 
 - 현재 운영 기준은 `infra/docker-compose.prod.yml`과 서버의 `/home/ubuntu/sidepick-docker/.env`를 중심으로 봅니다.

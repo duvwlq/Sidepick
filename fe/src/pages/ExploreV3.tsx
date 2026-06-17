@@ -798,16 +798,16 @@ function ReviewCardRow({
               </span>
             </div>
 
-            <div className="flex shrink-0 items-center gap-[4px]">
+            <div className="flex shrink-0 items-center gap-[2px]">
               <button
                 type="button"
-                className="m-0 flex w-[46px] shrink-0 items-center border-0 bg-transparent p-0 text-inherit appearance-none"
+                className="m-0 inline-flex shrink-0 items-center border-0 bg-transparent p-0 text-inherit appearance-none"
                 onClick={(event) => {
                   stopEvent(event);
                   onHeartToggle(experience);
                 }}
               >
-                <div className="flex w-full shrink-0 items-center gap-[2px]">
+                <div className="flex shrink-0 items-center gap-[2px]">
                   <div className="flex h-[20px] w-[20px] shrink-0 items-center justify-center">
                     <span
                       aria-hidden="true"
@@ -816,7 +816,7 @@ function ReviewCardRow({
                     />
                   </div>
                   <span
-                    className="min-w-[24px] shrink-0 text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A] tabular-nums"
+                    className="shrink-0 text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A] tabular-nums"
                     style={textFeatureStyle}
                   >
                     {heartCount.toLocaleString()}
@@ -825,13 +825,13 @@ function ReviewCardRow({
               </button>
               <button
                 type="button"
-                className="m-0 flex w-[46px] shrink-0 items-center border-0 bg-transparent p-0 text-inherit appearance-none"
+                className="m-0 inline-flex shrink-0 items-center border-0 bg-transparent p-0 text-inherit appearance-none"
                 onClick={(event) => {
                   stopEvent(event);
                   onBookmarkToggle(experience);
                 }}
               >
-                <div className="flex w-full shrink-0 items-center gap-[2px]">
+                <div className="flex shrink-0 items-center gap-[2px]">
                   <div className="flex h-[24px] w-[24px] shrink-0 items-center justify-center">
                     <span
                       aria-hidden="true"
@@ -840,7 +840,7 @@ function ReviewCardRow({
                     />
                   </div>
                   <span
-                    className="min-w-[24px] shrink-0 text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A] tabular-nums"
+                    className="shrink-0 text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A] tabular-nums"
                     style={textFeatureStyle}
                   >
                     {bookmarkCount.toLocaleString()}
@@ -865,7 +865,7 @@ function ReviewCardRow({
                   className="flex flex-col justify-center text-center text-[12px] font-[600] leading-[0] text-white"
                   style={textFeatureStyle}
                 >
-                  <span className="leading-[14.4px]">성공</span>
+                  <span className="leading-[14.4px]">CTA</span>
                 </div>
               </button>
             </div>

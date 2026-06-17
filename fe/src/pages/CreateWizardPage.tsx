@@ -1,7 +1,8 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { LoaderCircle, X } from 'lucide-react';
 import { useRef } from 'react';
+import AgentAQuestionModal from '../components/create/AgentAQuestionModal';
 import ExampleCard from '../components/create/ExampleCard';
 import { useToast } from '../components/common/useToast';
 import {
@@ -26,6 +27,7 @@ import { getAccessToken, getStoredUser } from '../lib/session';
 
 const MIN_CONTENT_LENGTH = 10;
 const MAX_CONTENT_LENGTH = 2000;
+const SUPPLEMENTARY_CHECK_MIN_MS = 1200;
 const DURATION_OPTIONS = ['1개월 미만', '1개월', '2개월', '3개월', '4개월', '5개월', '6개월', '7개월', '8개월', '9개월', '10개월', '11개월', '1년 이상'];
 const DAILY_TIME_OPTIONS = ['1시간 미만', '1시간', '2시간', '3시간', '4시간', '5시간', '6시간', '7시간', '8시간 이상'];
 const DIFFICULTY_OPTIONS = ['고객 확보(마케팅)', '수익 구조 이해', '시간 관리', '수익화 연결', '운영 지속성', '정보 부족', '경쟁 심화', '기타'];
@@ -274,7 +276,7 @@ function SelectField({ label, value, placeholder, onClick }: { label: string; va
       <span className="text-[14px] font-[500] leading-[16.8px] text-[#131416]">{label}</span>
       <button type="button" onClick={onClick} className="flex h-[40px] w-full items-center justify-between rounded-[10px] border border-[#E6E6E6] px-[16px] text-[14px] leading-[20px] text-[#8A8A8A]">
         <span>{value ?? placeholder}</span>
-        <span className="text-[16px] text-[#8A8A8A]">⌄</span>
+        <span className="text-[16px] text-[#8A8A8A]">?</span>
       </button>
     </div>
   );
@@ -324,6 +326,12 @@ export default function CreateWizardPage() {
   const [submitting, setSubmitting] = useState(false);
   const [agentAResult, setAgentAResult] = useState<AgentAAnalyzeDraftPayload | null>(null);
   const [agentALoading, setAgentALoading] = useState(false);
+  const [agentAModalOpen, setAgentAModalOpen] = useState(false);
+  const [agentAQuestionIndex, setAgentAQuestionIndex] = useState(0);
+  const [agentAAnswers, setAgentAAnswers] = useState<Record<string, string>>({});
+  const [submitAfterAgentA, setSubmitAfterAgentA] = useState(false);
+  const [checkingSupplementaryQuestions, setCheckingSupplementaryQuestions] = useState(false);
+  const [savedExperienceId, setSavedExperienceId] = useState<number | null>(null);
 
   const editingExperienceId = useMemo(() => {
     const raw = searchParams.get('experienceId') ?? searchParams.get('id') ?? searchParams.get('editId');
@@ -525,7 +533,16 @@ export default function CreateWizardPage() {
 
   useEffect(() => {
     setAgentAResult(null);
+    setAgentAModalOpen(false);
+    setAgentAQuestionIndex(0);
+    setAgentAAnswers({});
+    setSubmitAfterAgentA(false);
+    setCheckingSupplementaryQuestions(false);
   }, [content, matchedCategory?.slug, selectedCategoryKey]);
+
+  useEffect(() => {
+    setSavedExperienceId(editingExperienceId);
+  }, [editingExperienceId]);
 
   const stepDisabled =
     (step === 1 && !selectedCategoryKey)
@@ -556,18 +573,12 @@ export default function CreateWizardPage() {
     closeWizard();
   }
 
-  async function handleRecommendQuestions() {
-    const token = getAccessToken();
+  async function analyzeCurrentDraft(token: string) {
     const categorySlug = matchedCategory?.slug ?? (selectedCategoryKey ? CATEGORY_SLUG_BY_KEY[selectedCategoryKey] : null);
-
-    if (!token) {
-      navigate('/auth?next=%2Fcreate');
-      return;
-    }
 
     if (!categorySlug || content.trim().length < MIN_CONTENT_LENGTH) {
       showToast('카테고리와 본문을 먼저 입력해 주세요.', 'error');
-      return;
+      return null;
     }
 
     try {
@@ -580,8 +591,11 @@ export default function CreateWizardPage() {
         },
       });
       setAgentAResult(result);
+      setAgentAQuestionIndex(0);
+      setAgentAAnswers({});
+      return result;
     } catch (error) {
-      setAgentAResult({
+      const fallbackResult: AgentAAnalyzeDraftPayload = {
         status: 'fallback',
         needs_questions: false,
         questions: [],
@@ -590,11 +604,140 @@ export default function CreateWizardPage() {
           output_tokens: 0,
           elapsed_ms: 0,
           used_template: true,
+          analysis_id: null,
+          cache_hit: null,
+          confidence: null,
+          plan_b_triggered: false,
         },
         message: resolveErrorMessage(error, '질문 카드를 불러오지 못했어요. 지금 내용으로 계속 작성해도 됩니다.'),
-      });
+      };
+      setAgentAResult(fallbackResult);
+      return fallbackResult;
     } finally {
       setAgentALoading(false);
+    }
+  }
+
+  async function handleRecommendQuestions() {
+    const token = getAccessToken();
+    if (!token) {
+      navigate('/auth?next=%2Fcreate');
+      return;
+    }
+
+    setSubmitAfterAgentA(false);
+    const result = await analyzeCurrentDraft(token);
+    if (result?.status === 'ok' && result.needs_questions && result.questions.length > 0) {
+      setAgentAModalOpen(true);
+      return;
+    }
+
+    setAgentAModalOpen(false);
+  }
+
+  function buildContentWithAgentAAnswers(baseContent: string, answerMap = agentAAnswers) {
+    const answeredEntries = Object.entries(answerMap)
+      .map(([slot, value]) => [slot, value.trim()] as const)
+      .filter(([, value]) => value.length > 0);
+
+    if (answeredEntries.length === 0) {
+      return baseContent.trimEnd();
+    }
+
+    const questionMap = new Map((agentAResult?.questions ?? []).map((question) => [question.slot, question.question]));
+    const addition = answeredEntries
+      .map(([slot, value]) => '- ' + (questionMap.get(slot) ?? slot) + ': ' + value)
+      .join('\n');
+
+    const trimmed = baseContent.trimEnd();
+    const sectionTitle = '\n\n[AI 보완 답변]\n';
+    if (trimmed.includes('[AI 보완 답변]')) {
+      return (trimmed + '\n' + addition).slice(0, MAX_CONTENT_LENGTH);
+    }
+    return (trimmed + sectionTitle + addition).slice(0, MAX_CONTENT_LENGTH);
+  }
+
+  async function persistExperience(token: string, finalContent: string) {
+    if (!selectedCategory || !matchedCategory || !duration || !dailyTime || isConcurrentWithMainJob === null) {
+      showToast('필수 정보를 모두 입력해 주세요.', 'error');
+      return;
+    }
+
+    const payload = buildPendingPayload({
+      selectedCategory,
+      duration,
+      dailyTime,
+      investmentAmount,
+      monthlyRevenue,
+      isConcurrentWithMainJob,
+      difficulties,
+      difficultyEtc,
+      content: finalContent,
+      matchedCategory,
+    });
+
+    if (isEditMode && editingExperienceId !== null) {
+      const updated = await updateExperience(token, editingExperienceId, {
+        ...payload,
+        categoryId: matchedCategory.id,
+      });
+      showToast('경험을 수정했어요.', 'success');
+      return updated;
+    }
+
+    const created = await createExperience(token, {
+      ...payload,
+      categoryId: matchedCategory.id,
+    });
+    clearCreateExperienceDraft(draftScope);
+    showToast('경험을 등록했어요. 분석을 이어서 준비할게요.', 'success');
+    return created;
+  }
+
+  async function handleAgentAComplete() {
+    const token = getAccessToken();
+    if (!token) {
+      navigate('/auth?next=%2Fcreate');
+      return;
+    }
+
+    const finalContent = buildContentWithAgentAAnswers(content);
+    setContent(finalContent);
+    setAgentAModalOpen(false);
+
+    if (!submitAfterAgentA) {
+      showToast('보완 답변이 본문에 반영됐어요.', 'success');
+      return;
+    }
+
+    if (!savedExperienceId) {
+      showToast('저장된 경험을 찾지 못했어요.', 'error');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await updateExperience(token, savedExperienceId, {
+        ...buildPendingPayload({
+          selectedCategory,
+          duration,
+          dailyTime,
+          investmentAmount,
+          monthlyRevenue,
+          isConcurrentWithMainJob,
+          difficulties,
+          difficultyEtc,
+          content: finalContent,
+          matchedCategory,
+        }),
+        categoryId: matchedCategory!.id,
+      });
+      navigate(`/experiences/${savedExperienceId}`);
+    } catch (error) {
+      showToast(resolveErrorMessage(error, '경험을 처리하지 못했어요.'), 'error');
+    } finally {
+      setSubmitting(false);
+      setSubmitAfterAgentA(false);
     }
   }
 
@@ -618,51 +761,43 @@ export default function CreateWizardPage() {
       return;
     }
 
-    if (!selectedCategory || !matchedCategory || !duration || !dailyTime || isConcurrentWithMainJob === null) {
-      showToast('필수 정보를 모두 입력해 주세요.', 'error');
-      return;
-    }
-
-    const payload = buildPendingPayload({
-      selectedCategory,
-      duration,
-      dailyTime,
-      investmentAmount,
-      monthlyRevenue,
-      isConcurrentWithMainJob,
-      difficulties,
-      difficultyEtc,
-      content,
-      matchedCategory,
-    });
-
     try {
       setSubmitting(true);
+      setCheckingSupplementaryQuestions(true);
+      const saved = await persistExperience(token, content.trim());
+      if (!saved?.id) {
+        return;
+      }
+      setSavedExperienceId(saved.id);
 
-      if (isEditMode && editingExperienceId !== null) {
-        await updateExperience(token, editingExperienceId, {
-          ...payload,
-          categoryId: matchedCategory.id,
-        });
-        showToast('경험을 수정했어요.', 'success');
-        navigate(`/experiences/${editingExperienceId}`);
+      const startedAt = Date.now();
+      const result = await analyzeCurrentDraft(token);
+      if (!result) {
+        navigate(`/experiences/${saved.id}`);
         return;
       }
 
-      const created = await createExperience(token, {
-        ...payload,
-        categoryId: matchedCategory.id,
-      });
-      clearCreateExperienceDraft(draftScope);
-      showToast('경험을 등록했어요. AI 분석을 시작합니다.', 'success');
-      navigate(`/analysis-result?experienceId=${created.id}`);
+      const elapsed = Date.now() - startedAt;
+      if (elapsed < SUPPLEMENTARY_CHECK_MIN_MS) {
+        await new Promise((resolve) => window.setTimeout(resolve, SUPPLEMENTARY_CHECK_MIN_MS - elapsed));
+      }
+
+      if (result.status === 'ok' && result.needs_questions && result.questions.length > 0) {
+        setSubmitAfterAgentA(true);
+        setAgentAModalOpen(true);
+        return;
+      }
+
+      setSubmitAfterAgentA(false);
+      setAgentAModalOpen(false);
+      navigate(`/experiences/${saved.id}`);
     } catch (error) {
-      showToast(resolveErrorMessage(error, '경험을 처리하지 못했어요.'), 'error');
+      showToast(resolveErrorMessage(error, '보완 질문 확인 중 문제가 발생했어요.'), 'error');
     } finally {
+      setCheckingSupplementaryQuestions(false);
       setSubmitting(false);
     }
   }
-
   return (
     <>
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
@@ -785,78 +920,6 @@ export default function CreateWizardPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-[10px]">
-                <button
-                  type="button"
-                  onClick={() => void handleRecommendQuestions()}
-                  disabled={agentALoading || content.trim().length < MIN_CONTENT_LENGTH}
-                  className={`flex h-[44px] items-center justify-center rounded-[10px] border text-[14px] font-[600] ${
-                    agentALoading || content.trim().length < MIN_CONTENT_LENGTH
-                      ? 'border-[#DDE7E0] bg-[#F4F7F5] text-[#A0ACA5]'
-                      : 'border-[#5A876E] bg-[#F4F8F5] text-[#2F5C46]'
-                  }`}
-                >
-                  {agentALoading ? '질문 카드 생성 중...' : 'AI 보완 질문 받기'}
-                </button>
-
-                {agentAResult?.status === 'fallback' ? (
-                  <div className="rounded-[10px] border border-[#E6E6E6] bg-[#FAFAFA] px-[14px] py-[12px] text-[13px] leading-[18px] text-[#5E5E5E]">
-                    {agentAResult.message ?? '질문 카드를 만들지 못했어요. 지금 내용으로 계속 작성해도 됩니다.'}
-                  </div>
-                ) : null}
-
-                {agentAResult?.status === 'ok' && !agentAResult.needs_questions ? (
-                  <div className="rounded-[10px] border border-[#D9E8DF] bg-[#F4F8F5] px-[14px] py-[12px] text-[13px] leading-[18px] text-[#2F5C46]">
-                    지금 초안은 추가 질문 없이도 진행 가능한 상태예요.
-                  </div>
-                ) : null}
-
-                {agentAResult?.status === 'ok' && agentAResult.needs_questions ? (
-                  <div className="flex flex-col gap-[10px] rounded-[12px] bg-[#F8F8F8] p-[12px]">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[14px] font-[600] leading-[16.8px] text-[#131416]">보완 질문 카드</p>
-                        <p className="pt-[4px] text-[12px] leading-[16px] text-[#6D6D6D]">답을 그대로 본문에 반영하면 분석 품질을 높일 수 있어요.</p>
-                      </div>
-                      <span className="text-[11px] leading-[13px] text-[#8A8A8A]">{agentAResult.questions.length}개</span>
-                    </div>
-
-                    {agentAResult.questions.map((question) => (
-                      <div key={question.slot} className="rounded-[10px] bg-white px-[12px] py-[12px] shadow-[0_0_2px_rgba(0,0,0,0.08)]">
-                        <div className="flex items-start justify-between gap-[12px]">
-                          <p className="flex-1 text-[14px] font-[600] leading-[19.6px] text-[#131416]">{question.question}</p>
-                          {question.required ? (
-                            <span className="shrink-0 rounded-full bg-[#F4F8F5] px-[8px] py-[3px] text-[11px] font-[600] leading-none text-[#2F5C46]">
-                              필수
-                            </span>
-                          ) : (
-                            <span className="shrink-0 rounded-full bg-[#F3F3F3] px-[8px] py-[3px] text-[11px] font-[500] leading-none text-[#7A7A7A]">
-                              선택
-                            </span>
-                          )}
-                        </div>
-                        <p className="pt-[6px] text-[12px] leading-[16px] text-[#6D6D6D]">
-                          입력 유형: {question.input_type}
-                          {question.hint ? ` · ${question.hint}` : ''}
-                        </p>
-                        {question.options?.length ? (
-                          <div className="mt-[10px] flex flex-wrap gap-[6px]">
-                            {question.options.map((option) => (
-                              <span
-                                key={`${question.slot}-${option}`}
-                                className="rounded-full bg-[#F8F8F8] px-[10px] py-[5px] text-[12px] leading-none text-[#494949]"
-                              >
-                                {option}
-                              </span>
-                            ))}
-                          </div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-
               <ExampleCard
                 visible={exampleVisible}
                 loading={guideLoading}
@@ -896,7 +959,7 @@ export default function CreateWizardPage() {
               <button
                 type="button"
                 onClick={handleStepBack}
-                className="flex h-[41px] min-w-[92px] items-center justify-center rounded-[8px] border border-[#D8D8D8] bg-white px-[16px] font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#494949]"
+                className="flex h-[43px] flex-1 items-center justify-center rounded-[8px] border border-[#D8D8D8] bg-white px-[16px] font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#494949]"
               >
                 뒤로가기
               </button>
@@ -905,11 +968,11 @@ export default function CreateWizardPage() {
               type="button"
               disabled={stepDisabled || categoryLoading || submitting}
               onClick={() => void handleNext()}
-              className={`flex h-[41px] flex-1 items-center justify-center rounded-[8px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white ${
+              className={`flex h-[43px] ${step > 1 ? 'flex-1' : 'w-full'} items-center justify-center rounded-[8px] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white ${
                 stepDisabled || categoryLoading || submitting ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'
               }`}
             >
-              {submitting ? '처리 중...' : step === 4 ? (isEditMode ? '수정 완료' : '작성 완료') : '다음 단계'}
+              {submitting ? '처리 중...' : step === 4 ? '다음' : '다음 단계'}
             </button>
           </div>
         </div>
@@ -942,6 +1005,79 @@ export default function CreateWizardPage() {
           </div>
         </div>
       ) : null}
+
+      <AgentAQuestionModal
+        open={agentAModalOpen && (agentAResult?.questions?.length ?? 0) > 0}
+        questions={agentAResult?.questions ?? []}
+        answers={agentAAnswers}
+        currentIndex={agentAQuestionIndex}
+        onClose={() => { setAgentAModalOpen(false); setSubmitAfterAgentA(false); }}
+        onAnswerChange={(slot, value) => setAgentAAnswers((current) => ({ ...current, [slot]: value }))}
+        onSkip={() => {
+          setAgentAQuestionIndex((current) => Math.min(current + 1, Math.max((agentAResult?.questions.length ?? 1) - 1, 0)));
+        }}
+        onNext={() => {
+          setAgentAQuestionIndex((current) => Math.min(current + 1, Math.max((agentAResult?.questions.length ?? 1) - 1, 0)));
+        }}
+        onComplete={() => { void handleAgentAComplete(); }}
+      />
+
+      {checkingSupplementaryQuestions ? (
+        <SubmissionCheckingOverlay nickname={getStoredUser()?.nickname ?? '사용자'} />
+      ) : null}
     </>
   );
 }
+
+function SubmissionCheckingOverlay({ nickname }: { nickname: string }) {
+  return (
+    <div className="fixed inset-0 z-[140] bg-white">
+      <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
+        <div className="flex h-[59px] items-center justify-between px-[24px] pb-[19px] pt-[21px]">
+          <div className="text-[17px] font-[600] leading-[22px] text-black">9:41</div>
+          <div className="flex items-center gap-[7px]">
+            <div className="flex h-[12px] items-end gap-[2px]">
+              <span className="block h-[4px] w-[3px] rounded-[1px] bg-black" />
+              <span className="block h-[6px] w-[3px] rounded-[1px] bg-black" />
+              <span className="block h-[8px] w-[3px] rounded-[1px] bg-black" />
+              <span className="block h-[10px] w-[3px] rounded-[1px] bg-black" />
+            </div>
+            <div className="relative h-[12px] w-[17px]">
+              <div className="absolute inset-0 rounded-[2px] border border-black/90" />
+              <div className="absolute left-[2px] top-[2px] h-[6px] w-[9px] rounded-[1px] bg-black" />
+              <div className="absolute right-[-2px] top-[3px] h-[4px] w-[1.5px] rounded-full bg-black" />
+            </div>
+            <div className="relative h-[13px] w-[27px] rounded-[4px] border border-black/60 p-[1px]">
+              <div className="h-full w-[70%] rounded-[3px] bg-black" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex min-h-[calc(100vh-59px)] flex-col items-center justify-center gap-[20px] px-[16px] pb-[120px]">
+          <div className="text-center text-[24px] leading-[28.8px] text-[#131416]">
+            <p>
+              <span className="font-[700] text-[#5A876E]">{nickname}</span>
+              <span className="font-[400]">님의</span>
+            </p>
+            <p className="pt-[4px] font-[400]">경험을 분석하고 있어요!</p>
+          </div>
+
+          <div className="flex flex-col items-center gap-[12px]">
+            <LoaderCircle size={24} strokeWidth={2.2} className="animate-spin text-[#5E5E5E]" />
+            <p className="text-[12px] leading-[16.8px] text-[#8A8A8A]">잠시만 기다려주세요.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
+
+
+
+
+
+

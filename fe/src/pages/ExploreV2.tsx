@@ -728,7 +728,7 @@ function ExploreCard({
                 }
               }}
               disabled={ctaDisabled}
-              className={`flex h-[30px] items-center justify-center rounded-[8px] px-[12px] py-[8px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-white ${
+              className={`inline-flex h-[32px] min-w-[106px] items-center justify-center rounded-[8px] px-[12px] py-[8px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-white ${
                 ctaDisabled ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'
               }`}
               style={textFeatureStyle}

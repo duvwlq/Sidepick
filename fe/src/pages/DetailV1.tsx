@@ -21,7 +21,7 @@ import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
 import HeaderBookmarkIcon from '../components/common/HeaderBookmarkIcon';
 import BottomNav from '../components/layout/BottomNav';
-import { CaseChip, CaseChipRow, CaseTextLink } from '../components/common/CaseUi';
+import { CaseBookmarkCount, CaseChip, CaseChipRow, CaseReactionCount, CaseTextLink } from '../components/common/CaseUi';
 import { ErrorState, LoadingState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
@@ -304,18 +304,8 @@ function SimilarCaseCard({
         </div>
 
         <div className="flex shrink-0 items-center gap-[4px] pt-[1px]">
-          <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-            <span className="inline-flex h-[20px] w-[20px] items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M10.0006 17.2913L8.79232 16.1913C4.50065 12.2997 1.66732 9.73301 1.66732 6.58301C1.66732 4.01634 3.68398 1.99967 6.25065 1.99967C7.70065 1.99967 9.09232 2.67467 10.0006 3.74134C10.9089 2.67467 12.3007 1.99967 13.7507 1.99967C16.3173 1.99967 18.334 4.01634 18.334 6.58301C18.334 9.73301 15.5007 12.2997 11.2089 16.1913L10.0006 17.2913Z" stroke="#8A8A8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
-            <span>{likeCount.toLocaleString()}</span>
-          </div>
-          <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-            <img src={bookmarkIcon} alt="" className="h-[24px] w-[24px] shrink-0" />
-            <span>{bookmarkCount.toLocaleString()}</span>
-          </div>
+          <CaseReactionCount count={likeCount} />
+          <CaseBookmarkCount count={bookmarkCount} />
         </div>
       </div>
     </button>

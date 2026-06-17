@@ -47,6 +47,7 @@ public final class AgentADtos {
     ) {
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Meta(
             @JsonProperty("input_tokens")
             int inputTokens,
@@ -55,7 +56,14 @@ public final class AgentADtos {
             @JsonProperty("elapsed_ms")
             long elapsedMs,
             @JsonProperty("used_template")
-            boolean usedTemplate
+            boolean usedTemplate,
+            @JsonProperty("analysis_id")
+            String analysisId,
+            @JsonProperty("cache_hit")
+            Boolean cacheHit,
+            Double confidence,
+            @JsonProperty("plan_b_triggered")
+            Boolean planBTriggered
     ) {
     }
 }

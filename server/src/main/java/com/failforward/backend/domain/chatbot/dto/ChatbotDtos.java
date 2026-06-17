@@ -15,6 +15,7 @@ public final class ChatbotDtos {
             @JsonProperty("session_id")
             @NotBlank
             String sessionId,
+            Long experienceId,
             @NotBlank
             String message
     ) {
@@ -34,12 +35,26 @@ public final class ChatbotDtos {
     public record AiChatbotRequest(
             @JsonProperty("session_id")
             String sessionId,
+            @JsonProperty("experience_id")
+            Long experienceId,
             String message,
             @JsonProperty("route_hint")
-            String routeHint
+            String routeHint,
+            @JsonProperty("analysis_context")
+            Map<String, Object> analysisContext
     ) {
-        public static AiChatbotRequest from(ChatbotMessageRequest request, String routeHint) {
-            return new AiChatbotRequest(request.sessionId(), request.message(), routeHint);
+        public static AiChatbotRequest from(
+                ChatbotMessageRequest request,
+                String routeHint,
+                Map<String, Object> analysisContext
+        ) {
+            return new AiChatbotRequest(
+                    request.sessionId(),
+                    request.experienceId(),
+                    request.message(),
+                    routeHint,
+                    analysisContext
+            );
         }
     }
 

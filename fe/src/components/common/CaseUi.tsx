@@ -1,4 +1,5 @@
 import { Heart } from 'lucide-react';
+import { Bookmark } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
 import { buttonClassName } from './button-class-name';
 
@@ -106,6 +107,21 @@ export function CaseReactionCount({
   return (
     <div className="flex items-center gap-[2px]">
       <Heart size={14} strokeWidth={1.75} fill={active ? '#5A876E' : 'none'} color={active ? '#5A876E' : '#8A8A8A'} />
+      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{count}</span>
+    </div>
+  );
+}
+
+export function CaseBookmarkCount({
+  count,
+  active = false,
+}: {
+  count: number;
+  active?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-[2px]">
+      <Bookmark size={14} strokeWidth={1.75} fill={active ? '#5A876E' : 'none'} color={active ? '#5A876E' : '#8A8A8A'} />
       <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{count}</span>
     </div>
   );

@@ -3,10 +3,13 @@ package com.failforward.backend.domain.chatbot.service;
 import com.failforward.backend.common.config.AiServerProperties;
 import com.failforward.backend.common.config.ChatbotProperties;
 import com.failforward.backend.common.security.CurrentUserProvider;
+import com.failforward.backend.domain.analysis.dto.AnalysisDtos.AnalysisReportResponse;
+import com.failforward.backend.domain.analysis.service.AIAnalysisService;
 import com.failforward.backend.domain.chatbot.dto.ChatbotDtos.AiChatbotRequest;
 import com.failforward.backend.domain.chatbot.dto.ChatbotDtos.AiChatbotResponse;
 import com.failforward.backend.domain.chatbot.dto.ChatbotDtos.ChatbotMessageRequest;
 import com.failforward.backend.domain.chatbot.dto.ChatbotDtos.ChatbotMessageResponse;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,6 +45,7 @@ public class ChatbotService {
     private final RestTemplate aiRestTemplate;
     private final AiServerProperties aiServerProperties;
     private final ChatbotProperties chatbotProperties;
+    private final AIAnalysisService aiAnalysisService;
 
     public ChatbotMessageResponse sendMessage(ChatbotMessageRequest request) {
         Long userId = currentUserProvider.getCurrentUser().id();
@@ -49,6 +53,7 @@ public class ChatbotService {
 
         String normalizedMessage = chatbotSafetyService.validateAndNormalizeMessage(request);
         String routeHint = inferRouteHint(normalizedMessage);
+        Map<String, Object> analysisContext = buildAnalysisContext(request.experienceId());
         int queueSlot = chatbotRequestQueue.acquire();
 
         try {
@@ -65,48 +70,101 @@ public class ChatbotService {
 
             chatbotTokenBudget.checkAndConsume(chatbotSafetyService.estimateTokens(normalizedMessage));
             AiChatbotResponse upstream = requestUpstream(
-                    new ChatbotMessageRequest(request.sessionId(), normalizedMessage),
-                    routeHint
+                    new ChatbotMessageRequest(request.sessionId(), request.experienceId(), normalizedMessage),
+                    routeHint,
+                    analysisContext
             );
             String validationFailure = chatbotSafetyService.validateUpstream(upstream);
             if (validationFailure != null) {
-                return fallback(validationFailure, routeHint);
+                return fallback(validationFailure, routeHint, analysisContext);
             }
 
             chatbotTokenBudget.checkAndConsume(chatbotSafetyService.estimateTokens(upstream.reply()));
+            Map<String, Object> explanation = new LinkedHashMap<>();
+            if (upstream.explanation() != null) {
+                explanation.putAll(upstream.explanation());
+            }
+            if (!analysisContext.isEmpty()) {
+                explanation.put("analysisContextUsed", true);
+                explanation.put("analysisContext", analysisContext);
+            }
             return new ChatbotMessageResponse(
                     upstream.status() == null || upstream.status().isBlank() ? STATUS_SUCCESS : upstream.status(),
                     upstream.reply(),
                     upstream.type() == null || upstream.type().isBlank() ? routeHint : upstream.type(),
                     upstream.sources() == null ? List.of() : upstream.sources(),
-                    upstream.explanation(),
+                    explanation.isEmpty() ? null : explanation,
                     upstream.reason()
             );
         } catch (RestClientException exception) {
             log.warn("chatbot_upstream_error routeHint={} detail={}", routeHint, exception.getMessage());
-            return fallback("upstream_error", routeHint);
+            return fallback("upstream_error", routeHint, analysisContext);
         } finally {
             chatbotRequestQueue.release(queueSlot);
         }
     }
 
-    private AiChatbotResponse requestUpstream(ChatbotMessageRequest request, String routeHint) {
+    private AiChatbotResponse requestUpstream(
+            ChatbotMessageRequest request,
+            String routeHint,
+            Map<String, Object> analysisContext
+    ) {
         String endpoint = aiServerProperties.url() + "/chatbot/message";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AiChatbotRequest> entity = new HttpEntity<>(AiChatbotRequest.from(request, routeHint), headers);
+        HttpEntity<AiChatbotRequest> entity = new HttpEntity<>(AiChatbotRequest.from(request, routeHint, analysisContext), headers);
         return aiRestTemplate.postForObject(endpoint, entity, AiChatbotResponse.class);
     }
 
-    private ChatbotMessageResponse fallback(String reason, String routeHint) {
+    private ChatbotMessageResponse fallback(String reason, String routeHint, Map<String, Object> analysisContext) {
+        String reply = FALLBACK_REPLY;
+        if (!analysisContext.isEmpty()) {
+            Object summary = analysisContext.get("summary");
+            if (summary instanceof String text && !text.isBlank()) {
+                reply = "현재는 간단한 안내만 가능하지만, 등록된 분석 기준으로 보면 " + text;
+            }
+        }
+        Map<String, Object> explanation = new LinkedHashMap<>();
+        explanation.put("fallback", true);
+        if (!analysisContext.isEmpty()) {
+            explanation.put("analysisContextUsed", true);
+            explanation.put("analysisContext", analysisContext);
+        }
         return new ChatbotMessageResponse(
                 STATUS_FALLBACK,
-                FALLBACK_REPLY,
+                reply,
                 TYPE_GUIDE_REDIRECT.equals(routeHint) ? TYPE_RAG : routeHint,
                 List.of(),
-                Map.of("fallback", true),
+                explanation,
                 reason
         );
+    }
+
+    private Map<String, Object> buildAnalysisContext(Long experienceId) {
+        if (experienceId == null) {
+            return Map.of();
+        }
+        try {
+            AnalysisReportResponse report = aiAnalysisService.getReport(experienceId);
+            if (!"READY".equalsIgnoreCase(report.reportStatus())) {
+                return Map.of();
+            }
+            Map<String, Object> context = new LinkedHashMap<>();
+            context.put("summary", report.summary());
+            context.put("failureCategory", report.failureCategory());
+            context.put("keywords", report.keywords() == null ? List.of() : report.keywords().stream().limit(4).toList());
+            context.put("advice", report.advice() == null ? List.of() : report.advice().stream().limit(2).toList());
+            context.put("matchedPatterns", report.explanation() == null || report.explanation().matchedPatterns() == null
+                    ? List.of()
+                    : report.explanation().matchedPatterns().stream().limit(3).toList());
+            context.put("similarCases", report.similarCases() == null
+                    ? List.of()
+                    : report.similarCases().stream().map(item -> item.title() == null ? item.caseId() : item.title()).limit(2).toList());
+            return context;
+        } catch (Exception exception) {
+            log.debug("chatbot_analysis_context_unavailable experienceId={} detail={}", experienceId, exception.getMessage());
+            return Map.of();
+        }
     }
 
     private String inferRouteHint(String message) {
