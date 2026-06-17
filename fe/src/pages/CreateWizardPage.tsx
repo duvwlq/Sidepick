@@ -325,7 +325,7 @@ export default function CreateWizardPage() {
   const [exampleIndex, setExampleIndex] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [agentAResult, setAgentAResult] = useState<AgentAAnalyzeDraftPayload | null>(null);
-  const [agentALoading, setAgentALoading] = useState(false);
+  const [, setAgentALoading] = useState(false);
   const [agentAModalOpen, setAgentAModalOpen] = useState(false);
   const [agentAQuestionIndex, setAgentAQuestionIndex] = useState(0);
   const [agentAAnswers, setAgentAAnswers] = useState<Record<string, string>>({});
@@ -616,23 +616,6 @@ export default function CreateWizardPage() {
     } finally {
       setAgentALoading(false);
     }
-  }
-
-  async function handleRecommendQuestions() {
-    const token = getAccessToken();
-    if (!token) {
-      navigate('/auth?next=%2Fcreate');
-      return;
-    }
-
-    setSubmitAfterAgentA(false);
-    const result = await analyzeCurrentDraft(token);
-    if (result?.status === 'ok' && result.needs_questions && result.questions.length > 0) {
-      setAgentAModalOpen(true);
-      return;
-    }
-
-    setAgentAModalOpen(false);
   }
 
   function buildContentWithAgentAAnswers(baseContent: string, answerMap = agentAAnswers) {

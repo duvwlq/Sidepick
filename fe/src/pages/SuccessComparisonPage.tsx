@@ -4,7 +4,6 @@ import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
 import wifiIcon from '../assets/auth-figma/wifi.svg';
-import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import { CaseBookmarkCount } from '../components/common/CaseUi';
 import { ErrorState, LoadingState, PageMessage } from '../components/common/Skeleton';
 import {

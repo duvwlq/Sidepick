@@ -1,7 +1,6 @@
 ﻿import {
   ChevronRight,
   X,
-  Upload,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -10,24 +9,16 @@ import accountCircleZipIcon from '../assets/detail-v1-icons/account-circle.svg';
 import aiGuideSymbolZipIcon from '../assets/detail-v1-icons/ai-guide-symbol.svg';
 import clockZipIcon from '../assets/detail-v1-icons/clock.svg';
 import dollarSignZipIcon from '../assets/detail-v1-icons/dollar-sign.svg';
-import headerBookmarkZipIcon from '../assets/detail-v1-icons/icon-bookmark.svg';
-import moreVerticalZipIcon from '../assets/detail-v1-icons/more-vertical.svg';
 import uploadZipIcon from '../assets/detail-v1-icons/upload.svg';
-import aiGuideStarIcon from '../assets/detail-v1-figma/ai-guide-star.svg';
-import clockIcon from '../assets/detail-v1-figma/clock.svg';
-import dollarSignIcon from '../assets/detail-v1-figma/dollar-sign.svg';
-import moreVerticalIcon from '../assets/detail-v1-figma/more-vertical.svg';
-import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
 import HeaderBookmarkIcon from '../components/common/HeaderBookmarkIcon';
 import BottomNav from '../components/layout/BottomNav';
-import { CaseBookmarkCount, CaseChip, CaseChipRow, CaseReactionCount, CaseTextLink } from '../components/common/CaseUi';
+import { CaseBookmarkCount, CaseChip, CaseChipRow, CaseReactionCount } from '../components/common/CaseUi';
 import { ErrorState, LoadingState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
 import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
 import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
-import userIcon from '../assets/home-v1-figma/icons/user-figma.svg';
 import {
   bookmarkExperience,
   deleteExperience,
