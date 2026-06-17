@@ -9,6 +9,7 @@ import accountCircleZipIcon from '../assets/detail-v1-icons/account-circle.svg';
 import aiGuideSymbolZipIcon from '../assets/detail-v1-icons/ai-guide-symbol.svg';
 import clockZipIcon from '../assets/detail-v1-icons/clock.svg';
 import dollarSignZipIcon from '../assets/detail-v1-icons/dollar-sign.svg';
+import moreVerticalZipIcon from '../assets/detail-v1-icons/more-vertical.svg';
 import uploadZipIcon from '../assets/detail-v1-icons/upload.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
 import HeaderBookmarkIcon from '../components/common/HeaderBookmarkIcon';
@@ -914,5 +915,4 @@ export default function DetailV1() {
     </div>
   );
 }
-
 
