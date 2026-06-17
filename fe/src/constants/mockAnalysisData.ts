@@ -66,4 +66,7 @@ export const mockAnalysisData = {
       similarity: 0,
     },
   ],
+  // PM-10: 실패→성공 연결 버튼용 (mock)
+  caseId: 'case_123',
+  relatedSuccessCount: 3,
 };

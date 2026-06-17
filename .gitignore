@@ -6,6 +6,7 @@ out/
 .idea/
 .vscode/
 *.iml
+.DS_Store
 
 .env
 application-local.yml
@@ -25,5 +26,11 @@ __pycache__/
 # Claude Code
 .claude/
 
-# AI handoff (개인 작업 인수인계, 로컬 보관)
+# Crawling raw candidates (pre-cleaning; strict/review only for analysis)
+ai/data/success_*_candidates.csv
+
+# AI handoff materials kept outside the main repo
 ai/handoff/
+
+# Local outbound docs kept out of git
+docs/_local/

@@ -1,0 +1,57 @@
+{
+  "generated_at": "2026-06-09T09:07:38+09:00",
+  "source_relabel_file": "relabel_all_results.json",
+  "total_input": 351,
+  "total_kept": 36,
+  "total_removed": 315,
+  "removed_breakdown": {
+    "advertisement": 152,
+    "skipped_body_too_short": 91,
+    "meta_only": 51,
+    "neutral": 19,
+    "not_real_user_case": 2
+  },
+  "kept_by_case_type": {
+    "success_story": 32,
+    "failure_story": 4
+  },
+  "kept_by_category_slug": {
+    "content-sns": {
+      "total": 8,
+      "success_story": 8
+    },
+    "etc": {
+      "total": 2,
+      "failure_story": 1,
+      "success_story": 1
+    },
+    "investment": {
+      "total": 5,
+      "success_story": 4,
+      "failure_story": 1
+    },
+    "offline-sidejob": {
+      "total": 3,
+      "success_story": 2,
+      "failure_story": 1
+    },
+    "online-commerce": {
+      "total": 5,
+      "success_story": 5
+    },
+    "platform-labor": {
+      "total": 10,
+      "success_story": 9,
+      "failure_story": 1
+    },
+    "talent-freelance": {
+      "total": 3,
+      "success_story": 3
+    }
+  },
+  "low_confidence_flagged": {
+    "threshold": 0.5,
+    "count": 0,
+    "case_ids": []
+  }
+}

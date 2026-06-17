@@ -1,0 +1,185 @@
+{
+  "version": "AI-19-v1",
+  "generated_at": "2026-06-02T17:46:52+09:00",
+  "model": "claude-sonnet-4-5-20250929",
+  "prompt_version": "AI-19-v1",
+  "summary": {
+    "total_cases": 8,
+    "successful_relabels": 7,
+    "skipped": 1,
+    "errors": 0,
+    "total_input_tokens": 28699,
+    "total_output_tokens": 1654,
+    "estimated_cost_usd": 0.1109,
+    "elapsed_sec": 45.1,
+    "total_validation_issues": 0,
+    "label_change_distribution": {
+      "fail → advertisement": 2,
+      "fail → meta_only": 2,
+      "ambiguous → advertisement": 2,
+      "ambiguous → meta_only": 1
+    }
+  },
+  "drafts": [
+    {
+      "case_type": "advertisement",
+      "is_real_user_case": false,
+      "category_inferred": {
+        "slug": "platform-labor",
+        "label_ko": "플랫폼 노동",
+        "confidence": 0.85
+      },
+      "reasoning": "첫 문장 '본 포스팅은 체험 기회 및 소정의 혜택을 받고 작성한 글입니다' 명시. 본문 후반부 특정 앱(위버링) 홍보 + 외부 링크 포함. '여러분도 이 앱을 한 번 사용해보세요!' 등 전형적 광고 문구. 수익 언급은 있으나 협찬 목적의 과장된 성공담.",
+      "confidence": 0.95,
+      "_meta": {
+        "case_id": "blog_055",
+        "original_label": "fail",
+        "original_category_slug": "etc",
+        "source": "blog",
+        "title": "재택 부업 내가 해본 진짜 후기! 성공할 수 있을까?",
+        "elapsed_sec": 6.69,
+        "input_tokens": 3986,
+        "output_tokens": 243,
+        "validation_issues": []
+      }
+    },
+    {
+      "case_type": "meta_only",
+      "is_real_user_case": false,
+      "category_inferred": {
+        "slug": "etc",
+        "label_ko": "기타",
+        "confidence": 0.3
+      },
+      "reasoning": "질문자는 '부업 광고 알려주세요'라는 제목으로 질문만 했고, 답변들은 모두 '본인 입력 포함 정보' 메타 안내문구와 함께 광고성 답변들로 구성. 질문자 본인의 부업 경험이나 사례는 전혀 없으며, 답변자들의 홍보글만 존재. 실제 사용자 케이스 아님.",
+      "confidence": 0.95,
+      "_meta": {
+        "case_id": "kin_001",
+        "original_label": "fail",
+        "original_category_slug": "etc",
+        "source": "kin",
+        "title": "부업 광고~ 알려주세요",
+        "elapsed_sec": 5.31,
+        "input_tokens": 4130,
+        "output_tokens": 231,
+        "validation_issues": []
+      }
+    },
+    {
+      "case_type": "meta_only",
+      "is_real_user_case": false,
+      "category_inferred": {
+        "slug": "offline-sidejob",
+        "label_ko": "오프라인 부업",
+        "confidence": 0.3
+      },
+      "reasoning": "제목은 '타코야끼' 부업 질문이나, 본문은 지식iN 답변자들의 재택알바/홍보 광고글만 나열. 7번째 답변에만 질문자 원문('대구에서 타코야끼 차량 구함')이 짧게 인용되었으나, 실제 경험담이나 성공/실패 사례 없음. '본인 입력 포함 정보' 메타 안내문구 반복 출현.",
+      "confidence": 0.85,
+      "_meta": {
+        "case_id": "kin_067",
+        "original_label": "fail",
+        "original_category_slug": "etc",
+        "source": "kin",
+        "title": "소자본 창업 (부업) 타코야끼",
+        "elapsed_sec": 7.43,
+        "input_tokens": 5185,
+        "output_tokens": 250,
+        "validation_issues": []
+      }
+    },
+    {
+      "case_type": "advertisement",
+      "is_real_user_case": false,
+      "category_inferred": {
+        "slug": "content-sns",
+        "label_ko": "콘텐츠·SNS",
+        "confidence": 0.7
+      },
+      "reasoning": "2~4번 답변은 '제 프로필 눌러주세요', '하루 1시간 홍보하면 수당', '지금 시작하세요', '무료 체험', 외부 링크 등 전형적인 광고 문구 반복. 5번 답변만 실제 조언이나 본인 경험 없이 일반론 + 카페 링크. 질문자 본인 경험 전무.",
+      "confidence": 0.95,
+      "_meta": {
+        "case_id": "kin_062",
+        "original_label": "fail",
+        "original_category_slug": "etc",
+        "source": "kin",
+        "title": "카카오뷰 부업 해 보신분?",
+        "elapsed_sec": 6.68,
+        "input_tokens": 3663,
+        "output_tokens": 229,
+        "validation_issues": []
+      }
+    },
+    {
+      "case_id": "cafe_060",
+      "original_label": "ambiguous",
+      "skipped": true,
+      "reason": "body < 30자 (호출 생략)"
+    },
+    {
+      "case_type": "meta_only",
+      "is_real_user_case": false,
+      "category_inferred": {
+        "slug": "etc",
+        "label_ko": "기타",
+        "confidence": 0.3
+      },
+      "reasoning": "본문은 탈퇴한 사용자들의 일반 조언과 '지식iN 서비스 질문 답변 페이지 및 프로필의 답변자 정보...' 같은 네이버 표준 안내문구로 구성. 마지막 답변은 '온라인종합광고대행사/제휴/홍보 대신 해주는/온라인쇼핑몰 CEO' 등 광고성 어휘 포함하나, 전체적으로 답변자 메타정보와 일반 조언이 주를 이루어 meta_only로 분류",
+      "confidence": 0.75,
+      "_meta": {
+        "case_id": "kin_069",
+        "original_label": "ambiguous",
+        "original_category_slug": "etc",
+        "source": "kin",
+        "title": "집에서 할 수 있는 부업 ㅡ",
+        "elapsed_sec": 7.2,
+        "input_tokens": 5242,
+        "output_tokens": 274,
+        "validation_issues": []
+      }
+    },
+    {
+      "case_type": "advertisement",
+      "is_real_user_case": false,
+      "category_inferred": {
+        "slug": "etc",
+        "label_ko": "기타",
+        "confidence": 0.3
+      },
+      "reasoning": "구체적 경험 없이 '재택부업가이드' 사이트 홍보. '짭짤한 수익/신종 돈벌이' 등 전형적 광고 어휘 + 외부 링크 유도. 본인 사례 부재.",
+      "confidence": 0.95,
+      "_meta": {
+        "case_id": "kin_055",
+        "original_label": "ambiguous",
+        "original_category_slug": "etc",
+        "source": "kin",
+        "title": "POP 부업하려고 하는데요...",
+        "elapsed_sec": 4.14,
+        "input_tokens": 1320,
+        "output_tokens": 171,
+        "validation_issues": []
+      }
+    },
+    {
+      "case_type": "advertisement",
+      "is_real_user_case": false,
+      "category_inferred": {
+        "slug": "content-sns",
+        "label_ko": "콘텐츠·SNS",
+        "confidence": 0.75
+      },
+      "reasoning": "3개 답변 모두 '멘토링/교육자료 제공/1:1시스템/프로필 참고/카톡 문의' 등 전형적 광고 패턴. '집에서억대수익' '수이멘토' '고무줄' '희야' 등 닉네임+외부 링크 유도. '건당 최대 81만원/월천이상/4억연봉' 등 과장된 수익 강조. 본인 경험 아닌 멘토 모집 광고글.",
+      "confidence": 0.95,
+      "_meta": {
+        "case_id": "kin_049",
+        "original_label": "ambiguous",
+        "original_category_slug": "etc",
+        "source": "kin",
+        "title": "부업성공지원센터 어떤가요?",
+        "elapsed_sec": 7.6,
+        "input_tokens": 5173,
+        "output_tokens": 256,
+        "validation_issues": []
+      }
+    }
+  ]
+}
