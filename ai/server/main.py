@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import time
 
-from server.agent_pipeline import DraftMeta, detect_missing_slots, make_analysis_id, needs_questions
-from server.llm_analyzer import analyze_experience
+from .agent_pipeline import DraftMeta, detect_missing_slots, make_analysis_id, needs_questions
+from .llm_analyzer import analyze_experience
 
 app = FastAPI(
     title="Sidepick AI Server",
@@ -80,59 +80,59 @@ class AgentAAnalyzeDraftResponse(BaseModel):
 QUESTION_CARD_BY_SLOT = {
     "duration": AgentAQuestionCard(
         slot="duration",
-        question="ÀÌ ºÎ¾÷À» ¾ó¸¶³ª ¿À·¡ ½ÃµµÇß³ª¿ä?",
+        question="ì´ ê²½í—˜ì„ ì–¼ë§ˆë‚˜ ì˜¤ë˜ ì‹œë„í–ˆë‚˜ìš”?",
         input_type="select",
-        options=["1°³¿ù ¹Ì¸¸", "1~3°³¿ù", "3~6°³¿ù", "6°³¿ù ÀÌ»ó"],
+        options=["1ê°œì›” ì´ë‚´", "1~3ê°œì›”", "3~6ê°œì›”", "6ê°œì›” ì´ìƒ"],
         required=True,
-        hint="´ë·«ÀûÀÎ ±â°£¸¸ ÀÖ¾îµµ ±¦Âú½À´Ï´Ù.",
+        hint="ëŒ€ëµì ì¸ ê¸°ê°„ë§Œ ìˆì–´ë„ ì¶©ë¶„í•©ë‹ˆë‹¤.",
     ),
     "daily_hours": AgentAQuestionCard(
         slot="daily_hours",
-        question="ÇÏ·ç Æò±Õ ¾î´À Á¤µµ ½Ã°£À» ½è³ª¿ä?",
+        question="í•˜ë£¨ í‰ê·  ì–´ëŠ ì •ë„ ì‹œê°„ì„ ì¼ë‚˜ìš”?",
         input_type="select",
-        options=["1½Ã°£ ¹Ì¸¸", "1~3½Ã°£", "3~5½Ã°£", "5½Ã°£ ÀÌ»ó"],
+        options=["1ì‹œê°„ ì´ë‚´", "1~3ì‹œê°„", "3~5ì‹œê°„", "5ì‹œê°„ ì´ìƒ"],
         required=True,
-        hint="º»¾÷°ú º´ÇàÇß´Ù¸é Ã¼°¨ ±âÁØÀ¸·Î Àû¾îÁÖ¼¼¿ä.",
+        hint="ë³¸ì—…ê³¼ ë³‘í–‰í–ˆë‹¤ë©´ ì²´ê° ì‹œê°„ì„ ì ì–´ì£¼ì„¸ìš”.",
     ),
     "invest_amount": AgentAQuestionCard(
         slot="invest_amount",
-        question="½ÃÀÛÇÒ ¶§ µé¾î°£ ºñ¿ëÀº ¾î´À Á¤µµ¿´³ª¿ä?",
+        question="ì§€ê¸ˆê¹Œì§€ ì´ ë“¤ì–´ê°„ ë¹„ìš©ì€ ì–´ëŠ ì •ë„ì˜€ë‚˜ìš”?",
         input_type="number",
         options=None,
         required=False,
-        hint="´ë·«ÀûÀÎ ÃÑ¾×ÀÌ¸é ÃæºĞÇÕ´Ï´Ù.",
+        hint="ëŒ€ëµì ì¸ ì´ì•¡ì´ë©´ ì¶©ë¶„í•©ë‹ˆë‹¤.",
     ),
     "revenue_amount": AgentAQuestionCard(
         slot="revenue_amount",
-        question="¿ù ¼öÀÍÀÌ³ª ½ÇÁ¦·Î ¹ú¾îµéÀÎ ±İ¾×ÀÌ ÀÖ¾ú³ª¿ä?",
+        question="ë§¤ì¶œì´ë‚˜ ìˆ˜ìµìœ¼ë¡œ í™•ì¸ëœ ê¸ˆì•¡ì´ ìˆì—ˆë‚˜ìš”?",
         input_type="number",
         options=None,
         required=False,
-        hint="¾ø¾ú´Ù¸é 0À¸·Î »ı°¢ÇØµµ µË´Ï´Ù.",
+        hint="ì—†ì—ˆë‹¤ë©´ 0ìœ¼ë¡œ ì ì–´ë„ ë©ë‹ˆë‹¤.",
     ),
     "failure_reasons": AgentAQuestionCard(
         slot="failure_reasons",
-        question="°á±¹ °¡Àå Å©°Ô ½ÇÆĞÇß´Ù°í ´À³¤ ÀÌÀ¯´Â ¹«¾ùÀÌ¾ú³ª¿ä?",
+        question="ê²°êµ­ ì‹¤íŒ¨ì˜ ê°€ì¥ í° ì´ìœ ëŠ” ë¬´ì—‡ì´ì—ˆë‹¤ê³  ë³´ë‚˜ìš”?",
         input_type="tag",
         options=None,
         required=True,
-        hint="¸¶ÄÉÆÃ, ÀÚ±İ, ½ÇÇà·Â, °æÀï, ½Ã°£ °°Àº ´Ü¾î·Î Àû¾îµµ µË´Ï´Ù.",
+        hint="ì •ë³´ ë¶€ì¡±, ìê¸ˆ, ê²½ìŸ, ì‹œê°„ ê°™ì€ ë‹¨ì–´ë¡œ ì ì–´ë„ ë©ë‹ˆë‹¤.",
     ),
     "difficulties": AgentAQuestionCard(
         slot="difficulties",
-        question="ÁøÇà Áß Æ¯È÷ ¾î·Á¿ü´ø Á¡À» 2~3°³¸¸ ´õ Àû¾îÁÖ¼¼¿ä.",
+        question="ì§„í–‰ ì¤‘ íŠ¹íˆ ì–´ë ¤ì› ë˜ ì ì„ 2~3ê°€ì§€ ì ì–´ì£¼ì„¸ìš”.",
         input_type="tag",
         options=None,
         required=True,
-        hint="°í°´ È®º¸, ¼öÀÍÈ­, Á¤º¸ ºÎÁ·, ¿î¿µ Áö¼Ó¼º °°Àº Ç¥ÇöÀÌ¸é ÃæºĞÇÕ´Ï´Ù.",
+        hint="ê³ ê° í™•ë³´, ìˆ˜ìµí™”, ìš´ì˜ ë¶€ë‹´, ì‹œê°„ ê´€ë¦¬ ê°™ì€ í‘œí˜„ì´ë©´ ì¶©ë¶„í•©ë‹ˆë‹¤.",
     ),
     "body_richness": AgentAQuestionCard(
         slot="body_richness",
-        question="½ÃÀÛ °è±â, ÁøÇà ¹æ½Ä, ¸·Èù ÁöÁ¡À» ÇÑµÎ ¹®Àå¸¸ ´õ ÀÚ¼¼È÷ Àû¾îÁÙ ¼ö ÀÖ³ª¿ä?",
+        question="ì‹œë„ ê³¼ì •, ì‹¤ì œ í–‰ë™, ê²°ê³¼ íë¦„ì„ í•œë‘ ë¬¸ë‹¨ ë” ìì„¸íˆ ì ì–´ì¤„ ìˆ˜ ìˆë‚˜ìš”?",
         input_type="text",
         options=None,
         required=True,
-        hint="±¸Ã¼ÀûÀÎ »óÈ²ÀÌ µé¾î°¡¸é ºĞ¼® Ç°ÁúÀÌ ÁÁ¾ÆÁı´Ï´Ù.",
+        hint="êµ¬ì²´ì ì¸ ìƒí™©ì´ ë“¤ì–´ê°€ë©´ ë¶„ì„ í’ˆì§ˆì´ ë†’ì•„ì§‘ë‹ˆë‹¤.",
     ),
 }
 
@@ -222,7 +222,7 @@ async def analyze_draft_with_agent_a(req: AgentAAnalyzeDraftRequest):
                 confidence=None,
                 plan_b_triggered=False,
             ),
-            message=None if should_ask else "ÃÊ¾È Á¤º¸°¡ ÃæºĞÇØ¼­ Ãß°¡ Áú¹® ¾øÀÌ ÁøÇàÇÒ ¼ö ÀÖ½À´Ï´Ù.",
+            message=None if should_ask else "ì´ˆì•ˆ ì •ë³´ê°€ ì¶©ë¶„í•´ì„œ ì¶”ê°€ ì§ˆë¬¸ ì—†ì´ ë°”ë¡œ ë¶„ì„í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Agent A draft analysis failed: {type(e).__name__}: {str(e)}")

@@ -26,24 +26,25 @@ public class AgentAService {
     private static final String STATUS_OK = "ok";
     private static final String STATUS_FALLBACK = "fallback";
     private static final String FALLBACK_MESSAGE =
-            "Áú¹® Ä«µå¸¦ »ı¼ºÇÏÁö ¸øÇß¾î¿ä. ±×´ë·Î ÁøÇàÇÏ°Å³ª Àá½Ã ÈÄ ´Ù½Ã ½ÃµµÇØ ÁÖ¼¼¿ä.";
+            "ì§ˆë¬¸ ì¹´ë“œë¥¼ ì¤€ë¹„í•˜ì§€ ëª»í–ˆì–´ìš”. ê·¸ëŒ€ë¡œ ì €ì¥í•˜ê±°ë‚˜ ì ì‹œ í›„ ë‹¤ì‹œ ì‹œë„í•´ ì£¼ì„¸ìš”.";
     private static final int QUESTION_TRIGGER_BODY_LENGTH = 180;
     private static final List<QuestionTemplate> QUESTION_TEMPLATES = List.of(
-            new QuestionTemplate("goal", "ÀÌ¹ø ±Û¿¡¼­ ¾ò°í ½ÍÀº °á°ú°¡ ¹«¾ùÀÎ°¡¿ä?", "text", null, true, "¿¹: ½ÇÆĞ ¿øÀÎ ºĞ¼®, ´ÙÀ½ ¹æÇâ Á¤¸®"),
-            new QuestionTemplate("timeline", "¾ó¸¶ µ¿¾È ½ÃµµÇß´ÂÁö ¾Ë·ÁÁÖ¼¼¿ä.", "select",
-                    List.of("1°³¿ù ¹Ì¸¸", "1~3°³¿ù", "3~6°³¿ù", "6°³¿ù ÀÌ»ó"), true, null),
-            new QuestionTemplate("budget", "½ÃÀÛÇÒ ¶§ µé¾î°£ ºñ¿ëÀº ¾î´À Á¤µµ¿´³ª¿ä?", "number", null, false,
-                    "´ë·«ÀûÀÎ ÃÑ¾×¸¸ Àû¾îµµ ÃæºĞÇÕ´Ï´Ù."),
-            new QuestionTemplate("target_customer", "ÁÖ¿ä °í°´ÀÌ³ª Å¸±êÀº ´©±¸¿´³ª¿ä?", "text", null, true, null),
-            new QuestionTemplate("obstacle", "°¡Àå Å©°Ô ¸·Çû´ø ÁöÁ¡À» Àû¾îÁÖ¼¼¿ä.", "tag", null, true,
-                    "¿©·¯ °³¶ó¸é ´ëÇ¥ 2~3°³¸¸ Àû¾îÁÖ¼¼¿ä."),
-            new QuestionTemplate("market", "½ÃÀå Á¶»ç³ª °æÀï ºĞ¼®Àº ¾î´À Á¤µµ Çß³ª¿ä?", "select",
-                    List.of("ÃæºĞÈ÷ Çß´Ù", "°£´ÜÈ÷ Çß´Ù", "°ÅÀÇ ¸ø Çß´Ù"), false, null),
-            new QuestionTemplate("channel", "»ç¿ëÇß´ø À¯ÀÔ Ã¤³ÎÀ» ¾Ë·ÁÁÖ¼¼¿ä.", "tag", null, false,
-                    "SNS, ºí·Î±×, ÁöÀÎ ¼Ò°³Ã³·³ Àû¾îµµ µË´Ï´Ù."),
-            new QuestionTemplate("result", "ÀÓ½Ã °á°ú³ª ¹İÀÀÀº ¾î¶®³ª¿ä?", "text", null, false,
-                    "¸ÅÃâ, ¹®ÀÇ, ¹İÀÀ ¼öÄ¡ Áß ¾Æ´Â Á¤µµ¸¸ Àû¾îÁÖ¼¼¿ä.")
+            new QuestionTemplate("goal", "ì´ë²ˆ ê¸€ì—ì„œ ì–»ê³  ì‹¶ì€ ê²°ê³¼ëŠ” ë¬´ì—‡ì¸ê°€ìš”?", "text", null, true, "ì˜ˆ: ì‹¤íŒ¨ ì›ì¸ ë¶„ì„, ë‹¤ìŒ ì‹œë„ ë°©í–¥ ì •ë¦¬"),
+            new QuestionTemplate("timeline", "ì´ ê²½í—˜ì„ ì–¼ë§ˆë‚˜ ì˜¤ë˜ ì‹œë„í–ˆëŠ”ì§€ ì•Œë ¤ì£¼ì„¸ìš”.", "select",
+                    List.of("1ê°œì›” ì´ë‚´", "1~3ê°œì›”", "3~6ê°œì›”", "6ê°œì›” ì´ìƒ"), true, null),
+            new QuestionTemplate("budget", "ì§€ê¸ˆê¹Œì§€ ì´ ë“¤ì–´ê°„ ë¹„ìš©ì€ ì–´ëŠ ì •ë„ì˜€ë‚˜ìš”?", "number", null, false,
+                    "ëŒ€ëµì ì¸ ê¸ˆì•¡ë§Œ ì ì–´ë„ ê´œì°®ìŠµë‹ˆë‹¤."),
+            new QuestionTemplate("target_customer", "ì£¼ìš” ê³ ê°ì´ë‚˜ íƒ€ê¹ƒì€ ëˆ„êµ¬ì˜€ë‚˜ìš”?", "text", null, true, null),
+            new QuestionTemplate("obstacle", "ê°€ì¥ í¬ê²Œ ë§‰í˜”ë˜ ë¬¸ì œë¥¼ ì§§ê²Œ ì ì–´ì£¼ì„¸ìš”.", "tag", null, true,
+                    "í•µì‹¬ ë¬¸ì œë¥¼ 2~3ê°œ ì •ë„ ì ì–´ì£¼ì„¸ìš”."),
+            new QuestionTemplate("market", "ì‹œì¥ ì¡°ì‚¬ë‚˜ ê²½ìŸ ë¶„ì„ì€ ì–´ëŠ ì •ë„ í–ˆë‚˜ìš”?", "select",
+                    List.of("ì¶©ë¶„íˆ í–ˆë‹¤", "ì¡°ê¸ˆë§Œ í–ˆë‹¤", "ê±°ì˜ ì•ˆ í–ˆë‹¤"), false, null),
+            new QuestionTemplate("channel", "ì‹œë„í–ˆë˜ í™ë³´ ì±„ë„ì„ ì•Œë ¤ì£¼ì„¸ìš”.", "tag", null, false,
+                    "SNS, ë¸”ë¡œê·¸, ì§€ì¸ ì†Œê°œì²˜ëŸ¼ ì ì–´ë„ ê´œì°®ìŠµë‹ˆë‹¤."),
+            new QuestionTemplate("result", "ë§¤ì¶œì´ë‚˜ ë°˜ì‘ì€ ì–´ë• ë‚˜ìš”?", "text", null, false,
+                    "ìˆ˜ìµ, ë¬¸ì˜, í´ë¦­ ê°™ì€ ê²°ê³¼ë¥¼ ì ì–´ì£¼ì„¸ìš”.")
     );
+
 
     private final CurrentUserProvider currentUserProvider;
     private final AgentARateLimiter rateLimiter;
@@ -100,7 +101,7 @@ public class AgentAService {
                             null,
                             false
                     ),
-                    needsQuestions ? null : "Áö±İ ÃÊ¾ÈÀº Ãß°¡ Áú¹® ¾øÀÌµµ ÁøÇà °¡´ÉÇÑ »óÅÂ¿¹¿ä."
+                    needsQuestions ? null : "ì´ˆì•ˆì´ ì¶©ë¶„í•´ ë³´ì—¬ì„œ ì¶”ê°€ ì§ˆë¬¸ ì—†ì´ ë°”ë¡œ ë¶„ì„í•  ìˆ˜ ìˆì–´ìš”."
             );
         } catch (RuntimeException exception) {
             return new AnalyzeDraftResponse(
@@ -155,22 +156,22 @@ public class AgentAService {
         ranked.add(findTemplate("goal"));
         ranked.add(findTemplate("obstacle"));
 
-        if (!containsAny(normalized, "°³¿ù", "month", "±â°£", "¿À·¡", "timeline")) {
+        if (!containsAny(normalized, "ê°œì›”", "month", "ê¸°ê°„", "ë™ì•ˆ", "timeline")) {
             ranked.add(findTemplate("timeline"));
         }
-        if (!containsAny(normalized, "¿ø", "¸¸¿ø", "ÅõÀÚ", "ºñ¿ë", "budget")) {
+        if (!containsAny(normalized, "ëˆ", "ë¹„ìš©", "ì˜ˆì‚°", "ì§€ì¶œ", "budget")) {
             ranked.add(findTemplate("budget"));
         }
-        if (!containsAny(normalized, "°í°´", "Å¸±ê", "´ë»ó", "buyer", "target")) {
+        if (!containsAny(normalized, "ê³ ê°", "íƒ€ê¹ƒ", "ëŒ€ìƒ", "buyer", "target")) {
             ranked.add(findTemplate("target_customer"));
         }
-        if (!containsAny(normalized, "½ÃÀå", "°æÀï", "Á¶»ç", "market")) {
+        if (!containsAny(normalized, "ì‹œì¥", "ê²½ìŸ", "ë¶„ì„", "market")) {
             ranked.add(findTemplate("market"));
         }
-        if (!containsAny(normalized, "±¤°í", "¸¶ÄÉÆÃ", "Ã¤³Î", "sns", "ºí·Î±×")) {
+        if (!containsAny(normalized, "í™ë³´", "ì±„ë„", "sns", "ë¸”ë¡œê·¸")) {
             ranked.add(findTemplate("channel"));
         }
-        if (!containsAny(normalized, "¸ÅÃâ", "°á°ú", "¼º°ú", "¹İÀÀ", "¹®ÀÇ")) {
+        if (!containsAny(normalized, "ë§¤ì¶œ", "ìˆ˜ìµ", "ë°˜ì‘", "ê²°ê³¼")) {
             ranked.add(findTemplate("result"));
         }
 
