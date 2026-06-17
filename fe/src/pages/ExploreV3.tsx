@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type MouseEvent, type WheelEvent } from 'react';
+import { X } from 'lucide-react';
 import BottomNav from '../components/layout/BottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Arrow left.svg';
@@ -13,6 +14,8 @@ import plusIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검�
 import searchNavIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
 import userIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
 import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
+import edit3FabIcon from '../assets/explore-figma/edit.svg';
+import subtractFabIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import {
@@ -117,19 +120,16 @@ function handleHorizontalWheel(event: WheelEvent<HTMLDivElement>) {
     return;
   }
 
+  event.preventDefault();
+  event.stopPropagation();
+
   const maxScrollLeft = container.scrollWidth - container.clientWidth;
   if (maxScrollLeft <= 0) {
     return;
   }
 
   const nextScrollLeft = Math.min(maxScrollLeft, Math.max(0, container.scrollLeft + event.deltaY));
-  if (nextScrollLeft === container.scrollLeft) {
-    return;
-  }
-
   container.scrollLeft = nextScrollLeft;
-  event.preventDefault();
-  event.stopPropagation();
 }
 
 function stopEvent(event: MouseEvent<HTMLElement>) {
@@ -991,6 +991,8 @@ function SharedFooterArea({
   fabOpen: boolean;
   onToggleFab: () => void;
 }) {
+  const navigate = useNavigate();
+
   return (
     <BottomNav
       active="explore"
@@ -1022,17 +1024,52 @@ function SharedFooterArea({
               );
             })}
           </div>
-          <button
-            type="button"
-            onClick={onToggleFab}
-            className="pointer-events-auto flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full bg-[#5A876E] shadow-[0px_4px_12px_rgba(90,135,110,0.24)]"
-          >
-            <img
-              src={plusIcon}
-              alt=""
-              className={`h-[20px] w-[20px] transition-transform ${fabOpen ? 'rotate-45' : ''}`}
-            />
-          </button>
+          <div className="relative flex h-[36px] w-[36px] shrink-0 items-center justify-center">
+            <div
+              className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+                fabOpen
+                  ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
+                  : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => navigate('/coming-soon')}
+                className="flex items-center gap-[8px] whitespace-nowrap"
+              >
+                <img src={subtractFabIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">
+                  AI 챗봇
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate('/create')}
+                className="flex items-center gap-[8px] whitespace-nowrap"
+              >
+                <img src={edit3FabIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">
+                  경험 작성
+                </span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              aria-label={fabOpen ? '경험 작성 메뉴 닫기' : '경험 작성 메뉴 열기'}
+              aria-expanded={fabOpen}
+              onClick={onToggleFab}
+              className={`pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full ${
+                fabOpen ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
+              }`}
+            >
+              {fabOpen ? (
+                <X size={20} strokeWidth={2.2} color="#FFFFFF" />
+              ) : (
+                <img src={plusIcon} alt="" className="h-[18px] w-[18px]" />
+              )}
+            </button>
+          </div>
         </>
       }
     />

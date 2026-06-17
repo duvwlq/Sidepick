@@ -2,7 +2,7 @@
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import editIcon from '../../assets/figma-downloaded-icons/home/Edit 3.svg';
+import editIcon from '../../assets/explore-figma/edit.svg';
 import guideIcon from '../../assets/figma-downloaded-icons/home/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
 import homeIcon from '../../assets/figma-downloaded-icons/home/Home.svg';
 import plusIcon from '../../assets/figma-downloaded-icons/home/Plus.svg';

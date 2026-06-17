@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+import { BrowserRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
 import FlashToastListener from './components/common/FlashToastListener';
 import ComingSoonPage from './pages/ComingSoonPage';
 import Create from './pages/Create';
@@ -32,10 +33,21 @@ import ExploreFigmaMainPage from './pages/ExploreFigmaMainPage';
 import SearchPage from './pages/SearchPage';
 import SuccessComparisonPage from './pages/SuccessComparisonPage';
 
+function ScrollToTopOnRouteChange() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname]);
+
+  return null;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <AuthFlowProvider>
+        <ScrollToTopOnRouteChange />
         <FlashToastListener />
         <Routes>
           <Route path="/" element={<HomeV2 />} />

@@ -6,9 +6,13 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
+import accountCircleZipIcon from '../assets/detail-v1-icons/account-circle.svg';
+import aiGuideSymbolZipIcon from '../assets/detail-v1-icons/ai-guide-symbol.svg';
+import clockZipIcon from '../assets/detail-v1-icons/clock.svg';
+import dollarSignZipIcon from '../assets/detail-v1-icons/dollar-sign.svg';
+import headerBookmarkZipIcon from '../assets/detail-v1-icons/icon-bookmark.svg';
+import moreVerticalZipIcon from '../assets/detail-v1-icons/more-vertical.svg';
+import uploadZipIcon from '../assets/detail-v1-icons/upload.svg';
 import aiGuideStarIcon from '../assets/detail-v1-figma/ai-guide-star.svg';
 import clockIcon from '../assets/detail-v1-figma/clock.svg';
 import dollarSignIcon from '../assets/detail-v1-figma/dollar-sign.svg';
@@ -22,6 +26,7 @@ import { ErrorState, LoadingState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
 import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
+import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import userIcon from '../assets/home-v1-figma/icons/user-figma.svg';
 import {
   bookmarkExperience,
@@ -30,7 +35,9 @@ import {
   getExperience,
   getExperienceShare,
   getRelatedSuccessCases,
+  getSimilarExperiences,
   type Experience,
+  type SimilarExperienceMatch,
   unbookmarkExperience,
 } from '../lib/api';
 import { publishBookmarkSync } from '../lib/bookmark-sync';
@@ -167,21 +174,6 @@ function buildPatternRows(experience: Experience) {
     { label: unique[1], percent: 30 },
     { label: unique[2], percent: 20 },
   ];
-}
-
-function StatusBarV1() {
-  return (
-    <div className="flex h-[59px] w-full items-center px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex h-[22px] min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] tracking-[0px] text-black">9:41</span>
-      </div>
-      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-      </div>
-    </div>
-  );
 }
 
 function MetricStatColumn({
@@ -347,6 +339,7 @@ export default function DetailV1() {
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successCases, setSuccessCases] = useState<Experience[]>([]);
+  const [similarCases, setSimilarCases] = useState<SimilarExperienceMatch[]>([]);
   const [fabExpanded, setFabExpanded] = useState(false);
 
   const isOwner = useMemo(() => {
@@ -390,6 +383,19 @@ export default function DetailV1() {
           }
         } else {
           setBookmarked(false);
+        }
+
+        try {
+          const similar = await getSimilarExperiences(payload.id, 2);
+          if (!cancelled) {
+            setSimilarCases(
+              similar.filter((item) => item.similarExperience.id !== payload.id),
+            );
+          }
+        } catch {
+          if (!cancelled) {
+            setSimilarCases([]);
+          }
         }
 
         try {
@@ -564,7 +570,6 @@ export default function DetailV1() {
 
       <div className="relative min-h-screen bg-white">
         <div className="sticky top-0 z-30 bg-white">
-          <StatusBarV1 />
           <div className="flex h-[64px] items-center justify-between bg-white px-[16px] py-[20px]">
             <button
               type="button"
@@ -597,19 +602,17 @@ export default function DetailV1() {
         <main className="flex flex-col gap-[12px] pb-[188px]">
           <section className="bg-white px-[16px] py-[12px]">
             <div className="flex flex-col gap-[24px]">
-              <div className="flex items-center justify-between gap-[12px]">
-                <div className="flex min-w-0 items-center gap-[8px]">
+              <div className="flex items-start justify-between gap-[12px]">
+                <div className="flex min-w-0 items-start gap-[8px]">
                   {experience.author.profileImage ? (
                     <img src={experience.author.profileImage} alt="" className="h-[40px] w-[40px] rounded-full object-cover" />
                   ) : (
-                    <div className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#D9D9D9]">
-                      <img src={userIcon} alt="" className="h-[24px] w-[24px] opacity-60" style={{ filter: 'grayscale(1)' }} />
-                    </div>
+                    <img src={accountCircleZipIcon} alt="" className="h-[40px] w-[40px] shrink-0" />
                   )}
 
-                  <div className="flex min-w-0 flex-col gap-[2px] pt-[1px]">
+                  <div className="flex min-w-0 flex-col gap-[2px] pt-[2px]">
                     <div className="flex items-center gap-[4px] font-['Pretendard'] text-[12px] leading-[16.8px] tracking-[0px]">
-                      <span className="truncate font-[600] text-[#131416]">{sanitizeText(experience.author.nickname, '닉네임')}</span>
+                      <span className="truncate font-[500] text-[#131416]">{sanitizeText(experience.author.nickname, '닉네임')}</span>
                       <span className="shrink-0 font-[400] text-[#BABABA]">{formatDate(experience.createdAt)}</span>
                     </div>
                     <p className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
@@ -618,14 +621,14 @@ export default function DetailV1() {
                   </div>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-[4px]">
+                <div className="flex shrink-0 items-start gap-[4px] pt-[2px]">
                   <button
                     type="button"
                     onClick={() => void handleShare()}
                     className="flex h-[20px] w-[20px] items-center justify-center text-[#1E1E1E]"
                     aria-label="공유"
                   >
-                    <Upload size={20} strokeWidth={1.8} />
+                    <img src={uploadZipIcon} alt="" className="h-[20px] w-[20px]" />
                   </button>
 
                   {isOwner ? (
@@ -637,7 +640,7 @@ export default function DetailV1() {
                         aria-label="더보기"
                       >
                         <span className="relative h-[20px] w-[20px]">
-                          <img src={moreVerticalIcon} alt="" className="absolute left-[8.667px] top-[2.833px] h-[14.333px] w-[2.667px]" />
+                          <img src={moreVerticalZipIcon} alt="" className="absolute left-[8.667px] top-[2.833px] h-[14.333px] w-[2.667px]" />
                         </span>
                       </button>
 
@@ -687,7 +690,11 @@ export default function DetailV1() {
               ) : null}
 
               <CaseChipRow>
-                <CaseChip label={tags[0] ?? '부업'} tone="type" maxWidthClassName="max-w-[44px]" />
+                <CaseChip
+                  label={experience.caseStatus === 'SUCCESS' ? '성공' : '실패'}
+                  tone={experience.caseStatus === 'SUCCESS' ? 'status-success' : 'status-failure'}
+                  maxWidthClassName="max-w-[44px]"
+                />
                 <CaseChip label={tags[1] ?? '카테고리'} tone="category" maxWidthClassName="max-w-[116px]" />
                 <CaseChip label={tags[2] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
                 <CaseChip label={tags[3] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
@@ -695,31 +702,19 @@ export default function DetailV1() {
 
               <div className="flex items-stretch gap-[8px] rounded-[4px] bg-white">
                 <MetricStatColumn
-                  icon={
-                    <span className="relative h-[16px] w-[16px]">
-                      <img src={clockIcon} alt="" className="absolute left-[0.583px] top-[0.583px] h-[14.833px] w-[14.833px]" />
-                    </span>
-                  }
+                  icon={<img src={clockZipIcon} alt="" className="h-[16px] w-[16px]" />}
                   value={formatDurationValue(experience.durationMonths)}
                   label="진행 기간"
                 />
                 <p className="self-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#D8D8D8]">ㅣ</p>
                 <MetricStatColumn
-                  icon={
-                    <span className="relative h-[16px] w-[16px]">
-                      <img src={dollarSignIcon} alt="" className="absolute left-[3.25px] top-[-0.083px] h-[16.167px] w-[9.5px]" />
-                    </span>
-                  }
+                  icon={<img src={dollarSignZipIcon} alt="" className="h-[16px] w-[16px]" />}
                   value={formatMoneyValue(experience.investmentAmount)}
                   label="투자금"
                 />
                 <p className="self-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#D8D8D8]">ㅣ</p>
                 <MetricStatColumn
-                  icon={
-                    <span className="relative h-[16px] w-[16px]">
-                      <img src={dollarSignIcon} alt="" className="absolute left-[3.25px] top-[-0.083px] h-[16.167px] w-[9.5px]" />
-                    </span>
-                  }
+                  icon={<img src={dollarSignZipIcon} alt="" className="h-[16px] w-[16px]" />}
                   value={formatMoneyValue(experience.monthlyRevenue)}
                   label="수익"
                 />
@@ -742,7 +737,7 @@ export default function DetailV1() {
             <div className="rounded-[10px] border border-[#EEEEEE] border-b-[2px] border-b-[#5A876E] bg-white px-[16px] py-[16px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
               <div className="flex w-[311px] items-center gap-[4px]">
                 <div className="flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[4px] bg-gradient-to-b from-[#92BFA6] to-[#5A876E]">
-                  <img src={aiGuideStarIcon} alt="" className="h-[12.201px] w-[12px]" />
+                  <img src={aiGuideSymbolZipIcon} alt="" className="h-[12.201px] w-[12px]" />
                 </div>
                 <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#5A876E]">AI 가이드</p>
               </div>
@@ -751,20 +746,20 @@ export default function DetailV1() {
                 {sanitizeText(experience.analysis?.structuredSummary, '실패 원인을 정리하고 다음 행동으로 이어질 수 있도록 핵심 포인트를 추렸습니다.')}
               </p>
 
-              <div className="mb-[12px] mt-[8px] h-px w-[311px] bg-[#D8D8D8]" />
+              <div className="mb-[14px] mt-[10px] h-px w-[311px] bg-[#D8D8D8]" />
 
-              <div className="flex w-[311px] flex-col gap-[10px]">
+              <div className="flex w-[311px] flex-col gap-[12px]">
                 {guideLines.map((line, index) => (
                   <p
                     key={`${index}-${line}`}
-                    className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]"
+                    className="font-['Pretendard'] text-[12px] font-[500] leading-[18px] tracking-[0px] text-[#494949]"
                   >
-                    {line}
+                    {index + 1}. {line}
                   </p>
                 ))}
               </div>
 
-              <div className="w-[311px] pt-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
+              <div className="w-[311px] pt-[12px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
                 <p>처음에는 작은 시도들이 쌓이면서 변화가 생기기 때문에</p>
                 <p>하루에 한 가지씩만 꾸준히 시도해도 충분합니다.</p>
               </div>
@@ -774,10 +769,12 @@ export default function DetailV1() {
           <section className="bg-white px-[16px] pb-[20px] pt-[10px]">
             <SectionBlockTitle title="실패 패턴" description="유사 카테고리 내 실패 원인 별 비중 그래프 데이터입니다." />
             <div className="pt-[10px]">
-              <div className="flex flex-col gap-[16px]">
-                {patternRows.map((item) => (
-                  <PatternRow key={item.label} label={item.label} percent={item.percent} />
-                ))}
+              <div className="rounded-[10px] bg-[#F8F8F8] px-[16px] py-[16px]">
+                <div className="flex flex-col gap-[16px]">
+                  {patternRows.map((item) => (
+                    <PatternRow key={item.label} label={item.label} percent={item.percent} />
+                  ))}
+                </div>
               </div>
             </div>
           </section>
@@ -796,18 +793,34 @@ export default function DetailV1() {
                 <div className="pb-[4px]">
                   <p className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#5A876E]">실패 사례</p>
                 </div>
-                <SimilarCaseCard
-                  title={sanitizeText(experience.title, '제목')}
-                  summary={sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
-                  tags={buildTopTags(experience).slice(1)}
-                  success={false}
-                  likeCount={experience.likeCount}
-                  bookmarkCount={experience.bookmarkCount ?? 0}
-                  viewCount={experience.viewCount}
-                  author={sanitizeText(experience.author.nickname, '닉네임')}
-                  createdAt={formatDate(experience.createdAt)}
-                  onClick={() => navigate(`/experiences/${experience.id}`)}
-                />
+                {similarCases.length ? (
+                  <div className="flex flex-col gap-[4px]">
+                    {similarCases.slice(0, 1).map((item) => {
+                      const similarExperience = item.similarExperience;
+
+                      return (
+                        <SimilarCaseCard
+                          key={similarExperience.id}
+                          title={sanitizeText(similarExperience.title, '제목')}
+                          summary={sanitizeText(stripImageMarkdown(similarExperience.content), '본문 텍스트 미리보기')}
+                          tags={buildTopTags(similarExperience).slice(1)}
+                          success={false}
+                          likeCount={similarExperience.likeCount}
+                          bookmarkCount={similarExperience.bookmarkCount ?? 0}
+                          viewCount={similarExperience.viewCount}
+                          author={sanitizeText(similarExperience.author.nickname, '닉네임')}
+                          createdAt={formatDate(similarExperience.createdAt)}
+                          similarity={Math.round(item.similarityScore * 100)}
+                          onClick={() => navigate(`/experiences/${similarExperience.id}`)}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="rounded-[4px] bg-[#F8F8F8] px-[14px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+                    아직 연결된 유사 실패 사례가 없어요.
+                  </div>
+                )}
               </div>
 
               <div className="flex w-[311px] flex-col gap-[4px]">
@@ -839,8 +852,14 @@ export default function DetailV1() {
                 )}
               </div>
 
-              <div className="flex justify-center">
-                <CaseTextLink label="모든 사례 보기" onClick={() => navigate('/explore')} />
+              <div className="flex justify-center pt-[4px]">
+                <button
+                  type="button"
+                  onClick={() => navigate('/explore')}
+                  className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#5D5D5D]"
+                >
+                  모든 사례 보기
+                </button>
               </div>
               </div>
             </div>
@@ -870,15 +889,26 @@ export default function DetailV1() {
 
           <div className="pointer-events-auto relative h-[36px] w-[36px] shrink-0">
             {fabExpanded ? (
-              <button
-                type="button"
-                onClick={handleCreateClick}
-                className="pointer-events-auto absolute right-0 top-[-52px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-                aria-label="경험 작성 열기"
-              >
-                <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
-              </button>
+              <div className="pointer-events-auto absolute right-[-10px] top-[-96px] flex w-max flex-col items-start gap-[12px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]">
+                <button
+                  type="button"
+                  onClick={() => navigate('/coming-soon')}
+                  className="flex items-center gap-[8px] whitespace-nowrap"
+                  aria-label="AI 챗봇 열기"
+                >
+                  <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateClick}
+                  className="flex items-center gap-[8px] whitespace-nowrap"
+                  aria-label="경험 작성 열기"
+                >
+                  <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
+                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
+                </button>
+              </div>
             ) : null}
 
             <button
