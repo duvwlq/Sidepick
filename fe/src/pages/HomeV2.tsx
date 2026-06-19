@@ -76,6 +76,19 @@ const previewClampStyle = {
   whiteSpace: 'nowrap' as const,
 } as const;
 
+function buildMaskIconStyle(iconUrl: string) {
+  return {
+    WebkitMaskImage: `url("${iconUrl}")`,
+    maskImage: `url("${iconUrl}")`,
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+    WebkitMaskPosition: 'center',
+    maskPosition: 'center',
+    WebkitMaskSize: 'contain',
+    maskSize: 'contain',
+  } as const;
+}
+
 function handleHorizontalWheelScroll(event: WheelEvent<HTMLDivElement>) {
   const container = event.currentTarget;
 
@@ -476,7 +489,11 @@ function StoryMeta({
           >
             <div className="flex shrink-0 items-center gap-[2px]">
               <div className="flex h-[20px] w-[20px] shrink-0 items-center justify-center">
-                <img src={heartIcon} alt="" className="h-[14px] w-[14px] shrink-0" />
+                <span
+                  aria-hidden="true"
+                  className={`block h-[14px] w-[14px] ${heartActive ? 'bg-[#5A876E]' : 'bg-[#8A8A8A]'}`}
+                  style={buildMaskIconStyle(heartIcon)}
+                />
               </div>
               <p
                 className="shrink-0 whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]"
