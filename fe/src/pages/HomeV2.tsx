@@ -243,6 +243,12 @@ const homeReviewCategoryCardsExact: CategoryCardData[] = [
   },
   {
     id: 6,
+    title: '투자·재테크',
+    lines: ['주식, 코인, ETF, P2P 투자', '부동산 소액 투자 등'],
+    image: categoryPlatformImage,
+  },
+  {
+    id: 7,
     title: '오프라인 기반 부업',
     lines: ['공방, 핸드메이드, 플리마켓 판매', '오프라인 클래스 운영 등'],
     image: categoryCommerceImage,
@@ -348,6 +354,9 @@ function CategorySection({
   onToggleExpanded: () => void;
 }) {
   const visibleCards = expanded ? cards : cards.slice(0, 4);
+  const cardRows = Array.from({ length: Math.ceil(visibleCards.length / 2) }, (_, index) =>
+    visibleCards.slice(index * 2, index * 2 + 2),
+  );
 
   return (
     <section
@@ -366,30 +375,13 @@ function CategorySection({
         </Link>
       </div>
       <div className="mt-[16px] flex w-[343px] flex-col gap-[10px]">
-        <div className="flex gap-[10px]">
-          {visibleCards.slice(0, 2).map((card) => (
-            <CategoryCard key={card.id} card={card} />
-          ))}
-        </div>
-        <div className="flex gap-[10px]">
-          {visibleCards.slice(2, 4).map((card) => (
-            <CategoryCard key={card.id} card={card} />
-          ))}
-        </div>
-        {expanded ? (
-          <>
-            <div className="flex gap-[10px]">
-              {visibleCards.slice(4, 6).map((card) => (
-                <CategoryCard key={card.id} card={card} />
-              ))}
-            </div>
-            <div className="flex gap-[10px]">
-              {visibleCards.slice(6, 8).map((card) => (
-                <CategoryCard key={card.id} card={card} />
-              ))}
-            </div>
-          </>
-        ) : null}
+        {cardRows.map((row, index) => (
+          <div key={`category-row-${index}`} className="flex gap-[10px]">
+            {row.map((card) => (
+              <CategoryCard key={card.id} card={card} />
+            ))}
+          </div>
+        ))}
       </div>
       <div className="flex w-[343px] justify-center pt-[16px]">
         <button
@@ -1120,5 +1112,4 @@ export default function HomeV2() {
     </div>
   );
 }
-
 
