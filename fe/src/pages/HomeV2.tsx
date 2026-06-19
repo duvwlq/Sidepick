@@ -305,7 +305,7 @@ function HomeHeader({ hasUnreadNotifications = true }: { hasUnreadNotifications?
             className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#BABABA]"
             style={textFeatureStyle}
           >
-            원하는 실패 사례를 검색해보세요!
+            원하는 사례를 검색해보세요!
           </span>
           <img src={searchIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
         </button>
