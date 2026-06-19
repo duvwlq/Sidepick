@@ -95,43 +95,28 @@ export function SignupField({
   placeholder,
   suffix,
   fieldHeight = 40,
-  value,
   className = '',
   ...props
 }: SignupFieldProps) {
-  const hasValue = typeof value === 'string' && value.length > 0;
-
   return (
     <div className="flex w-full flex-col gap-[4px]">
       <span className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-black">{label}</span>
 
       <label className={`relative block w-full ${className}`}>
-        <div
-          className="flex w-full items-center justify-between rounded-[10px] bg-[#F8F8F8] px-[16px] py-[10px]"
-          style={{ height: `${fieldHeight}px` }}
-        >
-          <span
-            className={`pointer-events-none min-w-0 flex-1 truncate font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] ${
-              hasValue ? 'text-[#494949]' : 'text-[#BABABA]'
-            }`}
-          >
-            {hasValue ? value : placeholder}
-          </span>
-
-          {suffix ? (
-            <span className="pointer-events-none ml-[8px] shrink-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
-              {suffix}
-            </span>
-          ) : null}
-        </div>
-
         <input
-          value={value}
-          className={`absolute inset-0 h-full w-full border-0 bg-transparent px-[16px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-transparent caret-black outline-none placeholder:text-transparent ${
+          className={`h-full w-full rounded-[10px] border-0 bg-[#F8F8F8] px-[16px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-[#494949] caret-black outline-none placeholder:text-[#BABABA] ${
             suffix ? 'pr-[64px]' : ''
           }`}
+          style={{ height: `${fieldHeight}px` }}
+          placeholder={placeholder}
           {...props}
         />
+
+        {suffix ? (
+          <span className="pointer-events-none absolute right-[16px] top-1/2 -translate-y-1/2 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
+            {suffix}
+          </span>
+        ) : null}
       </label>
     </div>
   );
