@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import avatarPlaceholderIcon from '../../assets/mypage-overview-figma/avatar-placeholder.svg';
 import cameraIcon from '../../assets/mypage-overview-figma/camera.svg';
@@ -67,12 +67,19 @@ export default function SignupNicknameStepPage() {
   const signupMode = parseSignupMode(location.search);
   const nextPath = parseNextPath(location.search);
   const storedUser = useMemo(() => getStoredUser(), []);
+  const seededSocialNicknameRef = useRef(false);
 
   useEffect(() => {
     updateField('signupMode', signupMode);
-    if (signupMode === 'social' && !form.nickname.trim() && storedUser?.nickname) {
+    if (
+      signupMode === 'social' &&
+      !seededSocialNicknameRef.current &&
+      !form.nickname.trim() &&
+      storedUser?.nickname
+    ) {
       updateField('nickname', storedUser.nickname);
       updateField('nicknameChecked', true);
+      seededSocialNicknameRef.current = true;
     }
   }, [form.nickname, signupMode, storedUser, updateField]);
 

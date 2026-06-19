@@ -7,7 +7,7 @@ import { useAuthFlow } from '../../context/useAuthFlow';
 import { register, updateMe } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
-import { clearSession, getAccessToken, getRefreshToken, getStoredUser, saveSession, saveStoredUser } from '../../lib/session';
+import { getAccessToken, getRefreshToken, getStoredUser, saveSession, saveStoredUser } from '../../lib/session';
 import { deriveAgeGroup, parseNextPath, parseSignupMode, PURPOSE_OPTIONS } from './signup-flow';
 
 function PurposeButton({
@@ -99,10 +99,9 @@ export default function SignupPurposePage() {
         });
         saveSession(accessToken, refreshToken, payload.user);
         saveStoredUser(payload.user);
-        setFlashToast('프로필 설정이 완료되었습니다. 다시 간편 로그인해 주세요.');
-        clearSession();
+        setFlashToast(`환영해요, ${payload.user.nickname}님`);
         reset();
-        navigate(`/auth?next=${encodeURIComponent(nextPath)}`, { replace: true });
+        navigate(nextPath, { replace: true });
         return;
       }
 
