@@ -1379,7 +1379,6 @@ export default function ExploreV3() {
       { replace: true },
     );
   }
-
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto w-full max-w-[375px]">
