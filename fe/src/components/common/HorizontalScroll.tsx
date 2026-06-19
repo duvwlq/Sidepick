@@ -44,6 +44,8 @@ export default function HorizontalScroll({
         scrollLeft: scroller.scrollLeft,
         dragging: false,
       };
+
+      scroller.setPointerCapture(event.pointerId);
     }
 
     function handlePointerMove(event: PointerEvent) {
@@ -59,7 +61,6 @@ export default function HorizontalScroll({
           return;
         }
         dragState.dragging = true;
-        scroller.setPointerCapture(event.pointerId);
       }
 
       event.preventDefault();
@@ -67,7 +68,7 @@ export default function HorizontalScroll({
     }
 
     function resetPointer(event?: PointerEvent) {
-      if (event && dragState?.dragging && scroller.hasPointerCapture(event.pointerId)) {
+      if (event && scroller.hasPointerCapture(event.pointerId)) {
         scroller.releasePointerCapture(event.pointerId);
       }
       dragState = undefined;
@@ -87,6 +88,8 @@ export default function HorizontalScroll({
         return;
       }
 
+      event.preventDefault();
+
       const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
       const nextScrollLeft = Math.min(maxScrollLeft, Math.max(0, scroller.scrollLeft + nextDelta));
 
@@ -94,7 +97,6 @@ export default function HorizontalScroll({
         return;
       }
 
-      event.preventDefault();
       scroller.scrollLeft = nextScrollLeft;
     }
 
@@ -102,6 +104,7 @@ export default function HorizontalScroll({
     scroller.addEventListener('pointermove', handlePointerMove);
     scroller.addEventListener('pointerup', resetPointer);
     scroller.addEventListener('pointercancel', resetPointer);
+    scroller.addEventListener('lostpointercapture', resetPointer);
     scroller.addEventListener('wheel', handleWheel, { passive: false });
 
     return () => {
@@ -109,6 +112,7 @@ export default function HorizontalScroll({
       scroller.removeEventListener('pointermove', handlePointerMove);
       scroller.removeEventListener('pointerup', resetPointer);
       scroller.removeEventListener('pointercancel', resetPointer);
+      scroller.removeEventListener('lostpointercapture', resetPointer);
       scroller.removeEventListener('wheel', handleWheel);
     };
   }, []);
