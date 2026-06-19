@@ -13,6 +13,8 @@ import plusIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검�
 import searchNavIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
 import userIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
 import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
+import editIcon from '../assets/figma-downloaded-icons/home/Edit 3.svg';
+import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import {
@@ -985,11 +987,15 @@ function SharedFooterArea({
   onSelectFeedMode,
   fabOpen,
   onToggleFab,
+  onOpenGuide,
+  onCreateClick,
 }: {
   feedMode: FeedMode;
   onSelectFeedMode: (mode: FeedMode) => void;
   fabOpen: boolean;
   onToggleFab: () => void;
+  onOpenGuide: () => void;
+  onCreateClick: () => void;
 }) {
   return (
     <BottomNav
@@ -1022,17 +1028,38 @@ function SharedFooterArea({
               );
             })}
           </div>
-          <button
-            type="button"
-            onClick={onToggleFab}
-            className="pointer-events-auto flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-full bg-[#5A876E] shadow-[0px_4px_12px_rgba(90,135,110,0.24)]"
-          >
-            <img
-              src={plusIcon}
-              alt=""
-              className={`h-[20px] w-[20px] transition-transform ${fabOpen ? 'rotate-45' : ''}`}
-            />
-          </button>
+          <div className="relative flex h-[36px] w-[36px] shrink-0 items-center justify-center">
+            <div
+              className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+                fabOpen
+                  ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
+                  : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
+              }`}
+            >
+              <button type="button" onClick={onOpenGuide} className="flex items-center gap-[8px] whitespace-nowrap">
+                <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
+              </button>
+              <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
+                <img src={editIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={onToggleFab}
+              aria-label={fabOpen ? '경험 작성 메뉴 닫기' : '경험 작성 메뉴 열기'}
+              aria-expanded={fabOpen}
+              className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E] shadow-[0px_4px_12px_rgba(90,135,110,0.24)]"
+            >
+              <img
+                src={plusIcon}
+                alt=""
+                className={`h-[20px] w-[20px] transition-transform ${fabOpen ? 'rotate-45' : ''}`}
+              />
+            </button>
+          </div>
         </>
       }
     />
@@ -1317,6 +1344,26 @@ export default function ExploreV3() {
     }
   }
 
+  function handleOpenGuide() {
+    setFabOpen(false);
+    navigate('/faq');
+  }
+
+  function handleCreateClick() {
+    setFabOpen(false);
+
+    if (!accessToken) {
+      navigate(
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
+          '경험 작성은 로그인이 필요한 서비스입니다.',
+        )}`,
+      );
+      return;
+    }
+
+    navigate('/create');
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto w-full max-w-[375px]">
@@ -1389,6 +1436,8 @@ export default function ExploreV3() {
           onSelectFeedMode={setFeedMode}
           fabOpen={fabOpen}
           onToggleFab={() => setFabOpen((prev) => !prev)}
+          onOpenGuide={handleOpenGuide}
+          onCreateClick={handleCreateClick}
         />
       </div>
     </div>
