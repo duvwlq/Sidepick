@@ -318,7 +318,7 @@ function CategoryCard({ card }: { card: CategoryCardData }) {
   return (
     <Link
       to={`/explore?categoryId=${card.id}`}
-      className="relative flex h-[160px] min-w-0 flex-1 flex-col justify-end overflow-hidden rounded-[10px] p-[16px]"
+      className="relative flex h-[160px] w-[166.5px] shrink-0 flex-col justify-end overflow-hidden rounded-[10px] p-[16px]"
     >
       <img src={card.image} alt="" className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_0%,#000000_100%)]" />
@@ -380,6 +380,12 @@ function CategorySection({
             {row.map((card) => (
               <CategoryCard key={card.id} card={card} />
             ))}
+            {row.length === 1 ? (
+              <div
+                className="relative flex h-[160px] w-[166.5px] shrink-0 overflow-hidden rounded-[10px] opacity-0"
+                aria-hidden="true"
+              />
+            ) : null}
           </div>
         ))}
       </div>
@@ -1112,4 +1118,3 @@ export default function HomeV2() {
     </div>
   );
 }
-

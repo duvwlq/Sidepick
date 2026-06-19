@@ -1070,6 +1070,7 @@ void FooterArea;
 
 export default function ExploreV3() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
   const accessToken = getAccessToken();
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
@@ -1087,6 +1088,24 @@ export default function ExploreV3() {
   const [patternStats, setPatternStats] = useState<FailurePatternStatsPayload | null>(null);
   const [timingStats, setTimingStats] = useState<FailureTimingStatsPayload | null>(null);
   const [interactionById, setInteractionById] = useState<Record<number, CardInteractionState>>({});
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const rawCategoryId = params.get('categoryId');
+
+    if (!rawCategoryId) {
+      setSelectedCategoryId(null);
+      return;
+    }
+
+    const nextCategoryId = Number(rawCategoryId);
+    if (!Number.isFinite(nextCategoryId)) {
+      setSelectedCategoryId(null);
+      return;
+    }
+
+    setSelectedCategoryId(nextCategoryId);
+  }, [location.search]);
 
   useEffect(() => {
     let active = true;
@@ -1364,6 +1383,25 @@ export default function ExploreV3() {
     navigate('/create');
   }
 
+  function handleSelectCategory(categoryId: number | null) {
+    const params = new URLSearchParams(location.search);
+
+    if (categoryId === null) {
+      params.delete('categoryId');
+    } else {
+      params.set('categoryId', String(categoryId));
+    }
+
+    const nextSearch = params.toString();
+    navigate(
+      {
+        pathname: '/explore',
+        search: nextSearch ? `?${nextSearch}` : '',
+      },
+      { replace: true },
+    );
+  }
+
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto w-full max-w-[375px]">
@@ -1373,7 +1411,7 @@ export default function ExploreV3() {
             resultCount={resultCount}
             sortKey={sortKey}
             sortOpen={sortOpen}
-            onSelectCategory={setSelectedCategoryId}
+            onSelectCategory={handleSelectCategory}
             onToggleSort={() => setSortOpen((prev) => !prev)}
             onSelectSort={(value) => {
               setSortKey(value);
