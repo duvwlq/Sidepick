@@ -2,18 +2,18 @@ import { useEffect, useMemo, useState, type MouseEvent, type WheelEvent } from '
 import { X } from 'lucide-react';
 import BottomNav from '../components/layout/BottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
-import arrowLeftIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Arrow left.svg';
-import chevronDownIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Chevron down.svg';
-import filterIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/tune_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24 1.svg';
+import arrowLeftIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Arrow left.svg';
+import chevronDownIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Chevron down.svg';
+import filterIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/tune_24dp_1F1F1F_FILL0_wght400_GRAD0_opsz24 1.svg';
 import helpIcon from '../assets/explore-figma/help.svg';
-import bookmarkIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Bookmark.svg';
-import guideIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
-import heartIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Heart.svg';
-import homeIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Home.svg';
-import plusIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Plus.svg';
-import searchNavIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
-import userIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
-import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
+import bookmarkIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Bookmark.svg';
+import guideIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
+import heartIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Heart.svg';
+import homeIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Home.svg';
+import plusIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Plus.svg';
+import searchNavIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Search.svg';
+import userIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/User.svg';
+import searchIcon from '../assets/explore-v3-figma-icons/?��? ?�색 v.2 - 검?�어�?치고 ?�어??경우?�만 ?�사???�시/Search.svg';
 import edit3FabIcon from '../assets/explore-figma/edit.svg';
 import subtractFabIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
@@ -60,26 +60,26 @@ type CardInteractionState = ReactionSummaryPayload & {
 const textFeatureStyle = { fontFeatureSettings: '"case" 1' } as const;
 
 const CATEGORY_OPTIONS: ExploreCategoryOption[] = [
-  { id: null, label: '전체', slug: null },
-  { id: 1, label: '온라인 판매 · 이커머스', slug: 'online-commerce' },
-  { id: 2, label: '콘텐츠 · SNS 기반', slug: 'content-sns' },
-  { id: 3, label: '디지털 상품 · 지식 판매', slug: 'digital-products' },
-  { id: 4, label: '플랫폼 기반 노동형', slug: 'platform-labor' },
-  { id: 5, label: '재능 판매 · 프리랜서', slug: 'talent-freelance' },
-  { id: 6, label: '투자 · 재테크', slug: 'investment' },
-  { id: 7, label: '오프라인 기반 부업', slug: 'offline-sidejob' },
+  { id: null, label: '?�체', slug: null },
+  { id: 1, label: '?�라???�매 · ?�커머스', slug: 'online-commerce' },
+  { id: 2, label: '콘텐�?· SNS 기반', slug: 'content-sns' },
+  { id: 3, label: '?��????�품 · 지???�매', slug: 'digital-products' },
+  { id: 4, label: '?�랫??기반 ?�동??, slug: 'platform-labor' },
+  { id: 5, label: '?�능 ?�매 · ?�리?�서', slug: 'talent-freelance' },
+  { id: 6, label: '?�자 · ?�테??, slug: 'investment' },
+  { id: 7, label: '?�프?�인 기반 부??, slug: 'offline-sidejob' },
 ];
 
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
-  { key: 'latest', label: '최신순' },
-  { key: 'likes', label: '추천순' },
-  { key: 'views', label: '조회수순' },
+  { key: 'latest', label: '최신?? },
+  { key: 'likes', label: '추천?? },
+  { key: 'views', label: '조회?�순' },
 ];
 
 const FEED_OPTIONS: Array<{ key: FeedMode; label: string }> = [
-  { key: 'all', label: '전체' },
-  { key: 'failure', label: '실패' },
-  { key: 'success', label: '성공' },
+  { key: 'all', label: '?�체' },
+  { key: 'failure', label: '?�패' },
+  { key: 'success', label: '?�공' },
 ];
 
 const FEED_SEGMENT_WIDTH_CLASS: Record<FeedMode, string> = {
@@ -175,7 +175,7 @@ function buildKeywordLabels(experience: Experience) {
 
 function normalizePreview(experience: Experience) {
   const value = experience.content.replace(/\s+/g, ' ').trim();
-  return value || '본문 텍스트 미리보기';
+  return value || '본문 ?�스??미리보기';
 }
 
 function buildTopItems(stats: FailurePatternStatsPayload | null) {
@@ -317,7 +317,7 @@ function HeaderBlock({
           className="text-[16px] font-[600] leading-[19.2px] text-black"
           style={textFeatureStyle}
         >
-          사례 탐색
+          ?��? ?�색
         </p>
         <button
           type="button"
@@ -338,7 +338,7 @@ function HeaderBlock({
             className="text-[14px] font-[400] leading-[19.6px] text-[#494949]"
             style={textFeatureStyle}
           >
-            검색어
+            검?�어
           </span>
           <img src={searchIcon} alt="" className="h-[24px] w-[24px]" />
         </button>
@@ -392,7 +392,7 @@ function HeaderBlock({
             style={textFeatureStyle}
           >
             <span>{resultCount.toLocaleString()}</span>
-            <span>개</span>
+            <span>�?/span>
           </div>
 
           <div className="relative">
@@ -477,7 +477,7 @@ function StatsAccordion({
             className="text-[14px] font-[400] leading-[16.8px] text-black"
             style={textFeatureStyle}
           >
-            통계
+            ?�계
           </span>
           <img src={helpIcon} alt="" className="h-[12.25px] w-[12.25px]" />
         </div>
@@ -492,7 +492,7 @@ function StatsAccordion({
         <div className="flex flex-col items-start gap-[12px] px-[16px] pb-[12px] pt-[8px]">
           {loading ? <ListSkeleton count={3} /> : null}
           {!loading && error ? <ErrorState message={error} /> : null}
-          {!loading && !error && !patternStats ? <PageMessage message="통계 데이터를 불러오지 못했습니다." /> : null}
+          {!loading && !error && !patternStats ? <PageMessage message="?�계 ?�이?��? 불러?��? 못했?�니??" /> : null}
 
           {!loading && !error && patternStats && timingStats ? (
             <>
@@ -502,13 +502,13 @@ function StatsAccordion({
                     className="text-[16px] font-[700] leading-[22.4px] text-[#131416]"
                     style={textFeatureStyle}
                   >
-                    실패 요인 TOP3
+                    ?�패 ?�인 TOP3
                   </h2>
                   <p
                     className="text-[14px] font-[400] leading-[19.6px] text-[#494949]"
                     style={textFeatureStyle}
                   >
-                    카테고리 내 가장 많이 나타나는 실패 원인입니다.
+                    카테고리 ??가??많이 ?��??�는 ?�패 ?�인?�니??
                   </p>
                 </div>
 
@@ -562,13 +562,13 @@ function StatsAccordion({
                     className="text-[16px] font-[700] leading-[22.4px] text-[#131416]"
                     style={textFeatureStyle}
                   >
-                    실패 패턴
+                    ?�패 ?�턴
                   </h2>
                   <p
                     className="text-[14px] font-[400] leading-[19.6px] text-[#494949]"
                     style={textFeatureStyle}
                   >
-                    카테고리 내 나타나는 실패 패턴 비중 그래프 데이터입니다.
+                    카테고리 ???��??�는 ?�패 ?�턴 비중 그래???�이?�입?�다.
                   </p>
                 </div>
 
@@ -613,13 +613,13 @@ function StatsAccordion({
                     className="text-[16px] font-[700] leading-[22.4px] text-[#131416]"
                     style={textFeatureStyle}
                   >
-                    실패 시점 분포
+                    ?�패 ?�점 분포
                   </h2>
                   <p
                     className="text-[14px] font-[400] leading-[19.6px] text-[#494949]"
                     style={textFeatureStyle}
                   >
-                    카테고리 내 실패를 겪는 시점의 분포 그래프입니다.
+                    카테고리 ???�패�?겪는 ?�점??분포 그래?�입?�다.
                   </p>
                 </div>
 
@@ -662,7 +662,7 @@ function StatsAccordion({
                       className="text-[14px] font-[500] leading-[19.6px] text-[#5A876E]"
                       style={textFeatureStyle}
                     >
-                      {`${timingChart.peakMonth}개월 차에 가장 많이 발생`}
+                      {`${timingChart.peakMonth}개월 차에 가??많이 발생`}
                     </span>
                   </div>
 
@@ -713,7 +713,7 @@ function ReviewCardRow({
     whiteSpace: 'nowrap' as const,
   };
   const primaryTone: PrimaryTone = experience.caseStatus === 'SUCCESS' ? 'success' : 'failure';
-  const primaryLabel = experience.caseStatus === 'SUCCESS' ? '성공' : '실패';
+  const primaryLabel = experience.caseStatus === 'SUCCESS' ? '?�공' : '?�패';
   const categoryLabel = resolveCategoryLabel(experience);
   const keywordLabels = buildKeywordLabels(experience);
   const visibleKeywordLabels = keywordLabels.slice(0, 2);
@@ -788,10 +788,10 @@ function ReviewCardRow({
               className="flex min-w-0 items-start gap-[4px] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]"
               style={textFeatureStyle}
             >
-              <span className="truncate">{experience.author.nickname || '닉네임'}</span>
-              <span>•</span>
+              <span className="truncate">{experience.author.nickname || '?�네??}</span>
+              <span>??/span>
               <span>{formatCompactDate(experience.createdAt)}</span>
-              <span>•</span>
+              <span>??/span>
               <span className="flex items-center gap-[2px]">
                 <span>조회</span>
                 <span>{experience.viewCount.toLocaleString()}</span>
@@ -854,7 +854,7 @@ function ReviewCardRow({
             <div className="flex w-full items-center justify-end">
               <button
                 type="button"
-                aria-label="CTA 이동"
+                aria-label="CTA ?�동"
                 className="relative z-[1] flex h-[30px] w-[48px] shrink-0 items-start justify-start rounded-[8px] bg-[#5A876E] px-[12px] py-[8px]"
                 onClick={(event) => {
                   stopEvent(event);
@@ -890,10 +890,10 @@ function FooterArea({
   const navigate = useNavigate();
   const location = useLocation();
   const navItems = [
-    { key: 'home', label: '홈', icon: homeIcon, active: false, path: '/' },
+    { key: 'home', label: '??, icon: homeIcon, active: false, path: '/' },
     {
       key: 'explore',
-      label: '탐색',
+      label: '?�색',
       icon: searchNavIcon,
       active:
         location.pathname.startsWith('/explore') ||
@@ -901,7 +901,7 @@ function FooterArea({
         location.pathname.startsWith('/v3/explore'),
       path: '/explore',
     },
-    { key: 'guide', label: '가이드', icon: guideIcon, active: location.pathname === '/faq' || location.pathname === '/mypage/faq', path: '/faq' },
+    { key: 'guide', label: '가?�드', icon: guideIcon, active: location.pathname === '/faq' || location.pathname === '/mypage/faq', path: '/faq' },
     { key: 'my', label: 'MY', icon: userIcon, active: location.pathname.startsWith('/mypage') && location.pathname !== '/mypage/faq', path: '/mypage' },
   ] as const;
 
@@ -985,11 +985,15 @@ function SharedFooterArea({
   onSelectFeedMode,
   fabOpen,
   onToggleFab,
+  onOpenGuide,
+  onCreateClick,
 }: {
   feedMode: FeedMode;
   onSelectFeedMode: (mode: FeedMode) => void;
   fabOpen: boolean;
   onToggleFab: () => void;
+  onOpenGuide: () => void;
+  onCreateClick: () => void;
 }) {
   const navigate = useNavigate();
 
@@ -1034,7 +1038,7 @@ function SharedFooterArea({
             >
               <button
                 type="button"
-                onClick={() => navigate('/coming-soon')}
+                onClick={onOpenGuide}
                 className="flex items-center gap-[8px] whitespace-nowrap"
               >
                 <img src={subtractFabIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
@@ -1044,19 +1048,19 @@ function SharedFooterArea({
               </button>
               <button
                 type="button"
-                onClick={() => navigate('/create')}
+                onClick={onCreateClick}
                 className="flex items-center gap-[8px] whitespace-nowrap"
               >
                 <img src={edit3FabIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
                 <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">
-                  경험 작성
+                  경험 ?�성
                 </span>
               </button>
             </div>
 
             <button
               type="button"
-              aria-label={fabOpen ? '경험 작성 메뉴 닫기' : '경험 작성 메뉴 열기'}
+              aria-label={fabOpen ? '경험 ?�성 메뉴 ?�기' : '경험 ?�성 메뉴 ?�기'}
               aria-expanded={fabOpen}
               onClick={onToggleFab}
               className={`pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full ${
@@ -1123,7 +1127,7 @@ export default function ExploreV3() {
         if (!active) {
           return;
         }
-        setListError(resolveErrorMessage(error, '사례 목록을 불러오지 못했습니다.'));
+        setListError(resolveErrorMessage(error, '?��? 목록??불러?��? 못했?�니??'));
       } finally {
         if (active) {
           setListLoading(false);
@@ -1161,7 +1165,7 @@ export default function ExploreV3() {
         if (!active) {
           return;
         }
-        setStatsError(resolveErrorMessage(error, '카테고리 통계를 불러오지 못했습니다.'));
+        setStatsError(resolveErrorMessage(error, '카테고리 ?�계�?불러?��? 못했?�니??'));
         setPatternStats(null);
         setTimingStats(null);
       })
@@ -1240,7 +1244,7 @@ export default function ExploreV3() {
     if (!accessToken) {
       navigate(
         `/auth?next=${encodeURIComponent('/v3/explore')}&reason=${encodeURIComponent(
-          '북마크는 로그인이 필요한 서비스입니다.',
+          '북마?�는 로그?�이 ?�요???�비?�입?�다.',
         )}`,
       );
       return;
@@ -1275,9 +1279,9 @@ export default function ExploreV3() {
         bookmarked: payload.bookmarked,
         bookmarkCount: payload.bookmarkCount,
       });
-      showToast(payload.bookmarked ? '북마크에 추가했어요.' : '북마크를 해제했어요.');
+      showToast(payload.bookmarked ? '북마?�에 추�??�어??' : '북마?��? ?�제?�어??');
     } catch (error) {
-      showToast(resolveErrorMessage(error, '북마크 처리에 실패했습니다.'));
+      showToast(resolveErrorMessage(error, '북마??처리???�패?�습?�다.'));
     }
   }
 
@@ -1285,7 +1289,7 @@ export default function ExploreV3() {
     if (!accessToken) {
       navigate(
         `/auth?next=${encodeURIComponent('/v3/explore')}&reason=${encodeURIComponent(
-          '반응 기능은 로그인이 필요한 서비스입니다.',
+          '반응 기능?� 로그?�이 ?�요???�비?�입?�다.',
         )}`,
       );
       return;
@@ -1331,7 +1335,7 @@ export default function ExploreV3() {
         ...state,
         [experience.id]: current,
       }));
-      showToast(resolveErrorMessage(error, '반응 처리에 실패했습니다.'));
+      showToast(resolveErrorMessage(error, '반응 처리???�패?�습?�다.'));
     }
   }
 
@@ -1345,13 +1349,33 @@ export default function ExploreV3() {
       const related = await getRelatedSuccessCases(experience.id, 1);
       const target = related[0];
       if (!target) {
-        showToast('연결된 성공 사례가 아직 없어요.');
+        showToast('?�결???�공 ?��?가 ?�직 ?�어??');
         return;
       }
       navigate(`/experiences/${target.id}`);
     } catch (error) {
-      showToast(resolveErrorMessage(error, '성공 사례를 불러오지 못했습니다.'));
+      showToast(resolveErrorMessage(error, '?�공 ?��?�?불러?��? 못했?�니??'));
     }
+  }
+
+  function handleOpenGuide() {
+    setFabOpen(false);
+    navigate('/faq');
+  }
+
+  function handleCreateClick() {
+    setFabOpen(false);
+
+    if (!accessToken) {
+      navigate(
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
+          '경험 ?�성?� 로그?�이 ?�요???�비?�입?�다.',
+        )}`,
+      );
+      return;
+    }
+
+    navigate('/create');
   }
 
   return (
@@ -1400,7 +1424,7 @@ export default function ExploreV3() {
                 className="text-[12px] font-[400] leading-[16.8px] text-[#757575]"
                 style={textFeatureStyle}
               >
-                아직 등록된 사례가 없어요.
+                ?�직 ?�록???��?가 ?�어??
               </p>
             </div>
           ) : null}
@@ -1426,6 +1450,8 @@ export default function ExploreV3() {
           onSelectFeedMode={setFeedMode}
           fabOpen={fabOpen}
           onToggleFab={() => setFabOpen((prev) => !prev)}
+          onOpenGuide={handleOpenGuide}
+          onCreateClick={handleCreateClick}
         />
       </div>
     </div>
