@@ -16,7 +16,7 @@ import {
   type RecentExploreSearch,
 } from '../lib/recent-explore-searches';
 
-const SEARCH_PLACEHOLDER = '원하는 실패 사례를 검색해보세요!';
+const SEARCH_PLACEHOLDER = '원하는 사례를 검색해보세요!';
 const FIXTURE_RECENT_SEARCHES = ['유튜브', '쇼핑몰', '블로그'];
 const FIXTURE_RECOMMENDED_KEYWORDS = [
   '온라인 판매',
