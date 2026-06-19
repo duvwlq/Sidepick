@@ -871,8 +871,6 @@ export default function HomeV2() {
   const [apiCategories, setApiCategories] = useState<Category[]>([]);
   const [latestExperiences, setLatestExperiences] = useState<Experience[]>([]);
   const [popularExperiences, setPopularExperiences] = useState<Experience[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState('');
   const [interactionById, setInteractionById] = useState<Record<number, HomeCardInteraction>>({});
   void apiCategories;
 
@@ -880,9 +878,6 @@ export default function HomeV2() {
     let active = true;
 
     async function loadHomeFeeds() {
-      setListLoading(true);
-      setListError('');
-
       try {
         const [categoryPayload, latestPayload, popularPayload] = await Promise.all([
           getCategories(),
@@ -900,11 +895,6 @@ export default function HomeV2() {
       } catch (error) {
         if (!active) {
           return;
-        }
-        setListError(resolveErrorMessage(error, '메인 경험 목록을 불러오지 못했습니다.'));
-      } finally {
-        if (active) {
-          setListLoading(false);
         }
       }
     }
@@ -1126,9 +1116,6 @@ export default function HomeV2() {
             onHeartToggle={handleHeartToggle}
             onCtaClick={handleCardCta}
           />
-          {!listLoading && listError ? (
-            <div className="px-[16px] pb-[12px] text-[12px] font-[400] leading-[16.8px] text-[#C06D43]">{listError}</div>
-          ) : null}
         </main>
         <FloatingActionsExact />
       </div>
