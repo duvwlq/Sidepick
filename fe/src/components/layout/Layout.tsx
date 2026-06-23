@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import ChatbotFab from '../chatbot/ChatbotFab';
 import BottomNav from './BottomNav';
 import HeaderNav from './HeaderNav';
 
@@ -59,6 +60,8 @@ export default function Layout({
       </main>
 
       {showBottomNav ? <BottomNav /> : null}
+
+      <ChatbotFab />
     </div>
   );
 }
