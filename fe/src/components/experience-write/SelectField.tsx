@@ -1,4 +1,4 @@
-import FieldLabel from './FieldLabal';
+import FieldLabel from './FieldLabel';
 
 type Props = {
   label: string;
@@ -21,12 +21,12 @@ export default function SelectField({
 
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full h-11 border rounded-xl px-3 mt-2"
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-3 h-12 w-full rounded-[16px] border border-[#CCD2E0] bg-white px-4 text-sm text-[#111111] outline-none"
       >
         <option value="">{placeholder}</option>
-        {options.map((o) => (
-          <option key={o}>{o}</option>
+        {options.map((option) => (
+          <option key={option}>{option}</option>
         ))}
       </select>
     </div>

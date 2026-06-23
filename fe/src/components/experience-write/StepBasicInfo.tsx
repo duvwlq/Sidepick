@@ -1,107 +1,106 @@
+import type { Dispatch, SetStateAction } from 'react';
 import type { FormState } from '../../hooks/useExperienceWrite';
-import { categoryOptions } from '../../constants/experienceOptions';
-import SelectField from './SelectField';
-import MoneyField from './MoneyField';
-import FieldLabel from './FieldLabal';
+import type { Category } from '../../lib/api';
+import { CATEGORY_VISUALS } from '../../lib/category-visuals';
+import { ErrorState, LoadingState } from '../common/Skeleton';
+import FieldLabel from './FieldLabel';
 
 type Props = {
+  categories: Category[];
   form: FormState;
-  setForm: React.Dispatch<React.SetStateAction<FormState>>;
+  setForm: Dispatch<SetStateAction<FormState>>;
+  loading?: boolean;
+  error?: string;
 };
 
-export default function StepBasicInfo({ form, setForm }: Props) {
+export default function StepBasicInfo({
+  categories,
+  form,
+  setForm,
+  loading = false,
+  error = '',
+}: Props) {
   const toggleCategory = (value: string) => {
-    setForm((prev) => {
-      const exists = prev.categories.includes(value);
-
-      return {
-        ...prev,
-        categories: exists
-          ? prev.categories.filter((v) => v !== value)
-          : [...prev.categories, value],
-      };
-    });
+    setForm((previous) => ({
+      ...previous,
+      categories: previous.categories.includes(value) ? [] : [value],
+    }));
   };
 
-  return (
-    <div className="space-y-5 bg-white p-5 rounded-[10px]">
-      <div className="justify-center text-black text-2xl font-semibold font-['Pretendard'] leading-9">
-        기본 정보
+  if (loading) {
+    return (
+      <div className="flex w-full flex-col gap-[10px]">
+        <FieldLabel label="어떤 부업을 경험했나요?" required />
+        <LoadingState message="카테고리를 불러오는 중입니다." className="min-h-[147px] content-center" />
       </div>
-      <div className="text-center justify-center text-black text-sm font-light font-['Pretendard'] leading-4">
-        부업 경험에 대한 기본 정보를 선택해주세요!
-      </div>
-      <FieldLabel label="경험 부업 카테고리" required />
+    );
+  }
 
-      <div className="grid grid-cols-2 gap-3">
-        {categoryOptions.map((item) => {
-          const active = form.categories.includes(item);
+  if (error) {
+    return (
+      <div className="flex w-full flex-col gap-[10px]">
+        <FieldLabel label="어떤 부업을 경험했나요?" required />
+        <div className="min-h-[147px]">
+          <ErrorState message={error} />
+        </div>
+      </div>
+    );
+  }
+
+  const categoryById = new Map(categories.map((item) => [item.id, item]));
+  const displayCategories = CATEGORY_VISUALS.map((visual) => {
+    const apiCategory = categoryById.get(visual.id);
+    return {
+      id: visual.id,
+      visual: apiCategory
+        ? {
+            ...visual,
+            label: apiCategory.name || visual.label,
+          }
+        : visual,
+    };
+  });
+
+  return (
+    <div className="flex w-full flex-col items-start gap-[10px]">
+      <FieldLabel label="어떤 부업을 경험했나요?" required />
+
+      <div className="grid w-full grid-cols-2 gap-x-[10px] gap-y-[10px]">
+        {displayCategories.map(({ id, visual }) => {
+          const selectedValue = String(id);
+          const active = form.categories.includes(selectedValue);
 
           return (
             <button
-              key={item}
+              key={id}
               type="button"
-              onClick={() => toggleCategory(item)}
-              className={`h-24 rounded-xl border ${
-                active ? 'border-black' : 'border-gray-200'
+              onClick={() => toggleCategory(selectedValue)}
+              className={`flex min-h-[147px] flex-col items-start justify-between rounded-[16px] border p-[16px] ${
+                active ? 'border-[#131416] bg-[#F8F8F8]' : 'border-[#E6E6E6] bg-[#FFFFFF]'
               }`}
             >
-              {item}
+              <div className="flex h-[40px] shrink-0 items-center">{visual.icon}</div>
+              <div className="flex w-full min-w-0 flex-col items-start gap-[4px] text-left">
+                <p
+                  className={`w-full break-words text-[14px] leading-[16.8px] ${
+                    active ? 'font-semibold text-[#131416]' : 'font-medium text-[#494949]'
+                  }`}
+                >
+                  {visual.label}
+                </p>
+                <div
+                  className={`w-full break-words text-[10px] leading-[12px] ${
+                    active ? 'font-medium text-[#494949]' : 'font-normal text-[#757575]'
+                  }`}
+                >
+                  {visual.descriptionLines.map((line) => (
+                    <p key={line}>{line}</p>
+                  ))}
+                </div>
+              </div>
             </button>
           );
         })}
-      </div>
-
-      <SelectField
-        label="총 진행 기간"
-        value={form.totalPeriod}
-        placeholder="선택 안 함"
-        options={['1개월', '3개월', '6개월']}
-        onChange={(v) => setForm((prev) => ({ ...prev, totalPeriod: v }))}
-      />
-
-      <SelectField
-        label="하루 평균 시간"
-        value={form.dailyHours}
-        placeholder="선택 안 함"
-        options={['1시간', '2시간', '3시간']}
-        onChange={(v) => setForm((prev) => ({ ...prev, dailyHours: v }))}
-      />
-
-      <MoneyField
-        label="투자금"
-        value={form.expense}
-        onChange={(v) => setForm((prev) => ({ ...prev, expense: v }))}
-      />
-
-      <MoneyField
-        label="수익"
-        value={form.revenue}
-        onChange={(v) => setForm((prev) => ({ ...prev, revenue: v }))}
-      />
-
-      <div>
-        <FieldLabel label="본업 병행 여부" required />
-
-        <div className="mt-2 space-y-2">
-          {(['예', '아니오'] as const).map((item) => (
-            <button
-              key={item}
-              type="button"
-              onClick={() =>
-                setForm((prev) => ({
-                  ...prev,
-                  currentStatus: item,
-                }))
-              }
-              className={`h-11 w-full rounded-xl border ${
-                form.currentStatus === item ? 'border-black' : 'border-gray-200'
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </div>
       </div>
     </div>
   );

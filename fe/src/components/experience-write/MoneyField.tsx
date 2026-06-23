@@ -1,4 +1,4 @@
-import FieldLabel from './FieldLabal';
+import FieldLabel from './FieldLabel';
 
 type Props = {
   label: string;
@@ -11,14 +11,14 @@ export default function MoneyField({ label, value, onChange }: Props) {
     <div>
       <FieldLabel label={label} />
 
-      <div className="flex items-center border rounded-xl px-3 h-11 mt-2">
+      <div className="mt-3 flex h-12 items-center rounded-[16px] border border-[#CCD2E0] bg-white px-4">
         <input
           value={value}
-          onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, ''))}
-          className="flex-1 outline-none"
+          onChange={(event) => onChange(event.target.value.replace(/[^\d]/g, ''))}
+          className="flex-1 text-sm text-[#111111] outline-none placeholder:text-[#9CA3AF]"
           placeholder="1000000"
         />
-        <span className="text-sm">원</span>
+        <span className="text-sm text-[#555555]">원</span>
       </div>
     </div>
   );

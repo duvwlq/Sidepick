@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
+import BottomNav from './BottomNav';
 import HeaderNav from './HeaderNav';
-import BottomNav from './ButtomNav';
 
 type HeaderLeftType = 'menu' | 'back' | 'none';
 
@@ -9,7 +9,9 @@ type Props = {
   title?: string;
   leftType?: HeaderLeftType;
   showRightIcon?: boolean;
+  rightIcon?: 'bell' | 'search' | 'menu' | 'none';
   showHeader?: boolean;
+  showStatusBar?: boolean;
   showBottomNav?: boolean;
   onBack?: () => void;
   onMenuClick?: () => void;
@@ -21,32 +23,42 @@ export default function Layout({
   title = '사이드픽',
   leftType = 'menu',
   showRightIcon = true,
+  rightIcon = 'bell',
   showHeader = true,
+  showStatusBar = false,
   showBottomNav = true,
   onBack,
   onMenuClick,
   onRightIconClick,
 }: Props) {
   return (
-    <div className="max-w-md min-h-screen bg-gray-100">
-      {showHeader && (
+    <div
+      className="mx-auto min-h-screen w-full max-w-[430px] overflow-x-clip bg-white notranslate"
+      translate="no"
+    >
+      {showHeader ? (
         <HeaderNav
           title={title}
           leftType={leftType}
           showRightIcon={showRightIcon}
+          rightIcon={rightIcon}
+          showStatusBar={showStatusBar}
           onBack={onBack}
           onMenuClick={onMenuClick}
           onRightIconClick={onRightIconClick}
         />
-      )}
+      ) : null}
 
       <main
-        className={`${showHeader ? 'pt-16' : ''} ${showBottomNav ? 'pb-26' : ''}`}
+        translate="no"
+        className={`overflow-x-clip ${showHeader ? (showStatusBar ? 'pt-[123px]' : 'pt-[64px]') : ''} ${
+          showBottomNav ? 'pb-[110px]' : ''
+        }`}
       >
         {children}
       </main>
 
-      {showBottomNav && <BottomNav />}
+      {showBottomNav ? <BottomNav /> : null}
     </div>
   );
 }
