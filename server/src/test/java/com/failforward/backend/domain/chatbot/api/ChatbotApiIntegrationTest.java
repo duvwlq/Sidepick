@@ -111,6 +111,36 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void chatbotMessageTreatsShortKoreanGuideQuestionAsGuideIntent() throws Exception {
+        String token = registerAndLogin("chatbot_korean_guide@sidepick.dev", "password123", "chatbotKoreanGuide", "20s");
+        mockServer.expect(requestTo("http://localhost:8001/chatbot/message"))
+                .andExpect(method(POST))
+                .andRespond(withSuccess("""
+                        {
+                          "reply": "퇴근 후 운영 가능한 방식부터 정리해볼게요.",
+                          "type": "guide_redirect",
+                          "sources": [],
+                          "status": "success"
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(post("/api/chatbot/message")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "session_id": "session-korean-guide",
+                                  "message": "스마트스토어를 시작하려는데 뭐부터 해야 할까요?"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("success"))
+                .andExpect(jsonPath("$.data.type").value("guide_redirect"))
+                .andExpect(jsonPath("$.data.reason").doesNotExist())
+                .andExpect(jsonPath("$.data.reply").value("퇴근 후 운영 가능한 방식부터 정리해볼게요."));
+    }
+
+    @Test
     void chatbotMessageRejectsBlockedInput() throws Exception {
         String token = registerAndLogin("chatbot_blocked@sidepick.dev", "password123", "chatbotBlocked", "20s");
 

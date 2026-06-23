@@ -894,7 +894,7 @@ export default function HomeV2() {
         setApiCategories(categoryPayload);
         setLatestExperiences(latestPayload.experiences);
         setPopularExperiences(popularPayload.experiences);
-      } catch (error) {
+      } catch {
         if (!active) {
           return;
         }
@@ -910,7 +910,6 @@ export default function HomeV2() {
 
   useEffect(() => {
     if (!accessToken) {
-      setHasUnreadNotifications(false);
       return;
     }
 
@@ -959,7 +958,6 @@ export default function HomeV2() {
 
   useEffect(() => {
     if (!accessToken || interactiveCards.length === 0) {
-      setInteractionById({});
       return;
     }
 
@@ -1006,6 +1004,9 @@ export default function HomeV2() {
       cancelled = true;
     };
   }, [accessToken, interactiveCards]);
+
+  const visibleHasUnreadNotifications = accessToken ? hasUnreadNotifications : false;
+  const visibleInteractionById = accessToken && interactiveCards.length > 0 ? interactionById : {};
 
   function moveToAuth(reason: string) {
     navigate(`/auth?next=${encodeURIComponent('/')}&reason=${encodeURIComponent(reason)}`);
@@ -1123,7 +1124,7 @@ export default function HomeV2() {
     <div className="min-h-screen overflow-x-hidden bg-white">
       <div className="relative mx-auto w-full max-w-[375px] bg-white pt-[116px]" style={textFeatureStyle}>
         <div className="absolute left-0 top-0 z-10 w-full">
-          <HomeHeader hasUnreadNotifications={hasUnreadNotifications} />
+          <HomeHeader hasUnreadNotifications={visibleHasUnreadNotifications} />
         </div>
         <main className="flex w-full flex-col bg-white pb-[220px]">
           <CategorySection cards={resolvedCategoryCards} expanded={categoryExpanded} onToggleExpanded={() => setCategoryExpanded((prev) => !prev)} />
@@ -1131,7 +1132,7 @@ export default function HomeV2() {
             topic={popularTopic}
             onChangeTopic={setPopularTopic}
             cards={popularSectionCards}
-            interactionById={interactionById}
+            interactionById={visibleInteractionById}
             onBookmarkToggle={handleBookmarkToggle}
             onHeartToggle={handleHeartToggle}
             onCtaClick={handleCardCta}
@@ -1140,7 +1141,7 @@ export default function HomeV2() {
             sort={exploreSort}
             onChangeSort={setExploreSort}
             cards={exploreSectionCards}
-            interactionById={interactionById}
+            interactionById={visibleInteractionById}
             onBookmarkToggle={handleBookmarkToggle}
             onHeartToggle={handleHeartToggle}
             onCtaClick={handleCardCta}

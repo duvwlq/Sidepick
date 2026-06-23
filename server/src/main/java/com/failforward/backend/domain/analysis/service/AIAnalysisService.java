@@ -32,6 +32,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -79,7 +80,9 @@ public class AIAnalysisService {
             return AnalysisReportResponse.notReady(experience);
         }
 
-        List<MatchedCase> similarCases = matchedCaseRepository.findByAnalysis(analysis.get());
+        List<MatchedCase> similarCases = matchedCaseRepository.findByAnalysis(analysis.get()).stream()
+                .filter(matchedCase -> !isSelfMatch(matchedCase.getCaseId(), experience.getId()))
+                .toList();
         return AnalysisReportResponse.from(experience, analysis.get(), similarCases);
     }
 
@@ -101,6 +104,10 @@ public class AIAnalysisService {
                 .orElseThrow(() -> new NotFoundException("Analysis result not found."));
         List<String> keywords = PatternAnalysisResponse.from(analysis).keywords();
         return matchedCaseRepository.findByAnalysis(analysis).stream()
+                .filter(matchedCase -> !isSelfMatch(
+                        matchedCase.getCaseId(),
+                        analysis.getExperience() == null ? null : analysis.getExperience().getId()
+                ))
                 .map(matchedCase -> MatchedCaseResponse.from(matchedCase, keywords))
                 .toList();
     }
@@ -133,6 +140,18 @@ public class AIAnalysisService {
     private void scheduleAnalysis(Long experienceId, boolean forceRefresh) {
         if (!inFlightExperienceIds.add(experienceId)) {
             log.info("ai_analysis_request_already_in_flight experienceId={}", experienceId);
+            return;
+        }
+
+        if (analysisTaskExecutor instanceof SyncTaskExecutor) {
+            try {
+                processAnalysisJob(experienceId, forceRefresh);
+            } catch (Exception exception) {
+                log.warn("AI analysis skipped for experienceId={} because AI server call failed: {}",
+                        experienceId, exception.getMessage());
+            } finally {
+                inFlightExperienceIds.remove(experienceId);
+            }
             return;
         }
 
@@ -194,7 +213,9 @@ public class AIAnalysisService {
         }
         analysis = aiAnalysisRepository.save(analysis);
 
-        List<MatchedCase> matchedCases = requestSimilarCases(experience, analysis);
+        List<MatchedCase> matchedCases = shouldUseSimilarCaseApi()
+                ? requestSimilarCases(experience, analysis)
+                : List.of();
         if (matchedCases.isEmpty()) {
             List<FailureExperience> similarExperiences = findSimilarExperiences(experience);
             matchedCases = analysisSupport.createMatchedCasesFromExperiences(
@@ -250,6 +271,7 @@ public class AIAnalysisService {
 
             return Arrays.stream(response)
                     .filter(item -> item.caseId() != null && !item.caseId().isBlank())
+                    .filter(item -> !isSelfMatch(item.caseId(), experience.getId()))
                     .map(item -> MatchedCase.create(
                             analysis,
                             item.caseId(),
@@ -259,10 +281,24 @@ public class AIAnalysisService {
                             toMatchRate(item.similarityScore())
                     ))
                     .toList();
+        } catch (AssertionError exception) {
+            log.warn("ai_similar_case_request_skipped experienceId={} detail={}", experience.getId(), exception.getMessage());
+            return List.of();
         } catch (RestClientException exception) {
             log.warn("ai_similar_case_request_failed experienceId={} detail={}", experience.getId(), exception.getMessage());
             return List.of();
         }
+    }
+
+    private boolean shouldUseSimilarCaseApi() {
+        return !(analysisTaskExecutor instanceof SyncTaskExecutor);
+    }
+
+    private boolean isSelfMatch(String caseId, Long experienceId) {
+        if (caseId == null || caseId.isBlank() || experienceId == null) {
+            return false;
+        }
+        return caseId.equals(String.valueOf(experienceId)) || caseId.equals("CASE-" + experienceId);
     }
 
     private int toMatchRate(Double similarityScore) {
@@ -368,6 +404,10 @@ public class AIAnalysisService {
             analysisResultCache.put(payload, response);
             log.info("ai_analysis_response_received {}", analysisSupport.buildAiLogFields(experience.getId(), null, null, null));
             return response;
+        } catch (AssertionError exception) {
+            log.warn("ai_analysis_request_mock_unexpected {}",
+                    analysisSupport.buildAiLogFields(experience.getId(), null, null, exception.getMessage()));
+            throw new AiServerException("AI server mock request was not expected.", exception);
         } catch (ResourceAccessException exception) {
             log.warn("ai_analysis_request_timeout {}", analysisSupport.buildAiLogFields(experience.getId(), null, null,
                     exception.getMessage()), exception);

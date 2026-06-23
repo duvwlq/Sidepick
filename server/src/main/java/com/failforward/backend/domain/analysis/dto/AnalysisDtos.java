@@ -214,11 +214,9 @@ public final class AnalysisDtos {
         List<String> extractedPatterns = parseJsonList(analysis.getFailReasonTags());
         String category = experience.getCategory() == null ? null : experience.getCategory().getName();
         String bodyExcerpt = abbreviate(experience.getContent(), 140);
-        String source = similarCases.isEmpty()
-                ? "analysis-only"
-                : similarCases.stream().map(MatchedCase::getCaseId).anyMatch(AnalysisDtos::isAiSimilarCaseId)
+        String source = similarCases.stream().map(MatchedCase::getCaseId).anyMatch(AnalysisDtos::isAiSimilarCaseId)
                 ? "ai-similar-search"
-                : "db-fallback";
+                : "server-generated";
 
         return new AnalysisExplanation(
                 new InputUsed(category, bodyExcerpt),
@@ -237,14 +235,15 @@ public final class AnalysisDtos {
         BigDecimal similarityScore = matchedCase.getMatchRate() == null
                 ? null
                 : BigDecimal.valueOf(matchedCase.getMatchRate() / 100.0d);
-        String source = isAiSimilarCaseId(matchedCase.getCaseId()) ? "ai-similar-search" : "db-fallback";
+        String source = isAiSimilarCaseId(matchedCase.getCaseId()) ? "ai-similar-search" : "matched-case";
+        String debugSource = isAiSimilarCaseId(matchedCase.getCaseId()) ? "ai-similar-search" : "server-generated";
         return new SimilarCaseExplanation(
                 similarityScore,
                 matchedKeywords.stream().filter(keyword -> keyword != null && !keyword.isBlank()).distinct().limit(3).toList(),
                 null,
                 source,
                 matchedCase.getCaseId(),
-                new DebugInfo(null, source)
+                new DebugInfo(null, debugSource)
         );
     }
 
