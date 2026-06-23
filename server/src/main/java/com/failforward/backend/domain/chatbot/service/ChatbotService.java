@@ -111,12 +111,23 @@ public class ChatbotService {
             String routeHint,
             Map<String, Object> analysisContext
     ) {
-        String endpoint = aiServerProperties.url() + "/chatbot/message";
+        String endpoint = chatbotEndpoint();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AiChatbotRequest> entity =
                 new HttpEntity<>(AiChatbotRequest.from(request, routeHint, analysisContext), headers);
         return aiRestTemplate.postForObject(endpoint, entity, AiChatbotResponse.class);
+    }
+
+    private String chatbotEndpoint() {
+        String baseUrl = aiServerProperties.url();
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+        if (baseUrl.endsWith("/api")) {
+            return baseUrl + "/chatbot/message";
+        }
+        return baseUrl + "/api/chatbot/message";
     }
 
     private ChatbotMessageResponse fallback(String reason, String routeHint, Map<String, Object> analysisContext) {
