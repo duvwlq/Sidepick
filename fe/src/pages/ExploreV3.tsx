@@ -1343,7 +1343,7 @@ export default function ExploreV3() {
 
   function handleOpenGuide() {
     setFabOpen(false);
-    navigate('/faq');
+    navigate('/chatbot');
   }
 
   function handleCreateClick() {

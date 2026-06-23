@@ -62,6 +62,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: guideIcon,
     matches: (pathname) =>
       pathname === '/faq' ||
+      pathname === '/chatbot' ||
       pathname.startsWith('/guide') ||
       pathname === '/mypage/faq',
   },
@@ -118,7 +119,7 @@ function DefaultFabMenu({
             : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
         }`}
       >
-        <button type="button" onClick={() => navigate('/faq')} className="flex items-center gap-[8px] whitespace-nowrap">
+        <button type="button" onClick={() => navigate('/chatbot')} className="flex items-center gap-[8px] whitespace-nowrap">
           <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
           <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
         </button>

@@ -371,6 +371,15 @@ export type ExperienceUpsertInput = {
   };
 };
 
+export type ChatbotMessagePayload = {
+  status: string;
+  reply: string;
+  type: string | null;
+  sources: string[];
+  explanation: Record<string, unknown> | null;
+  reason: string | null;
+};
+
 export type ExperienceImageUploadPayload = {
   imageUrls: string[];
 };
@@ -678,6 +687,21 @@ export function getExperienceGuide(experienceId: number | string) {
 
 export function getGuideWritingExamples() {
   return request<GuideWritingExamplesPayload>('/guides/writing-examples');
+}
+
+export function sendChatbotMessage(payload: {
+  sessionId: string;
+  message: string;
+  experienceId?: number | null;
+}) {
+  return request<ChatbotMessagePayload>('/chatbot/message', {
+    method: 'POST',
+    body: {
+      session_id: payload.sessionId,
+      experienceId: payload.experienceId ?? null,
+      message: payload.message,
+    },
+  });
 }
 
 export function analyzeDraftWithAgentA(

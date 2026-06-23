@@ -796,7 +796,7 @@ function ExploreBottomBar({
         <div className="relative flex h-[36px] w-[36px] items-center justify-end">
           {fabExpanded ? (
             <div className="absolute bottom-[52px] right-0 flex flex-col gap-[12px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)]">
-              <button type="button" onClick={() => navigate('/coming-soon')} className="flex items-center gap-[8px] whitespace-nowrap">
+              <button type="button" onClick={() => navigate('/chatbot')} className="flex items-center gap-[8px] whitespace-nowrap">
                 <img src={subtractIcon} alt="" className="h-[17px] w-[17px]" />
                 <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black" style={textFeatureStyle}>
                   AI 챗봇
