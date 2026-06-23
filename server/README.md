@@ -123,6 +123,27 @@ curl http://127.0.0.1:8081/api/health
 
 ---
 
+## Admin Ops Checks
+
+관리자 계정으로 아래 운영 확인 API를 사용할 수 있습니다.
+
+- `GET /api/admin/latency-metrics`
+  - 최근 요청 지연 시간 샘플 확인
+- `GET /api/admin/chatbot-ops`
+  - 챗봇 분당 제한, 일일 토큰 사용량, 현재 인스턴스 큐 상태 확인
+- `GET /api/experiences/{id}/share-page`
+  - OG/트위터 메타 태그가 포함된 공유용 HTML
+- `GET /api/experiences/{id}/share-image`
+  - 공유 카드 PNG 다운로드
+
+챗봇 운영 주의:
+
+- `queue-capacity`는 단일 앱 인스턴스 보호용입니다.
+- `rate-limit` 상태와 `daily-token-limit` 사용량은 DB에 저장되어 재시작 후에도 유지됩니다.
+- 다중 인스턴스 전역 동시성 제어가 필요하면 별도 분산 큐/락 계층이 추가되어야 합니다.
+
+---
+
 ## Infra Notes
 
 - 운영 환경에서는 Nginx 컨테이너가 `80/443`을 수신합니다.

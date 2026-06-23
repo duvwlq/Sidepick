@@ -30,7 +30,7 @@ export default function ExploreSearchBar({
           value={inputValue}
           onChange={onInputChange}
           className="flex-1"
-          placeholder="원하는 실패 사례를 검색해보세요!"
+          placeholder="원하는 사례를 검색해보세요!"
         />
         <button
           type="submit"

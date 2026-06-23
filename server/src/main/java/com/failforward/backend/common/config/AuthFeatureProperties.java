@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AuthFeatureProperties(
         boolean localEnabled,
         boolean kakaoEnabled,
-        boolean googleEnabled
+        boolean googleEnabled,
+        boolean naverEnabled
 ) {
 }

@@ -7,9 +7,11 @@ import com.failforward.backend.domain.analysis.dto.AnalysisDtos.PatternAnalysisR
 import com.failforward.backend.domain.analysis.service.AnalysisService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,8 +31,10 @@ public class AnalysisController {
     }
 
     @PostMapping("/api/experiences/{experienceId}/analysis")
-    public ApiResponse<PatternAnalysisResponse> createAnalysis(@PathVariable Long experienceId) {
-        return ApiResponse.ok("Analysis created.", analysisService.createAnalysis(experienceId));
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public ApiResponse<Void> createAnalysis(@PathVariable Long experienceId) {
+        analysisService.createAnalysis(experienceId);
+        return ApiResponse.ok("Analysis started.", null);
     }
 
     @GetMapping("/api/analysis/{analysisId}/matched-cases")

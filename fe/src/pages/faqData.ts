@@ -212,7 +212,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'digital-products',
-    label: '디지털 상품·지식 판매',
+    label: '디지털·지식판매',
     items: [
       {
         id: 1,

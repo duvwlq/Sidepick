@@ -940,7 +940,7 @@ components:
           maxLength: 500
         categoryHint:
           type: string
-          enum: [commerce, content, digital, platform, freelance, investment, offline]
+          enum: [commerce, content-sns, digital-product, platform-labor, talent, investment, offline]
         experienceId:
           type: integer
           format: int64

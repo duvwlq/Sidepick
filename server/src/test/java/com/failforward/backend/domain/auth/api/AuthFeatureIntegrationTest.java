@@ -31,8 +31,8 @@ class AuthFeatureIntegrationTest {
                                   "email": "disabled@sidepick.dev"
                                 }
                                 """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data.detail").value("Email login is not available right now."));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -40,12 +40,18 @@ class AuthFeatureIntegrationTest {
                                 {
                                   "email": "disabled@sidepick.dev",
                                   "password": "password123",
+                                  "fullName": "Disabled User",
+                                  "birthDate": "1997-01-01",
+                                  "gender": "MALE",
+                                  "region": "서울",
+                                  "signupPurposes": ["서비스를 가볍게 둘러보고 싶어요"],
                                   "nickname": "disabled",
+                                  "experienceStatus": "NO_EXPERIENCE",
                                   "ageGroup": "20s"
                                 }
                                 """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data.detail").value("Email login is not available right now."));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -55,7 +61,7 @@ class AuthFeatureIntegrationTest {
                                   "password": "password123"
                                 }
                                 """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data.detail").value("Email login is not available right now."));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 }

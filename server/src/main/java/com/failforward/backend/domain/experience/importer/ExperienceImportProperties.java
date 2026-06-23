@@ -26,6 +26,7 @@ public class ExperienceImportProperties {
     private LocalDateTime createdAtEnd = LocalDateTime.of(2026, 4, 30, 23, 59, 59);
     private String defaultAgeGroup = "30s";
     private String defaultRiskLevel = "MEDIUM";
+    private String defaultCaseStatus = "FAILURE";
     private long defaultCategoryId = 5L;
     private Map<String, Long> categoryMap = new LinkedHashMap<>();
 
@@ -179,6 +180,14 @@ public class ExperienceImportProperties {
 
     public void setDefaultRiskLevel(String defaultRiskLevel) {
         this.defaultRiskLevel = defaultRiskLevel;
+    }
+
+    public String getDefaultCaseStatus() {
+        return defaultCaseStatus;
+    }
+
+    public void setDefaultCaseStatus(String defaultCaseStatus) {
+        this.defaultCaseStatus = defaultCaseStatus;
     }
 
     public long getDefaultCategoryId() {

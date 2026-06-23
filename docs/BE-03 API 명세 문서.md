@@ -40,7 +40,7 @@
 1. 성공사례 등록 API를 일반 API로 둘지, 관리자성 API로 제한할지
 2. 에이전트 C SSE를 별도 stream endpoint로 둘지, 단일 endpoint streaming으로 단순화할지
 3. 4주차 구현 시 실제 LLM 호출 주체를 `server`가 아니라 `ai-server`로 고정할지
-4. 통계 API의 `category` 입력을 카테고리명으로 받을지, slug로 받을지
+4. 통계 API의 `category` 입력은 slug(`commerce`, `content-sns`, `digital-product`, `platform-labor`, `talent`, `investment`, `offline`)로 고정한다.
 
 ## 목적
 
@@ -224,6 +224,7 @@
 
 - AI-02 기준으로 통계/그래프 외부 API는 `/api/stats/...` 네임스페이스로 통일한다.
 - 내부 구현에서 `categoryId`를 쓰더라도 외부 계약은 `category` query 기준으로 둔다.
+- `category` query 값은 한글명이 아니라 slug(`commerce`, `content-sns`, `digital-product`, `platform-labor`, `talent`, `investment`, `offline`)로 고정한다.
 
 ### 업종별 통계 응답 초안
 
@@ -469,8 +470,11 @@
 
 - 이 문서는 “현재 코드”와 “고도화 목표”를 섞지 않기 위해 섹션을 분리했다.
 - 히스토리 API는 `GET /users/me/analysis-history`, 사례 검색은 `GET /experiences` 필터 확장으로 단일화했다.
+- 개인화 홈 API는 `GET /users/me/home-feed`를 기준으로 유지한다.
 - 에이전트 C는 `server -> ai-server` 호출 구조를 전제로 API를 정리했다.
 - 통계/그래프 외부 API는 AI-02 기준으로 `/api/stats/...` 네임스페이스를 사용한다.
+- 통계/그래프/가이드 검색의 `category` 입력은 `CategoryMapper` 기준 slug로 통일한다.
+- FAISS 수동 재동기화용 관리자 endpoint 초안은 공용 API가 아니라 운영용 설계 문서(`BE-28`)에서 별도로 관리한다.
 - Swagger 자동화 이전 단계로, 현재는 `BE-03 Swagger 초안.yaml`을 기준 초안으로 둔다.
 
 ## 작업 완료 현황

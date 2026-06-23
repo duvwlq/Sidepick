@@ -1,35 +1,50 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import amountIcon from '../assets/images/amount.svg';
-import durationIcon from '../assets/images/duration.svg';
-import viewsIcon from '../assets/images/views.svg';
-import HorizontalScroll from '../components/common/HorizontalScroll';
-import { CardSkeleton, PageMessage } from '../components/common/Skeleton';
+import { Link, useNavigate } from 'react-router-dom';
+import bellIcon from '../assets/images/bell.svg';
+import brandMarkIcon from '../assets/auth-figma/brand-mark.svg';
 import SearchBar from '../components/common/SearchBar';
+import { CardSkeleton, PageMessage } from '../components/common/Skeleton';
+import HorizontalScroll from '../components/common/HorizontalScroll';
 import { useToast } from '../components/common/useToast';
 import Layout from '../components/layout/Layout';
 import { getExperiences, getMe, type Experience, type UserSummary } from '../lib/api';
-import { CATEGORY_TAG_LABELS } from '../lib/category-visuals';
+import { CATEGORY_VISUALS } from '../lib/category-visuals';
+import { getExperienceImageMeta } from '../lib/experience-images';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { clearSession, getAccessToken, getStoredUser } from '../lib/session';
 
 type SortKey = 'latest' | 'popular';
+type PopularTopic = '유튜브' | '쇼핑몰' | '블로그' | '주식';
 
-const CATEGORY_TABS = CATEGORY_TAG_LABELS.slice(0, 4) as string[];
+type HomeCategoryCard = {
+  id: number;
+  label: string;
+  description: string[];
+  theme: string;
+  accent: string;
+};
 
-function formatDuration(months: number | null) {
-  if (!months || months <= 0) {
-    return '기간 미정';
-  }
+const CATEGORY_CARD_THEMES: Array<{ theme: string; accent: string }> = [
+  {
+    theme: 'bg-[linear-gradient(180deg,rgba(40,46,50,0.08)_0%,rgba(15,18,20,0.88)_100%)]',
+    accent: 'from-[rgba(111,160,132,0.5)]',
+  },
+  {
+    theme: 'bg-[linear-gradient(180deg,rgba(51,46,41,0.08)_0%,rgba(22,18,15,0.9)_100%)]',
+    accent: 'from-[rgba(167,118,77,0.48)]',
+  },
+  {
+    theme: 'bg-[linear-gradient(180deg,rgba(49,49,55,0.08)_0%,rgba(17,17,22,0.9)_100%)]',
+    accent: 'from-[rgba(143,140,167,0.46)]',
+  },
+  {
+    theme: 'bg-[linear-gradient(180deg,rgba(40,46,44,0.08)_0%,rgba(14,19,17,0.9)_100%)]',
+    accent: 'from-[rgba(105,138,117,0.44)]',
+  },
+];
 
-  if (months < 12) {
-    return `${months}개월`;
-  }
-
-  const years = Math.floor(months / 12);
-  const remainMonths = months % 12;
-  return remainMonths ? `${years}년 ${remainMonths}개월` : `${years}년`;
-}
+const POPULAR_TOPICS: PopularTopic[] = ['유튜브', '쇼핑몰', '블로그', '주식'];
+const DEFAULT_CATEGORY_COUNT = 4;
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -42,176 +57,179 @@ function formatDate(value: string) {
   ).padStart(2, '0')}`;
 }
 
-function getKeywordLabels(experience: Experience) {
-  const merged = [
+function extractTags(experience: Experience) {
+  const raw = [
+    experience.businessType ?? '',
+    experience.category.name,
     ...experience.failureReasons,
     ...experience.difficulties,
-    experience.failureReason ?? '',
   ].filter(Boolean);
 
-  return Array.from(new Set(merged)).slice(0, 3);
+  return Array.from(new Set(raw)).slice(0, 4);
 }
 
-function matchesCategory(experience: Experience, category: string) {
-  const haystacks = [
-    experience.category.name,
+function matchesPopularTopic(experience: Experience, topic: PopularTopic) {
+  const haystack = [
     experience.title,
     experience.content,
     experience.businessType ?? '',
-  ].map((value) => value.toLowerCase());
+    experience.category.name,
+    ...experience.failureReasons,
+    ...experience.difficulties,
+    ...(experience.analysis?.keywords ?? []),
+  ]
+    .join(' ')
+    .toLowerCase();
 
-  return haystacks.some((value) => value.includes(category.toLowerCase()));
+  const keywordsByTopic: Record<PopularTopic, string[]> = {
+    유튜브: ['유튜브', 'youtube', '영상', '쇼츠', '크리에이터'],
+    쇼핑몰: ['쇼핑몰', '스마트스토어', '이커머스', '쿠팡', '스토어'],
+    블로그: ['블로그', 'blog', '브런치', '콘텐츠', '워드프레스'],
+    주식: ['주식', '코인', 'etf', '투자', '재테크'],
+  };
+
+  return keywordsByTopic[topic].some((keyword) => haystack.includes(keyword));
 }
 
-function HomeCard({
-  experience,
-  compact = false,
-  onClick,
-}: {
-  experience: Experience;
-  compact?: boolean;
-  onClick: () => void;
-}) {
-  const tags = getKeywordLabels(experience);
-  const visibleTags = tags.slice(0, compact ? 1 : 3);
-  const amountLabel = `${(experience.investmentAmount ?? 0).toLocaleString()}원`;
-  const durationLabel = formatDuration(experience.durationMonths);
-  const viewsLabel = experience.viewCount.toLocaleString();
-  const dateLabel = formatDate(experience.createdAt);
+function BookmarkIcon() {
+  return (
+    <svg aria-hidden="true" className="h-[14px] w-[14px]" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M7 5.5C7 4.67 7.67 4 8.5 4H15.5C16.33 4 17 4.67 17 5.5V19L12 15.7L7 19V5.5Z"
+        stroke="#A8A8A8"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function HomeStoryCard({ experience, compact = false }: { experience: Experience; compact?: boolean }) {
+  const tags = extractTags(experience);
+  const preview = experience.content.replace(/\s+/g, ' ').trim() || '아직 본문이 등록되지 않았습니다.';
+  const imageMeta = getExperienceImageMeta(experience);
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex min-h-[127px] min-w-0 appearance-none flex-col items-start gap-[10px] overflow-hidden rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left ${
-        compact ? 'w-[240px] shrink-0' : 'w-full'
+    <article
+      className={`rounded-[8px] border border-[#ECECEC] bg-white px-[12px] py-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.06)] ${
+        compact ? 'w-[296px] shrink-0' : 'w-full'
       }`}
     >
-      <div className="flex w-full min-w-0 flex-col items-start gap-[8px]">
-        <div
-          className={`flex w-full min-w-0 items-start ${compact ? 'gap-[4px]' : 'justify-between gap-[8px]'}`}
-        >
-          <div className="flex min-w-0 flex-wrap items-start gap-[4px] overflow-hidden">
-            {visibleTags.length ? (
-              visibleTags.map((tag) => (
-                <span
-                  key={`${experience.id}-${tag}`}
-                  className="flex h-[20px] max-w-full items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]"
-                >
-                  <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#FFFFFF]">
-                    {tag}
-                  </span>
-                </span>
-              ))
-            ) : (
-              <span className="flex h-[20px] max-w-full items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px]">
-                <span className="truncate whitespace-nowrap font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#FFFFFF]">
-                  키워드 없음
-                </span>
+      <div className="flex flex-col gap-[10px]">
+        <div className="flex flex-wrap gap-[4px]">
+          {tags.slice(0, 4).map((tag, index) => {
+            const palette = index === 0 ? 'bg-[#D07B48]' : index === 1 ? 'bg-[#7DA884]' : 'bg-[#BABABA]';
+            return (
+              <span
+                key={`${experience.id}-${tag}-${index}`}
+                className={`${palette} rounded-[4px] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-white`}
+              >
+                {tag}
               </span>
-            )}
+            );
+          })}
+        </div>
+
+        <div className="flex gap-[10px]">
+          <div className="min-w-0 flex-1">
+            <h3 className="line-clamp-2 text-[15px] font-[600] leading-[20px] text-[#131416]">{experience.title}</h3>
+            <p className="mt-[4px] line-clamp-2 text-[12px] font-[400] leading-[16px] text-[#5D5D5D]">{preview}</p>
           </div>
-          {!compact ? (
-            <span className="shrink-0 whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#494949] underline">
-              자세히 보기
-            </span>
+
+          {imageMeta.primaryImageUrl ? (
+            <div className="relative h-[84px] w-[84px] shrink-0 overflow-hidden rounded-[4px] bg-[#9F9F9F]">
+              <img src={imageMeta.primaryImageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.2),transparent_52%)]" />
+              <span className="absolute bottom-[6px] right-[6px] flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-[rgba(0,0,0,0.3)] px-[4px] text-[10px] font-[600] leading-[12px] text-white">
+                {imageMeta.imageCount}
+              </span>
+            </div>
           ) : null}
         </div>
 
-        <h3 className="w-full truncate font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#000000]">
-          {experience.title}
-        </h3>
-      </div>
-
-      <div className="grid w-full grid-cols-[repeat(2,minmax(0,1fr))] gap-x-[10px] gap-y-[4px]">
-        <MetaItem icon={durationIcon} label={durationLabel} />
-        <MetaItem icon={amountIcon} label={amountLabel} />
-        <MetaItem icon={viewsIcon} label={viewsLabel} />
-        <div className="flex min-w-0 items-center justify-self-start">
-          <span
-            translate="no"
-            className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]"
-          >
-            {dateLabel}
-          </span>
+        <div className="flex items-center justify-between gap-[8px] text-[11px] leading-[13px] text-[#A8A8A8]">
+          <div className="flex min-w-0 flex-wrap items-center gap-[4px]">
+            <span className="truncate">{experience.author.nickname || '익명'}</span>
+            <span>·</span>
+            <span>{formatDate(experience.createdAt)}</span>
+            <span>·</span>
+            <span>조회 {experience.viewCount.toLocaleString()}</span>
+          </div>
+          <div className="flex shrink-0 items-center gap-[2px]">
+            <BookmarkIcon />
+            <span>{experience.likeCount.toLocaleString()}</span>
+          </div>
         </div>
       </div>
-    </button>
+    </article>
   );
 }
 
-function MetaItem({ icon, label }: { icon: string; label: string }) {
+function CategoryGridCard({ category }: { category: HomeCategoryCard }) {
   return (
-    <div className="flex min-w-0 items-center gap-[4px] justify-self-start">
-      <img src={icon} alt="" className="h-[16px] w-[16px] shrink-0" />
-      <span
-        translate="no"
-        className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]"
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
-
-function CategoryTab({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex shrink-0 appearance-none items-start border-0 bg-transparent p-[0px]"
+    <Link
+      to={`/explore?categoryId=${category.id}`}
+      className={`relative flex h-[160px] min-h-[160px] flex-col justify-end overflow-hidden rounded-[16px] p-[16px] text-white ${category.theme}`}
     >
-      <span
-        className={`flex shrink-0 items-center justify-center px-[8px] py-[4px] ${
-          active ? 'border-b-[1.5px] border-[#494949]' : ''
-        }`}
-      >
-        <span
-          className={`whitespace-nowrap text-center font-['Pretendard'] text-[14px] leading-[16.8px] ${
-            active ? 'font-[600] text-[#494949]' : 'font-[400] text-[#BABABA]'
-          }`}
-        >
-          {label}
-        </span>
-      </span>
-    </button>
+      <div
+        className={`absolute inset-0 bg-[radial-gradient(circle_at_top_left,var(--tw-gradient-stops),transparent_48%)] ${category.accent} to-transparent`}
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(0,0,0,0.18)_55%,rgba(0,0,0,0.74)_100%)]" />
+      <div className="relative">
+        <h3 className="text-[14px] font-[600] leading-[17px]">{category.label}</h3>
+        <div className="mt-[6px] space-y-[1px] text-[10px] font-[300] leading-[14px] text-white/92">
+          {category.description.map((line) => (
+            <p key={line}>{line}</p>
+          ))}
+        </div>
+      </div>
+    </Link>
   );
 }
 
-function SegmentButton({
+function TopicPill({
   active,
   label,
   onClick,
 }: {
   active: boolean;
-  label: string;
+  label: PopularTopic;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`flex min-w-0 flex-1 appearance-none items-center justify-center border-0 py-[10px] ${
-        active
-          ? 'rounded-[999px] border-[2px] border-[#E6E6E6] bg-[#FFFFFF]'
-          : 'rounded-[4px] bg-transparent'
+      className={`shrink-0 border-b-[1.5px] px-[8px] pb-[7px] pt-[3px] text-[14px] leading-[17px] ${
+        active ? 'border-[#5A876E] font-[600] text-[#5A876E]' : 'border-transparent font-[400] text-[#BABABA]'
       }`}
+      aria-pressed={active}
     >
-      <span
-        className={`whitespace-nowrap text-center font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] ${
-          active ? 'text-[#131416]' : 'text-[#757575]'
-        }`}
-      >
-        {label}
-      </span>
+      {label}
+    </button>
+  );
+}
+
+function SortSegment({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`flex h-[32px] min-w-0 flex-1 items-center justify-center rounded-[999px] px-[12px] text-[12px] leading-[14px] ${
+        active ? 'bg-white font-[500] text-[#141414] shadow-[0_2px_8px_rgba(0,0,0,0.08)]' : 'font-[400] text-[#8A8A8A]'
+      }`}
+      aria-pressed={active}
+    >
+      {label}
     </button>
   );
 }
@@ -219,17 +237,17 @@ function SegmentButton({
 export default function Home() {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const keyword = '';
+  const [selectedTopic, setSelectedTopic] = useState<PopularTopic>('유튜브');
   const [sort, setSort] = useState<SortKey>('latest');
-  const [selectedCategory, setSelectedCategory] = useState<string>(CATEGORY_TABS[0]);
+  const [expandedCategories, setExpandedCategories] = useState(false);
   const [user, setUser] = useState<UserSummary | null>(() => getStoredUser());
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState('');
 
   useEffect(() => {
-    void loadExperiences(keyword, sort);
-  }, [keyword, sort]);
+    void loadExperiences(sort);
+  }, [sort]);
 
   useEffect(() => {
     if (listError) {
@@ -251,7 +269,7 @@ export default function Home() {
       });
   }, [user]);
 
-  async function loadExperiences(searchKeyword: string, nextSort: SortKey) {
+  async function loadExperiences(nextSort: SortKey) {
     setListLoading(true);
     setListError('');
 
@@ -259,188 +277,174 @@ export default function Home() {
       const payload = await getExperiences({
         page: 0,
         size: 20,
-        q: searchKeyword.trim() || undefined,
         sort: nextSort,
       });
       setExperiences(payload.experiences);
     } catch (loadError) {
-      setListError(
-        resolveErrorMessage(
-          loadError,
-          '경험 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.',
-        ),
-      );
+      setListError(resolveErrorMessage(loadError, '경험 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'));
     } finally {
       setListLoading(false);
     }
   }
 
-  function moveToAuth(nextPath: string, reason: string) {
-    navigate(`/auth?next=${encodeURIComponent(nextPath)}&reason=${encodeURIComponent(reason)}`);
-  }
+  const homeCategories = useMemo<HomeCategoryCard[]>(
+    () =>
+      CATEGORY_VISUALS.map((item, index) => ({
+        id: item.id,
+        label: item.label,
+        description: item.descriptionLines,
+        theme: CATEGORY_CARD_THEMES[index % CATEGORY_CARD_THEMES.length].theme,
+        accent: CATEGORY_CARD_THEMES[index % CATEGORY_CARD_THEMES.length].accent,
+      })),
+    [],
+  );
 
-  function handlePrimaryAction() {
-    if (!user) {
-      moveToAuth('/create', '경험 등록과 분석은 로그인이 필요한 서비스입니다.');
-      return;
-    }
+  const visibleCategories = useMemo(
+    () => (expandedCategories ? homeCategories : homeCategories.slice(0, DEFAULT_CATEGORY_COUNT)),
+    [expandedCategories, homeCategories],
+  );
 
-    navigate('/create');
-  }
-
-  function handleExperienceClick(experienceId: number) {
-    navigate(`/experiences/${experienceId}`);
-  }
-
-  const featuredExperiences = useMemo(() => {
-    const filtered = experiences.filter((experience) =>
-      matchesCategory(experience, selectedCategory),
-    );
-    return (filtered.length ? filtered : experiences).slice(0, 3);
-  }, [experiences, selectedCategory]);
+  const popularExperiences = useMemo(() => {
+    const topicMatched = experiences.filter((experience) => matchesPopularTopic(experience, selectedTopic));
+    return (topicMatched.length ? topicMatched : experiences).slice(0, 6);
+  }, [experiences, selectedTopic]);
 
   const exploreExperiences = useMemo(() => experiences.slice(0, 4), [experiences]);
 
   return (
-    <Layout title="사이드픽" leftType="menu" showRightIcon>
-      <div className="bg-[#FFFFFF]">
-        <section className="h-[52px] w-full bg-[#FFFFFF] px-[16px] pb-[12px]">
-          <SearchBar
-            placeholder="원하는 실패 경험을 검색해보세요"
-            value={keyword}
-            onClick={() => navigate('/explore?mode=search')}
-            readOnly
-          />
-        </section>
-
-        <section className="flex w-full flex-col items-center gap-[16px] px-[16px] py-[12px]">
-          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]">
-            인기 카테고리
-          </h2>
-
-          <HorizontalScroll
-            wrapperClassName="w-full"
-            contentClassName="horizontal-scroll-content--tags"
-          >
-            {CATEGORY_TABS.map((tab) => (
-              <CategoryTab
-                key={tab}
-                active={selectedCategory === tab}
-                label={tab}
-                onClick={() => setSelectedCategory(tab)}
-              />
-            ))}
-          </HorizontalScroll>
-
-          {featuredExperiences.length ? (
-            <HorizontalScroll
-              wrapperClassName="w-full"
-              contentClassName="horizontal-scroll-content--cards pr-[16px]"
-            >
-              {featuredExperiences.map((experience) => (
-                <HomeCard
-                  key={experience.id}
-                  experience={experience}
-                  compact
-                  onClick={() => handleExperienceClick(experience.id)}
-                />
-              ))}
-            </HorizontalScroll>
-          ) : (
-            <PageMessage message="표시할 경험이 없습니다." />
-          )}
-        </section>
-
-        <section className="w-full bg-[#FFFFFF] p-[16px]">
-          <div className="flex w-full flex-col items-start gap-[39px] rounded-[10px] bg-[#757575] p-[20px] text-[#FFFFFF]">
-            <div className="flex w-full flex-col items-start gap-[8px]">
-              <p className="font-['Pretendard'] text-[20px] font-[600] leading-[24px] text-[#FFFFFF]">
-                실패도 좋은 경험이에요
-              </p>
-              <div className="w-full max-w-[314px] break-words font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#FFFFFF]">
-                <p>경험을 등록하면 AI가 실패 원인을 분석해주고</p>
-                <p>비슷한 사례를 보여주며 다음 선택을 돕습니다.</p>
-              </div>
+    <Layout showHeader={false} title="사이드픽">
+      <div className="bg-white">
+        <section className="bg-white px-[16px] pb-[12px] pt-[20px]">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-[2px]">
+              <img src={brandMarkIcon} alt="" className="h-[16px] w-[16px]" />
+              <span className="text-[20px] font-[400] uppercase leading-[16px] tracking-[0.02em] text-[#5A876E]">
+                SidePick
+              </span>
             </div>
 
             <button
               type="button"
-              onClick={handlePrimaryAction}
-              className="flex min-h-[44px] w-full appearance-none items-center justify-between rounded-[8px] border-0 bg-[#FFFFFF] px-[12px] py-[8px] font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#000000]"
+              className="flex h-[24px] w-[24px] items-center justify-center"
+              aria-label="알림"
+              onClick={() => showToast('알림 기능은 아직 준비 중입니다.')}
             >
-              <span className="whitespace-nowrap text-center font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#000000]">
-                내 경험 분석하러 가기
-              </span>
-              <span className="relative h-[16px] w-[16px] shrink-0 overflow-hidden" aria-hidden="true">
-                <svg
-                  className="absolute inset-[20.83%_33.33%] h-[58.34%] w-[33.34%]"
-                  fill="none"
-                  viewBox="0 0 6 10"
-                >
-                  <path
-                    d="M1 1L5 5L1 9"
-                    stroke="#000000"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.6"
-                  />
-                </svg>
-              </span>
+              <img src={bellIcon} alt="" className="h-[24px] w-[24px]" />
+            </button>
+          </div>
+
+          <div className="mt-[20px]">
+            <SearchBar
+              placeholder="원하는 실패 경험을 검색해보세요"
+              value=""
+              readOnly
+              onClick={() => navigate('/explore?mode=search')}
+            />
+          </div>
+        </section>
+
+        <section className="px-[16px] py-[12px]">
+          <div className="flex items-end justify-between">
+            <h2 className="text-[16px] font-[600] leading-[19px] text-[#131416]">부업 카테고리</h2>
+            <button
+              type="button"
+              onClick={() => navigate('/explore')}
+              className="text-[12px] font-[400] leading-[14px] text-[#8A8A8A]"
+            >
+              전체보기
+            </button>
+          </div>
+
+          <div className="mt-[16px] grid grid-cols-2 gap-[10px]">
+            {visibleCategories.map((category) => (
+              <CategoryGridCard key={category.id} category={category} />
+            ))}
+          </div>
+
+          <div className="mt-[12px] text-center">
+            <button
+              type="button"
+              onClick={() => setExpandedCategories((prev) => !prev)}
+              className="text-[12px] font-[400] leading-[14px] text-[#757575] underline"
+              aria-expanded={expandedCategories}
+            >
+              {expandedCategories ? '접어 보기' : '펼쳐 보기'}
             </button>
           </div>
         </section>
 
-        <section className="flex w-full flex-col items-start justify-center gap-[10px] bg-[#FFFFFF] px-[16px] py-[12px]">
-          <h2 className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]">
-            탐색
-          </h2>
+        <section className="px-[16px] py-[12px]">
+          <h2 className="text-[16px] font-[600] leading-[19px] text-[#131416]">인기 부업</h2>
 
-          <div className="flex min-h-[616px] w-full flex-col items-center gap-[12px]">
-            <div className="w-full rounded-[999px] bg-[#E6E6E6]">
-              <div className="flex w-full items-center justify-center">
-                <SegmentButton
-                  active={sort === 'latest'}
-                  label="최신 등록 경험"
-                  onClick={() => setSort('latest')}
-                />
-                <SegmentButton
-                  active={sort === 'popular'}
-                  label="인기 경험"
-                  onClick={() => setSort('popular')}
-                />
+          <div className="mt-[16px] flex items-center gap-[2px]">
+            {POPULAR_TOPICS.map((topic) => (
+              <TopicPill key={topic} active={selectedTopic === topic} label={topic} onClick={() => setSelectedTopic(topic)} />
+            ))}
+          </div>
+
+          <div className="mt-[16px]">
+            {listLoading ? (
+              <div className="flex gap-[14px] overflow-hidden">
+                <div className="w-[296px] shrink-0">
+                  <CardSkeleton />
+                </div>
+                <div className="w-[296px] shrink-0">
+                  <CardSkeleton />
+                </div>
               </div>
-            </div>
+            ) : listError ? (
+              <PageMessage message={listError} tone="error" />
+            ) : popularExperiences.length ? (
+              <HorizontalScroll wrapperClassName="w-full" contentClassName="gap-[10px] pr-[16px]">
+                {popularExperiences.map((experience) => (
+                  <Link key={experience.id} to={`/experiences/${experience.id}`} className="block">
+                    <HomeStoryCard compact experience={experience} />
+                  </Link>
+                ))}
+              </HorizontalScroll>
+            ) : (
+              <PageMessage message="조건에 맞는 사례가 없습니다." />
+            )}
+          </div>
+        </section>
 
-            <div className="flex w-full flex-col items-start gap-[10px]">
-              {listLoading ? (
-                <>
-                  <CardSkeleton />
-                  <CardSkeleton />
-                  <CardSkeleton />
-                </>
-              ) : listError ? (
-                <PageMessage message={listError} tone="error" />
-              ) : exploreExperiences.length ? (
-                exploreExperiences.map((experience) => (
-                  <HomeCard
-                    key={experience.id}
-                    experience={experience}
-                    onClick={() => handleExperienceClick(experience.id)}
-                  />
-                ))
-              ) : (
-                <PageMessage message="아직 등록된 경험이 없습니다." />
-              )}
-            </div>
+        <section className="px-[16px] py-[12px]">
+          <h2 className="text-[16px] font-[600] leading-[19px] text-[#131416]">탐색</h2>
 
+          <div className="mt-[10px] w-full rounded-[999px] bg-[#E1E1E1] p-[3px]">
+            <div className="flex items-center">
+              <SortSegment active={sort === 'latest'} label="최근 등록된 사례" onClick={() => setSort('latest')} />
+              <SortSegment active={sort === 'popular'} label="인기 사례" onClick={() => setSort('popular')} />
+            </div>
+          </div>
+
+          <div className="mt-[12px] flex flex-col gap-[10px]">
+            {listLoading ? (
+              <>
+                <CardSkeleton />
+                <CardSkeleton />
+                <CardSkeleton />
+              </>
+            ) : listError ? (
+              <PageMessage message={listError} tone="error" />
+            ) : exploreExperiences.length ? (
+              exploreExperiences.map((experience) => (
+                <Link key={experience.id} to={`/experiences/${experience.id}`} className="block">
+                  <HomeStoryCard experience={experience} />
+                </Link>
+              ))
+            ) : (
+              <PageMessage message="아직 등록된 사례가 없습니다." />
+            )}
+          </div>
+
+          <div className="pt-[12px] text-center">
             <button
               type="button"
               onClick={() => navigate('/explore')}
-              className="appearance-none border-0 bg-transparent p-[0px]"
+              className="text-[12px] font-[400] leading-[14px] text-[#5D5D5D] underline"
             >
-              <span className="text-[12px] leading-[14.4px] text-[#5D5D5D] underline">
-                모든 사례 보기
-              </span>
+              모든 사례 보기
             </button>
           </div>
         </section>

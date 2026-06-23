@@ -1,262 +1,186 @@
-﻿import { Bookmark, ChevronLeft, LoaderCircle, Trash2 } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import amountIcon from '../../assets/images/amount.svg';
-import durationIcon from '../../assets/images/duration.svg';
-import { ErrorState, LoadingState } from '../common/Skeleton';
+import { ErrorState, LoadingState, PageMessage } from '../common/Skeleton';
+import { useToast } from '../common/useToast';
+import HeaderBookmarkIcon from '../common/HeaderBookmarkIcon';
+import BottomNav from '../layout/BottomNav';
 import {
   ApiError,
-  createAnalysis,
+  bookmarkExperience,
   deleteExperience,
+  getBookmarkStatus,
   getExperience,
   getReport,
+  getRelatedSuccessCases,
   type Experience,
+  unbookmarkExperience,
 } from '../../lib/api';
 import { mapAnalysisReport } from '../../lib/analysisMapper';
 import { ERROR_CODES } from '../../lib/error-codes';
 import { setFlashToast } from '../../lib/flash-toast';
+import { extractExperienceImageUrls } from '../../lib/experience-images';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../../lib/session';
 import {
   buildIssueItems,
   buildPatternItems,
   formatCurrency,
-  formatDailyHours,
   formatDate,
   formatDuration,
-  formatMainJobStatus,
   shouldUseDevFallback,
 } from './aiAnalysisResult.utils';
-import BottomNav from '../layout/BottomNav';
+import FailureToSuccessButton from './FailureToSuccessButton';
 
 type Props = {
   experienceId: number | null;
 };
 
-const ENCOURAGEMENT_MESSAGES = [
-  '이번 경험은 실패가 아니라 다음 선택을 더 단단하게 만들어 줄 기록이에요.',
-  '실패를 정리한 것만으로도 다음 시도를 위한 중요한 데이터를 만든 거예요.',
-  '지금의 기록은 다음 선택에서 같은 실수를 줄이는 데 분명 도움이 될 거예요.',
-];
-
-function SectionTitle({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+function SectionTitle({ title, description }: { title: string; description: string }) {
   return (
-    <div className="flex w-full flex-col gap-[4px]">
-      <p className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
-        {title}
-      </p>
-      <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-        {description}
-      </p>
+    <div className="flex flex-col gap-[4px]">
+      <p className="text-[16px] font-[600] leading-[19px] text-[#131416]">{title}</p>
+      <p className="text-[12px] leading-[17px] text-[#494949]">{description}</p>
     </div>
   );
 }
 
-function PrimaryBadge({ text }: { text: string }) {
+function FilledBadge({ text, tone = 'gray' }: { text: string; tone?: 'gray' | 'green' | 'orange' }) {
+  const className =
+    tone === 'orange'
+      ? 'bg-[#C97945] text-white'
+      : tone === 'green'
+        ? 'bg-[#CBE5D8] text-[#5A876E]'
+        : 'bg-[#D8D8D8] text-white';
+
+  return <div className={`rounded-[4px] px-[4px] py-[2px] text-[12px] leading-[14px] ${className}`}>{text}</div>;
+}
+
+function MetricCard({ value, label, helper }: { value: string; label: string; helper: string }) {
   return (
-    <div className="flex items-center justify-center rounded-[999px] bg-[#EEEEEE] px-[8px] py-[2px]">
-      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#757575]">
-        {text}
-      </span>
+    <div className="flex min-h-[83px] flex-1 flex-col items-center justify-center text-center">
+      <p className="text-[20px] font-[500] leading-[25px] text-[#131416]">{value}</p>
+      <p className="mt-[4px] text-[14px] font-[500] leading-[17px] text-[#131416]">{label}</p>
+      <p className="mt-[4px] text-[12px] leading-[14px] text-[#8A8A8A]">{helper}</p>
     </div>
   );
 }
 
-function SecondaryBadge({ text }: { text: string }) {
+function ProgressRow({ label, percent }: { label: string; percent: number }) {
   return (
-    <div className="flex items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px] py-[2px]">
-      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF]">
-        {text}
-      </span>
-    </div>
-  );
-}
-
-function MoreVerticalIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M10.0001 10.8335C10.4603 10.8335 10.8334 10.4604 10.8334 10.0002C10.8334 9.53993 10.4603 9.16683 10.0001 9.16683C9.53984 9.16683 9.16675 9.53993 9.16675 10.0002C9.16675 10.4604 9.53984 10.8335 10.0001 10.8335Z"
-        stroke="#1E1E1E"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10.0001 5.00016C10.4603 5.00016 10.8334 4.62707 10.8334 4.16683C10.8334 3.70659 10.4603 3.3335C10.0001 3.3335C9.53984 3.3335 9.16675 3.70659 9.16675 4.16683C9.16675 4.62707 9.53984 5.00016 10.0001 5.00016Z"
-        stroke="#1E1E1E"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M10.0001 16.6668C10.4603 16.6668 10.8334 16.2937 10.8334 15.8335C10.8334 15.3733 10.4603 15.0002 10.0001 15.0002C9.53984 15.0002 9.16675 15.3733 9.16675 15.8335C9.16675 16.2937 9.53984 16.6668 10.0001 16.6668Z"
-        stroke="#1E1E1E"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function DetailMetricRow({
-  icon,
-  label,
-  value,
-  showDivider = true,
-}: {
-  icon: string;
-  label: string;
-  value: string;
-  showDivider?: boolean;
-}) {
-  return (
-    <>
-      <div className="flex w-full items-center justify-between">
-        <div className="flex items-center gap-[4px]">
-          <img src={icon} alt="" className="h-[14px] w-[14px]" />
-          <p className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A]">
-            {label}
-          </p>
-        </div>
-        <p className="font-['Pretendard'] text-[16px] font-[400] leading-[22.4px] tracking-[0px] text-[#131416]">
-          {value}
-        </p>
+    <div className="flex flex-col gap-[4px]">
+      <div className="flex items-center justify-between">
+        <span className="text-[12px] leading-[17px] text-[#131416]">{label}</span>
+        <span className="text-[12px] leading-[17px] text-[#131416]">{percent}%</span>
       </div>
-      {showDivider ? <div className="h-0 w-full border-t border-[#E6E6E6]" /> : null}
-    </>
+      <div className="h-[6px] w-full rounded-[999px] bg-[#E8ECE9]">
+        <div className="h-full rounded-[999px] bg-[#5A876E]" style={{ width: `${Math.max(0, Math.min(percent, 100))}%` }} />
+      </div>
+    </div>
   );
 }
 
 function SimilarCaseCard({
-  item,
+  title,
+  summary,
+  similarity,
   onClick,
 }: {
-  item: ReturnType<typeof mapAnalysisReport>['similarCases'][number];
+  title: string;
+  summary: string | null;
+  similarity: number;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full flex-col items-start rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left"
+      className="flex w-full flex-col items-start gap-[8px] rounded-[10px] bg-[#F8F8F8] p-[16px] text-left"
     >
-        <div className="flex w-full flex-col gap-[8px]">
-          <div className="flex w-full items-start justify-between gap-[8px]">
-            <div className="flex min-w-0 flex-1 flex-wrap items-start gap-[4px]">
-            {item.tags.map((tag) => (
-              <SecondaryBadge key={`${item.caseId}-${tag}`} text={tag} />
-            ))}
-          </div>
-
-          <div className="flex shrink-0 items-center justify-end gap-[4px] whitespace-nowrap text-right">
-            <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-              유사도
-            </p>
-            <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-              {String(item.similarity).padStart(2, '0')}%
-            </p>
-          </div>
-        </div>
-
-        <p className="w-full font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000]">
-          {item.title}
-        </p>
-
-        {item.summary ? (
-          <p className="w-full font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-            {item.summary}
-          </p>
-        ) : null}
-
-        {item.keyLesson ? (
-          <p className="w-full font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575]">
-            {item.keyLesson}
-          </p>
-        ) : null}
-      </div>
+      <FilledBadge text="실패 사례" tone="green" />
+      <p className="text-[14px] font-[500] leading-[17px] text-[#131416]">{title}</p>
+      {summary ? <p className="line-clamp-3 text-[12px] leading-[17px] text-[#494949]">{summary}</p> : null}
+      <p className="text-[12px] leading-[17px] text-[#8A8A8A]">유사도 {similarity}%</p>
     </button>
-  );
-}
-
-function FaqShortcutCard({ onClick }: { onClick: () => void }) {
-  return (
-    <section className="flex w-full flex-col gap-[10px]">
-      <div className="flex items-center gap-[4px]">
-        <div className="flex h-[16px] w-[16px] items-center justify-center rounded-[999px] border border-[#E1E4E6]">
-          <span className="text-[10px] leading-none text-[#E5E8EB]">i</span>
-        </div>
-        <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-          비슷한 상황의 사람들은 어떤 질문을 가장 많이 했을까요?
-        </p>
-      </div>
-
-      <button
-        type="button"
-        onClick={onClick}
-        className="flex w-full items-center justify-between rounded-[10px] bg-[#131416] px-[16px] py-[12px] text-left"
-      >
-        <div className="flex items-center gap-[4px]">
-          <div className="flex items-center justify-center rounded-[999px] bg-white px-[8px] py-[2px]">
-            <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-black">
-              FAQ
-            </span>
-          </div>
-          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#F8F8F8]">
-            사용자 가이드 게시판 바로 가기
-          </span>
-        </div>
-
-        <svg
-          viewBox="0 0 16 16"
-          className="h-[16px] w-[16px] shrink-0"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M6 4L10 8L6 12"
-            stroke="#FFFFFF"
-            strokeWidth="1.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
-    </section>
   );
 }
 
 export default function AiAnalysisResult({ experienceId }: Props) {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [experience, setExperience] = useState<Experience | null>(null);
   const [report, setReport] = useState<Awaited<ReturnType<typeof getReport>> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [actionMenuOpen, setActionMenuOpen] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [relatedSuccessCount, setRelatedSuccessCount] = useState(0);
+  const [recommendedSuccessReason, setRecommendedSuccessReason] = useState('');
 
   const viewer = getStoredUser();
   const isOwner = useMemo(() => {
     if (!viewer || !experience) {
       return false;
     }
-
     return viewer.id === experience.author.id;
   }, [experience, viewer]);
 
   useEffect(() => {
     if (!experienceId) {
       setLoading(false);
-      setError('요청한 경험을 찾을 수 없습니다.');
+      setError('요청한 사례를 찾을 수 없어요.');
       return;
     }
 
     void loadPageData(experienceId);
   }, [experienceId]);
+
+  useEffect(() => {
+    if (error) {
+      showToast(error);
+    }
+  }, [error, showToast]);
+
+  useEffect(() => {
+    if (!experience) {
+      return;
+    }
+
+    const token = getAccessToken();
+    if (!token) {
+      setBookmarked(false);
+      return;
+    }
+
+    void getBookmarkStatus(token, experience.id)
+      .then((payload) => {
+        setBookmarked(payload.bookmarked);
+      })
+      .catch(() => {
+        setBookmarked(false);
+      });
+  }, [experience]);
+
+  useEffect(() => {
+    if (!experience || experience.caseStatus === 'SUCCESS') {
+      setRelatedSuccessCount(0);
+      setRecommendedSuccessReason('');
+      return;
+    }
+
+    void getRelatedSuccessCases(experience.id, 10)
+      .then((payload) => {
+        setRelatedSuccessCount(payload.length);
+        const topReason = (payload[0] as Experience & { recommendationReason?: string | null } | undefined)?.recommendationReason?.trim();
+        setRecommendedSuccessReason(topReason || '');
+      })
+      .catch(() => {
+        setRelatedSuccessCount(0);
+        setRecommendedSuccessReason('');
+      });
+  }, [experience]);
 
   async function loadPageData(targetExperienceId: number) {
     setLoading(true);
@@ -267,21 +191,14 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       let reportPayload = await getReport(targetExperienceId);
 
       if (reportPayload.reportStatus === 'NOT_READY') {
-        const token = getAccessToken();
-        if (token) {
-          try {
-            await createAnalysis(token, targetExperienceId);
-            reportPayload = await getReport(targetExperienceId);
-          } catch (requestError) {
-            if (
-              requestError instanceof ApiError &&
-              (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
-                requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR)
-            ) {
-              setExperience(experiencePayload);
-              setReport(reportPayload);
-              return;
-            }
+        try {
+          await new Promise((resolve) => window.setTimeout(resolve, 1200));
+          reportPayload = await getReport(targetExperienceId);
+        } catch (requestError) {
+          if (requestError instanceof ApiError && requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT) {
+            setExperience(experiencePayload);
+            setReport(reportPayload);
+            return;
           }
         }
       }
@@ -290,16 +207,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       setReport(reportPayload);
     } catch (requestError) {
       if (shouldUseDevFallback(requestError)) {
-        setError('개발 환경에서 API 서버에 연결하지 못했습니다.');
+        setError('개발 환경에서 API 서버에 연결하지 못했어요.');
         return;
       }
 
-      setError(
-        resolveErrorMessage(
-          requestError,
-          '분석 결과를 불러오지 못했어요. 잠시 후 다시 시도해주세요.',
-        ),
-      );
+      setError(resolveErrorMessage(requestError, '사례 상세를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.'));
     } finally {
       setLoading(false);
     }
@@ -316,45 +228,42 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       return;
     }
 
-    const confirmed = window.confirm('이 경험을 삭제하시겠어요?');
-    if (!confirmed) {
+    if (!window.confirm('이 사례를 삭제할까요?')) {
       return;
     }
 
     setDeleting(true);
     setActionMenuOpen(false);
-    setError('');
 
     try {
       await deleteExperience(token, experience.id);
-      setFlashToast('삭제했어요');
+      setFlashToast('사례를 삭제했어요.');
       navigate('/', { replace: true });
     } catch (requestError) {
-      setError(
-        resolveErrorMessage(
-          requestError,
-          '경험을 삭제하지 못했어요. 잠시 후 다시 시도해주세요.',
-        ),
-      );
+      setError(resolveErrorMessage(requestError, '사례를 삭제하지 못했어요.'));
       setDeleting(false);
     }
   }
 
   function handleSimilarCaseClick(caseId: string) {
-    const directNumericId = Number(caseId);
-    if (Number.isFinite(directNumericId) && directNumericId > 0) {
-      navigate(`/experiences/${directNumericId}`);
+    const parsed = Number(caseId.match(/(\d+)/)?.[1] ?? caseId);
+    if (Number.isFinite(parsed) && parsed > 0) {
+      navigate(`/experiences/${parsed}`);
       return;
     }
-
-    const extractedId = caseId.match(/(\d+)/)?.[1];
-    const numericId = extractedId ? Number(extractedId) : Number.NaN;
-    if (Number.isFinite(numericId) && numericId > 0) {
-      navigate(`/experiences/${numericId}`);
-      return;
-    }
-
     navigate('/explore');
+  }
+
+  function moveToCreate() {
+    const token = getAccessToken();
+    if (!token) {
+      navigate(
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 등록은 로그인이 필요한 서비스입니다.')}`,
+      );
+      return;
+    }
+
+    navigate('/create');
   }
 
   const chips = useMemo(() => {
@@ -362,56 +271,43 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       return [];
     }
 
-    return [
-      experience.category.name,
-      formatDuration(experience.durationMonths),
-      formatDailyHours(experience.averageDailyHours),
-      formatMainJobStatus(experience.isConcurrentWithMainJob),
-    ].filter((value): value is string => Boolean(value));
+    return [experience.businessType || '부업', experience.category.name, ...experience.failureReasons.slice(0, 2)].filter(Boolean);
   }, [experience]);
 
-  const isReportReady = report?.reportStatus === 'READY';
-  const isReportNotReady = report?.reportStatus === 'NOT_READY';
-  const isReportError = report?.reportStatus === 'ERROR';
-
+  const imageUrls = useMemo(() => (experience ? extractExperienceImageUrls(experience) : []), [experience]);
+  const displayedImageUrl = imageUrls[selectedImageIndex] ?? imageUrls[0] ?? null;
   const mappedReport = useMemo(
     () => (report?.reportStatus === 'READY' ? mapAnalysisReport(report) : null),
     [report],
   );
-
-  const issueItems = useMemo(
-    () => (isReportReady ? buildIssueItems(report) : []),
-    [isReportReady, report],
-  );
-  const patternItems = useMemo(
-    () => (isReportReady ? buildPatternItems(report) : []),
-    [isReportReady, report],
-  );
-  const guideLines = useMemo(() => mappedReport?.guideLines ?? [], [mappedReport]);
-  const guideSummary = useMemo(
+  const issueItems = useMemo(() => (report?.reportStatus === 'READY' ? buildIssueItems(report) : []), [report]);
+  const patternItems = useMemo(() => (report?.reportStatus === 'READY' ? buildPatternItems(report) : []), [report]);
+  const similarCases = useMemo(() => mappedReport?.similarCases.slice(0, 2) ?? [], [mappedReport]);
+  const similarCaseReasons = useMemo(
     () =>
-      mappedReport?.guideSummary ??
-      '이번 경험에서 드러난 흐름을 바탕으로 다음 시도에서 줄일 수 있는 위험을 정리했어요.',
-    [mappedReport],
+      (report?.similarCases ?? []).slice(0, 2).map((item) => {
+        const matchedKeywords = item.explanation?.matchedKeywords?.filter(Boolean) ?? [];
+        if (matchedKeywords.length) {
+          return `${matchedKeywords.join(', ')} 기준으로 비슷한 사례로 분류했어요.`;
+        }
+        if (item.explanation?.source === 'ai-similar-search') {
+          return 'AI 유사도 검색 결과를 기준으로 가까운 사례로 분류했어요.';
+        }
+        return '같은 카테고리와 실패 맥락이 겹쳐 추천된 사례예요.';
+      }),
+    [report],
   );
-  const guideClosing = useMemo(() => {
-    if (!experience) {
-      return ENCOURAGEMENT_MESSAGES[0];
-    }
-
-    return ENCOURAGEMENT_MESSAGES[experience.id % ENCOURAGEMENT_MESSAGES.length];
-  }, [experience]);
-  const similarCases = useMemo(() => mappedReport?.similarCases.slice(0, 3) ?? [], [mappedReport]);
-  const similarCaseTags = useMemo(
-    () => mappedReport?.similarCaseTags ?? ['실패 경험', '원인 분석', '유사 사례'],
-    [mappedReport],
+  const aiSummary = useMemo(
+    () => report?.summary?.trim() || '아직 AI 요약이 준비되지 않았어요.',
+    [report],
   );
+  const aiAdvice = useMemo(() => report?.advice?.slice(0, 3) ?? [], [report]);
 
   if (loading) {
     return (
-      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
+      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
         <div className="px-[16px] py-[40px]">
-          <LoadingState message="경험을 불러오는 중입니다." />
+          <LoadingState message="사례를 불러오는 중입니다." />
         </div>
       </div>
     );
@@ -419,104 +315,112 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
   if (error || !experience) {
     return (
-      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
+      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
         <div className="px-[16px] py-[40px]">
-          <ErrorState message={error || '분석 결과를 불러오지 못했어요. 잠시 후 다시 시도해주세요.'} />
+          <ErrorState message={error || '사례를 불러오지 못했어요.'} />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
+    <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
       {actionMenuOpen ? (
         <button
           type="button"
-          aria-label="액션 메뉴 닫기"
+          aria-label="메뉴 닫기"
           onClick={() => setActionMenuOpen(false)}
           className="fixed inset-0 z-40 bg-transparent"
         />
       ) : null}
 
-      <div className="relative flex w-full flex-col bg-[#FFFFFF]">
-        <div className="relative flex w-full items-center justify-between bg-[#FFFFFF] px-[16px] py-[20px]">
-          <div className="flex min-w-[24px] items-center gap-[8px]">
+      <div className="relative min-h-screen bg-white pb-[180px]">
+        <header className="sticky top-0 z-30 bg-white">
+          <div className="flex h-[64px] items-center justify-between px-[16px] py-[20px]">
             <button
               type="button"
-              onClick={() => navigate(-1)}
-              aria-label="뒤로가기"
+              onClick={() => {
+                if (window.history.length > 1) {
+                  navigate(-1);
+                  return;
+                }
+                navigate('/explore');
+              }}
+              aria-label="뒤로 가기"
               className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
             >
               <ChevronLeft size={24} strokeWidth={1.75} />
             </button>
-          </div>
 
-          <p className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 whitespace-nowrap text-center font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#000000]">
-            사례 상세
-          </p>
+            <p className="text-[16px] font-[600] leading-[19px] text-[#000000]">사례 상세</p>
 
-          <div className="flex min-w-[24px] items-center justify-end">
             <button
               type="button"
               aria-label="북마크"
+              onClick={() => {
+                const token = getAccessToken();
+                if (!token) {
+                  navigate(
+                    `/auth?next=${encodeURIComponent(`/experiences/${experience.id}`)}&reason=${encodeURIComponent(
+                      '북마크는 로그인이 필요한 서비스입니다.',
+                    )}`,
+                  );
+                  return;
+                }
+
+                void (bookmarked ? unbookmarkExperience(token, experience.id) : bookmarkExperience(token, experience.id))
+                  .then((payload) => {
+                    setBookmarked(payload.bookmarked);
+                    showToast(payload.bookmarked ? '북마크에 추가했어요.' : '북마크를 해제했어요.');
+                  })
+                  .catch((requestError) => {
+                    setError(resolveErrorMessage(requestError, '북마크를 처리하지 못했어요.'));
+                  });
+              }}
               className="flex h-[24px] w-[24px] items-center justify-center text-[#000000]"
             >
-              <Bookmark size={24} strokeWidth={1.75} />
+              <HeaderBookmarkIcon active={bookmarked} className="h-[24px] w-[24px]" />
             </button>
           </div>
-        </div>
+        </header>
 
-        <div className="flex w-full flex-col gap-[36px] px-[16px] pb-[100px]">
-          <section className="flex w-full flex-col gap-[24px] bg-[#FFFFFF]">
-            <div className="flex w-full items-center justify-between gap-[12px]">
+        <main className="flex flex-col gap-[12px]">
+          <section className="px-[16px] pt-[12px]">
+            <div className="flex items-start justify-between gap-[12px]">
               <div className="flex min-w-0 items-center gap-[8px]">
                 {experience.author.profileImage ? (
-                  <img
-                    src={experience.author.profileImage}
-                    alt=""
-                    className="h-[32px] w-[32px] rounded-[999px] object-cover"
-                  />
+                  <img src={experience.author.profileImage} alt="" className="h-[40px] w-[40px] rounded-full object-cover" />
                 ) : (
-                  <div className="h-[32px] w-[32px] rounded-[999px] bg-[#EEEEEE]" />
+                  <div className="h-[40px] w-[40px] rounded-full bg-[#E6E6E6]" />
                 )}
 
-                <div className="flex min-w-0 flex-col items-start gap-[2px] text-[12px] leading-[16.8px]">
-                  <div className="flex items-center gap-[4px] whitespace-nowrap">
-                    <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] tracking-[0px] text-[#131416]">
-                      {experience.author.nickname}
-                    </p>
-                    <p
-                      translate="no"
-                      className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#BABABA]"
-                    >
-                      {formatDate(experience.createdAt)}
-                    </p>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-[4px] text-[12px] leading-[17px] text-[#131416]">
+                    <span className="font-[500]">{experience.author.nickname}</span>
+                    <span className="text-[#8A8A8A]">{formatDate(experience.createdAt)}</span>
                   </div>
-                  <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-                    {experience.category.name}
-                  </p>
+                  <p className="text-[12px] leading-[17px] text-[#494949]">{experience.category.name}</p>
                 </div>
               </div>
 
               {isOwner ? (
-                <div className="relative z-50 shrink-0">
+                <div className="relative shrink-0">
                   <button
                     type="button"
                     aria-label="더보기"
                     onClick={() => setActionMenuOpen((current) => !current)}
-                    className="flex h-[24px] w-[24px] items-center justify-center"
+                    className="flex h-[20px] w-[20px] items-center justify-center text-[#1E1E1E]"
                   >
-                    <MoreVerticalIcon />
+                    <MoreVertical size={20} strokeWidth={1.9} />
                   </button>
 
                   {actionMenuOpen ? (
-                    <div className="absolute right-0 top-[28px] flex w-[92px] flex-col rounded-[12px] border border-[#E6E6E6] bg-[#FFFFFF] p-[6px] shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
+                    <div className="absolute right-0 top-[26px] z-50 flex w-[92px] flex-col rounded-[12px] border border-[#E6E6E6] bg-white p-[6px] shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
                       <button
                         type="button"
                         onClick={() => void handleDelete()}
                         disabled={deleting}
-                        aria-label="삭제하기"
-                        className="flex w-full items-center gap-[6px] rounded-[8px] px-[10px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] tracking-[0px] text-[#D33B3B] hover:bg-[#FFF4F2] disabled:opacity-60"
+                        className="flex items-center gap-[6px] rounded-[8px] px-[10px] py-[8px] text-left text-[12px] font-[500] leading-[17px] text-[#D33B3B] disabled:opacity-60"
                       >
                         <Trash2 size={14} strokeWidth={1.9} />
                         <span>{deleting ? '삭제 중...' : '삭제'}</span>
@@ -526,215 +430,197 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                 </div>
               ) : null}
             </div>
+          </section>
 
-            <div className="flex w-full flex-col gap-[16px]">
-              <p className="w-full font-['Pretendard'] text-[18px] font-[600] leading-[21.6px] tracking-[0px] text-[#131416]">
-                {experience.title}
-              </p>
-              <div className="w-full whitespace-pre-wrap font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] text-[#494949]">
-                {experience.content}
-              </div>
-            </div>
-
-            <div className="flex w-full flex-wrap items-center gap-[4px]">
-              {chips.map((chip) => (
-                <PrimaryBadge key={chip} text={chip} />
-              ))}
-            </div>
-
-            <div className="flex w-full flex-col gap-[10px] rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] p-[16px]">
-              <DetailMetricRow icon={durationIcon} label="진행 기간" value={formatDuration(experience.durationMonths)} />
-              <DetailMetricRow icon={amountIcon} label="투자금" value={formatCurrency(experience.investmentAmount)} />
-              <DetailMetricRow
-                icon={amountIcon}
-                label="월 수익"
-                value={formatCurrency(experience.monthlyRevenue)}
-                showDivider={false}
-              />
+          <section className="px-[16px]">
+            <div className="flex flex-col gap-[16px]">
+              <h1 className="text-[16px] font-[600] leading-[19px] text-[#131416]">{experience.title}</h1>
+              <div className="whitespace-pre-wrap text-[14px] leading-[21px] text-[#494949]">{experience.content}</div>
             </div>
           </section>
 
-          {isReportNotReady ? (
-            <section className="flex w-full flex-col gap-[12px]">
-              <SectionTitle
-                title="분석 준비 중"
-                description="AI가 이 경험을 분석하고 있습니다. 잠시 후 다시 확인해주세요."
-              />
-              <div className="flex w-full items-center gap-[12px]">
-                <LoaderCircle size={18} strokeWidth={2.2} className="animate-spin text-[#5E5E5E]" />
-                <LoadingState
-                  message="분석이 완료되면 이 화면에서 바로 결과를 볼 수 있습니다."
-                  className="text-left"
-                />
+          {displayedImageUrl ? (
+            <section className="px-[16px]">
+              <div className="flex gap-[10px] overflow-x-auto pb-[4px]">
+                {imageUrls.map((imageUrl, index) => (
+                  <button
+                    key={`${imageUrl}-${index}`}
+                    type="button"
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`h-[300px] w-[300px] shrink-0 overflow-hidden rounded-[10px] border ${
+                      selectedImageIndex === index ? 'border-[#5A876E]' : 'border-transparent'
+                    }`}
+                  >
+                    <img src={imageUrl} alt="" className="h-full w-full object-cover" loading="lazy" />
+                  </button>
+                ))}
               </div>
             </section>
           ) : null}
 
-          {isReportError ? (
-            <section className="flex w-full flex-col gap-[12px]">
-              <SectionTitle
-                title="분석 실패"
-                description="분석 결과를 준비하지 못했습니다."
-              />
-              <ErrorState message="잠시 후 다시 시도해주세요." />
+          {chips.length ? (
+            <section className="px-[16px]">
+              <div className="flex flex-wrap gap-[4px]">
+                {chips.map((chip, index) => (
+                  <FilledBadge key={`${chip}-${index}`} text={chip} tone={index === 0 ? 'orange' : index === 1 ? 'green' : 'gray'} />
+                ))}
+              </div>
             </section>
           ) : null}
 
-          {isReportReady ? (
-            <>
-              <section className="flex w-full flex-col gap-[12px]">
-                <SectionTitle
-                  title="문제 인식"
-                  description="이 경험에서 확인된 핵심 문제 인식입니다."
-                />
+          <section className="px-[16px]">
+            <div className="flex rounded-[10px] bg-white">
+              <MetricCard value={formatDuration(experience.durationMonths)} label="기간" helper="진행 기간" />
+              <div className="my-[14px] w-px bg-[#E6E6E6]" />
+              <MetricCard value={formatCurrency(experience.investmentAmount)} label="투자금" helper="초기 비용" />
+              <div className="my-[14px] w-px bg-[#E6E6E6]" />
+              <MetricCard value={formatCurrency(experience.monthlyRevenue)} label="수익" helper="월 수익" />
+            </div>
+          </section>
 
-                <div className="flex w-full flex-wrap items-start gap-[10px]">
-                  {issueItems.length ? (
-                    issueItems.map((item) => (
-                      <div
-                        key={item}
-                        className="flex flex-wrap items-start rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[12px]"
-                      >
-                        <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#131416]">
-                          {item}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="flex flex-wrap items-start rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[12px]">
-                      <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575]">
-                        아직 문제 인식을 추출하지 못했어요.
-                      </p>
-                    </div>
-                  )}
+          <section className="px-[16px] pt-[12px]">
+            <SectionTitle title="핵심 이슈" description="해당 사례에서 드러난 주요 실패 원인을 요약했어요." />
+            <div className="mt-[12px] flex flex-wrap gap-[6px]">
+              {issueItems.length ? (
+                issueItems.map((item) => (
+                  <div key={item} className="rounded-[10px] bg-[#F8F8F8] px-[16px] py-[12px]">
+                    <p className="text-[12px] leading-[14px] text-[#131416]">{item}</p>
+                  </div>
+                ))
+              ) : (
+                <PageMessage message="아직 핵심 이슈를 정리하지 못했어요." />
+              )}
+            </div>
+          </section>
+
+          <section className="px-[16px] pt-[12px]">
+            <div className="rounded-[10px] border border-[#5E5E5E] bg-white p-[16px]">
+              <div className="flex items-center gap-[8px]">
+                <div className="flex h-[20px] w-[20px] items-center justify-center rounded-full bg-[#131416] text-[10px] font-[700] text-white">AI</div>
+                <p className="text-[16px] font-[600] leading-[19px] text-[#131416]">AI 가이드</p>
+              </div>
+
+              <p className="mt-[12px] text-[12px] leading-[17px] text-[#494949]">{aiSummary}</p>
+
+              <div className="my-[12px] h-px bg-[#D8D8D8]" />
+
+              {aiAdvice.length ? (
+                <div className="flex flex-col gap-[8px]">
+                  {aiAdvice.map((line, index) => (
+                    <p key={`${index}-${line}`} className="text-[12px] leading-[17px] text-[#494949]">
+                      {index + 1}. {line}
+                    </p>
+                  ))}
                 </div>
-              </section>
+              ) : (
+                <PageMessage message="AI 조언이 아직 준비 중입니다." />
+              )}
+            </div>
+          </section>
 
-              <section className="flex w-full flex-col">
-                <div className="flex w-full flex-col gap-[12px] rounded-[10px] border border-[#5E5E5E] bg-[#FFFFFF] p-[16px]">
-                  <div className="flex w-full items-center gap-[8px]">
-                    <div className="flex h-[20px] w-[20px] items-center justify-center rounded-[4px] bg-[#131416]">
-                      <span className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#FFFFFF]">
-                        AI
-                      </span>
-                    </div>
-                    <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#131416]">
-                      AI 가이드
+          <section className="px-[16px] pt-[12px]">
+            <SectionTitle title="실패 패턴" description="비슷한 실패가 반복되는 지점을 비율로 보여드려요." />
+            <div className="mt-[12px] flex flex-col gap-[10px] rounded-[10px] bg-[#F8F8F8] p-[16px]">
+              {patternItems.length ? (
+                patternItems.map((item) => <ProgressRow key={item.label} label={item.label} percent={item.percent} />)
+              ) : (
+                <PageMessage message="실패 패턴 분석이 아직 준비되지 않았어요." />
+              )}
+            </div>
+          </section>
+
+          <section className="px-[16px] pt-[12px]">
+            <SectionTitle title="유사 사례" description="비슷한 실패 경험을 가진 다른 사례를 추천해드립니다." />
+            <div className="mt-[12px] flex flex-col gap-[10px]">
+              {similarCases.length ? (
+                similarCases.map((item, index) => (
+                  <div key={item.caseId} className="flex flex-col gap-[6px]">
+                    <SimilarCaseCard
+                      title={item.title}
+                      summary={item.summary}
+                      similarity={item.similarity}
+                      onClick={() => handleSimilarCaseClick(item.caseId)}
+                    />
+                    <p className="px-[4px] text-[12px] leading-[18px] text-[#6B7280]">
+                      {similarCaseReasons[index] ?? '입력한 실패 맥락과 가까운 사례라서 추천했어요.'}
                     </p>
                   </div>
+                ))
+              ) : (
+                <PageMessage message="유사 사례가 아직 없습니다." />
+              )}
+            </div>
 
-                  <p className="w-full font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
-                    {guideSummary}
-                  </p>
+            <button
+              type="button"
+              onClick={() => navigate('/explore')}
+              className="mt-[12px] h-[42px] w-full rounded-[10px] bg-[#F8F8F8] text-[14px] font-[500] text-[#131416]"
+            >
+              모든 사례 보기
+            </button>
+          </section>
 
-                  <div className="h-0 w-full border-t border-[#D8D8D8]" />
-
-                  <div className="flex w-full flex-col gap-[10px]">
-                    {guideLines.length ? (
-                      guideLines.map((line, index) => (
-                        <ol
-                          key={`${index}-${line}`}
-                          start={index + 1}
-                          className="w-full list-decimal font-['Pretendard'] text-[12px] font-[600] leading-[0px] tracking-[0px] text-[#494949]"
-                        >
-                          <li className="ml-[18px]">
-                            <span className="font-[400] leading-[16.8px]">{line}</span>
-                          </li>
-                        </ol>
-                      ))
-                    ) : (
-                      <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575]">
-                        아직 AI 가이드가 준비되지 않았어요.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="h-0 w-full border-t border-[#D8D8D8]" />
-
-                  <div className="w-full whitespace-pre-wrap font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
-                    {guideClosing}
-                  </div>
-                </div>
-              </section>
-
-              <section className="flex w-full flex-col gap-[12px]">
-                <SectionTitle
-                  title="실패 패턴"
-                  description="이번 사례에서 분석된 주요 실패 패턴입니다."
-                />
-
-                <div className="flex w-full flex-wrap gap-[8px]">
-                  {patternItems.length ? (
-                    patternItems.map((item) => (
-                      <div
-                        key={item.label}
-                        className="flex min-h-[41px] items-center rounded-[10px] border border-[#E6E6E6] bg-[#F8F8F8] px-[16px] py-[12px]"
-                      >
-                        <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#131416]">
-                          {item.label}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575]">
-                      아직 실패 패턴 데이터가 없습니다.
-                    </p>
-                  )}
-                </div>
-              </section>
-
-              <section className="flex w-full items-center">
-                <div className="flex min-w-0 flex-1 flex-col items-center gap-[12px] rounded-[10px] border border-[#E5E7EB] bg-[#FFFFFF] p-[16px]">
-                  <SectionTitle
-                    title="유사 사례"
-                    description="이 경험과 비슷한 실패 경험을 추천해드려요."
-                  />
-
-                  {similarCaseTags.length ? (
-                    <div className="flex w-full flex-wrap items-center gap-[4px]">
-                      {similarCaseTags.map((tag) => (
-                        <PrimaryBadge key={tag} text={tag} />
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <div className="flex w-full flex-col gap-[10px]">
-                    {similarCases.length ? (
-                      similarCases.map((item) => (
-                        <SimilarCaseCard
-                          key={item.caseId}
-                          item={item}
-                          onClick={() => handleSimilarCaseClick(item.caseId)}
-                        />
-                      ))
-                    ) : (
-                      <div className="flex w-full flex-col items-start rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] p-[16px]">
-                        <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#757575]">
-                          아직 추천할 유사 사례가 없습니다.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => navigate('/explore')}
-                    className="appearance-none border-0 bg-transparent p-[0px]"
-                  >
-                    <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#5D5D5D] underline [text-decoration-skip-ink:none]">
-                      모든 사례 보기
-                    </span>
-                  </button>
-                </div>
-              </section>
-
-              <FaqShortcutCard onClick={() => navigate('/faq')} />
-            </>
+          {experience.caseStatus !== 'SUCCESS' ? (
+            <section className="px-[16px] pt-[12px]">
+              {recommendedSuccessReason ? (
+                <p className="mb-[10px] rounded-[12px] bg-[#F6FAF7] px-[12px] py-[10px] text-[12px] leading-[18px] text-[#4E6A59]">
+                  {recommendedSuccessReason}
+                </p>
+              ) : null}
+              <FailureToSuccessButton caseId={experience.id} relatedSuccessCount={relatedSuccessCount} />
+            </section>
           ) : null}
+        </main>
+
+        <div className="hidden pointer-events-none fixed bottom-[88px] left-1/2 z-40 flex w-full max-w-[430px] -translate-x-1/2 items-end justify-between px-[24px]">
+          <div className="pointer-events-auto">
+            <button
+              type="button"
+              onClick={moveToCreate}
+              className="flex h-[36px] min-w-[208px] items-center justify-center gap-[8px] rounded-[999px] bg-[#131416] px-[16px] text-white shadow-[0_6px_14px_rgba(0,0,0,0.16)]"
+            >
+              <Pencil size={16} strokeWidth={1.9} />
+              <span className="text-[14px] font-[500] leading-[17px]">경험 분석하러 가기</span>
+            </button>
+          </div>
+
+          <div className="pointer-events-auto">
+            <button
+              type="button"
+              onClick={moveToCreate}
+              className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E] text-white shadow-[0_10px_22px_rgba(90,135,110,0.3)]"
+              aria-label="경험 작성"
+            >
+              <span className="text-[28px] leading-none">+</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <BottomNav />
+      <BottomNav
+        active="guide"
+        accessoryLayout="between"
+        accessory={
+          <>
+            <button
+              type="button"
+              onClick={moveToCreate}
+              className="pointer-events-auto flex h-[36px] min-w-[208px] items-center justify-center gap-[8px] rounded-[999px] bg-[#131416] px-[16px] text-white shadow-[0_6px_14px_rgba(0,0,0,0.16)]"
+            >
+              <Pencil size={16} strokeWidth={1.9} />
+              <span className="text-[14px] font-[500] leading-[17px]">경험 작성 바로가기</span>
+            </button>
+            <button
+              type="button"
+              onClick={moveToCreate}
+              className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E] text-white shadow-[0_10px_22px_rgba(90,135,110,0.3)]"
+              aria-label="경험 작성"
+            >
+              <span className="text-[28px] leading-none">+</span>
+            </button>
+          </>
+        }
+      />
     </div>
   );
 }

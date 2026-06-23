@@ -17,8 +17,8 @@ public class AnalysisService {
         return aiAnalysisService.getAnalysis(experienceId);
     }
 
-    public PatternAnalysisResponse createAnalysis(Long experienceId) {
-        return aiAnalysisService.createAnalysis(experienceId);
+    public void createAnalysis(Long experienceId) {
+        aiAnalysisService.createAnalysis(experienceId);
     }
 
     public AnalysisReportResponse getReport(Long experienceId) {

@@ -1,5 +1,5 @@
 import { LoaderCircle } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { ErrorState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
@@ -16,7 +16,11 @@ import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
 type AnalysisPhase = 'analyzing' | 'completed';
+
 const PENDING_EXPERIENCE_CREATE_KEY = 'pendingExperienceCreate';
+const COMPLETE_DELAY_MS = 1200;
+const MAX_POLL_ATTEMPTS = 15;
+const DEFAULT_NICKNAME = '사용자';
 
 type PendingExperienceCreate = {
   payload: ExperienceUpsertInput;
@@ -30,18 +34,19 @@ export default function AiAnalysisResultPage() {
   const token = getAccessToken();
   const storedUser = getStoredUser();
   const { showToast } = useToast();
+
   const startedRef = useRef(false);
   const pollRef = useRef<number | null>(null);
   const completeRef = useRef<number | null>(null);
+  const pollCountRef = useRef(0);
+
   const [experienceId, setExperienceId] = useState<string | null>(initialExperienceId);
-  const [nickname, setNickname] = useState(storedUser?.nickname ?? '사용자');
+  const [nickname, setNickname] = useState(storedUser?.nickname ?? DEFAULT_NICKNAME);
   const [error, setError] = useState('');
   const [phase, setPhase] = useState<AnalysisPhase>('analyzing');
   const [redirectTarget, setRedirectTarget] = useState<string | null>(null);
 
-  const completeDelayMs = 1200;
-
-  const cleanupTimers = () => {
+  const cleanupTimers = useCallback(() => {
     if (pollRef.current != null) {
       window.clearInterval(pollRef.current);
       pollRef.current = null;
@@ -51,15 +56,35 @@ export default function AiAnalysisResultPage() {
       window.clearTimeout(completeRef.current);
       completeRef.current = null;
     }
-  };
+  }, []);
 
-  const scheduleRedirect = (targetExperienceId: string) => {
-    cleanupTimers();
-    setPhase('completed');
-    completeRef.current = window.setTimeout(() => {
-      setRedirectTarget(targetExperienceId);
-    }, completeDelayMs);
-  };
+  const shouldContinuePolling = (requestError: unknown) =>
+    requestError instanceof ApiError &&
+    (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
+      requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR);
+
+  const scheduleRedirect = useCallback(
+    (targetExperienceId: string) => {
+      cleanupTimers();
+      setError('');
+      setPhase('completed');
+      completeRef.current = window.setTimeout(() => {
+        setRedirectTarget(targetExperienceId);
+      }, COMPLETE_DELAY_MS);
+    },
+    [cleanupTimers],
+  );
+
+  const fallbackToDetail = useCallback(
+    (targetExperienceId: string, message?: string) => {
+      cleanupTimers();
+      if (message) {
+        showToast(message);
+      }
+      navigate(`/experiences/${targetExperienceId}`, { replace: true });
+    },
+    [cleanupTimers, navigate, showToast],
+  );
 
   useEffect(() => {
     if (error) {
@@ -74,13 +99,47 @@ export default function AiAnalysisResultPage() {
 
     let mounted = true;
 
+    async function checkReportStatus(targetExperienceId: string) {
+      try {
+        const report = await getReport(targetExperienceId);
+
+        if (!mounted) {
+          return true;
+        }
+
+        if (report.reportStatus === 'READY') {
+          scheduleRedirect(targetExperienceId);
+          return true;
+        }
+
+        if (report.reportStatus === 'ERROR') {
+          fallbackToDetail(
+            targetExperienceId,
+            'AI 분석이 아직 준비되지 않아 상세 페이지로 먼저 이동합니다.',
+          );
+          return true;
+        }
+      } catch (reportError) {
+        if (mounted) {
+          setError(
+            resolveErrorMessage(
+              reportError,
+              '분석 응답이 지연되고 있어요. 잠시 후 다시 시도해 주세요.',
+            ),
+          );
+        }
+      }
+
+      return false;
+    }
+
     async function bootstrap() {
       let targetExperienceId = experienceId;
 
       if (!targetExperienceId && pendingCreate) {
         if (!token) {
           if (mounted) {
-            setError('로그인 정보가 없어요. 다시 로그인해주세요.');
+            setError('로그인 정보가 없어 다시 로그인해 주세요.');
           }
           return;
         }
@@ -88,7 +147,7 @@ export default function AiAnalysisResultPage() {
         const pendingPayload = readPendingExperienceCreate();
         if (!pendingPayload) {
           if (mounted) {
-            setError('등록할 경험 정보를 찾을 수 없어요. 다시 작성해주세요.');
+            setError('등록할 경험 정보가 없어 다시 작성해 주세요.');
           }
           return;
         }
@@ -108,7 +167,7 @@ export default function AiAnalysisResultPage() {
             setError(
               resolveErrorMessage(
                 requestError,
-                '경험 등록 중 문제가 발생했어요. 다시 시도해주세요.',
+                '경험 등록 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.',
               ),
             );
           }
@@ -126,11 +185,11 @@ export default function AiAnalysisResultPage() {
       try {
         const experience = await getExperience(targetExperienceId);
         if (mounted) {
-          setNickname(experience.author.nickname || storedUser?.nickname || '사용자');
+          setNickname(experience.author.nickname || storedUser?.nickname || DEFAULT_NICKNAME);
         }
       } catch {
         if (mounted) {
-          setNickname(storedUser?.nickname ?? '사용자');
+          setNickname(storedUser?.nickname ?? DEFAULT_NICKNAME);
         }
       }
 
@@ -148,45 +207,34 @@ export default function AiAnalysisResultPage() {
             return;
           }
         } catch (requestError) {
-          if (
-            requestError instanceof ApiError &&
-            (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT ||
-              requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR)
-          ) {
+          if (!shouldContinuePolling(requestError)) {
             if (mounted) {
-              setError(resolveErrorMessage(requestError, '잠시 연결이 불안정해요. 다시 시도해주세요.'));
+              setError(
+                resolveErrorMessage(
+                  requestError,
+                  '분석 생성 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.',
+                ),
+              );
             }
             return;
           }
+        }
+      }
 
-          if (mounted) {
-            setError(resolveErrorMessage(requestError, '잠시 연결이 불안정해요. 다시 시도해주세요.'));
-          }
+      pollCountRef.current = 0;
+      pollRef.current = window.setInterval(() => {
+        pollCountRef.current += 1;
+
+        if (pollCountRef.current >= MAX_POLL_ATTEMPTS) {
+          fallbackToDetail(
+            targetExperienceId,
+            'AI 분석이 길어지고 있어 상세 페이지로 먼저 이동합니다.',
+          );
           return;
         }
-      }
 
-      pollRef.current = window.setInterval(() => {
         void checkReportStatus(targetExperienceId);
       }, 1000);
-    }
-
-    async function checkReportStatus(targetExperienceId: string) {
-      try {
-        const report = await getReport(targetExperienceId);
-        if (report.reportStatus === 'READY') {
-          if (mounted) {
-            scheduleRedirect(targetExperienceId);
-          }
-          return true;
-        }
-      } catch (reportError) {
-        if (mounted) {
-          setError(resolveErrorMessage(reportError, '잠시 연결이 불안정해요. 다시 시도해주세요.'));
-        }
-      }
-
-      return false;
     }
 
     void bootstrap();
@@ -195,9 +243,18 @@ export default function AiAnalysisResultPage() {
       mounted = false;
       cleanupTimers();
     };
-  }, [experienceId, navigate, pendingCreate, storedUser?.nickname, token]);
+  }, [
+    cleanupTimers,
+    experienceId,
+    fallbackToDetail,
+    navigate,
+    pendingCreate,
+    scheduleRedirect,
+    storedUser?.nickname,
+    token,
+  ]);
 
-  const displayName = useMemo(() => nickname || '사용자', [nickname]);
+  const displayName = useMemo(() => nickname || DEFAULT_NICKNAME, [nickname]);
 
   if (!experienceId && !pendingCreate) {
     return <Navigate to="/" replace />;
@@ -209,9 +266,7 @@ export default function AiAnalysisResultPage() {
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
-      <DeviceStatusBar />
-
-      <main className="flex min-h-[calc(100vh-61px)] flex-col items-center justify-center px-4 pb-[110px] pt-5">
+      <main className="flex min-h-screen flex-col items-center justify-center px-4 pb-[110px] pt-5">
         {error ? (
           <div className="w-full max-w-[320px]">
             <ErrorState message={error} />
@@ -244,30 +299,6 @@ function readPendingExperienceCreate(): PendingExperienceCreate | null {
   }
 }
 
-function DeviceStatusBar() {
-  return (
-    <div className="flex h-[59px] items-center justify-between bg-white px-6 pb-[19px] pt-[21px]">
-      <div className="flex-1 text-[17px] font-semibold leading-[22px] text-black">9:41</div>
-      <div className="flex flex-1 items-center justify-end gap-[7px]">
-        <div className="flex h-[12px] items-end gap-[2px]">
-          <span className="block h-[4px] w-[3px] rounded-[1px] bg-black" />
-          <span className="block h-[6px] w-[3px] rounded-[1px] bg-black" />
-          <span className="block h-[8px] w-[3px] rounded-[1px] bg-black" />
-          <span className="block h-[10px] w-[3px] rounded-[1px] bg-black" />
-        </div>
-        <div className="relative h-[12px] w-[17px]">
-          <div className="absolute inset-0 rounded-[2px] border border-black/90" />
-          <div className="absolute left-[2px] top-[2px] h-[6px] w-[9px] rounded-[1px] bg-black" />
-          <div className="absolute right-[-2px] top-[3px] h-[4px] w-[1.5px] rounded-full bg-black" />
-        </div>
-        <div className="relative h-[13px] w-[27px] rounded-[4px] border border-black/60 p-[1px]">
-          <div className="h-full w-[70%] rounded-[3px] bg-black" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function AnalyzingScreen({ nickname }: { nickname: string }) {
   return (
     <div className="flex w-full flex-col items-center gap-5">
@@ -276,12 +307,12 @@ function AnalyzingScreen({ nickname }: { nickname: string }) {
           <span className="font-semibold">{nickname}</span>
           <span>님의</span>
         </p>
-        <p>경험을 분석하고 있어요!</p>
+        <p>경험을 분석하고 있어요</p>
       </div>
 
       <div className="flex flex-col items-center gap-5">
         <LoaderCircle size={24} strokeWidth={2.2} className="animate-spin text-[#5E5E5E]" />
-        <p className="text-[12px] leading-[1.4] text-[#8A8A8A]">잠시만 기다려주세요.</p>
+        <p className="text-[12px] leading-[1.4] text-[#8A8A8A]">잠시만 기다려 주세요.</p>
       </div>
     </div>
   );

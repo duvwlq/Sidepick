@@ -3,6 +3,7 @@ package com.failforward.backend.domain.analysis.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.failforward.backend.domain.category.entity.BusinessCategory;
+import com.failforward.backend.domain.category.entity.BusinessCategoryType;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.user.entity.User;
@@ -99,7 +100,14 @@ class DemoScenarioSupportTest {
     ) {
         return FailureExperience.create(
                 User.create("demo@sidepick.local", "password", "demo", "30s"),
-                BusinessCategory.create(categoryId, categoryName, "", "icon", "#000000"),
+                BusinessCategory.create(
+                        categoryId,
+                        categoryName,
+                        "",
+                        "icon",
+                        "#000000",
+                        BusinessCategoryType.business_field
+                ),
                 "demo-title",
                 content,
                 "demo-business",
@@ -118,7 +126,8 @@ class DemoScenarioSupportTest {
                 "[]",
                 null,
                 false,
-                "{\"source\":\"test\"}"
+                "{\"source\":\"test\"}",
+                "FAILURE"
         );
     }
 

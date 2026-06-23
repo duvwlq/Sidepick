@@ -23,14 +23,25 @@ AI 구현 전체를 설명하는 문서가 아니라, 서비스 런타임에서 
 AI 호출이 실패해도 경험 등록 자체가 반드시 함께 실패할 필요는 없습니다.  
 서비스는 경험 데이터 저장과 분석 상태를 분리해서 다룹니다.
 
+### 분석 결과 캐시
+
+동일 payload 기준 분석 요청은 백엔드 캐시를 재사용할 수 있습니다.
+즉, AI 서버 호출 횟수와 FE 응답 계약은 분리되어 있습니다.
+
 ### 분석 준비 중 상태
 
 분석 결과가 아직 없으면 프론트는 `NOT_READY` 상태를 받습니다.
 이 상태를 통해 준비 중 UI를 노출할 수 있습니다.
+작성 플로우에서는 경험 저장이 먼저 완료되고, 이후 상세 화면(`/experiences/:id`)에서 이 상태를 기준으로 준비 중 화면을 보여줍니다.
 
 ### 분석 완료 상태
 
 분석 완료 후 프론트는 리포트 API를 통해 결과를 조회합니다.
+
+### 챗봇 요청 실패
+
+챗봇은 분석 리포트와 별도 흐름으로 동작합니다.
+AI upstream 실패나 guardrail 차단이 있어도 백엔드는 fallback 응답 shape를 유지합니다.
 
 ---
 
@@ -49,8 +60,8 @@ AI 호출이 실패해도 경험 등록 자체가 반드시 함께 실패할 필
 | 레이어 | 책임 |
 | --- | --- |
 | Frontend | 상태에 맞는 화면 분기와 결과 렌더링 |
-| Backend | 요청 조정, 저장, DTO 조립, 상태 관리 |
-| AI Server | LLM 호출, 분석 생성, 추천 자산 활용 |
+| Backend | 요청 조정, 저장, DTO 조립, 상태 관리, fallback/guardrail/persistence |
+| AI Server | 분석 생성, 챗봇 upstream 응답 생성 |
 
 ---
 
@@ -60,13 +71,34 @@ AI 호출이 실패해도 경험 등록 자체가 반드시 함께 실패할 필
 - 경험 저장과 분석 생성을 분리해 생각합니다.
 - 프론트는 `READY / NOT_READY / ERROR`를 기준으로 안정적으로 분기합니다.
 - API shape mismatch를 mock으로 숨기지 않습니다.
+- Agent A 보완 질문은 저장 이후의 품질 보완 단계로 취급합니다. 질문이 필요해도 경험 저장 자체는 선행되어야 합니다.
+
+### Current Backend Guarantees
+
+- 분석 리포트는 `READY / NOT_READY / ERROR` 상태 모델을 유지합니다.
+- `NOT_READY`일 때는 `analysisId=null`, `keywords=[]`, `riskFactors=[]`, `similarCases=[]`, `explanation=null` shape를 유지합니다.
+- 챗봇의 분당 제한 상태와 일일 토큰 사용량은 DB persistence를 사용합니다.
+- 챗봇 queue-capacity는 단일 앱 인스턴스 보호용이며, 다중 인스턴스 전역 동시성 제어는 별도 계층이 필요합니다.
 
 ---
 
 ## Asset Note
 
-AI 관련 추천 자산은 `ai/recommender/`와 `ai/scripts/` 영역에서 관리합니다.
-이 자산은 프론트 PR과 직접 결합되지 않으며, 별도 품질 관리 대상입니다.
+현재 서비스에서 직접 참조하거나 품질 기준으로 함께 봐야 하는 AI 자산은 아래 경로를 우선 기준으로 둡니다.
+
+- `ai/data/case_metadata_v2.json`
+- `ai/data/faiss_index_v2.bin`
+- `ai/data/success_analysis_drafts.json`
+- `ai/data/failure_pattern.json`
+- `ai/data/failure_timing.json`
+- `ai/pipeline/25_rebuild_faiss_v2.py`
+- `ai/pipeline/26_generate_success_analysis_full.py`
+- `ai/pipeline/27_generate_explanation_samples.py`
+- `ai/server/explanation_builder.py`
+- `ai/server/chatbot_api.py`
+
+즉, 현재 AI 자산 관리의 중심은 `ai/recommender/`보다 `ai/data/`, `ai/pipeline/`, `ai/server/`입니다.
+프론트/백엔드 PR은 이 자산과 직접 결합하지 않더라도, 런타임 연결점과 품질 설명은 이 자산 기준으로 검토해야 합니다.
 
 ---
 

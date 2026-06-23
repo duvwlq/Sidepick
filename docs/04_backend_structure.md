@@ -12,10 +12,14 @@
 | 도메인 | 역할 |
 | --- | --- |
 | `auth` | 회원가입, 로그인, 이메일 인증, OAuth |
-| `experience` | 경험 목록/상세/작성/수정/삭제 |
+| `experience` | 경험 목록/상세/작성/수정/삭제, 공유 payload/OG/이미지 |
 | `analysis` | 분석 생성, 리포트 조회, 유사 사례 매칭 |
 | `category` | 카테고리 목록 제공 |
-| `user` | 내 정보 조회/수정 |
+| `user` | 내 정보 조회/수정, 비밀번호 변경, 프로필 이미지 업로드 |
+| `user activity` | 내 경험/북마크/최근 조회/분석 이력/홈 피드 |
+| `stats` | 실패 패턴/실패 시점 통계 JSON 제공 |
+| `admin` | 요청 지연시간, 챗봇 운영 상태 조회 |
+| `chatbot` | 챗봇 메시지 처리, fallback, guardrail, rate-limit |
 | `comment` | 댓글 / 답글 |
 | `decision` | 사용자 선택 흐름 기록 |
 | `interaction` | 경험 상호작용 기록 |
@@ -42,10 +46,15 @@
 | Controller | 핵심 책임 |
 | --- | --- |
 | `AuthController` | 로그인, 회원가입, 이메일 인증, OAuth |
-| `ExperienceController` | 경험 CRUD, 유사 경험 조회, 경험 비교 |
+| `ExperienceController` | 경험 CRUD, 공유 payload/OG/이미지, 유사 경험 조회, 경험 비교 |
 | `AnalysisController` | 분석 리포트 조회, 분석 생성, 매칭 사례 조회 |
 | `CategoryController` | 카테고리 목록 조회 |
-| `UserController` | 내 정보 조회/수정 |
+| `UserController` | 내 정보 조회/수정, 비밀번호 변경, 프로필 이미지 업로드 |
+| `UserActivityController` | 내 경험/북마크/최근 조회/분석 이력/홈 피드 조회 |
+| `StatsController` | 실패 패턴/실패 시점 통계 조회 |
+| `AdminLatencyMetricsController` | 운영용 요청 지연시간 샘플 조회 |
+| `AdminChatbotOpsController` | 운영용 챗봇 큐/토큰/분당 제한 상태 조회 |
+| `ChatbotController` | 챗봇 메시지 요청 처리 |
 | `CommentController` | 댓글 생성/삭제/답글 |
 | `DecisionController` | 선택 기록 저장 |
 | `InteractionController` | 사용자 상호작용 기록 |
@@ -60,6 +69,8 @@
 - 경험 생성 / 수정 / 삭제
 - 목록 / 상세 / 비교 흐름 처리
 - 상세 화면 진입의 핵심 데이터 제공
+- 공유 payload 생성
+- 공유용 OG HTML / PNG 생성에 필요한 메타 조립
 
 ### Analysis Domain
 
@@ -67,6 +78,20 @@
 - 분석 리포트 조회
 - AI 결과를 FE 계약에 맞는 응답으로 조립
 - 유사 사례와 리포트 데이터를 함께 묶어 제공
+- `READY / NOT_READY / ERROR` 상태 분기 기준 유지
+
+### User Domain
+
+- 내 정보 수정
+- 계정 설정 / 비밀번호 변경
+- 프로필 이미지 업로드 후 공개 URL 반환
+
+### Admin / Chatbot Domain
+
+- 최근 요청 지연시간 샘플 조회
+- 챗봇 인스턴스 큐 상태 조회
+- 분당 제한 상태와 일일 토큰 사용량 조회
+- 단일 인스턴스 보호용 queue-capacity 운용
 
 ### Auth Domain
 
@@ -82,6 +107,7 @@
 - Flyway로 운영 스키마 이력 관리
 - 운영 DB는 AWS RDS MySQL 기준
 - 데모/운영 데이터 분리 원칙 존재
+- 챗봇 rate-limit 상태와 daily-token-limit 사용량은 DB에 저장되어 재시작 후 유지
 
 ---
 
@@ -92,6 +118,7 @@
 - 프론트는 AI 서버를 직접 호출하지 않습니다.
 - 백엔드가 AI 요청을 생성하고 결과를 저장/가공합니다.
 - FE 계약에 맞는 DTO 변환은 백엔드가 책임집니다.
+- FE는 공유 랜딩 HTML이나 PNG 생성을 직접 하지 않고 백엔드 응답을 사용합니다.
 
 ---
 

@@ -1,11 +1,15 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AuthButton from '../../components/auth/AuthButton';
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthInput from '../../components/auth/AuthInput';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { ErrorState } from '../../components/common/Skeleton';
+import {
+  SignupButton,
+  SignupErrorText,
+  SignupField,
+  SignupFieldGroup,
+  SignupScreen,
+} from '../../components/auth/FigmaSignupPrimitives';
 import { useAuthFlow } from '../../context/useAuthFlow';
+
+const PASSWORD_POLICY = /^(?=.*[A-Za-z])(?=.*\d).{8,64}$/;
 
 export default function SignupPasswordPage() {
   const navigate = useNavigate();
@@ -18,64 +22,63 @@ export default function SignupPasswordPage() {
     return params.get('next') || '/';
   }, [location.search]);
 
+  const hasValidPassword = PASSWORD_POLICY.test(form.password);
+  const passwordMatches = form.password.length > 0 && form.password === form.passwordConfirm;
+  const canContinue = hasValidPassword && passwordMatches;
+
   function handleNext() {
     if (!form.password.trim() || !form.passwordConfirm.trim()) {
       setError('비밀번호를 모두 입력해 주세요.');
       return;
     }
 
-    if (form.password.length < 8) {
-      setError('비밀번호는 8자 이상 입력해 주세요.');
+    if (!PASSWORD_POLICY.test(form.password)) {
+      setError('영문, 숫자를 조합하여 8자 이상 입력해 주세요.');
       return;
     }
 
     if (form.password !== form.passwordConfirm) {
-      setError('비밀번호가 일치하지 않습니다.');
+      setError('비밀번호가 일치하지 않아요.');
       return;
     }
 
     setError('');
-    navigate(`/signup/nickname?next=${encodeURIComponent(nextPath)}`);
+    navigate(`/signup/nickname?next=${encodeURIComponent(nextPath)}&mode=local`);
   }
 
   return (
-    <AuthLayout>
-      <AuthHeader
-        title="비밀번호 설정"
-        onBack={() => navigate(`/signup/verify?next=${encodeURIComponent(nextPath)}`)}
-      />
+    <SignupScreen
+      title="비밀번호 설정"
+      headlineLines={['로그인 시 사용할', '비밀번호를 입력해 주세요']}
+      onBack={() => navigate(`/signup/username?next=${encodeURIComponent(nextPath)}`)}
+    >
+      <SignupFieldGroup>
+        <SignupField
+          label="비밀번호"
+          type="password"
+          placeholder="영문, 숫자를 조합하여 8자 이상 입력해 주세요"
+          value={form.password}
+          onChange={(event) => updateField('password', event.target.value)}
+          autoComplete="new-password"
+          fieldHeight={40}
+        />
 
-      <section className="pt-2">
-        <div className="mb-6">
-          <h2 className="whitespace-pre-line text-[22px] font-semibold leading-8 text-black">
-            로그인에 사용할{'\n'}비밀번호를 입력해 주세요
-          </h2>
-        </div>
+        <SignupField
+          label="비밀번호 재입력"
+          type="password"
+          placeholder="비밀번호 확인을 위해 다시 한 번 입력해 주세요"
+          value={form.passwordConfirm}
+          onChange={(event) => updateField('passwordConfirm', event.target.value)}
+          autoComplete="new-password"
+          fieldHeight={40}
+        />
 
-        <div className="flex flex-col gap-4">
-          <AuthInput
-            label="비밀번호"
-            type="password"
-            placeholder="8자 이상 입력해 주세요"
-            value={form.password}
-            onChange={(event) => updateField('password', event.target.value)}
-          />
+        {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-          <AuthInput
-            label="비밀번호 재입력"
-            type="password"
-            placeholder="비밀번호를 다시 입력해 주세요"
-            value={form.passwordConfirm}
-            onChange={(event) =>
-              updateField('passwordConfirm', event.target.value)
-            }
-          />
-
-          {error ? <ErrorState message={error} /> : null}
-
-          <AuthButton onClick={handleNext}>다음으로</AuthButton>
-        </div>
-      </section>
-    </AuthLayout>
+        <SignupButton onClick={handleNext} disabled={!canContinue} tone="primary">
+          다음으로
+        </SignupButton>
+      </SignupFieldGroup>
+    </SignupScreen>
   );
 }

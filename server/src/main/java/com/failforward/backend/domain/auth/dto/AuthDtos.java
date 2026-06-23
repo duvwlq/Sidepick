@@ -4,8 +4,13 @@ import com.failforward.backend.domain.user.entity.User;
 import com.failforward.backend.domain.user.entity.AuthProvider;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public final class AuthDtos {
 
@@ -14,8 +19,14 @@ public final class AuthDtos {
 
     public record SignUpRequest(
             @Email @NotBlank String email,
-            @NotBlank @Size(min = 8) String password,
+            @NotBlank @Size(min = 8, max = 64) String password,
+            @NotBlank @Size(min = 2, max = 30) String fullName,
+            @NotNull @Past LocalDate birthDate,
+            @NotBlank String gender,
+            @NotBlank String region,
+            @NotEmpty @Size(max = 3) List<String> signupPurposes,
             @NotBlank @Size(min = 2, max = 20) String nickname,
+            @NotBlank String experienceStatus,
             String ageGroup
     ) {
     }
@@ -39,7 +50,21 @@ public final class AuthDtos {
 
     public record OAuthLoginRequest(
             @NotBlank String code,
+            @NotBlank String state,
             @NotBlank String redirectUri
+    ) {
+    }
+
+    public record OAuthStateRequest(
+            @NotNull AuthProvider provider,
+            @NotBlank String redirectUri
+    ) {
+    }
+
+    public record OAuthStatePayload(
+            String state,
+            AuthProvider provider,
+            LocalDateTime expiresAt
     ) {
     }
 
@@ -47,6 +72,12 @@ public final class AuthDtos {
             Long id,
             String email,
             String nickname,
+            String fullName,
+            LocalDate birthDate,
+            String gender,
+            String region,
+            List<String> signupPurposes,
+            String experienceStatus,
             String ageGroup,
             String profileImage,
             AuthProvider authProvider,
@@ -59,6 +90,12 @@ public final class AuthDtos {
                     user.getId(),
                     user.getEmail(),
                     user.getNickname(),
+                    user.getFullName(),
+                    user.getBirthDate(),
+                    user.getGender(),
+                    user.getRegion(),
+                    user.getSignupPurposeList(),
+                    user.getExperienceStatus(),
                     user.getAgeGroup(),
                     user.getProfileImage(),
                     user.getAuthProvider(),

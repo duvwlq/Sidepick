@@ -34,7 +34,7 @@ class CommentApiIntegrationTest extends ApiIntegrationTestSupport {
                                 """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.data.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.errorCode").value("AUTH_REQUIRED"));
     }
 
     @Test

@@ -100,6 +100,9 @@ public class FailureExperience extends BaseTimeEntity {
     @Column(name = "is_public", nullable = false)
     private Boolean isPublic = true;
 
+    @Column(name = "case_status", nullable = false, length = 20)
+    private String caseStatus = "FAILURE";
+
     private FailureExperience(
             User user,
             BusinessCategory category,
@@ -121,7 +124,8 @@ public class FailureExperience extends BaseTimeEntity {
             String marketingChannels,
             String lessonsLearned,
             Boolean wouldRetry,
-            String structuredData
+            String structuredData,
+            String caseStatus
     ) {
         this.user = user;
         this.category = category;
@@ -144,6 +148,7 @@ public class FailureExperience extends BaseTimeEntity {
         this.lessonsLearned = lessonsLearned;
         this.wouldRetry = wouldRetry;
         this.structuredData = structuredData;
+        this.caseStatus = caseStatus;
         this.viewCount = 0;
         this.likeCount = 0;
         this.isPublic = true;
@@ -170,7 +175,8 @@ public class FailureExperience extends BaseTimeEntity {
             String marketingChannels,
             String lessonsLearned,
             Boolean wouldRetry,
-            String structuredData
+            String structuredData,
+            String caseStatus
     ) {
         return new FailureExperience(
                 user,
@@ -193,12 +199,21 @@ public class FailureExperience extends BaseTimeEntity {
                 marketingChannels,
                 lessonsLearned,
                 wouldRetry,
-                structuredData
+                structuredData,
+                caseStatus
         );
     }
 
     public void increaseViewCount() {
         this.viewCount = this.viewCount + 1;
+    }
+
+    public void increaseLikeCount() {
+        this.likeCount = this.likeCount + 1;
+    }
+
+    public void decreaseLikeCount() {
+        this.likeCount = Math.max(0, this.likeCount - 1);
     }
 
     public void update(
@@ -221,7 +236,8 @@ public class FailureExperience extends BaseTimeEntity {
             String marketingChannels,
             String lessonsLearned,
             Boolean wouldRetry,
-            String structuredData
+            String structuredData,
+            String caseStatus
     ) {
         this.category = category;
         this.title = title;
@@ -243,6 +259,7 @@ public class FailureExperience extends BaseTimeEntity {
         this.lessonsLearned = lessonsLearned;
         this.wouldRetry = wouldRetry;
         this.structuredData = structuredData;
+        this.caseStatus = caseStatus;
     }
 
     public void updateStructuredData(String structuredData) {

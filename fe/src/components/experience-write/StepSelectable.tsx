@@ -75,11 +75,11 @@ function OtherDetailField({
   const visibleText = hasValue ? value : '기타 의견을 작성해주세요';
 
   return (
-    <div className="relative mt-[6px] h-[40px] w-full rounded-[14px] bg-[#F8F8F8]">
+    <div className="relative mt-[6px] h-[36px] w-full rounded-[10px] bg-[#F8F8F8]">
       <div className="pointer-events-none absolute inset-0 flex items-center px-[16px]">
         <span
-          className={`font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] tracking-[0px] [font-feature-settings:'case'_1] ${
-            hasValue ? 'text-[#131416]' : 'text-[#D0D0D0]'
+          className={`font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] [font-feature-settings:'case'_1] ${
+            hasValue ? 'text-[#131416]' : 'text-[#BABABA]'
           }`}
         >
           {visibleText}
@@ -88,7 +88,7 @@ function OtherDetailField({
       <input
         value={value}
         onChange={(event) => onChange?.(event.target.value)}
-        className="absolute inset-0 h-full w-full rounded-[14px] bg-transparent px-[16px] text-transparent caret-[#131416] outline-none"
+        className="absolute inset-0 h-full w-full rounded-[10px] bg-transparent px-[16px] text-transparent caret-[#131416] outline-none"
         aria-label="기타 의견 입력"
       />
     </div>

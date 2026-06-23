@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import AppButton from '../common/Button';
 
 type Variant = 'primary' | 'secondary' | 'kakao';
 
@@ -13,22 +14,15 @@ export default function AuthButton({
   className = '',
   ...props
 }: Props) {
-  const baseStyle =
-    'h-12 w-full rounded-xl text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60';
-
-  const variantStyle: Record<Variant, string> = {
-    primary: 'bg-[#111111] text-white',
-    secondary: 'border border-[#E5E5E5] bg-white text-[#666666]',
-    kakao: 'bg-[#FEE500] text-[#191600]',
+  const toneByVariant: Record<Variant, 'primary' | 'secondary' | 'kakao'> = {
+    primary: 'primary',
+    secondary: 'secondary',
+    kakao: 'kakao',
   };
 
   return (
-    <button
-      type="button"
-      className={`${baseStyle} ${variantStyle[variant]} ${className}`}
-      {...props}
-    >
+    <AppButton tone={toneByVariant[variant]} size="auth" fullWidth className={className} {...props}>
       {children}
-    </button>
+    </AppButton>
   );
 }

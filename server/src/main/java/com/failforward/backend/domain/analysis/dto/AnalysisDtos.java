@@ -3,6 +3,7 @@ package com.failforward.backend.domain.analysis.dto;
 import com.failforward.backend.domain.analysis.entity.AiAnalysis;
 import com.failforward.backend.domain.analysis.entity.MatchedCase;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
@@ -17,6 +18,41 @@ public final class AnalysisDtos {
     private AnalysisDtos() {
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record AnalysisExplanation(
+            InputUsed inputUsed,
+            List<String> matchedPatterns,
+            List<String> similarCasesUsed,
+            boolean isVerified,
+            BigDecimal confidenceScore,
+            DebugInfo debug
+    ) {
+    }
+
+    public record InputUsed(
+            String category,
+            String bodyExcerpt
+    ) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record DebugInfo(
+            Integer totalSimilarCases,
+            String source
+    ) {
+    }
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public record SimilarCaseExplanation(
+            BigDecimal similarityScore,
+            List<String> matchedKeywords,
+            Boolean categoryMatch,
+            String source,
+            String caseId,
+            DebugInfo debug
+    ) {
+    }
+
     public record PatternAnalysisResponse(
             Long id,
             Long experienceId,
@@ -28,7 +64,8 @@ public final class AnalysisDtos {
             List<String> successFactors,
             String structuredSummary,
             BigDecimal confidenceScore,
-            LocalDateTime processedAt
+            LocalDateTime processedAt,
+            AnalysisExplanation explanation
     ) {
         public static PatternAnalysisResponse from(AiAnalysis analysis) {
             List<String> extractedPatterns = parseJsonList(analysis.getFailReasonTags());
@@ -45,7 +82,8 @@ public final class AnalysisDtos {
                     successFactors,
                     analysis.getStructuredSummary(),
                     analysis.getRiskScore(),
-                    analysis.getProcessedAt()
+                    analysis.getProcessedAt(),
+                    buildAnalysisExplanation(analysis, List.of())
             );
         }
     }
@@ -57,9 +95,14 @@ public final class AnalysisDtos {
             String caseSummary,
             String keyLesson,
             Integer matchRate,
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+            SimilarCaseExplanation explanation
     ) {
         public static MatchedCaseResponse from(MatchedCase matchedCase) {
+            return from(matchedCase, List.of());
+        }
+
+        public static MatchedCaseResponse from(MatchedCase matchedCase, List<String> matchedKeywords) {
             return new MatchedCaseResponse(
                     matchedCase.getId(),
                     matchedCase.getCaseId(),
@@ -67,7 +110,8 @@ public final class AnalysisDtos {
                     matchedCase.getCaseSummary(),
                     matchedCase.getKeyLesson(),
                     matchedCase.getMatchRate(),
-                    matchedCase.getCreatedAt()
+                    matchedCase.getCreatedAt(),
+                    buildSimilarCaseExplanation(matchedCase, matchedKeywords)
             );
         }
     }
@@ -86,7 +130,8 @@ public final class AnalysisDtos {
             List<String> advice,
             BigDecimal confidenceScore,
             LocalDateTime processedAt,
-            List<ReportSimilarCaseResponse> similarCases
+            List<ReportSimilarCaseResponse> similarCases,
+            AnalysisExplanation explanation
     ) {
         public static AnalysisReportResponse from(
                 FailureExperience experience,
@@ -113,8 +158,9 @@ public final class AnalysisDtos {
                     response.confidenceScore(),
                     response.processedAt(),
                     similarCases.stream()
-                            .map(ReportSimilarCaseResponse::from)
-                            .toList()
+                            .map(matchedCase -> ReportSimilarCaseResponse.from(matchedCase, response.keywords()))
+                            .toList(),
+                    buildAnalysisExplanation(analysis, similarCases)
             );
         }
 
@@ -133,7 +179,8 @@ public final class AnalysisDtos {
                     List.of(),
                     null,
                     null,
-                    List.of()
+                    List.of(),
+                    null
             );
         }
     }
@@ -143,17 +190,69 @@ public final class AnalysisDtos {
             String title,
             String summary,
             String keyLesson,
-            Integer matchRate
+            Integer matchRate,
+            SimilarCaseExplanation explanation
     ) {
         public static ReportSimilarCaseResponse from(MatchedCase matchedCase) {
+            return from(matchedCase, List.of());
+        }
+
+        public static ReportSimilarCaseResponse from(MatchedCase matchedCase, List<String> matchedKeywords) {
             return new ReportSimilarCaseResponse(
                     matchedCase.getCaseId(),
                     matchedCase.getCaseTitle(),
                     matchedCase.getCaseSummary(),
                     matchedCase.getKeyLesson(),
-                    matchedCase.getMatchRate()
+                    matchedCase.getMatchRate(),
+                    buildSimilarCaseExplanation(matchedCase, matchedKeywords)
             );
         }
+    }
+
+    private static AnalysisExplanation buildAnalysisExplanation(AiAnalysis analysis, List<MatchedCase> similarCases) {
+        FailureExperience experience = analysis.getExperience();
+        List<String> extractedPatterns = parseJsonList(analysis.getFailReasonTags());
+        String category = experience.getCategory() == null ? null : experience.getCategory().getName();
+        String bodyExcerpt = abbreviate(experience.getContent(), 140);
+        String source = similarCases.isEmpty()
+                ? "analysis-only"
+                : similarCases.stream().map(MatchedCase::getCaseId).anyMatch(AnalysisDtos::isAiSimilarCaseId)
+                ? "ai-similar-search"
+                : "db-fallback";
+
+        return new AnalysisExplanation(
+                new InputUsed(category, bodyExcerpt),
+                extractedPatterns,
+                similarCases.stream().map(MatchedCase::getCaseId).toList(),
+                true,
+                analysis.getRiskScore(),
+                new DebugInfo(similarCases.size(), source)
+        );
+    }
+
+    private static SimilarCaseExplanation buildSimilarCaseExplanation(
+            MatchedCase matchedCase,
+            List<String> matchedKeywords
+    ) {
+        BigDecimal similarityScore = matchedCase.getMatchRate() == null
+                ? null
+                : BigDecimal.valueOf(matchedCase.getMatchRate() / 100.0d);
+        String source = isAiSimilarCaseId(matchedCase.getCaseId()) ? "ai-similar-search" : "db-fallback";
+        return new SimilarCaseExplanation(
+                similarityScore,
+                matchedKeywords.stream().filter(keyword -> keyword != null && !keyword.isBlank()).distinct().limit(3).toList(),
+                null,
+                source,
+                matchedCase.getCaseId(),
+                new DebugInfo(null, source)
+        );
+    }
+
+    private static boolean isAiSimilarCaseId(String caseId) {
+        if (caseId == null || caseId.isBlank()) {
+            return false;
+        }
+        return caseId.startsWith("pickply_") || caseId.startsWith("blog_");
     }
 
     private static List<String> parseJsonList(String value) {
@@ -174,5 +273,15 @@ public final class AnalysisDtos {
                 .map(String::trim)
                 .filter(item -> !item.isBlank())
                 .toList();
+    }
+
+    private static String abbreviate(String value, int maxLength) {
+        if (value == null || value.isBlank()) {
+            return value;
+        }
+        if (value.length() <= maxLength) {
+            return value;
+        }
+        return value.substring(0, maxLength) + "...";
     }
 }

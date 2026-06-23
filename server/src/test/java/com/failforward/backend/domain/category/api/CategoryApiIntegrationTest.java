@@ -27,9 +27,12 @@ class CategoryApiIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(5))
+                .andExpect(jsonPath("$.data.length()").value(16))
                 .andExpect(jsonPath("$.data[0].id").value(1))
-                .andExpect(jsonPath("$.data[0].name").isNotEmpty())
-                .andExpect(jsonPath("$.data[0].description").isNotEmpty());
+                .andExpect(jsonPath("$.data[0].name").value("온라인 판매·이커머스"))
+                .andExpect(jsonPath("$.data[0].slug").value("online-commerce"))
+                .andExpect(jsonPath("$.data[0].type").value("business_field"))
+                .andExpect(jsonPath("$.data[7].id").value(8))
+                .andExpect(jsonPath("$.data[7].type").value("cross_topic"));
     }
 }

@@ -51,8 +51,8 @@ class ExperienceAiIntegrationTest extends ApiIntegrationTestSupport {
                 .andRespond(withSuccess("""
                         {
                           "keywords": ["market research gap", "validation gap"],
-                          "failure_category": "타겟분석실패",
-                          "summary": "시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다.",
+                          "failure_category": "market_validation_gap",
+                          "summary": "Customer validation and early promotion were both insufficient.",
                           "risk_level": "high"
                         }
                         """, MediaType.APPLICATION_JSON));
@@ -77,19 +77,20 @@ class ExperienceAiIntegrationTest extends ApiIntegrationTestSupport {
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.analysis.structuredSummary").value("시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다."))
-                .andExpect(jsonPath("$.data.analysis.keywords[0]").value("market research gap"))
-                .andExpect(jsonPath("$.data.analysis.failureCategory").value("타겟분석실패"))
-                .andExpect(jsonPath("$.data.analysis.riskLevel").value("high"))
-                .andExpect(jsonPath("$.data.hasPatternAnalysis").value(true))
+                .andExpect(jsonPath("$.data.analysis").isEmpty())
+                .andExpect(jsonPath("$.data.hasPatternAnalysis").value(false))
                 .andReturn();
 
         long experienceId = readId(createResult);
 
         mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.analysis.structuredSummary").value("시장 검증과 초기 홍보 전략이 부족해 수요 확보에 실패했습니다."))
-                .andExpect(jsonPath("$.data.analysis.riskLevel").value("high"));
+                .andExpect(jsonPath("$.data.analysis.structuredSummary")
+                        .value("Customer validation and early promotion were both insufficient."))
+                .andExpect(jsonPath("$.data.analysis.keywords[0]").value("market research gap"))
+                .andExpect(jsonPath("$.data.analysis.failureCategory").value("market_validation_gap"))
+                .andExpect(jsonPath("$.data.analysis.riskLevel").value("high"))
+                .andExpect(jsonPath("$.data.hasPatternAnalysis").value(true));
 
         mockServer.verify();
     }
@@ -138,7 +139,7 @@ class ExperienceAiIntegrationTest extends ApiIntegrationTestSupport {
                 .andRespond(withSuccess("""
                         {
                           "keywords": ["initial pattern"],
-                          "failure_category": "운영관리부족",
+                          "failure_category": "operations_gap",
                           "summary": "Initial AI summary",
                           "risk_level": "medium"
                         }
@@ -149,7 +150,7 @@ class ExperienceAiIntegrationTest extends ApiIntegrationTestSupport {
                 .andRespond(withSuccess("""
                         {
                           "keywords": ["updated pattern"],
-                          "failure_category": "시간관리",
+                          "failure_category": "time_management",
                           "summary": "Updated AI summary",
                           "risk_level": "low"
                         }
@@ -174,7 +175,7 @@ class ExperienceAiIntegrationTest extends ApiIntegrationTestSupport {
                                 }
                                 """))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.data.analysis.structuredSummary").value("Initial AI summary"))
+                .andExpect(jsonPath("$.data.analysis").isEmpty())
                 .andReturn();
 
         long experienceId = readId(createResult);
@@ -199,14 +200,18 @@ class ExperienceAiIntegrationTest extends ApiIntegrationTestSupport {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.analysis.structuredSummary").value("Updated AI summary"))
+                .andExpect(jsonPath("$.data.analysis.failureCategory").value("time_management"))
                 .andExpect(jsonPath("$.data.analysis.keywords[0]").value("updated pattern"))
-                .andExpect(jsonPath("$.data.analysis.riskLevel").value("low"));
+                .andExpect(jsonPath("$.data.analysis.riskLevel").value("low"))
+                .andExpect(jsonPath("$.data.hasPatternAnalysis").value(true));
 
         mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.analysis.structuredSummary").value("Updated AI summary"))
-                .andExpect(jsonPath("$.data.analysis.failureCategory").value("시간관리"))
-                .andExpect(jsonPath("$.data.analysis.riskLevel").value("low"));
+                .andExpect(jsonPath("$.data.analysis.failureCategory").value("time_management"))
+                .andExpect(jsonPath("$.data.analysis.keywords[0]").value("updated pattern"))
+                .andExpect(jsonPath("$.data.analysis.riskLevel").value("low"))
+                .andExpect(jsonPath("$.data.hasPatternAnalysis").value(true));
 
         mockServer.verify();
     }

@@ -1,5 +1,115 @@
 @import 'tailwindcss';
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/fonts/pretendard/Pretendard-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/fonts/pretendard/Pretendard-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/fonts/pretendard/Pretendard-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/fonts/pretendard/Pretendard-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  src: url('../assets/fonts/pretendard/Pretendard-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Times_New_Roman';
+  src: url('../assets/fonts/times.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Times_New_Roman';
+  src: url('../assets/fonts/timesbd.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bruno_Ace_SC';
+  src: url('../assets/fonts/bruno-ace-sc/BrunoAceSC-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bruno Ace SC';
+  src: url('../assets/fonts/bruno-ace-sc/BrunoAceSC-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF_Pro';
+  src:
+    local('SF Pro Display'),
+    local('SF Pro Text'),
+    local('SFProDisplay-Regular'),
+    local('SFProText-Regular'),
+    local('Segoe UI');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF_Pro';
+  src:
+    local('SF Pro Display Semibold'),
+    local('SF Pro Text Semibold'),
+    local('SFProDisplay-Semibold'),
+    local('SFProText-Semibold'),
+    local('Segoe UI Semibold');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF_Pro';
+  src:
+    local('SF Pro Display Semibold'),
+    local('SF Pro Text Semibold'),
+    local('SFProDisplay-Semibold'),
+    local('SFProText-Semibold'),
+    local('Segoe UI Semibold');
+  font-weight: 590;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   font-family:

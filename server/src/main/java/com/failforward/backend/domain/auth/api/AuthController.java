@@ -7,6 +7,8 @@ import com.failforward.backend.domain.auth.dto.AuthDtos.EmailVerificationPayload
 import com.failforward.backend.domain.auth.dto.AuthDtos.EmailVerificationRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.LoginRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.OAuthLoginRequest;
+import com.failforward.backend.domain.auth.dto.AuthDtos.OAuthStatePayload;
+import com.failforward.backend.domain.auth.dto.AuthDtos.OAuthStateRequest;
 import com.failforward.backend.domain.auth.dto.AuthDtos.SignUpRequest;
 import com.failforward.backend.domain.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -67,5 +69,17 @@ public class AuthController {
     @PostMapping("/oauth/google")
     public ApiResponse<AuthPayload> loginWithGoogle(@Valid @RequestBody OAuthLoginRequest request) {
         return ApiResponse.ok("Google login succeeded.", authService.loginWithGoogle(request));
+    }
+
+    @Operation(summary = "Naver OAuth login")
+    @PostMapping("/oauth/naver")
+    public ApiResponse<AuthPayload> loginWithNaver(@Valid @RequestBody OAuthLoginRequest request) {
+        return ApiResponse.ok("Naver login succeeded.", authService.loginWithNaver(request));
+    }
+
+    @Operation(summary = "Issue OAuth state")
+    @PostMapping("/oauth/state")
+    public ApiResponse<OAuthStatePayload> issueOAuthState(@Valid @RequestBody OAuthStateRequest request) {
+        return ApiResponse.ok("OAuth state issued.", authService.issueOAuthState(request));
     }
 }

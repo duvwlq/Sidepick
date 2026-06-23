@@ -1,9 +1,9 @@
 import { useParams } from 'react-router-dom';
-import AiAnalysisResult from '../components/ai-analysis/AiAnalysisResult';
+import DetailV1 from './DetailV1';
 
 export default function ExperienceDetail() {
   const { id } = useParams();
   const numericExperienceId = id ? Number(id) : null;
 
-  return <AiAnalysisResult experienceId={Number.isFinite(numericExperienceId) ? numericExperienceId : null} />;
+  return <DetailV1 key={Number.isFinite(numericExperienceId) ? numericExperienceId : 'detail-v1'} />;
 }

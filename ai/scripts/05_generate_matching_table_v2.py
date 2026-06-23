@@ -72,7 +72,7 @@ CATEGORIES = [
     },
     {
         "key": "digital_products",
-        "label": "디지털 상품 · 지식 판매",
+        "label": "디지털·지식판매",
         "examples": "전자책 판매, 강의 제작(클래스/인강), 템플릿·디자인 판매, 노션·자료 판매, PDF 자료 판매 등",
     },
     {

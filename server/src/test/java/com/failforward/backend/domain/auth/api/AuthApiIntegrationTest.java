@@ -66,7 +66,13 @@ class AuthApiIntegrationTest {
                 {
                   "email": "auth_test@sidepick.dev",
                   "password": "password123",
+                  "fullName": "Auth User",
+                  "birthDate": "1998-03-15",
+                  "gender": "FEMALE",
+                  "region": "서울",
+                  "signupPurposes": ["실패 이유를 찾아보고 싶어요"],
                   "nickname": "authuser",
+                  "experienceStatus": "HAS_EXPERIENCE",
                   "ageGroup": "20s"
                 }
                 """;
@@ -77,6 +83,7 @@ class AuthApiIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.user.email").value("auth_test@sidepick.dev"))
+                .andExpect(jsonPath("$.data.user.fullName").value("Auth User"))
                 .andExpect(jsonPath("$.data.user.emailVerified").value(true))
                 .andExpect(jsonPath("$.data.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.data.accessToken").isNotEmpty())
@@ -108,10 +115,9 @@ class AuthApiIntegrationTest {
                                   "password": "wrongpass"
                                 }
                                 """))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.data.code").value("INVALID_REQUEST"))
-                .andExpect(jsonPath("$.data.detail").value("Email or password is invalid."));
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 
     @Test
@@ -147,7 +153,13 @@ class AuthApiIntegrationTest {
                                 {
                                   "email": "token_test@sidepick.dev",
                                   "password": "password123",
+                                  "fullName": "Token User",
+                                  "birthDate": "1995-04-20",
+                                  "gender": "MALE",
+                                  "region": "경기",
+                                  "signupPurposes": ["부업 시작 전에 공부해보고 싶어요"],
                                   "nickname": "tokenuser",
+                                  "experienceStatus": "PLANNING",
                                   "ageGroup": "20s"
                                 }
                                 """))
@@ -208,7 +220,13 @@ class AuthApiIntegrationTest {
                                 {
                                   "email": "verify_test@sidepick.dev",
                                   "password": "password123",
+                                  "fullName": "Verify User",
+                                  "birthDate": "1994-05-30",
+                                  "gender": "MALE",
+                                  "region": "부산",
+                                  "signupPurposes": ["내 경험을 기록하고 공유하고 싶어요"],
                                   "nickname": "verifyuser",
+                                  "experienceStatus": "HAS_EXPERIENCE",
                                   "ageGroup": "20s"
                                 }
                                 """))

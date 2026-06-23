@@ -1,4 +1,5 @@
 import { ERROR_CODES } from './error-codes';
+import { clearSession, getAccessToken } from './session';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081/api';
@@ -27,18 +28,20 @@ type ApiEnvelope<T> = {
 };
 
 type RequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
   body?: unknown;
   token?: string | null;
 };
 
 export async function request<T>(path: string, options: RequestOptions = {}) {
   const headers: Record<string, string> = {};
-  if (options.body !== undefined) {
+  const effectiveToken = options.token ?? getAccessToken();
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  if (options.body !== undefined && !isFormData) {
     headers['Content-Type'] = 'application/json';
   }
-  if (options.token) {
-    headers.Authorization = `Bearer ${options.token}`;
+  if (effectiveToken) {
+    headers.Authorization = `Bearer ${effectiveToken}`;
   }
 
   let response: Response;
@@ -46,7 +49,12 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
     response = await fetch(`${API_BASE_URL}${path}`, {
       method: options.method ?? 'GET',
       headers,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body:
+        options.body === undefined
+          ? undefined
+          : isFormData
+            ? (options.body as FormData)
+            : JSON.stringify(options.body),
     });
   } catch (networkError) {
     throw new ApiError(
@@ -65,6 +73,10 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
   }
 
   if (!response.ok || !json?.success) {
+    if (response.status === 401 && effectiveToken) {
+      clearSession();
+    }
+
     const detail =
       json &&
       typeof json.data === 'object' &&

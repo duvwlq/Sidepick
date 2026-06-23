@@ -1,14 +1,26 @@
 import { useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import AuthButton from '../../components/auth/AuthButton';
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthInput from '../../components/auth/AuthInput';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { ErrorState } from '../../components/common/Skeleton';
+import {
+  SignupButton,
+  SignupErrorText,
+  SignupField,
+  SignupFieldGroup,
+  SignupScreen,
+} from '../../components/auth/FigmaSignupPrimitives';
 import { useToast } from '../../components/common/useToast';
 import { useAuthFlow } from '../../context/useAuthFlow';
 import { requestEmailVerification } from '../../lib/api';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const INVALID_EMAIL_MESSAGE = '올바른 이메일 형식을 입력해 주세요.';
+const VERIFICATION_SENT_MESSAGE = '인증 메일이 발송되었어요.';
+const SCREEN_TITLE = '개인 정보 등록';
+const HEADLINE_LINES = ['이메일 주소로,', '본인 인증을 진행할게요'];
+const EMAIL_LABEL = '이메일';
+const EMAIL_PLACEHOLDER = '이메일을 입력해 주세요';
+const VERIFY_BUTTON_LABEL = '본인 인증하기';
+const VERIFY_BUTTON_LOADING_LABEL = '인증 요청 중...';
 
 export default function SignupEmailPage() {
   const navigate = useNavigate();
@@ -23,9 +35,12 @@ export default function SignupEmailPage() {
     return params.get('next') || '/';
   }, [location.search]);
 
+  const normalizedEmail = form.email.trim();
+  const isEmailValid = EMAIL_PATTERN.test(normalizedEmail);
+
   async function handleNext() {
-    if (!form.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
-      setError('이메일 형식에 맞게 다시 작성해주세요');
+    if (!isEmailValid) {
+      setError(INVALID_EMAIL_MESSAGE);
       return;
     }
 
@@ -33,17 +48,18 @@ export default function SignupEmailPage() {
     setError('');
 
     try {
-      const payload = await requestEmailVerification({ email: form.email });
+      const payload = await requestEmailVerification({ email: normalizedEmail });
+      const verificationMessage = payload.verificationCode
+        ? `개발용 인증코드: ${payload.verificationCode}`
+        : VERIFICATION_SENT_MESSAGE;
+
+      updateField('email', normalizedEmail);
       updateField('verificationSent', true);
-      updateField(
-        'verificationMessage',
-        payload.verificationCode
-          ? `개발용 인증 코드: ${payload.verificationCode}`
-          : '이메일 인증이 완료되었어요',
-      );
-      navigate(`/signup/verify?next=${encodeURIComponent(nextPath)}`);
+      updateField('verificationMessage', verificationMessage);
+      showToast(verificationMessage);
+      navigate(`/signup/identity?next=${encodeURIComponent(nextPath)}`);
     } catch (requestError) {
-      const message = resolveErrorMessage(requestError, '이메일 형식에 맞게 다시 작성해주세요');
+      const message = resolveErrorMessage(requestError, INVALID_EMAIL_MESSAGE);
       setError(message);
       showToast(message);
     } finally {
@@ -52,39 +68,32 @@ export default function SignupEmailPage() {
   }
 
   return (
-    <AuthLayout>
-      <AuthHeader
-        title="개인 정보 등록"
-        onBack={() =>
-          navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
-            replace: true,
-          })
-        }
-      />
+    <SignupScreen
+      title={SCREEN_TITLE}
+      headlineLines={HEADLINE_LINES}
+      onBack={() =>
+        navigate(`/auth?next=${encodeURIComponent(nextPath)}`, {
+          replace: true,
+        })
+      }
+    >
+      <SignupFieldGroup>
+        <SignupField
+          label={EMAIL_LABEL}
+          type="email"
+          placeholder={EMAIL_PLACEHOLDER}
+          value={form.email}
+          onChange={(event) => updateField('email', event.target.value)}
+          autoComplete="email"
+          fieldHeight={40}
+        />
 
-      <section className="pt-2">
-        <div className="mb-6">
-          <h2 className="whitespace-pre-line text-[22px] font-semibold leading-8 text-black">
-            이메일로{'\n'}본인 확인을 진행할게요
-          </h2>
-        </div>
+        {error ? <SignupErrorText>{error}</SignupErrorText> : null}
 
-        <div className="flex flex-col gap-4">
-          <AuthInput
-            label="이메일"
-            type="email"
-            placeholder="이메일 형식에 맞게 다시 작성해주세요"
-            value={form.email}
-            onChange={(event) => updateField('email', event.target.value)}
-          />
-
-          {error ? <ErrorState message={error} /> : null}
-
-          <AuthButton onClick={() => void handleNext()} disabled={loading}>
-            {loading ? '잠시만 기다려주세요' : '인증번호 받기'}
-          </AuthButton>
-        </div>
-      </section>
-    </AuthLayout>
+        <SignupButton onClick={() => void handleNext()} disabled={loading || !isEmailValid} tone="soft">
+          {loading ? VERIFY_BUTTON_LOADING_LABEL : VERIFY_BUTTON_LABEL}
+        </SignupButton>
+      </SignupFieldGroup>
+    </SignupScreen>
   );
 }

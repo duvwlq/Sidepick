@@ -31,7 +31,7 @@ export default function ComingSoonPage() {
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="flex h-[44px] items-center justify-center rounded-[10px] bg-[#5A876E] px-[18px] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]"
+          className="flex h-[40px] items-center justify-center rounded-[10px] bg-[#5A876E] px-[18px] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#FFFFFF] [font-feature-settings:'case'_1]"
         >
           이전 화면으로
         </button>

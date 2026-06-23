@@ -64,11 +64,22 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/api/health",
                                 "/api/reports/**",
+                                "/uploads/**",
+                                "/api/experiences/compare",
+                                "/experiences/compare",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/categories/**", "/api/experiences/**", "/experiences/**")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/categories/**",
+                                "/api/experiences/**",
+                                "/api/guides/**",
+                                "/api/stats/**",
+                                "/api/success-cases/**",
+                                "/experiences/**"
+                        )
                         .permitAll()
                         .anyRequest().authenticated()
                 )

@@ -51,7 +51,13 @@ public abstract class ApiIntegrationTestSupport {
                                 {
                                   "email": "%s",
                                   "password": "%s",
+                                  "fullName": "Test User",
+                                  "birthDate": "1999-01-01",
+                                  "gender": "MALE",
+                                  "region": "서울",
+                                  "signupPurposes": ["실패 이유를 찾아보고 싶어요"],
                                   "nickname": "%s",
+                                  "experienceStatus": "HAS_EXPERIENCE",
                                   "ageGroup": "%s"
                                 }
                                 """.formatted(email, password, nickname, ageGroup)))

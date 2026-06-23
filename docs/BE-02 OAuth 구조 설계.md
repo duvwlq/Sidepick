@@ -27,10 +27,10 @@
 
 ## 팀장 확인 필요 항목
 
-1. 네이버를 2주차 필수 범위로 확정하는지
-2. 소셜 로그인 후 추가 프로필 입력 화면으로 보내는 흐름이 맞는지
-3. `GET /api/auth/providers` 보조 API를 같이 둘지
-4. 소셜 이메일 미제공 시 pseudo email 정책을 유지할지
+1. 네이버는 2주차 필수 범위로 확정
+2. 소셜 로그인 후 회원가입 상세항목 7개 입력 흐름 확정
+3. `GET /api/auth/providers` 보조 API 포함 확정
+4. 소셜 이메일 미제공 시 pseudo email 정책 유지 확정
 
 ## 팀장 확인 후 바로 구현할 항목
 
@@ -214,7 +214,7 @@ sequenceDiagram
 ### 추가
 
 - 네이버 OAuth
-- 필요 시 `/api/auth/providers`
+- `/api/auth/providers`
 - 소셜 가입 후 프로필 보완 흐름
 
 ## 환경 변수
@@ -254,6 +254,7 @@ sequenceDiagram
 - [x] Spring Security 라이브러리 선택 (비교 후 확정)
 - [x] 통합 인증 흐름 다이어그램 작성
 - [x] API 연동 준비
+- [x] 팀장 확인 받음
 
 ## 전달 메모
 
@@ -261,3 +262,4 @@ sequenceDiagram
 - 구조를 `oauth2Login`으로 갈아타면 2주차 일정 리스크가 커진다.
 - 이 문서는 “새 프레임워크 도입”보다 “현재 구조 확장”을 기준으로 작성했다.
 - 소셜 로그인 후 프로필 보완 흐름을 쓰려면 `profile_completed` 계산 로직 변경이 함께 필요하다.
+- 팀장 확인 결과 네이버 2주차 포함, `/api/auth/providers` 포함, pseudo email 유지 방향으로 확정됐다.

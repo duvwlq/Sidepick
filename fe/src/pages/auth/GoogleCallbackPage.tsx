@@ -3,33 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import AuthHeader from '../../components/auth/AuthHeader';
 import AuthLayout from '../../components/auth/AuthLayout';
 import { ErrorState, LoadingState } from '../../components/common/Skeleton';
+import { useToast } from '../../components/common/useToast';
 import { loginWithGoogle } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
+import { clearOAuthCallbackState, readOAuthCallbackParams } from './oauth-callback';
 
 export default function GoogleCallbackPage() {
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [error, setError] = useState('');
 
-  const callbackParams = useMemo(() => {
-    const params = new URLSearchParams(window.location.search);
-    return {
-      code: params.get('code'),
-      oauthError: params.get('error'),
-      state: params.get('state') || '/',
-      redirectUri: `${window.location.origin}/auth/google/callback`,
-    };
-  }, []);
-
-  const immediateError = callbackParams.oauthError
-    ? '구글 로그인에 실패했어요.'
-    : !callbackParams.code
-      ? '구글 로그인 정보를 확인하지 못했어요.'
-      : '';
+  const callbackParams = useMemo(
+    () => readOAuthCallbackParams('GOOGLE', '/auth/google/callback'),
+    [],
+  );
 
   useEffect(() => {
-    if (immediateError) {
+    if (callbackParams.immediateError) {
+      clearOAuthCallbackState('GOOGLE');
       return;
     }
 
@@ -39,6 +32,7 @@ export default function GoogleCallbackPage() {
       try {
         const payload = await loginWithGoogle({
           code: callbackParams.code!,
+          state: callbackParams.state,
           redirectUri: callbackParams.redirectUri,
         });
 
@@ -46,11 +40,20 @@ export default function GoogleCallbackPage() {
           return;
         }
 
+        clearOAuthCallbackState('GOOGLE');
         saveSession(payload.accessToken, payload.refreshToken, payload.user);
+        if (!payload.user.profileCompleted) {
+          navigate(`/signup/nickname?next=${encodeURIComponent(callbackParams.nextPath)}&mode=social`, {
+            replace: true,
+          });
+          return;
+        }
+
         setFlashToast(`환영해요, ${payload.user.nickname}님!`);
-        navigate(callbackParams.state, { replace: true });
+        navigate(callbackParams.nextPath, { replace: true });
       } catch (callbackError) {
         if (!cancelled) {
+          clearOAuthCallbackState('GOOGLE');
           setError(
             resolveErrorMessage(
               callbackError,
@@ -66,7 +69,14 @@ export default function GoogleCallbackPage() {
     return () => {
       cancelled = true;
     };
-  }, [callbackParams, immediateError, navigate]);
+  }, [callbackParams, navigate]);
+
+  useEffect(() => {
+    const message = callbackParams.immediateError || error;
+    if (message) {
+      showToast(message);
+    }
+  }, [callbackParams.immediateError, error, showToast]);
 
   return (
     <AuthLayout>
@@ -74,14 +84,14 @@ export default function GoogleCallbackPage() {
 
       <section className="flex min-h-[calc(100vh-150px)] flex-col justify-center">
         <div className="space-y-4 rounded-2xl border border-[#EAEAEA] bg-white px-4 py-6 text-center">
-          {immediateError || error ? (
+          {callbackParams.immediateError || error ? (
             <>
-              <p className="text-base font-medium text-black">로그인에 실패했어요.</p>
-              <ErrorState message={immediateError || error} />
+              <p className="text-base font-medium text-black">로그인에 실패했어요</p>
+              <ErrorState message={callbackParams.immediateError || error} />
             </>
           ) : (
             <>
-              <p className="text-base font-medium text-black">구글 로그인 처리 중입니다.</p>
+              <p className="text-base font-medium text-black">구글 로그인을 처리 중입니다.</p>
               <LoadingState message="잠시만 기다려주세요." />
             </>
           )}

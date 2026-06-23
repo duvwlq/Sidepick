@@ -1,28 +1,71 @@
+type CaseSegmentOption = {
+  key: string;
+  label: string;
+};
+
 type Props = {
-  leftLabel?: string;
-  rightLabel?: string;
+  options?: CaseSegmentOption[];
+  activeKey?: string;
+  onChange?: (key: string) => void;
+  className?: string;
+  variant?: 'default' | 'feed' | 'home';
 };
 
 export default function CaseSegment({
-  leftLabel = '최근 등록된 사례',
-  rightLabel = '인기 사례',
+  options = [
+    { key: 'latest', label: '최근 등록된 사례' },
+    { key: 'popular', label: '인기 사례' },
+  ],
+  activeKey,
+  onChange,
+  className = '',
+  variant = 'default',
 }: Props) {
-  return (
-    <div className="w-full rounded-full bg-[#E9E9E9] p-1">
-      <div className="grid grid-cols-2">
-        <button
-          type="button"
-          className="h-10 rounded-full bg-white text-sm font-medium text-black shadow-sm"
-        >
-          {leftLabel}
-        </button>
+  const resolvedActiveKey = activeKey ?? options[0]?.key;
+  const isFeedVariant = variant === 'feed';
+  const isHomeVariant = variant === 'home';
 
-        <button
-          type="button"
-          className="h-10 rounded-full bg-transparent text-sm font-medium text-black/45"
-        >
-          {rightLabel}
-        </button>
+  return (
+    <div
+      className={`rounded-full ${
+        isFeedVariant
+          ? 'bg-white px-[8px] py-[6px] shadow-[0_0_4px_rgba(0,0,0,0.15)]'
+          : isHomeVariant
+            ? 'bg-[#DEDEDE]'
+            : 'bg-[#E1E1E1] p-[2px]'
+      } ${className}`}
+    >
+      <div
+        className={isFeedVariant ? 'flex items-center gap-[10px]' : 'grid'}
+        style={isFeedVariant ? undefined : { gridTemplateColumns: `repeat(${Math.max(options.length, 1)}, minmax(0, 1fr))` }}
+      >
+        {options.map((option) => {
+          const active = option.key === resolvedActiveKey;
+
+          return (
+            <button
+              key={option.key}
+              type="button"
+              onClick={() => onChange?.(option.key)}
+              className={`flex items-center justify-center whitespace-nowrap rounded-full font-['Pretendard'] text-[12px] leading-[14.4px] ${
+                isFeedVariant
+                  ? active
+                    ? 'h-[34px] min-w-[36px] bg-[#5A876E] px-[10px] font-[500] text-white'
+                    : 'h-[34px] min-w-[36px] px-[10px] font-[500] text-black'
+                  : isHomeVariant
+                    ? active
+                      ? 'h-[32px] rounded-[999px] border-2 border-[#DEDEDE] bg-white font-[500] text-black shadow-none'
+                      : 'h-[32px] rounded-[4px] bg-transparent font-[500] text-[#5D5D5D]'
+                  : active
+                    ? 'h-[32px] bg-white font-[500] text-black shadow-[0_0_4px_rgba(0,0,0,0.15)]'
+                    : 'h-[32px] bg-transparent font-[400] text-[#5D5D5D]'
+              }`}
+              aria-pressed={active}
+            >
+              {option.label}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

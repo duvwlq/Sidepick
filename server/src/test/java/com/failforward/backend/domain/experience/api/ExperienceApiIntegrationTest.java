@@ -4,7 +4,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.failforward.backend.domain.user.entity.User;
@@ -16,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
@@ -29,6 +32,9 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void createExperienceWithoutAuthReturnsUnauthorized() throws Exception {
@@ -45,7 +51,7 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.data.code").value("UNAUTHORIZED"));
+                .andExpect(jsonPath("$.errorCode").value("AUTH_REQUIRED"));
     }
 
     @Test
@@ -87,7 +93,7 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 }
                                 """))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.data.detail").value("Email verification is required to write experiences."));
+                .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
     }
 
     @Test
@@ -174,7 +180,7 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
 
         mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.data.code").value("NOT_FOUND"));
+                .andExpect(jsonPath("$.errorCode").value("EXPERIENCE_NOT_FOUND"));
     }
 
     @Test
@@ -230,24 +236,202 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
     }
 
     @Test
+    void searchEndpointUsesSameFiltersAsExperienceList() throws Exception {
+        String token = registerAndLogin("search_case@sidepick.dev", "password123", "searchCaseUser", "20s");
+
+        createExperienceWithPayload(token, """
+                {
+                  "title": "Mall keyword case",
+                  "content": "Mall search case with low demand.",
+                  "categoryId": 1,
+                  "businessType": "Online store",
+                  "investmentAmount": 300000,
+                  "durationMonths": 2,
+                  "failureReason": "Weak demand validation",
+                  "failureReasons": ["Weak demand validation"]
+                }
+                """);
+
+        createExperienceWithPayload(token, """
+                {
+                  "title": "Content keyword case",
+                  "content": "Creator search case with weak retention.",
+                  "categoryId": 2,
+                  "businessType": "Content creation",
+                  "investmentAmount": 800000,
+                  "durationMonths": 4,
+                  "failureReason": "Weak retention",
+                  "failureReasons": ["Weak retention"]
+                }
+                """);
+
+        mockMvc.perform(get("/api/experiences/search")
+                        .param("q", "Mall")
+                        .param("categoryId", "1")
+                        .param("sort", "latest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(1))
+                .andExpect(jsonPath("$.data.experiences[0].title").value("Mall keyword case"));
+
+        mockMvc.perform(get("/api/experiences/cases/search")
+                        .param("q", "Creator")
+                        .param("categoryId", "2")
+                        .param("sort", "latest"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(1))
+                .andExpect(jsonPath("$.data.experiences[0].title").value("Content keyword case"));
+    }
+
+    @Test
     void listRejectsInvalidFilterRanges() throws Exception {
         mockMvc.perform(get("/api/experiences")
                         .param("durationMonthsMin", "10")
                         .param("durationMonthsMax", "3"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
 
         mockMvc.perform(get("/api/experiences")
                         .param("investmentAmountMin", "1000000")
                         .param("investmentAmountMax", "100"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
 
         mockMvc.perform(get("/api/experiences")
                         .param("durationMonthsMin", "-1"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
 
         mockMvc.perform(get("/api/experiences")
                         .param("investmentAmountMin", "-1"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void detailExposesRelatedSuccessCases() throws Exception {
+        String token = registerAndLogin("success-link@sidepick.dev", "password123", "successLinkUser", "20s");
+        long sourceExperienceId = createExperience(token, "Failure source", "Failure source content");
+        long successExperienceId = createExperience(token, "Success target", "Success target content");
+
+        jdbcTemplate.update("UPDATE failure_experiences SET case_status = 'SUCCESS' WHERE id = ?", successExperienceId);
+
+        mockMvc.perform(get("/api/experiences/{experienceId}/success-cases", sourceExperienceId)
+                        .param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(successExperienceId))
+                .andExpect(jsonPath("$.data[0].caseStatus").value("SUCCESS"));
+    }
+
+    @Test
+    void standaloneSuccessCaseApisReturnOnlySuccessEntries() throws Exception {
+        String token = registerAndLogin("success-list@sidepick.dev", "password123", "successListUser", "20s");
+        long failureExperienceId = createExperience(token, "Failure case", "Failure case content");
+        long successExperienceId = createExperience(token, "Standalone success", "Standalone success content");
+
+        jdbcTemplate.update("UPDATE failure_experiences SET case_status = 'SUCCESS' WHERE id = ?", successExperienceId);
+
+        mockMvc.perform(get("/api/success-cases")
+                        .param("limit", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].id").value(successExperienceId))
+                .andExpect(jsonPath("$.data[0].caseStatus").value("SUCCESS"));
+
+        mockMvc.perform(get("/api/success-cases/{successCaseId}", successExperienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.id").value(successExperienceId))
+                .andExpect(jsonPath("$.data.caseStatus").value("SUCCESS"));
+
+        mockMvc.perform(get("/api/success-cases/{successCaseId}", failureExperienceId))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void detailExposesSharePayload() throws Exception {
+        String token = registerAndLogin("share@sidepick.dev", "password123", "shareUser", "20s");
+
+        MvcResult createResult = mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Share target",
+                                  "content": "Share body with image ![thumb](https://images.example.com/thumb.png) and enough text to summarize.",
+                                  "categoryId": 1,
+                                  "failureReason": "Share test",
+                                  "failureReasons": ["Share test"]
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        long experienceId = readId(createResult);
+
+        mockMvc.perform(get("/api/experiences/{experienceId}/share", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experienceId").value(experienceId))
+                .andExpect(jsonPath("$.data.title").value("Share target"))
+                .andExpect(jsonPath("$.data.shareUrl").value("http://localhost:8081/api/experiences/" + experienceId + "/share-page"))
+                .andExpect(jsonPath("$.data.imageUrl").value("https://images.example.com/thumb.png"))
+                .andExpect(jsonPath("$.data.downloadImageUrl").value("http://localhost:8081/api/experiences/" + experienceId + "/share-image"))
+                .andExpect(jsonPath("$.data.webUrl").value("http://localhost:4173/experiences/" + experienceId))
+                .andExpect(jsonPath("$.data.description").isNotEmpty());
+    }
+
+    @Test
+    void sharePageExposesOgMetadataAndRedirectTarget() throws Exception {
+        String token = registerAndLogin("share-page@sidepick.dev", "password123", "sharePageUser", "20s");
+        long experienceId = createExperience(token, "Share page target", "Share page body for metadata checks.");
+
+        mockMvc.perform(get("/api/experiences/{experienceId}/share-page", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.TEXT_HTML))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("property=\"og:title\"")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("Sidepick")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("http://localhost:8081/api/experiences/" + experienceId + "/share-image")))
+                .andExpect(content().string(org.hamcrest.Matchers.containsString("http://localhost:4173/experiences/" + experienceId)));
+    }
+
+    @Test
+    void shareImageDownloadReturnsPngAttachment() throws Exception {
+        String token = registerAndLogin("share-image@sidepick.dev", "password123", "shareImageUser", "20s");
+        long experienceId = createExperience(token, "Share image target", "Share image body for png generation.");
+
+        MvcResult result = mockMvc.perform(get("/api/experiences/{experienceId}/share-image", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.IMAGE_PNG))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header()
+                        .string("Content-Disposition", org.hamcrest.Matchers.containsString("sidepick-share-" + experienceId + ".png")))
+                .andReturn();
+
+        byte[] bytes = result.getResponse().getContentAsByteArray();
+        org.junit.jupiter.api.Assertions.assertTrue(bytes.length > 8);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x89, bytes[0]);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x50, bytes[1]);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x4E, bytes[2]);
+        org.junit.jupiter.api.Assertions.assertEquals((byte) 0x47, bytes[3]);
+    }
+
+    @Test
+    void compareEndpointReturnsPatternsDifferencesAndRecommendations() throws Exception {
+        String token = registerAndLogin("compare@sidepick.dev", "password123", "compareUser", "20s");
+        long firstExperienceId = createExperience(token, "Compare first", "Compare first content");
+        long secondExperienceId = createExperience(token, "Compare second", "Compare second content");
+
+        mockMvc.perform(post("/api/experiences/compare")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "experienceIds": [%d, %d]
+                                }
+                                """.formatted(firstExperienceId, secondExperienceId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.experiences.length()").value(2))
+                .andExpect(jsonPath("$.data.commonPatterns").isArray())
+                .andExpect(jsonPath("$.data.differences").isArray())
+                .andExpect(jsonPath("$.data.recommendations.length()").value(2));
     }
 
     @Test
@@ -266,7 +450,8 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                   "failureReasons": []
                                 }
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 
     @Test
@@ -297,6 +482,62 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
         mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.viewCount").value(2));
+    }
+
+    @Test
+    void createAndUpdateMaskSensitiveValuesBeforePersisting() throws Exception {
+        String token = registerAndLogin("masking@sidepick.dev", "password123", "maskingUser", "20s");
+
+        MvcResult createResult = mockMvc.perform(post("/api/experiences")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Mask target",
+                                  "content": "Call me at 010-1234-5678 or email testuser@example.com with 990101-1234567.",
+                                  "categoryId": 1,
+                                  "businessType": "Online store",
+                                  "failureReason": "Personal info leaked via 01012345678",
+                                  "failureReasons": ["Contact testuser@example.com"],
+                                  "targetMarket": "990101-1234567",
+                                  "marketingChannels": ["010 1234 5678", "owner@example.com"],
+                                  "lessonsLearned": "Do not publish 010-1234-5678"
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.content").value(org.hamcrest.Matchers.containsString("010-****-5678")))
+                .andExpect(jsonPath("$.data.content").value(org.hamcrest.Matchers.containsString("t**@example.com")))
+                .andExpect(jsonPath("$.data.content").value(org.hamcrest.Matchers.containsString("990101-*******")))
+                .andExpect(jsonPath("$.data.failureReason").value("Personal info leaked via 010-****-5678"))
+                .andExpect(jsonPath("$.data.targetMarket").value("990101-*******"))
+                .andExpect(jsonPath("$.data.marketingChannels[0]").value("010-****-5678"))
+                .andExpect(jsonPath("$.data.marketingChannels[1]").value("o**@example.com"))
+                .andReturn();
+
+        long experienceId = readId(createResult);
+
+        mockMvc.perform(patch("/api/experiences/{experienceId}", experienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Mask target updated",
+                                  "content": "Updated mail second@example.com and phone 010-9999-0000.",
+                                  "categoryId": 1,
+                                  "businessType": "Online store",
+                                  "failureReason": "Updated 010-9999-0000",
+                                  "failureReasons": ["Updated second@example.com"],
+                                  "targetMarket": "010-9999-0000",
+                                  "marketingChannels": ["second@example.com"],
+                                  "lessonsLearned": "Hide second@example.com"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.content").value(org.hamcrest.Matchers.containsString("s**@example.com")))
+                .andExpect(jsonPath("$.data.content").value(org.hamcrest.Matchers.containsString("010-****-0000")))
+                .andExpect(jsonPath("$.data.failureReason").value("Updated 010-****-0000"))
+                .andExpect(jsonPath("$.data.targetMarket").value("010-****-0000"))
+                .andExpect(jsonPath("$.data.marketingChannels[0]").value("s**@example.com"));
     }
 
     @Test
@@ -334,12 +575,60 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 }
                                 """))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.data.code").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
+
+        mockMvc.perform(put("/api/experiences/{experienceId}", experienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(otherToken))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "Should fail via put",
+                                  "content": "This update must be rejected.",
+                                  "categoryId": 1,
+                                  "failureReason": "Ownership",
+                                  "failureReasons": ["Ownership"]
+                                }
+                                """))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
 
         mockMvc.perform(delete("/api/experiences/{experienceId}", experienceId)
                         .header(HttpHeaders.AUTHORIZATION, bearer(otherToken)))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.data.code").value("FORBIDDEN"));
+                .andExpect(jsonPath("$.errorCode").value("FORBIDDEN"));
+    }
+
+    @Test
+    void ownerCanUpdateExperienceWithPut() throws Exception {
+        String token = registerAndLogin("put-owner@sidepick.dev", "password123", "putOwner", "20s");
+        long experienceId = createExperience(token, "PUT target", "Original content");
+
+        mockMvc.perform(put("/api/experiences/{experienceId}", experienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "title": "PUT updated title",
+                                  "content": "Updated via put endpoint.",
+                                  "categoryId": 1,
+                                  "businessType": "Online store",
+                                  "investmentAmount": 120000,
+                                  "durationMonths": 2,
+                                  "averageDailyHours": "1_TO_3_HOURS",
+                                  "isConcurrentWithMainJob": true,
+                                  "monthlyRevenue": 10000,
+                                  "failureReason": "Need put support",
+                                  "failureReasons": ["Need put support"],
+                                  "difficulties": ["Time management"],
+                                  "targetMarket": "Workers",
+                                  "marketingChannels": ["Blog"],
+                                  "lessonsLearned": "PUT should work.",
+                                  "wouldRetry": true
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.title").value("PUT updated title"))
+                .andExpect(jsonPath("$.data.failureReason").value("Need put support"));
     }
 
     @Test
@@ -371,7 +660,7 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
 
         mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.data.code").value("NOT_FOUND"));
+                .andExpect(jsonPath("$.errorCode").value("EXPERIENCE_NOT_FOUND"));
     }
 
     private long createExperienceWithPayload(String token, String payload) throws Exception {

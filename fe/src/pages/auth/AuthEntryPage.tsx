@@ -1,14 +1,20 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import AuthHeader from '../../components/auth/AuthHeader';
-import AuthInput from '../../components/auth/AuthInput';
-import AuthLayout from '../../components/auth/AuthLayout';
-import { ErrorState } from '../../components/common/Skeleton';
+import { SignupErrorText, SignupField } from '../../components/auth/FigmaSignupPrimitives';
 import { useToast } from '../../components/common/useToast';
-import { login } from '../../lib/api';
+import arrowLeftIcon from '../../assets/auth-figma/arrow-left.svg';
+import brandMarkIcon from '../../assets/auth-figma/brand-mark.svg';
+import googleIcon from '../../assets/auth-figma/google-icon.svg';
+import kakaoIcon from '../../assets/auth-figma/kakao-icon.svg';
+import naverIcon from '../../assets/auth-figma/naver-icon.svg';
+import { issueOAuthState, login } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
+import { buildOAuthRedirectUri } from '../../lib/oauth-redirect';
+import { saveOAuthState } from '../../lib/oauth-state';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
+
+type OAuthProvider = 'KAKAO' | 'GOOGLE' | 'NAVER';
 
 export default function AuthEntryPage() {
   const location = useLocation();
@@ -16,9 +22,9 @@ export default function AuthEntryPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState<OAuthProvider | null>(null);
   const [loginError, setLoginError] = useState('');
-  const [kakaoError, setKakaoError] = useState('');
-  const [googleError, setGoogleError] = useState('');
+  const [oauthError, setOauthError] = useState('');
 
   const nextPath = useMemo(() => {
     const params = new URLSearchParams(location.search);
@@ -32,7 +38,7 @@ export default function AuthEntryPage() {
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) {
-      setLoginError('이메일 혹은 비밀번호를 다시 확인해주세요');
+      setLoginError('이메일과 비밀번호를 다시 확인해 주세요.');
       return;
     }
 
@@ -45,10 +51,10 @@ export default function AuthEntryPage() {
         password,
       });
       saveSession(payload.accessToken, payload.refreshToken, payload.user);
-      setFlashToast(`환영해요, ${payload.user.nickname}님!`);
+      setFlashToast(`환영해요, ${payload.user.nickname}님`);
       window.location.href = nextPath;
     } catch (error) {
-      const message = resolveErrorMessage(error, '이메일 혹은 비밀번호를 다시 확인해주세요');
+      const message = resolveErrorMessage(error, '이메일과 비밀번호를 다시 확인해 주세요.');
       setLoginError(message);
       showToast(message);
     } finally {
@@ -56,123 +62,204 @@ export default function AuthEntryPage() {
     }
   }
 
-  function handleKakaoLogin() {
-    const kakaoClientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
-    const redirectUri = `${window.location.origin}/auth/kakao/callback`;
+  async function startOAuthLogin(provider: OAuthProvider) {
+    const clientId = import.meta.env[`VITE_${provider}_CLIENT_ID`];
+    const providerPath = provider.toLowerCase();
+    const redirectUri = buildOAuthRedirectUri(`/auth/${providerPath}/callback`);
 
-    if (!kakaoClientId) {
-      setKakaoError('잠시 연결이 불안정해요. 다시 시도해주세요.');
+    if (!clientId) {
+      const message = '소셜 로그인 설정을 찾을 수 없어요. 잠시 후 다시 시도해 주세요.';
+      setOauthError(message);
+      showToast(message);
       return;
     }
 
-    const kakaoAuthUrl =
-      `https://kauth.kakao.com/oauth/authorize?response_type=code` +
-      `&client_id=${encodeURIComponent(kakaoClientId)}` +
-      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&state=${encodeURIComponent(nextPath)}`;
+    setOauthLoading(provider);
+    setOauthError('');
 
-    window.location.href = kakaoAuthUrl;
-  }
+    try {
+      const payload = await issueOAuthState({
+        provider,
+        redirectUri,
+      });
 
-  function handleGoogleLogin() {
-    const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    const redirectUri = `${window.location.origin}/auth/google/callback`;
+      saveOAuthState({
+        state: payload.state,
+        nextPath,
+        redirectUri,
+        provider,
+        expiresAt: payload.expiresAt,
+      });
 
-    if (!googleClientId) {
-      setGoogleError('잠시 연결이 불안정해요. 다시 시도해주세요.');
-      return;
+      const authUrl = buildOAuthAuthorizeUrl(provider, clientId, redirectUri, payload.state);
+      window.location.href = authUrl;
+    } catch (error) {
+      const message = resolveErrorMessage(error, '소셜 로그인을 준비하는 중 문제가 발생했어요. 다시 시도해 주세요.');
+      setOauthError(message);
+      setOauthLoading(null);
+      showToast(message);
     }
-
-    const googleAuthUrl =
-      `https://accounts.google.com/o/oauth2/v2/auth?response_type=code` +
-      `&client_id=${encodeURIComponent(googleClientId)}` +
-      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&scope=${encodeURIComponent('openid email profile')}` +
-      `&state=${encodeURIComponent(nextPath)}`;
-
-    window.location.href = googleAuthUrl;
   }
 
   return (
-    <AuthLayout>
-      <AuthHeader title="로그인" />
-
-      <section className="px-1 pb-8">
-        {reason ? (
-          <div className="mb-6 rounded-[18px] bg-[#F7F7F8] px-4 py-3 text-sm leading-6 text-[#555555]">
-            {reason}
-          </div>
-        ) : null}
-
-        <div className="space-y-5">
-          <AuthInput
-            label="이메일"
-            type="email"
-            placeholder="이메일 형식으로 입력해주세요"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-          />
-          <AuthInput
-            label="비밀번호"
-            type="password"
-            placeholder="비밀번호를 입력해주세요"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </div>
-
-        {loginError ? <div className="mt-4"><ErrorState message={loginError} /></div> : null}
-
-        <button
-          type="button"
-          onClick={() => void handleLogin()}
-          disabled={loading}
-          className="mt-6 h-14 w-full rounded-[16px] bg-[#111111] text-base font-semibold text-white disabled:bg-[#D8D8D8]"
-        >
-          {loading ? '잠시만 기다려주세요' : '로그인'}
-        </button>
-
-        <div className="mt-4 flex items-center justify-center gap-3 text-sm text-[#7D7D7D]">
-          <Link
-            to={`/signup/email?next=${encodeURIComponent(nextPath)}`}
-            className="underline-offset-2 hover:underline"
-          >
-            회원가입
-          </Link>
-          <span className="text-[#D4D4D4]">|</span>
-          <button type="button" disabled className="cursor-not-allowed text-[#B7B7B7]">
-            ID/PW 찾기
-          </button>
-        </div>
-
-        <div className="mt-10">
-          <p className="text-center text-sm font-medium text-[#6A6A6A]">소셜 로그인</p>
-
-          <div className="mt-4 space-y-3">
+    <div className="min-h-screen overflow-x-hidden bg-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-[375px] flex-col bg-white">
+        <div className="flex w-full flex-col">
+          <div className="flex w-full items-center px-[16px] py-[20px]">
             <button
               type="button"
-              onClick={handleKakaoLogin}
-              className="flex h-14 w-full items-center justify-center rounded-[16px] bg-[#191919] text-base font-semibold text-[#FEE500]"
+              aria-label="뒤로가기"
+              onClick={() => window.history.back()}
+              className="flex h-[24px] w-[24px] items-center justify-center"
             >
-              카카오 로그인
-            </button>
-
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="flex h-14 w-full items-center justify-center rounded-[16px] border border-[#E4E4E4] bg-white text-base font-medium text-[#202124]"
-            >
-              구글 로그인
+              <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
             </button>
           </div>
-
-          <p className="mt-4 text-center text-xs leading-5 text-[#8C8C8C]">
-            이메일 로그인과 소셜 로그인을 모두 사용할 수 있습니다.
-          </p>
-          {kakaoError ? <div className="mt-3"><ErrorState message={kakaoError} /></div> : null}
-          {googleError ? <div className="mt-3"><ErrorState message={googleError} /></div> : null}
         </div>
-      </section>
-    </AuthLayout>
+
+        <section className="flex w-full flex-col gap-[56px] py-[48px]">
+          <div className="flex w-full flex-col gap-[8px]">
+            <div className="flex w-full items-center justify-center gap-[2px]">
+              <img src={brandMarkIcon} alt="" className="h-[30px] w-[30px]" />
+              <span className="font-['Bruno_Ace_SC'] text-[25.667px] font-[400] leading-[20.533px] text-[#5A876E]">
+                sidePick
+              </span>
+            </div>
+            <div className="flex w-full items-center justify-center px-[16px]">
+              <p className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#494949]">
+                서비스를 이용하려면 로그인해 주세요
+              </p>
+            </div>
+          </div>
+
+          <div className="flex w-full flex-col gap-[24px]">
+            {reason ? (
+              <div className="px-[16px]">
+                <div className="rounded-[10px] bg-[#F8F8F8] px-[16px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#5D5D5D]">
+                  {reason}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="flex w-full flex-col gap-[16px] px-[16px]">
+              <SignupField
+                label="아이디"
+                type="email"
+                placeholder="이메일을 입력해 주세요"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                fieldHeight={43}
+              />
+
+              <SignupField
+                label="비밀번호"
+                type="password"
+                placeholder="비밀번호를 입력해 주세요"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                fieldHeight={43}
+              />
+
+              {loginError ? <SignupErrorText>{loginError}</SignupErrorText> : null}
+
+              <button
+                type="button"
+                onClick={() => void handleLogin()}
+                disabled={loading}
+                className="flex h-[48px] w-full items-center justify-center rounded-[10px] bg-[#CBE5D8] font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-white disabled:opacity-60"
+              >
+                {loading ? '로그인 중...' : '로그인'}
+              </button>
+
+              <div className="flex w-full items-center justify-center gap-[8px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#494949]">
+                <Link to={`/signup/email?next=${encodeURIComponent(nextPath)}&mode=local`}>회원가입</Link>
+                <span>|</span>
+                <button
+                  type="button"
+                  onClick={() => showToast('ID/PW 찾기 기능은 준비 중입니다.')}
+                >
+                  ID/PW 찾기
+                </button>
+              </div>
+            </div>
+
+            <div className="flex w-full flex-col gap-[16px] px-[16px]">
+              <div className="flex w-full items-center justify-center">
+                <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#8A8A8A]">
+                  간편 로그인
+                </span>
+              </div>
+
+              <div className="flex w-full items-center justify-center gap-[24px]">
+                <button
+                  type="button"
+                  onClick={() => void startOAuthLogin('KAKAO')}
+                  disabled={oauthLoading !== null}
+                  className="flex h-[48px] w-[48px] items-center justify-center rounded-[999px] bg-[#FFCD00] disabled:opacity-60"
+                  aria-label="카카오 로그인"
+                >
+                  <img src={kakaoIcon} alt="" className="h-[17px] w-[18px]" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void startOAuthLogin('NAVER')}
+                  disabled={oauthLoading !== null}
+                  className="flex h-[48px] w-[48px] items-center justify-center rounded-[999px] bg-[#06BE34] disabled:opacity-60"
+                  aria-label="네이버 로그인"
+                >
+                  <img src={naverIcon} alt="" className="h-[16px] w-[17px]" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => void startOAuthLogin('GOOGLE')}
+                  disabled={oauthLoading !== null}
+                  className="flex h-[48px] w-[48px] items-center justify-center rounded-[999px] border border-[#D8D8D8] bg-white disabled:opacity-60"
+                  aria-label="구글 로그인"
+                >
+                  <img src={googleIcon} alt="" className="h-[17px] w-[17px]" />
+                </button>
+              </div>
+
+              {oauthError ? <SignupErrorText>{oauthError}</SignupErrorText> : null}
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function buildOAuthAuthorizeUrl(
+  provider: OAuthProvider,
+  clientId: string,
+  redirectUri: string,
+  state: string,
+) {
+  if (provider === 'KAKAO') {
+    return (
+      `https://kauth.kakao.com/oauth/authorize?response_type=code` +
+      `&client_id=${encodeURIComponent(clientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&state=${encodeURIComponent(state)}`
+    );
+  }
+
+  if (provider === 'GOOGLE') {
+    return (
+      `https://accounts.google.com/o/oauth2/v2/auth?response_type=code` +
+      `&client_id=${encodeURIComponent(clientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&scope=${encodeURIComponent('openid email profile')}` +
+      `&state=${encodeURIComponent(state)}`
+    );
+  }
+
+  return (
+    `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
+    `&client_id=${encodeURIComponent(clientId)}` +
+    `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&state=${encodeURIComponent(state)}`
   );
 }

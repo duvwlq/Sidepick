@@ -1,0 +1,2481 @@
+{
+  "summary": {
+    "version": "AI-21-v2",
+    "generated_at": "2026-06-10T17:26:48+09:00",
+    "total_scenarios": 136,
+    "successful_runs": 136,
+    "error_count": 0,
+    "hallucination_count": 0,
+    "hallucination_rate": 0.0,
+    "target_rate": 0.05,
+    "passed_target": true,
+    "v2_changes": [
+      "test_data: test_scenarios_50.csv → clean_cases + pickply (136건)",
+      "keyword_match: substring → substring + 어절 부분 매칭",
+      "system_prompt: 본문 등장 단어만 추출 + few-shot",
+      "temperature: default → 0.1"
+    ],
+    "confidence_distribution": {
+      "min": 0.6,
+      "p25": 0.78,
+      "p50": 0.78,
+      "p75": 0.92,
+      "max": 0.92,
+      "avg": 0.785
+    },
+    "plan_b_reasons": {
+      "confidence_below_threshold_after_regenerate": 26
+    },
+    "elapsed_sec": 506.9
+  },
+  "results": [
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "공간임대업",
+        "쇼핑몰",
+        "틱톡"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "blog_002",
+      "elapsed_sec": 7.25
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "애드픽",
+        "적립",
+        "경유"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "blog_049",
+      "elapsed_sec": 6.0
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달",
+        "본업",
+        "미션"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "blog_050",
+      "elapsed_sec": 3.02
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "악세사리부업",
+        "첫 판매",
+        "1주일"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "cafe_042",
+      "elapsed_sec": 5.43
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "웹소설",
+        "챌린지리그",
+        "1위"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "dc_004",
+      "elapsed_sec": 5.74
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "곤충",
+        "만화",
+        "힛갤"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "dc_005",
+      "elapsed_sec": 6.04
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "건매트",
+        "대리구매",
+        "택배"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "dc_006",
+      "elapsed_sec": 6.09
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 0.667,
+      "keywords": [
+        "점심시간",
+        "고정수익",
+        "월100만원"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "dc_007",
+      "elapsed_sec": 4.81
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "커피숍",
+        "스타벅스",
+        "매출"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "dc_009",
+      "elapsed_sec": 3.99
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "핸들러",
+        "경쟁방식",
+        "장거리"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_002",
+      "elapsed_sec": 3.55
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "쿠팡이츠",
+        "도보",
+        "배달"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_003",
+      "elapsed_sec": 3.64
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "구독자",
+        "경제"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_004",
+      "elapsed_sec": 8.09
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "컴퓨터 수리",
+        "숨고",
+        "드라이버"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_005",
+      "elapsed_sec": 7.17
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달",
+        "배차",
+        "픽업"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_006",
+      "elapsed_sec": 6.33
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "쇼핑몰",
+        "부업",
+        "퇴사"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_007",
+      "elapsed_sec": 3.27
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "자본금",
+        "정권",
+        "동업"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_009",
+      "elapsed_sec": 3.2
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "인스타",
+        "앱"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_010",
+      "elapsed_sec": 6.77
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "재택",
+        "개발자",
+        "인맥"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_011",
+      "elapsed_sec": 6.62
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "스마트스토어",
+        "유튜브",
+        "구독자"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_014",
+      "elapsed_sec": 5.58
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "포켓몬빵",
+        "조회수",
+        "구독자"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_016",
+      "elapsed_sec": 6.45
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "스마트스토어",
+        "위탁판매",
+        "구매대행"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_002",
+      "elapsed_sec": 6.41
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "라이더",
+        "우천시",
+        "부수입"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_004",
+      "elapsed_sec": 5.37
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "블로그",
+        "SEO"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_008",
+      "elapsed_sec": 3.51
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "티스토리",
+        "워드프레스",
+        "애드센스"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_010",
+      "elapsed_sec": 6.47
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배민",
+        "킥보드",
+        "콜"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "clien_017",
+      "elapsed_sec": 6.2
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "자존감",
+        "돈",
+        "형들"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "clien_019",
+      "elapsed_sec": 4.55
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "전기자전거",
+        "배민콜",
+        "언덕"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "ppomppu_013",
+      "elapsed_sec": 3.54
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "종목",
+        "게시판"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_016",
+      "elapsed_sec": 5.93
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "중장기",
+        "테마주"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_017",
+      "elapsed_sec": 4.87
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튭",
+        "프리미어프로",
+        "포토샵"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_020",
+      "elapsed_sec": 14.64
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "P2P",
+        "연체",
+        "부실"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_021",
+      "elapsed_sec": 3.39
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달대행",
+        "반응속도",
+        "재투자"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_024",
+      "elapsed_sec": 2.67
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "눈팅이",
+        "부품",
+        "고객"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_025",
+      "elapsed_sec": 6.65
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "대출",
+        "손실"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "ppomppu_027",
+      "elapsed_sec": 2.66
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "밀키트",
+        "본사",
+        "아웃소싱"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "ppomppu_031",
+      "elapsed_sec": 3.79
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "직장생활",
+        "사업소득",
+        "월급"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "success_story",
+      "case_id": "ppomppu_032",
+      "elapsed_sec": 6.55
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "마케팅",
+        "제안",
+        "고객"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_1",
+      "elapsed_sec": 2.64
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "수익",
+        "마케팅"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_2",
+      "elapsed_sec": 3.0
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "투자",
+        "원금"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_3",
+      "elapsed_sec": 2.58
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장조사",
+        "원가",
+        "수익"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_4",
+      "elapsed_sec": 2.34
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식투자",
+        "환경변화",
+        "정보"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_5",
+      "elapsed_sec": 2.82
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "실행력",
+        "고객 확보",
+        "수익화"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_6",
+      "elapsed_sec": 2.8
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "카카오T",
+        "기름값",
+        "시간"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_7",
+      "elapsed_sec": 2.87
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "AI 툴",
+        "시장 조사",
+        "시간 관리"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_8",
+      "elapsed_sec": 2.31
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "블로그",
+        "수익화",
+        "시간"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_9",
+      "elapsed_sec": 3.05
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "플랫폼",
+        "가격 경쟁",
+        "경쟁 심화"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_10",
+      "elapsed_sec": 2.88
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "악세사리",
+        "외국 모델",
+        "자본 부족"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_11",
+      "elapsed_sec": 2.52
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "몸이",
+        "병원비",
+        "시간"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_12",
+      "elapsed_sec": 2.76
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "퍼스널브랜딩",
+        "수익화",
+        "운영"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_13",
+      "elapsed_sec": 6.96
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "투자",
+        "시장 조사",
+        "실행력"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_14",
+      "elapsed_sec": 3.0
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "실행력",
+        "자본"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_15",
+      "elapsed_sec": 3.25
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "앱테크",
+        "설문",
+        "시급"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_16",
+      "elapsed_sec": 6.2
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "마케팅",
+        "수익구조",
+        "수수료"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_17",
+      "elapsed_sec": 2.3
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "마케팅",
+        "경쟁"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_18",
+      "elapsed_sec": 2.84
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장 조사",
+        "마케팅",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_19",
+      "elapsed_sec": 2.79
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "수익",
+        "꾸준히"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_20",
+      "elapsed_sec": 6.49
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "피크타임",
+        "체력"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_21",
+      "elapsed_sec": 3.03
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장 조사",
+        "시간 관리",
+        "정보 부족"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_22",
+      "elapsed_sec": 2.93
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "재테크",
+        "투자",
+        "자본"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_23",
+      "elapsed_sec": 3.52
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "퇴근",
+        "체력",
+        "지속"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_24",
+      "elapsed_sec": 2.71
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "실행력",
+        "지속"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_25",
+      "elapsed_sec": 3.33
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "블로그",
+        "애드포스트",
+        "포스팅대행"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_26",
+      "elapsed_sec": 2.77
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 0.667,
+      "keywords": [
+        "시간",
+        "체력",
+        "관리"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_27",
+      "elapsed_sec": 2.84
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "수익 구조",
+        "시간 관리",
+        "운영 지속성"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_28",
+      "elapsed_sec": 2.17
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "체험단",
+        "제품홍보",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_29",
+      "elapsed_sec": 2.63
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장",
+        "시행착오",
+        "고객"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_30",
+      "elapsed_sec": 3.03
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "의지",
+        "마케팅",
+        "시간 관리"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_31",
+      "elapsed_sec": 2.85
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "웹소설",
+        "독자층",
+        "시장 조사"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_32",
+      "elapsed_sec": 2.56
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "색칠",
+        "시간",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_33",
+      "elapsed_sec": 2.84
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "홍보",
+        "마케팅"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_34",
+      "elapsed_sec": 2.64
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "수입",
+        "시간",
+        "수익성"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_35",
+      "elapsed_sec": 2.58
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "마케팅",
+        "고객 확보",
+        "운영 지속성"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_36",
+      "elapsed_sec": 6.43
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "판매",
+        "마케팅",
+        "고객"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_37",
+      "elapsed_sec": 2.82
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "앱테크",
+        "시간",
+        "효율성"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_38",
+      "elapsed_sec": 3.28
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "수입부족",
+        "실행력",
+        "시간"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_39",
+      "elapsed_sec": 2.25
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "sns",
+        "사업자등록증",
+        "본업"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_40",
+      "elapsed_sec": 2.58
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "블로그",
+        "광고글",
+        "검색"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_41",
+      "elapsed_sec": 2.27
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "경력단절",
+        "시간",
+        "조사"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_42",
+      "elapsed_sec": 2.75
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "쇼핑몰",
+        "자본력",
+        "금융기관"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_43",
+      "elapsed_sec": 3.7
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달일",
+        "자동차",
+        "시간대비"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_44",
+      "elapsed_sec": 3.4
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "시장흐름",
+        "자본"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_45",
+      "elapsed_sec": 2.7
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달",
+        "시간 관리",
+        "체력"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_46",
+      "elapsed_sec": 2.97
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "취미",
+        "수익화",
+        "운영"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_47",
+      "elapsed_sec": 3.48
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "타이밍",
+        "공부중",
+        "정보취합"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_48",
+      "elapsed_sec": 3.12
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "꾸준히",
+        "적응"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_49",
+      "elapsed_sec": 2.61
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장 조사",
+        "실행력",
+        "경쟁 심화"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_50",
+      "elapsed_sec": 2.81
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 0.667,
+      "keywords": [
+        "팔로워",
+        "모으기",
+        "시장 조사"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_51",
+      "elapsed_sec": 3.02
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "실행력",
+        "마케팅",
+        "시간 관리"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_52",
+      "elapsed_sec": 2.08
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "알고리즘",
+        "답보상태"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_53",
+      "elapsed_sec": 2.69
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "마케팅",
+        "독점",
+        "경쟁"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_54",
+      "elapsed_sec": 2.94
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달",
+        "작사",
+        "스마트스토어"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_55",
+      "elapsed_sec": 4.07
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "물건",
+        "매출"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_56",
+      "elapsed_sec": 2.66
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "sns광고",
+        "월정액",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_57",
+      "elapsed_sec": 2.67
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "레버리지",
+        "손실",
+        "정보"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_58",
+      "elapsed_sec": 3.04
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "취미생활",
+        "수익화",
+        "실행력"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_59",
+      "elapsed_sec": 2.58
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "실행력",
+        "시간 관리",
+        "급여"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_60",
+      "elapsed_sec": 3.28
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "정보의 홍수",
+        "시행착오",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_61",
+      "elapsed_sec": 3.14
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "ai 툴",
+        "광고",
+        "마케팅"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_62",
+      "elapsed_sec": 3.31
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "수입",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_63",
+      "elapsed_sec": 3.38
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "마케팅",
+        "시행착오"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_64",
+      "elapsed_sec": 3.05
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "고객",
+        "주문",
+        "포장"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_65",
+      "elapsed_sec": 2.47
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "코인",
+        "손절",
+        "시장"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_66",
+      "elapsed_sec": 2.87
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "마케팅",
+        "자본력",
+        "본업"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_67",
+      "elapsed_sec": 2.6
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "블로그",
+        "게시글",
+        "방문자수"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_68",
+      "elapsed_sec": 2.46
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "패시브 인컴",
+        "시드머니",
+        "장기투자"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_69",
+      "elapsed_sec": 2.52
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "애드포스트",
+        "금융",
+        "피로도"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_70",
+      "elapsed_sec": 2.13
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "경쟁력",
+        "실행력"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_71",
+      "elapsed_sec": 3.35
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장 조사",
+        "마케팅",
+        "시간 관리"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_72",
+      "elapsed_sec": 3.62
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "수익",
+        "시간",
+        "실행력"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_73",
+      "elapsed_sec": 3.68
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "실행력",
+        "시간",
+        "수익"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_74",
+      "elapsed_sec": 2.99
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "핸드메이드",
+        "판매",
+        "마케팅"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_75",
+      "elapsed_sec": 2.87
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달",
+        "주식",
+        "손실"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_76",
+      "elapsed_sec": 3.28
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장 조사",
+        "수익 구조",
+        "정보 부족"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_77",
+      "elapsed_sec": 2.27
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "마이너스",
+        "적금"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_78",
+      "elapsed_sec": 2.64
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "용돈벌이",
+        "지속성",
+        "느슨해져서"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_79",
+      "elapsed_sec": 3.38
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "마케팅",
+        "성과"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_80",
+      "elapsed_sec": 3.07
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "욕심",
+        "손절",
+        "시장 조사"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_81",
+      "elapsed_sec": 3.36
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "고객 확보",
+        "시간 대비 수익",
+        "지치더라고요"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_82",
+      "elapsed_sec": 3.03
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "정보",
+        "체력",
+        "시간"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_83",
+      "elapsed_sec": 2.85
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시간",
+        "실행력",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_84",
+      "elapsed_sec": 1.9
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "블로그",
+        "수익",
+        "마케팅"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_85",
+      "elapsed_sec": 3.15
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "앱테크",
+        "시간대비",
+        "보상"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_86",
+      "elapsed_sec": 6.08
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "앱테크",
+        "포인트",
+        "경쟁"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_87",
+      "elapsed_sec": 3.09
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "인스타그램",
+        "환불",
+        "포기"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_88",
+      "elapsed_sec": 2.85
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "투자",
+        "마음고생",
+        "시장 조사"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_89",
+      "elapsed_sec": 3.48
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "블로그",
+        "수익성",
+        "시장 조사"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_90",
+      "elapsed_sec": 3.01
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "배달",
+        "시간",
+        "경쟁"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_91",
+      "elapsed_sec": 5.42
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "실행력",
+        "고객 확보",
+        "시간 관리"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_92",
+      "elapsed_sec": 2.73
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "자본",
+        "마케팅",
+        "시간"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_93",
+      "elapsed_sec": 2.82
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "수익",
+        "시장"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_94",
+      "elapsed_sec": 2.79
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "주식",
+        "시장 정보",
+        "손해"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_95",
+      "elapsed_sec": 3.81
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "마케팅",
+        "실패",
+        "운영"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_96",
+      "elapsed_sec": 2.59
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "정보부족",
+        "자본투입",
+        "마케팅"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_97",
+      "elapsed_sec": 2.43
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "시장 조사",
+        "시간 부족",
+        "수익화"
+      ],
+      "confidence": 0.78,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_98",
+      "elapsed_sec": 2.58
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "앱테크",
+        "수익성",
+        "실행력"
+      ],
+      "confidence": 0.6,
+      "plan_b_triggered": true,
+      "plan_b_reason": "confidence_below_threshold_after_regenerate",
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_99",
+      "elapsed_sec": 5.92
+    },
+    {
+      "cite_accuracy": 1.0,
+      "unknown_cite_count": 0,
+      "category_in_whitelist": true,
+      "keyword_match_ratio_v2": 1.0,
+      "keywords": [
+        "유튜브",
+        "경쟁",
+        "자본"
+      ],
+      "confidence": 0.92,
+      "plan_b_triggered": false,
+      "plan_b_reason": null,
+      "hallucination_flag": false,
+      "true_label": "failure_story",
+      "case_id": "pickply_100",
+      "elapsed_sec": 2.6
+    }
+  ]
+}

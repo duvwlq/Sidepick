@@ -5,7 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "app.oauth")
 public record OAuthProperties(
         Provider kakao,
-        Provider google
+        Provider google,
+        Provider naver
 ) {
     public record Provider(
             String clientId,

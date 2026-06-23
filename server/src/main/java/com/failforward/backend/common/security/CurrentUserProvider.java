@@ -33,4 +33,12 @@ public class CurrentUserProvider {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("Authenticated user was not found."));
     }
+
+    public User getCurrentUserEntityOrNull() {
+        try {
+            return getCurrentUserEntity();
+        } catch (UnauthorizedException exception) {
+            return null;
+        }
+    }
 }

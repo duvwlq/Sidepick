@@ -29,10 +29,11 @@ class KakaoAuthFeatureIntegrationTest {
                         .content("""
                                 {
                                   "code": "dummy-code",
+                                  "state": "dummy-state",
                                   "redirectUri": "http://localhost:4174/auth/kakao/callback"
                                 }
                                 """))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.data.detail").value("Kakao login is not available right now."));
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 }

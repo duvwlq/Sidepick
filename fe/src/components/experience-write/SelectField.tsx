@@ -22,7 +22,7 @@ export default function SelectField({
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-3 h-12 w-full rounded-[16px] border border-[#CCD2E0] bg-white px-4 text-sm text-[#111111] outline-none"
+        className="mt-3 h-[36px] w-full rounded-[10px] border border-[#E6E6E6] bg-white px-[16px] font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#131416] outline-none"
       >
         <option value="">{placeholder}</option>
         {options.map((option) => (
