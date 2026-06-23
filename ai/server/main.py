@@ -1,15 +1,32 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-from typing import List, Optional
 import time
+from typing import Any, List, Optional
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, Field
 
 from .agent_pipeline import DraftMeta, detect_missing_slots, make_analysis_id, needs_questions
+from .chatbot_api import chatbot_process
+from .chatbot_llm import known_case_ids, llm_call as chatbot_llm_call
 from .llm_analyzer import analyze_experience
 
 app = FastAPI(
     title="Sidepick AI Server",
     description="Sidepick AI server",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -75,6 +92,22 @@ class AgentAAnalyzeDraftResponse(BaseModel):
     questions: List[AgentAQuestionCard]
     meta: AgentAMeta
     message: Optional[str] = None
+
+
+class ChatbotRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=600, description="Chatbot user message")
+    category_slug: Optional[str] = Field(default=None, description="Side business category slug")
+
+
+class ChatbotResponseModel(BaseModel):
+    status: str = Field(..., description="ok | fallback | blocked | guide_redirect")
+    reply: str
+    route: Optional[str] = None
+    cited_case_ids: List[str] = Field(default_factory=list)
+    plan_b_reason: Optional[str] = None
+    confidence: Optional[float] = None
+    tool_calls: List[dict[str, Any]] = Field(default_factory=list)
+    metadata: Optional[dict[str, Any]] = None
 
 
 QUESTION_CARD_BY_SLOT = {
@@ -181,8 +214,11 @@ async def analyze(req: AnalyzeRequest):
             free_text=req.free_text,
         )
         return result
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"AI analysis failed: {type(e).__name__}: {str(e)}")
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"AI analysis failed: {type(exc).__name__}: {exc}",
+        ) from exc
 
 
 @app.post(
@@ -224,5 +260,59 @@ async def analyze_draft_with_agent_a(req: AgentAAnalyzeDraftRequest):
             ),
             message=None if should_ask else "초안 정보가 충분해서 추가 질문 없이 바로 분석할 수 있습니다.",
         )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Agent A draft analysis failed: {type(e).__name__}: {str(e)}")
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Agent A draft analysis failed: {type(exc).__name__}: {exc}",
+        ) from exc
+
+
+@app.post(
+    "/api/chatbot/message",
+    response_model=ChatbotResponseModel,
+    summary="Process chatbot message",
+)
+async def chatbot_message(req: ChatbotRequest):
+    try:
+        captured: dict[str, Any] = {}
+
+        def wrapped_llm_call(**kwargs):
+            result = chatbot_llm_call(
+                message=kwargs["message"],
+                route=kwargs["route"],
+                category_slug=req.category_slug,
+            )
+            captured.update(result)
+            return result
+
+        result = chatbot_process(
+            message=req.message,
+            category_slug=req.category_slug,
+            known_case_ids=known_case_ids(),
+            llm_call=wrapped_llm_call,
+        )
+
+        metadata: dict[str, Any] = dict(result.metadata or {})
+        metadata.update(
+            {
+                "model": captured.get("model"),
+                "tokens_in": captured.get("tokens_in"),
+                "tokens_out": captured.get("tokens_out"),
+            }
+        )
+
+        return ChatbotResponseModel(
+            status=result.status,
+            reply=result.reply,
+            route=result.route,
+            cited_case_ids=result.cited_case_ids or [],
+            plan_b_reason=result.plan_b_reason,
+            confidence=captured.get("confidence"),
+            tool_calls=captured.get("tool_calls", []),
+            metadata=metadata,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Chatbot processing failed: {type(exc).__name__}: {exc}",
+        ) from exc
