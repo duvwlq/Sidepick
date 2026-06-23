@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -10,7 +11,10 @@ try:
 except ImportError:  # pragma: no cover - environment dependent
     faiss = None
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # pragma: no cover - environment dependent
+    np = None  # type: ignore[assignment]
 
 try:
     from anthropic import Anthropic
@@ -98,12 +102,57 @@ def _get_failure_timing() -> dict[str, Any]:
     return _failure_timing or {}
 
 
+def _tokenize(text: str) -> list[str]:
+    return [token for token in re.split(r"\W+", text.lower()) if len(token) >= 2]
+
+
+def _lexical_search_cases(
+    query: str,
+    cases: list[dict[str, Any]],
+    *,
+    top_k: int,
+    category_slug: str | None,
+) -> list[dict[str, Any]]:
+    query_tokens = set(_tokenize(query))
+    if not query_tokens:
+        return []
+
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for case in cases:
+        if category_slug and case.get("category_slug") != category_slug:
+            continue
+        title = str(case.get("title") or "")
+        title_tokens = set(_tokenize(title))
+        if not title_tokens:
+            continue
+        overlap = len(query_tokens & title_tokens)
+        if overlap == 0:
+            continue
+        score = overlap / len(query_tokens | title_tokens)
+        scored.append((score, case))
+
+    scored.sort(key=lambda item: item[0], reverse=True)
+    return [
+        {
+            "case_id": case.get("case_id"),
+            "title": case.get("title"),
+            "category_slug": case.get("category_slug"),
+            "case_type": case.get("case_type"),
+            "source": case.get("source"),
+            "similarity": float(score),
+        }
+        for score, case in scored[:top_k]
+    ]
+
+
 def search_cases(query: str, top_k: int = 5, category_slug: str | None = None) -> list[dict[str, Any]]:
     index = _get_index()
     metadata = _get_metadata()
     cases = metadata.get("cases", [])
-    if not index or not cases:
+    if not cases:
         return []
+    if not index or np is None or SentenceTransformer is None:
+        return _lexical_search_cases(query, cases, top_k=top_k, category_slug=category_slug)
 
     vector = _get_embedder().encode([query], convert_to_numpy=True)
     norm = np.linalg.norm(vector, axis=1, keepdims=True)
