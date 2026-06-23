@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface FailureExperienceRepository extends JpaRepository<FailureExperience, Long> {
 
+    List<FailureExperience> findAllByIsPublicTrueAndCaseStatusAndCategoryId(String caseStatus, Long categoryId);
+
     @EntityGraph(attributePaths = {"user", "category"})
     @Query("select e from FailureExperience e where e.id = :experienceId")
     Optional<FailureExperience> findWithUserAndCategoryById(Long experienceId);

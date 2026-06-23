@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record FileStorageProperties(
         String uploadDir,
         String publicPath,
-        long maxProfileImageBytes
+        long maxProfileImageBytes,
+        long maxExperienceImageBytes
 ) {
 }

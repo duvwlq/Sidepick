@@ -1,39 +1,40 @@
 ﻿import {
   ChevronRight,
+  Heart,
   X,
+  Upload,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import accountCircleZipIcon from '../assets/detail-v1-icons/account-circle.svg';
-import aiGuideSymbolZipIcon from '../assets/detail-v1-icons/ai-guide-symbol.svg';
-import clockZipIcon from '../assets/detail-v1-icons/clock.svg';
-import dollarSignZipIcon from '../assets/detail-v1-icons/dollar-sign.svg';
-import moreVerticalZipIcon from '../assets/detail-v1-icons/more-vertical.svg';
-import uploadZipIcon from '../assets/detail-v1-icons/upload.svg';
+import aiGuideStarIcon from '../assets/detail-v1-figma/ai-guide-star.svg';
+import clockIcon from '../assets/detail-v1-figma/clock.svg';
+import dollarSignIcon from '../assets/detail-v1-figma/dollar-sign.svg';
+import moreVerticalIcon from '../assets/detail-v1-figma/more-vertical.svg';
+import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
 import HeaderBookmarkIcon from '../components/common/HeaderBookmarkIcon';
 import BottomNav from '../components/layout/BottomNav';
-import { CaseBookmarkCount, CaseChip, CaseChipRow, CaseReactionCount } from '../components/common/CaseUi';
+import { CaseChip, CaseChipRow, CaseTextLink } from '../components/common/CaseUi';
 import { ErrorState, LoadingState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
 import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
-import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
+import userIcon from '../assets/home-v1-figma/icons/user-figma.svg';
 import {
   bookmarkExperience,
   deleteExperience,
   getBookmarkStatus,
   getExperience,
+  getExperienceGuide,
   getExperienceShare,
   getRelatedSuccessCases,
-  getSimilarExperiences,
   type Experience,
-  type SimilarExperienceMatch,
   unbookmarkExperience,
 } from '../lib/api';
 import { publishBookmarkSync } from '../lib/bookmark-sync';
 import { extractExperienceImageUrls } from '../lib/experience-images';
+import { resolveExperienceGuideLines } from '../lib/experience-guide-match';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
@@ -120,22 +121,18 @@ function buildIssueChips(experience: Experience) {
 }
 
 function buildGuideLines(experience: Experience) {
-  const successFactors = (experience.analysis?.successFactors ?? [])
+  const guideLines = (experience.analysis?.successFactors ?? [])
     .map((item) => sanitizeText(item, '').trim())
     .filter(Boolean);
-  const riskFactors = (experience.analysis?.riskFactors ?? [])
-    .map((item) => sanitizeText(item, '').trim())
-    .filter(Boolean);
-  const merged = [...successFactors, ...riskFactors];
 
-  if (merged.length) {
-    return Array.from(new Set(merged)).slice(0, 3);
+  if (guideLines.length) {
+    return Array.from(new Set(guideLines)).slice(0, 3);
   }
 
   return [
-    '시장 검증을 먼저 진행해 보세요.',
-    '초기 비용과 운영 시간을 작게 시작해 보세요.',
-    '같은 실패 원인이 반복되지 않도록 실행 기준을 정리해 보세요.',
+    '먼저 시장 반응을 가볍게 확인해 보세요.',
+    '초기 비용과 운영 시간은 부담되지 않는 범위에서 시작해 보세요.',
+    '비슷한 시행착오가 반복되지 않도록 실행 기준을 미리 정리해 두세요.',
   ];
 }
 
@@ -144,28 +141,36 @@ function buildPatternRows(experience: Experience) {
     experience.analysis?.failureCategory ?? '',
     ...(experience.analysis?.extractedPatterns ?? []),
     ...experience.failureReasons,
+    ...experience.difficulties,
   ]
     .map((item) => sanitizeText(item, '').trim())
     .filter(Boolean);
 
   const unique = Array.from(new Set(source)).slice(0, 3);
-  if (!unique.length) {
-    return [{ label: '실패 원인 분석 준비 중', percent: 100 }];
+  const rows =
+    unique.length >= 3
+      ? [
+          { label: unique[0], percent: 50 },
+          { label: unique[1], percent: 30 },
+          { label: unique[2], percent: 20 },
+        ]
+      : unique.length === 2
+        ? [
+            { label: unique[0], percent: 60 },
+            { label: unique[1], percent: 40 },
+          ]
+        : unique.length === 1
+          ? [{ label: unique[0], percent: 100 }]
+          : [{ label: '실패 원인 분석 준비 중', percent: 0 }];
+
+  while (rows.length < 3) {
+    rows.push({
+      label: '실패 원인 종류',
+      percent: 0,
+    });
   }
-  if (unique.length === 1) {
-    return [{ label: unique[0], percent: 100 }];
-  }
-  if (unique.length === 2) {
-    return [
-      { label: unique[0], percent: 60 },
-      { label: unique[1], percent: 40 },
-    ];
-  }
-  return [
-    { label: unique[0], percent: 50 },
-    { label: unique[1], percent: 30 },
-    { label: unique[2], percent: 20 },
-  ];
+
+  return rows;
 }
 
 function MetricStatColumn({
@@ -216,6 +221,15 @@ function PatternRow({ label, percent }: { label: string; percent: number }) {
       <div className="h-[4px] w-full rounded-[999px] bg-[#D8D8D8]">
         <div className="h-full rounded-[999px] bg-gradient-to-r from-[#92BFA6] to-[#5A876E]" style={{ width: `${percent}%` }} />
       </div>
+    </div>
+  );
+}
+
+function GuideStepRow({ index, text }: { index: number; text: string }) {
+  return (
+    <div className="flex items-start gap-[6px] font-['Pretendard'] text-[12px] leading-[16.8px] tracking-[0px] text-[#494949]">
+      <span className="shrink-0 font-[600] text-[#131416]">{index}.</span>
+      <span className="font-[600]">{text}</span>
     </div>
   );
 }
@@ -295,9 +309,15 @@ function SimilarCaseCard({
           <span>{`조회 ${viewCount.toLocaleString()}`}</span>
         </div>
 
-        <div className="flex shrink-0 items-center gap-[4px] pt-[1px]">
-          <CaseReactionCount count={likeCount} />
-          <CaseBookmarkCount count={bookmarkCount} />
+        <div className="flex shrink-0 items-center gap-[6px] pt-[1px]">
+          <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+            <Heart size={14} strokeWidth={1.75} color="#8A8A8A" />
+            <span>{likeCount.toLocaleString()}</span>
+          </div>
+          <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+            <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px] shrink-0" />
+            <span>{bookmarkCount.toLocaleString()}</span>
+          </div>
         </div>
       </div>
     </button>
@@ -321,8 +341,8 @@ export default function DetailV1() {
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successCases, setSuccessCases] = useState<Experience[]>([]);
-  const [similarCases, setSimilarCases] = useState<SimilarExperienceMatch[]>([]);
   const [fabExpanded, setFabExpanded] = useState(false);
+  const [matchedGuideLines, setMatchedGuideLines] = useState<string[]>([]);
 
   const isOwner = useMemo(() => {
     if (!viewer || !experience) {
@@ -368,19 +388,6 @@ export default function DetailV1() {
         }
 
         try {
-          const similar = await getSimilarExperiences(payload.id, 2);
-          if (!cancelled) {
-            setSimilarCases(
-              similar.filter((item) => item.similarExperience.id !== payload.id),
-            );
-          }
-        } catch {
-          if (!cancelled) {
-            setSimilarCases([]);
-          }
-        }
-
-        try {
           const related = await getRelatedSuccessCases(payload.id, 2);
           if (!cancelled) {
             setSuccessCases(related);
@@ -418,10 +425,47 @@ export default function DetailV1() {
     analysisSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [experience, location.search]);
 
+  useEffect(() => {
+    if (!experience) {
+      setMatchedGuideLines([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    getExperienceGuide(experience.id)
+      .then((payload) => {
+        if (!cancelled) {
+          setMatchedGuideLines(payload.guideLines);
+        }
+      })
+      .catch(async () => {
+        try {
+          const fallbackGuideLines = await resolveExperienceGuideLines(experience);
+          if (!cancelled) {
+            setMatchedGuideLines(fallbackGuideLines);
+          }
+        } catch {
+          if (!cancelled) {
+            setMatchedGuideLines([]);
+          }
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [experience]);
+
   const imageUrls = useMemo(() => (experience ? extractExperienceImageUrls(experience) : []), [experience]);
   const tags = useMemo(() => (experience ? buildTopTags(experience) : []), [experience]);
   const issueChips = useMemo(() => (experience ? buildIssueChips(experience) : []), [experience]);
-  const guideLines = useMemo(() => (experience ? buildGuideLines(experience) : []), [experience]);
+  const guideLines = useMemo(() => {
+    if (matchedGuideLines.length) {
+      return matchedGuideLines;
+    }
+    return experience ? buildGuideLines(experience) : [];
+  }, [experience, matchedGuideLines]);
   const patternRows = useMemo(() => (experience ? buildPatternRows(experience) : []), [experience]);
 
   async function handleBookmarkToggle() {
@@ -584,17 +628,19 @@ export default function DetailV1() {
         <main className="flex flex-col gap-[12px] pb-[188px]">
           <section className="bg-white px-[16px] py-[12px]">
             <div className="flex flex-col gap-[24px]">
-              <div className="flex items-start justify-between gap-[12px]">
-                <div className="flex min-w-0 items-start gap-[8px]">
+              <div className="flex items-center justify-between gap-[12px]">
+                <div className="flex min-w-0 items-center gap-[8px]">
                   {experience.author.profileImage ? (
                     <img src={experience.author.profileImage} alt="" className="h-[40px] w-[40px] rounded-full object-cover" />
                   ) : (
-                    <img src={accountCircleZipIcon} alt="" className="h-[40px] w-[40px] shrink-0" />
+                    <div className="flex h-[40px] w-[40px] items-center justify-center rounded-full bg-[#D9D9D9]">
+                      <img src={userIcon} alt="" className="h-[24px] w-[24px] opacity-60" style={{ filter: 'grayscale(1)' }} />
+                    </div>
                   )}
 
-                  <div className="flex min-w-0 flex-col gap-[2px] pt-[2px]">
+                  <div className="flex min-w-0 flex-col gap-[2px] pt-[1px]">
                     <div className="flex items-center gap-[4px] font-['Pretendard'] text-[12px] leading-[16.8px] tracking-[0px]">
-                      <span className="truncate font-[500] text-[#131416]">{sanitizeText(experience.author.nickname, '닉네임')}</span>
+                      <span className="truncate font-[600] text-[#131416]">{sanitizeText(experience.author.nickname, '닉네임')}</span>
                       <span className="shrink-0 font-[400] text-[#BABABA]">{formatDate(experience.createdAt)}</span>
                     </div>
                     <p className="truncate font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
@@ -603,30 +649,34 @@ export default function DetailV1() {
                   </div>
                 </div>
 
-                <div className="flex shrink-0 items-start gap-[4px] pt-[2px]">
+                <div className="flex shrink-0 items-center gap-[8px]">
                   <button
                     type="button"
                     onClick={() => void handleShare()}
                     className="flex h-[20px] w-[20px] items-center justify-center text-[#1E1E1E]"
                     aria-label="공유"
                   >
-                    <img src={uploadZipIcon} alt="" className="h-[20px] w-[20px]" />
+                    <Upload size={20} strokeWidth={1.8} />
                   </button>
 
-                  {isOwner ? (
-                    <div className="relative shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setActionMenuOpen((current) => !current)}
-                        className="flex h-[20px] w-[20px] items-center justify-center text-[#1E1E1E]"
-                        aria-label="더보기"
-                      >
-                        <span className="relative h-[20px] w-[20px]">
-                          <img src={moreVerticalZipIcon} alt="" className="absolute left-[8.667px] top-[2.833px] h-[14.333px] w-[2.667px]" />
-                        </span>
-                      </button>
+                  <div className="relative shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isOwner) {
+                          return;
+                        }
+                        setActionMenuOpen((current) => !current);
+                      }}
+                      className="flex h-[20px] w-[20px] items-center justify-center text-[#1E1E1E]"
+                      aria-label="더보기"
+                    >
+                      <span className="relative h-[20px] w-[20px]">
+                        <img src={moreVerticalIcon} alt="" className="absolute left-[8.667px] top-[2.833px] h-[14.333px] w-[2.667px]" />
+                      </span>
+                    </button>
 
-                      {actionMenuOpen ? (
+                    {isOwner && actionMenuOpen ? (
                         <div className="absolute right-0 top-[26px] z-50 flex w-[92px] flex-col rounded-[12px] border border-[#E6E6E6] bg-white p-[6px] shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
                           <button
                             type="button"
@@ -644,9 +694,8 @@ export default function DetailV1() {
                             {deleting ? '삭제 중…' : '삭제'}
                           </button>
                         </div>
-                      ) : null}
-                    </div>
-                  ) : null}
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
@@ -672,11 +721,7 @@ export default function DetailV1() {
               ) : null}
 
               <CaseChipRow>
-                <CaseChip
-                  label={experience.caseStatus === 'SUCCESS' ? '성공' : '실패'}
-                  tone={experience.caseStatus === 'SUCCESS' ? 'status-success' : 'status-failure'}
-                  maxWidthClassName="max-w-[44px]"
-                />
+                <CaseChip label={tags[0] ?? '부업'} tone="type" maxWidthClassName="max-w-[44px]" />
                 <CaseChip label={tags[1] ?? '카테고리'} tone="category" maxWidthClassName="max-w-[116px]" />
                 <CaseChip label={tags[2] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
                 <CaseChip label={tags[3] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
@@ -684,19 +729,31 @@ export default function DetailV1() {
 
               <div className="flex items-stretch gap-[8px] rounded-[4px] bg-white">
                 <MetricStatColumn
-                  icon={<img src={clockZipIcon} alt="" className="h-[16px] w-[16px]" />}
+                  icon={
+                    <span className="relative h-[16px] w-[16px]">
+                      <img src={clockIcon} alt="" className="absolute left-[0.583px] top-[0.583px] h-[14.833px] w-[14.833px]" />
+                    </span>
+                  }
                   value={formatDurationValue(experience.durationMonths)}
                   label="진행 기간"
                 />
                 <p className="self-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#D8D8D8]">ㅣ</p>
                 <MetricStatColumn
-                  icon={<img src={dollarSignZipIcon} alt="" className="h-[16px] w-[16px]" />}
+                  icon={
+                    <span className="relative h-[16px] w-[16px]">
+                      <img src={dollarSignIcon} alt="" className="absolute left-[3.25px] top-[-0.083px] h-[16.167px] w-[9.5px]" />
+                    </span>
+                  }
                   value={formatMoneyValue(experience.investmentAmount)}
                   label="투자금"
                 />
                 <p className="self-center font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#D8D8D8]">ㅣ</p>
                 <MetricStatColumn
-                  icon={<img src={dollarSignZipIcon} alt="" className="h-[16px] w-[16px]" />}
+                  icon={
+                    <span className="relative h-[16px] w-[16px]">
+                      <img src={dollarSignIcon} alt="" className="absolute left-[3.25px] top-[-0.083px] h-[16.167px] w-[9.5px]" />
+                    </span>
+                  }
                   value={formatMoneyValue(experience.monthlyRevenue)}
                   label="수익"
                 />
@@ -719,7 +776,7 @@ export default function DetailV1() {
             <div className="rounded-[10px] border border-[#EEEEEE] border-b-[2px] border-b-[#5A876E] bg-white px-[16px] py-[16px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
               <div className="flex w-[311px] items-center gap-[4px]">
                 <div className="flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[4px] bg-gradient-to-b from-[#92BFA6] to-[#5A876E]">
-                  <img src={aiGuideSymbolZipIcon} alt="" className="h-[12.201px] w-[12px]" />
+                  <img src={aiGuideStarIcon} alt="" className="h-[12.201px] w-[12px]" />
                 </div>
                 <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#5A876E]">AI 가이드</p>
               </div>
@@ -728,35 +785,30 @@ export default function DetailV1() {
                 {sanitizeText(experience.analysis?.structuredSummary, '실패 원인을 정리하고 다음 행동으로 이어질 수 있도록 핵심 포인트를 추렸습니다.')}
               </p>
 
-              <div className="mb-[14px] mt-[10px] h-px w-[311px] bg-[#D8D8D8]" />
+              <div className="mb-[12px] mt-[8px] h-px w-[311px] bg-[#D8D8D8]" />
 
-              <div className="flex w-[311px] flex-col gap-[12px]">
+              <div className="flex w-[311px] flex-col gap-[10px]">
                 {guideLines.map((line, index) => (
-                  <p
-                    key={`${index}-${line}`}
-                    className="font-['Pretendard'] text-[12px] font-[500] leading-[18px] tracking-[0px] text-[#494949]"
-                  >
-                    {index + 1}. {line}
-                  </p>
+                  <GuideStepRow key={`${index}-${line}`} index={index + 1} text={line} />
                 ))}
               </div>
 
-              <div className="w-[311px] pt-[12px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
+              <div className="mb-[10px] mt-[8px] h-px w-[311px] bg-[#D8D8D8]" />
+
+              <div className="w-[311px] pt-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
                 <p>처음에는 작은 시도들이 쌓이면서 변화가 생기기 때문에</p>
                 <p>하루에 한 가지씩만 꾸준히 시도해도 충분합니다.</p>
               </div>
             </div>
           </section>
 
-          <section className="bg-white px-[16px] pb-[20px] pt-[10px]">
+          <section className="bg-white px-[16px] py-[12px]">
             <SectionBlockTitle title="실패 패턴" description="유사 카테고리 내 실패 원인 별 비중 그래프 데이터입니다." />
-            <div className="pt-[10px]">
-              <div className="rounded-[10px] bg-[#F8F8F8] px-[16px] py-[16px]">
-                <div className="flex flex-col gap-[16px]">
-                  {patternRows.map((item) => (
-                    <PatternRow key={item.label} label={item.label} percent={item.percent} />
-                  ))}
-                </div>
+            <div className="pt-[12px]">
+              <div className="flex flex-col gap-[16px] rounded-[10px] bg-[#F8F8F8] px-[16px] py-[16px]">
+                {patternRows.map((item) => (
+                  <PatternRow key={item.label} label={item.label} percent={item.percent} />
+                ))}
               </div>
             </div>
           </section>
@@ -775,34 +827,18 @@ export default function DetailV1() {
                 <div className="pb-[4px]">
                   <p className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#5A876E]">실패 사례</p>
                 </div>
-                {similarCases.length ? (
-                  <div className="flex flex-col gap-[4px]">
-                    {similarCases.slice(0, 1).map((item) => {
-                      const similarExperience = item.similarExperience;
-
-                      return (
-                        <SimilarCaseCard
-                          key={similarExperience.id}
-                          title={sanitizeText(similarExperience.title, '제목')}
-                          summary={sanitizeText(stripImageMarkdown(similarExperience.content), '본문 텍스트 미리보기')}
-                          tags={buildTopTags(similarExperience).slice(1)}
-                          success={false}
-                          likeCount={similarExperience.likeCount}
-                          bookmarkCount={similarExperience.bookmarkCount ?? 0}
-                          viewCount={similarExperience.viewCount}
-                          author={sanitizeText(similarExperience.author.nickname, '닉네임')}
-                          createdAt={formatDate(similarExperience.createdAt)}
-                          similarity={Math.round(item.similarityScore * 100)}
-                          onClick={() => navigate(`/experiences/${similarExperience.id}`)}
-                        />
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="rounded-[4px] bg-[#F8F8F8] px-[14px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-                    아직 연결된 유사 실패 사례가 없어요.
-                  </div>
-                )}
+                <SimilarCaseCard
+                  title={sanitizeText(experience.title, '제목')}
+                  summary={sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
+                  tags={buildTopTags(experience).slice(1)}
+                  success={false}
+                  likeCount={experience.likeCount}
+                  bookmarkCount={experience.bookmarkCount ?? 0}
+                  viewCount={experience.viewCount}
+                  author={sanitizeText(experience.author.nickname, '닉네임')}
+                  createdAt={formatDate(experience.createdAt)}
+                  onClick={() => navigate(`/experiences/${experience.id}`)}
+                />
               </div>
 
               <div className="flex w-[311px] flex-col gap-[4px]">
@@ -834,14 +870,12 @@ export default function DetailV1() {
                 )}
               </div>
 
-              <div className="flex justify-center pt-[4px]">
-                <button
-                  type="button"
+              <div className="flex justify-center pt-[2px]">
+                <CaseTextLink
+                  label="모든 사례 보기"
                   onClick={() => navigate('/explore')}
-                  className="font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] tracking-[0px] text-[#5D5D5D]"
-                >
-                  모든 사례 보기
-                </button>
+                  className="text-[#5D5D5D] underline underline-offset-[1px]"
+                />
               </div>
               </div>
             </div>
@@ -871,26 +905,15 @@ export default function DetailV1() {
 
           <div className="pointer-events-auto relative h-[36px] w-[36px] shrink-0">
             {fabExpanded ? (
-              <div className="pointer-events-auto absolute right-[-10px] top-[-96px] flex w-max flex-col items-start gap-[12px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]">
-                <button
-                  type="button"
-                  onClick={() => navigate('/coming-soon')}
-                  className="flex items-center gap-[8px] whitespace-nowrap"
-                  aria-label="AI 챗봇 열기"
-                >
-                  <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
-                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCreateClick}
-                  className="flex items-center gap-[8px] whitespace-nowrap"
-                  aria-label="경험 작성 열기"
-                >
-                  <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={handleCreateClick}
+                className="pointer-events-auto absolute right-0 top-[-52px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
+                aria-label="경험 작성 열기"
+              >
+                <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
+              </button>
             ) : null}
 
             <button
@@ -915,4 +938,5 @@ export default function DetailV1() {
     </div>
   );
 }
+
 

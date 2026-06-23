@@ -1,8 +1,5 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import arrowLeftIcon from '../../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../../assets/auth-figma/wifi.svg';
 import AppButton from '../common/Button';
 
 type SignupScreenProps = {
@@ -36,23 +33,12 @@ export function SignupScreen({
   onBack,
   children,
 }: SignupScreenProps) {
-  const resolvedHeadline = headlineLines?.join(' ') ?? headline ?? '';
+  const resolvedHeadlineLines = headlineLines?.length ? headlineLines : headline ? [headline] : [];
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-white">
       <div className="mx-auto flex min-h-screen w-full max-w-[375px] flex-col bg-white">
         <div className="flex w-full flex-col">
-          <div className="flex h-[59px] w-full items-center justify-center px-[24px] pb-[19px] pt-[21px]">
-            <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center pt-[1.5px]">
-              <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">9:41</span>
-            </div>
-            <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
-              <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-              <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-              <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-            </div>
-          </div>
-
           <div className="flex h-[64px] w-full items-center px-[16px] py-[20px]">
             <button
               type="button"
@@ -73,9 +59,11 @@ export function SignupScreen({
 
         <div className="flex w-full flex-col gap-[48px] py-[20px]">
           <div className="flex w-full flex-col gap-[8px] px-[16px]">
-            <p className="font-['Pretendard'] text-[20px] font-[400] leading-[24px] text-black">
-              {resolvedHeadline}
-            </p>
+            <div className="font-['Pretendard'] text-[20px] font-[400] leading-[24px] text-black">
+              {resolvedHeadlineLines.map((line, index) => (
+                <p key={`${line}-${index}`}>{line}</p>
+              ))}
+            </div>
             {caption ? (
               <p className="font-['Pretendard'] text-[14px] font-[400] leading-[19.6px] text-[#8A8A8A]">
                 {caption}

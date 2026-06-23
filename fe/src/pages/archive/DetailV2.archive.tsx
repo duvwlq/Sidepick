@@ -1,11 +1,12 @@
+// Archived detail screen. Kept for reference only; active detail routing uses DetailV1.
 import { ChevronLeft, ExternalLink, Share2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import HeaderBookmarkIcon from '../components/common/HeaderBookmarkIcon';
-import { ErrorState, LoadingState } from '../components/common/Skeleton';
-import { useToast } from '../components/common/useToast';
-import BottomNav from '../components/layout/BottomNav';
-import type { Experience, SimilarExperienceMatch } from '../lib/api';
+import HeaderBookmarkIcon from '../../components/common/HeaderBookmarkIcon';
+import { ErrorState, LoadingState } from '../../components/common/Skeleton';
+import { useToast } from '../../components/common/useToast';
+import BottomNav from '../../components/layout/BottomNav';
+import type { Experience, SimilarExperienceMatch } from '../../lib/api';
 import {
   bookmarkExperience,
   getBookmarkStatus,
@@ -13,11 +14,11 @@ import {
   getExperienceShare,
   getSimilarExperiences,
   unbookmarkExperience,
-} from '../lib/api';
-import { publishBookmarkSync } from '../lib/bookmark-sync';
-import { extractExperienceImageUrls } from '../lib/experience-images';
-import { resolveErrorMessage } from '../lib/resolve-error-message';
-import { getAccessToken } from '../lib/session';
+} from '../../lib/api';
+import { publishBookmarkSync } from '../../lib/bookmark-sync';
+import { extractExperienceImageUrls } from '../../lib/experience-images';
+import { resolveErrorMessage } from '../../lib/resolve-error-message';
+import { getAccessToken } from '../../lib/session';
 
 type SimilarCardModel = {
   id: number;

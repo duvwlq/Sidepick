@@ -1,10 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
-import { CaseBookmarkCount } from '../components/common/CaseUi';
+import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import { ErrorState, LoadingState, PageMessage } from '../components/common/Skeleton';
 import {
   compareExperiences,
@@ -25,23 +22,6 @@ function formatDate(value: string) {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(
     date.getDate(),
   ).padStart(2, '0')}`;
-}
-
-function StatusBarV1() {
-  return (
-    <div className="flex h-[59px] w-full items-center px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex h-[22px] min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] tracking-[0px] text-black">
-          9:41
-        </span>
-      </div>
-      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-      </div>
-    </div>
-  );
 }
 
 function HeaderV1({ onBack }: { onBack: () => void }) {
@@ -260,7 +240,12 @@ function SuccessCaseCard({ experience }: { experience: Experience }) {
           <span>{formatDate(experience.createdAt)}</span>
         </div>
 
-        <CaseBookmarkCount count={experience.likeCount} />
+        <div className="flex items-center gap-[1px]">
+          <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px]" />
+          <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+            {experience.likeCount.toLocaleString()}
+          </span>
+        </div>
       </div>
     </Link>
   );
@@ -309,7 +294,6 @@ export default function SuccessComparisonPage() {
   return (
     <div className="min-h-screen bg-[#D6ECE2]">
       <div className="mx-auto min-h-screen w-full max-w-[393px] bg-white">
-        <StatusBarV1 />
         <HeaderV1 onBack={() => navigate(-1)} />
 
         <div className="bg-white px-[16px] pb-[48px]">

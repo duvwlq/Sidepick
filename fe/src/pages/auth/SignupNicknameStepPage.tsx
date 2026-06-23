@@ -115,7 +115,7 @@ export default function SignupNicknameStepPage() {
   return (
     <SignupScreen
       title="프로필 설정"
-      headlineLines={['사이드픽에서 사용할', '프로필을 등록해볼까요?']}
+      headlineLines={['사이드픽에서 사용할', '프로필을 등록 해볼까요?']}
       onBack={() =>
         navigate(
           signupMode === 'social'
@@ -126,7 +126,11 @@ export default function SignupNicknameStepPage() {
     >
       <SignupFieldGroup>
         <div className="flex w-full justify-center pb-[12px]">
-          <div className="relative flex h-[120px] w-[120px] items-center justify-center">
+          <button
+            type="button"
+            className="relative flex h-[120px] w-[120px] items-center justify-center"
+            aria-label="프로필 사진 설정"
+          >
             <div className="flex h-[120px] w-[120px] items-center justify-center rounded-full bg-[#D9D9D9]">
               {profileImage ? (
                 <img src={profileImage} alt="" className="h-[96px] w-[96px] rounded-full bg-[#F8F8F8] object-contain" />
@@ -137,7 +141,7 @@ export default function SignupNicknameStepPage() {
             <span className="absolute bottom-[11px] right-[10px] flex h-[28.8px] w-[28.8px] items-center justify-center rounded-full bg-[#8A8A8A]">
               <img src={cameraIcon} alt="" className="h-[17px] w-[17px]" />
             </span>
-          </div>
+          </button>
         </div>
 
         <NicknameInput

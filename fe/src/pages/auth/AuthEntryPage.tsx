@@ -3,13 +3,10 @@ import { Link, useLocation } from 'react-router-dom';
 import { SignupErrorText, SignupField } from '../../components/auth/FigmaSignupPrimitives';
 import { useToast } from '../../components/common/useToast';
 import arrowLeftIcon from '../../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../../assets/auth-figma/battery-frame.svg';
 import brandMarkIcon from '../../assets/auth-figma/brand-mark.svg';
-import cellularConnectionIcon from '../../assets/auth-figma/cellular-connection.svg';
 import googleIcon from '../../assets/auth-figma/google-icon.svg';
 import kakaoIcon from '../../assets/auth-figma/kakao-icon.svg';
 import naverIcon from '../../assets/auth-figma/naver-icon.svg';
-import wifiIcon from '../../assets/auth-figma/wifi.svg';
 import { issueOAuthState, login } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { buildOAuthRedirectUri } from '../../lib/oauth-redirect';
@@ -108,17 +105,6 @@ export default function AuthEntryPage() {
     <div className="min-h-screen overflow-x-hidden bg-white">
       <div className="mx-auto flex min-h-screen w-full max-w-[375px] flex-col bg-white">
         <div className="flex w-full flex-col">
-          <div className="flex h-[59px] w-full items-center justify-center px-[24px] pb-[19px] pt-[21px]">
-            <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center pt-[1.5px]">
-              <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">9:41</span>
-            </div>
-            <div className="flex h-[22px] min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
-              <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-              <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-              <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-            </div>
-          </div>
-
           <div className="flex w-full items-center px-[16px] py-[20px]">
             <button
               type="button"

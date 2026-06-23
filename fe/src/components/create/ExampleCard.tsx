@@ -33,12 +33,12 @@ export default function ExampleCard({
       <button
         type="button"
         onClick={onToggleVisible}
-        className="flex w-full items-start rounded-[8px] border border-[#5A876E] bg-[#F8F8F8] px-[16px] py-[12px]"
+        className="flex h-[44px] w-full items-center rounded-[8px] border border-[#5A876E] bg-[#F8F8F8] px-[16px] py-[12px]"
       >
         <div className="flex w-full items-center justify-between">
           <div className="flex items-center gap-[4px]">
-            <span className="flex h-[17px] w-[17px] items-center justify-center text-[#5A876E]">
-              <svg viewBox="0 0 20 20" className="h-[17px] w-[17px]" aria-hidden="true">
+            <span className="flex h-[18px] w-[18px] items-center justify-center text-[#5A876E]">
+              <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" aria-hidden="true">
                 <path
                   d="M4.5 4.5h11a1.5 1.5 0 0 1 1.5 1.5v7a1.5 1.5 0 0 1-1.5 1.5H8l-3.5 2.5V14.5H4.5A1.5 1.5 0 0 1 3 13V6A1.5 1.5 0 0 1 4.5 4.5Z"
                   fill="none"
@@ -70,9 +70,7 @@ export default function ExampleCard({
         </div>
       </button>
 
-      <p className="font-['Pretendard'] text-[10px] font-[300] leading-[14px] text-[#8A8A8A]">
-        * 예시를 참고하면 더 자세하게 작성할 수 있습니다.
-      </p>
+      <p className="font-['Pretendard'] text-[10px] font-[300] leading-[14px] text-[#8A8A8A]">* 예시를 참고하면 더 자세하게 작성할 수 있습니다.</p>
 
       {visible ? (
         <div className="rounded-[10px] bg-[#F8F8F8] px-[12px] py-[14px]">
@@ -125,9 +123,7 @@ export default function ExampleCard({
               ) : null}
             </>
           ) : (
-            <div className="text-[12px] leading-[16.8px] text-[#8A8A8A]">
-              {error ?? '선택한 카테고리와 어려움 조합에 맞는 작성 예시를 준비 중이에요.'}
-            </div>
+            <div className="text-[12px] leading-[16.8px] text-[#8A8A8A]">{error ?? '선택한 카테고리와 어려운 조합에 맞는 작성 예시를 준비 중이에요.'}</div>
           )}
         </div>
       ) : null}

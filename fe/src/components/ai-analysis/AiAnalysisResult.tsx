@@ -1,4 +1,4 @@
-﻿import { ChevronLeft, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ErrorState, LoadingState, PageMessage } from '../common/Skeleton';
@@ -8,7 +8,6 @@ import BottomNav from '../layout/BottomNav';
 import {
   ApiError,
   bookmarkExperience,
-  createAnalysis,
   deleteExperience,
   getBookmarkStatus,
   getExperience,
@@ -119,7 +118,6 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   const [bookmarked, setBookmarked] = useState(false);
   const [relatedSuccessCount, setRelatedSuccessCount] = useState(0);
   const [recommendedSuccessReason, setRecommendedSuccessReason] = useState('');
-  const [analysisStatus, setAnalysisStatus] = useState<'READY' | 'NOT_READY' | 'ERROR' | null>(null);
 
   const viewer = getStoredUser();
   const isOwner = useMemo(() => {
@@ -190,36 +188,23 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
     try {
       const experiencePayload = await getExperience(targetExperienceId);
-      setExperience(experiencePayload);
-      const initialReport = await getReport(targetExperienceId);
-      setReport(initialReport);
-      setAnalysisStatus(initialReport.reportStatus);
-      setLoading(false);
+      let reportPayload = await getReport(targetExperienceId);
 
-      if (initialReport.reportStatus === 'READY' || initialReport.reportStatus === 'ERROR') {
-        return;
-      }
-
-      const token = getAccessToken();
-      if (token) {
+      if (reportPayload.reportStatus === 'NOT_READY') {
         try {
-          await createAnalysis(token, targetExperienceId);
+          await new Promise((resolve) => window.setTimeout(resolve, 1200));
+          reportPayload = await getReport(targetExperienceId);
         } catch (requestError) {
-          if (!(requestError instanceof ApiError) || requestError.code !== ERROR_CODES.ANALYSIS_TIMEOUT) {
-            throw requestError;
+          if (requestError instanceof ApiError && requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT) {
+            setExperience(experiencePayload);
+            setReport(reportPayload);
+            return;
           }
         }
       }
 
-      for (let attempt = 0; attempt < 15; attempt += 1) {
-        await new Promise((resolve) => window.setTimeout(resolve, 1000));
-        const nextReport = await getReport(targetExperienceId);
-        setReport(nextReport);
-        setAnalysisStatus(nextReport.reportStatus);
-        if (nextReport.reportStatus === 'READY' || nextReport.reportStatus === 'ERROR') {
-          return;
-        }
-      }
+      setExperience(experiencePayload);
+      setReport(reportPayload);
     } catch (requestError) {
       if (shouldUseDevFallback(requestError)) {
         setError('개발 환경에서 API 서버에 연결하지 못했어요.');
@@ -298,31 +283,17 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   const issueItems = useMemo(() => (report?.reportStatus === 'READY' ? buildIssueItems(report) : []), [report]);
   const patternItems = useMemo(() => (report?.reportStatus === 'READY' ? buildPatternItems(report) : []), [report]);
   const similarCases = useMemo(() => mappedReport?.similarCases.slice(0, 2) ?? [], [mappedReport]);
-  const analysisExplanationNote = useMemo(() => {
-    if (report?.reportStatus !== 'READY' || !report.explanation) {
-      return '';
-    }
-    const category = report.explanation.inputUsed?.category?.trim();
-    const patterns = report.explanation.matchedPatterns?.filter(Boolean).slice(0, 2) ?? [];
-    const keywords = report.keywords?.filter(Boolean).slice(0, 3) ?? [];
-    const segments = [
-      category ? `${category} 경험으로 읽었고` : '',
-      patterns.length ? `${patterns.join(', ')} 패턴을 핵심 근거로 잡았어요` : '',
-      keywords.length ? `${keywords.join(', ')} 같은 표현도 함께 반영했어요` : '',
-    ].filter(Boolean);
-    return segments.length ? `${segments.join('. ')}.` : '';
-  }, [report]);
   const similarCaseReasons = useMemo(
     () =>
       (report?.similarCases ?? []).slice(0, 2).map((item) => {
         const matchedKeywords = item.explanation?.matchedKeywords?.filter(Boolean) ?? [];
         if (matchedKeywords.length) {
-          return `${matchedKeywords.join(', ')}이 반복돼 현재 사례와 닮은 흐름으로 판단했어요.`;
+          return `${matchedKeywords.join(', ')} 기준으로 비슷한 사례로 분류했어요.`;
         }
         if (item.explanation?.source === 'ai-similar-search') {
-          return '입력한 서술과 가장 가까운 실패 흐름으로 묶인 사례예요.';
+          return 'AI 유사도 검색 결과를 기준으로 가까운 사례로 분류했어요.';
         }
-        return '같은 카테고리 안에서 실패 맥락이 가장 많이 겹치는 사례예요.';
+        return '같은 카테고리와 실패 맥락이 겹쳐 추천된 사례예요.';
       }),
     [report],
   );
@@ -347,37 +318,6 @@ export default function AiAnalysisResult({ experienceId }: Props) {
       <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
         <div className="px-[16px] py-[40px]">
           <ErrorState message={error || '사례를 불러오지 못했어요.'} />
-        </div>
-      </div>
-    );
-  }
-
-  if (analysisStatus === 'NOT_READY') {
-    return (
-      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
-        <div className="flex min-h-screen flex-col items-center justify-center gap-[20px] px-[16px] pb-[120px]">
-          <div className="text-center text-[24px] leading-[28.8px] text-[#131416]">
-            <p>
-              <span className="font-[700] text-[#5A876E]">{experience.author.nickname}</span>
-              <span className="font-[400]">님의</span>
-            </p>
-            <p className="pt-[4px] font-[400]">경험을 분석하고 있어요!</p>
-          </div>
-
-          <div className="flex flex-col items-center gap-[12px]">
-            <div className="h-[24px] w-[24px] animate-spin rounded-full border-2 border-[#D8D8D8] border-t-[#5A876E]" />
-            <p className="text-[12px] leading-[16.8px] text-[#8A8A8A]">잠시만 기다려주세요.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (analysisStatus === 'ERROR') {
-    return (
-      <div className="mx-auto min-h-screen w-full max-w-[430px] bg-white">
-        <div className="px-[16px] py-[40px]">
-          <ErrorState message="AI 분석이 아직 준비되지 않았어요. 경험 내용은 저장되었고 잠시 후 다시 확인할 수 있어요." />
         </div>
       </div>
     );
@@ -560,12 +500,6 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                 <p className="text-[16px] font-[600] leading-[19px] text-[#131416]">AI 가이드</p>
               </div>
 
-              {analysisExplanationNote ? (
-                <p className="mt-[10px] rounded-[12px] bg-[#F6FAF7] px-[12px] py-[10px] text-[12px] leading-[18px] text-[#4E6A59]">
-                  {analysisExplanationNote}
-                </p>
-              ) : null}
-
               <p className="mt-[12px] text-[12px] leading-[17px] text-[#494949]">{aiSummary}</p>
 
               <div className="my-[12px] h-px bg-[#D8D8D8]" />
@@ -608,7 +542,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                       onClick={() => handleSimilarCaseClick(item.caseId)}
                     />
                     <p className="px-[4px] text-[12px] leading-[18px] text-[#6B7280]">
-                      {similarCaseReasons[index] ?? '입력한 실패 맥락과 가장 가까운 사례예요.'}
+                      {similarCaseReasons[index] ?? '입력한 실패 맥락과 가까운 사례라서 추천했어요.'}
                     </p>
                   </div>
                 ))

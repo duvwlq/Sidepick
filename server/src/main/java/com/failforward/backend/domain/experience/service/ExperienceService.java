@@ -3,7 +3,6 @@ package com.failforward.backend.domain.experience.service;
 import com.failforward.backend.common.api.BadRequestException;
 import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.api.PageInfo;
-import com.failforward.backend.common.config.AiAssetProperties;
 import com.failforward.backend.common.config.ShareProperties;
 import com.failforward.backend.common.privacy.SensitiveDataMaskingService;
 import com.failforward.backend.common.security.AdminAccessPolicy;
@@ -24,7 +23,9 @@ import jakarta.persistence.EntityManager;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,10 +40,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ExperienceService {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final List<SuccessDraft> SUCCESS_DRAFTS = loadSuccessDrafts();
 
     private final FailureExperienceRepository experienceRepository;
     private final AIAnalysisService aiAnalysisService;
-    private final AiAssetProperties aiAssetProperties;
     private final CurrentUserProvider currentUserProvider;
     private final AdminAccessPolicy adminAccessPolicy;
     private final CategoryService categoryService;
@@ -54,7 +55,8 @@ public class ExperienceService {
     private final ExperienceBookmarkRepository bookmarkRepository;
     private final ShareProperties shareProperties;
     private final ExperienceShareImageService experienceShareImageService;
-    private volatile List<SuccessDraft> successDrafts;
+    private final ExperienceImageStorageService experienceImageStorageService;
+    private final ExperienceAiSupplementComposer experienceAiSupplementComposer;
 
     @Transactional
     public ExperienceDtos.ExperienceResponse create(ExperienceDtos.ExperienceCreateRequest request) {
@@ -319,6 +321,17 @@ public class ExperienceService {
         );
     }
 
+    @Transactional
+    public ExperienceDtos.ExperienceImageUploadResponse uploadExperienceImages(
+            List<org.springframework.web.multipart.MultipartFile> files,
+            String publicBaseUrl
+    ) {
+        currentUserProvider.getCurrentUserEntity();
+        return new ExperienceDtos.ExperienceImageUploadResponse(
+                experienceImageStorageService.storeAll(files, publicBaseUrl)
+        );
+    }
+
     public FailureExperience getExperienceEntity(Long experienceId) {
         return experienceRepository.findWithUserAndCategoryById(experienceId)
                 .orElseThrow(() -> new NotFoundException("Experience not found."));
@@ -400,23 +413,10 @@ public class ExperienceService {
                 .flatMap(draft -> draft.successFactors() == null || draft.successFactors().isEmpty()
                         ? Optional.empty()
                         : Optional.ofNullable(draft.successFactors().get(0)))
-                .ifPresent(factor -> {
-                    String title = factor.title() == null ? "" : factor.title().trim();
-                    String description = factor.description() == null ? "" : summarizeSentence(factor.description(), 56);
-                    if (!title.isBlank() && !description.isBlank()) {
-                        reasons.add("'" + title + "'처럼 " + description);
-                        return;
-                    }
-                    if (!title.isBlank()) {
-                        reasons.add("'" + title + "' 요소가 성공 자산에서 반복됩니다");
-                    }
-                });
-
-        findMatchingSuccessDraft(target, targetAnalysis)
-                .map(SuccessDraft::differenceFromFailures)
-                .map(text -> summarizeSentence(text, 64))
-                .filter(text -> !text.isBlank())
-                .ifPresent(text -> reasons.add("실패 사례와 달리 " + text));
+                .map(SuccessFactorDraft::title)
+                .map(String::trim)
+                .filter(title -> !title.isBlank())
+                .ifPresent(title -> reasons.add("'" + title + "' 요소가 성공 자산에서 반복됩니다"));
 
         if (reasons.isEmpty()) {
             return "같은 카테고리의 성공 사례 중에서 입력한 실패 맥락과 가장 가까운 사례를 우선 추천했습니다.";
@@ -535,20 +535,6 @@ public class ExperienceService {
         return normalized.isBlank() ? null : normalized;
     }
 
-    private String summarizeSentence(String text, int maxLength) {
-        if (text == null) {
-            return "";
-        }
-        String normalized = text.replaceAll("\\s+", " ").trim();
-        if (normalized.isBlank()) {
-            return "";
-        }
-        if (normalized.length() <= maxLength) {
-            return normalized;
-        }
-        return normalized.substring(0, Math.max(0, maxLength - 1)).trim() + "...";
-    }
-
     private List<String> sharedKeywords(List<String> left, List<String> right, int limit) {
         if (left.isEmpty() || right.isEmpty()) {
             return List.of();
@@ -567,8 +553,7 @@ public class ExperienceService {
     }
 
     private Optional<SuccessDraft> findMatchingSuccessDraft(FailureExperience target, AiAnalysis targetAnalysis) {
-        List<SuccessDraft> drafts = getSuccessDrafts();
-        if (drafts.isEmpty()) {
+        if (SUCCESS_DRAFTS.isEmpty()) {
             return Optional.empty();
         }
         String categoryName = target.getCategory() == null ? null : target.getCategory().getName();
@@ -576,7 +561,7 @@ public class ExperienceService {
                 ? List.of()
                 : parseLooseJsonList(targetAnalysis.getFailReasonTags());
 
-        return drafts.stream()
+        return SUCCESS_DRAFTS.stream()
                 .filter(draft -> categoryMatches(categoryName, draft.categoryInferred()))
                 .sorted(java.util.Comparator.comparingInt((SuccessDraft draft) -> draftMatchScore(draft, targetKeywords)).reversed())
                 .findFirst();
@@ -623,25 +608,9 @@ public class ExperienceService {
         };
     }
 
-    private List<SuccessDraft> getSuccessDrafts() {
-        List<SuccessDraft> cached = successDrafts;
-        if (cached != null) {
-            return cached;
-        }
-        synchronized (this) {
-            if (successDrafts == null) {
-                successDrafts = loadSuccessDrafts(aiAssetProperties.successAnalysisDraftsPath());
-            }
-            return successDrafts;
-        }
-    }
-
-    private static List<SuccessDraft> loadSuccessDrafts(String configuredPath) {
+    private static List<SuccessDraft> loadSuccessDrafts() {
         try {
-            Path path = resolvePath(configuredPath);
-            if (path == null) {
-                return List.of();
-            }
+            Path path = Path.of("D:\\Codex_Folder\\Sidepick\\ai\\data\\success_analysis_drafts.json");
             if (!Files.exists(path)) {
                 return List.of();
             }
@@ -654,28 +623,6 @@ public class ExperienceService {
             log.warn("success_drafts_load_failed detail={}", exception.getMessage());
             return List.of();
         }
-    }
-
-    private static Path resolvePath(String configuredPath) {
-        if (configuredPath == null || configuredPath.isBlank()) {
-            return null;
-        }
-
-        Path direct = Path.of(configuredPath).normalize();
-        if (Files.exists(direct)) {
-            return direct;
-        }
-
-        Path cwd = Path.of("").toAbsolutePath().normalize();
-        List<Path> candidates = new ArrayList<>();
-        candidates.add(cwd.resolve(configuredPath).normalize());
-        candidates.add(cwd.resolve("server").resolve(configuredPath).normalize());
-        candidates.add(cwd.resolve("..").resolve(configuredPath).normalize());
-
-        return candidates.stream()
-                .filter(Files::exists)
-                .findFirst()
-                .orElse(direct);
     }
 
     private record SuccessDraftEnvelope(
@@ -779,8 +726,10 @@ public class ExperienceService {
                 request.difficultyExtra(),
                 request.targetMarket(),
                 request.marketingChannels(),
+                request.imageUrls(),
                 request.lessonsLearned(),
-                request.wouldRetry()
+                request.wouldRetry(),
+                request.aiSupplement()
         );
     }
 
@@ -803,8 +752,10 @@ public class ExperienceService {
                 request.difficultyExtra(),
                 request.targetMarket(),
                 request.marketingChannels(),
+                request.imageUrls(),
                 request.lessonsLearned(),
-                request.wouldRetry()
+                request.wouldRetry(),
+                request.aiSupplement()
         );
     }
 
@@ -826,12 +777,15 @@ public class ExperienceService {
             String difficultyExtra,
             String targetMarket,
             List<String> marketingChannels,
+            List<String> imageUrls,
             String lessonsLearned,
-            Boolean wouldRetry
+            Boolean wouldRetry,
+            ExperienceDtos.AiSupplementRequest aiSupplement
     ) {
         BusinessCategory category = categoryService.getCategory(categoryId);
+        String composedContent = experienceAiSupplementComposer.composeContent(content, aiSupplement);
         requestSupport.validateWriteRequest(
-                content,
+                composedContent,
                 investmentAmount,
                 durationMonths,
                 monthlyRevenue,
@@ -847,7 +801,9 @@ public class ExperienceService {
         String resolvedDifficultyExtra = requestSupport.normalizeOptionalText(difficultyExtra);
         String resolvedFailureReason = requestSupport.resolveFailureReason(failureReason, resolvedFailureReasons);
         String resolvedTitle = requestSupport.resolveTitle(title, resolvedBusinessType);
-        String resolvedLessons = requestSupport.resolveLessons(lessonsLearned, content);
+        String resolvedLessons = aiSupplement != null
+                ? maskingService.maskText(composedContent)
+                : requestSupport.resolveLessons(lessonsLearned, composedContent);
         var structured = requestSupport.buildStructuredData(
                 categoryId,
                 category.getName(),
@@ -861,13 +817,21 @@ public class ExperienceService {
                 resolvedDifficultyEtc,
                 resolvedDifficultyExtra,
                 targetMarket,
-                wouldRetry
+                wouldRetry,
+                imageUrls == null ? List.of() : imageUrls.stream().filter(requestSupport::hasText).toList()
         );
+        Map<String, Object> mutableStructured = new LinkedHashMap<>(structured);
+        if (aiSupplement != null) {
+            mutableStructured.put("originalContent", aiSupplement.originalContent());
+            mutableStructured.put("composedFromAiSupplement", true);
+            mutableStructured.put("aiSupplementAnswers", experienceAiSupplementComposer.toStructuredAnswers(aiSupplement));
+        }
+        Map<String, Object> maskedStructured = maskingService.maskObjectMap(mutableStructured);
 
         return new ExperiencePayload(
                 category,
                 resolvedTitle,
-                maskingService.maskText(content),
+                maskingService.maskText(composedContent),
                 maskingService.maskText(resolvedBusinessType),
                 investmentAmount,
                 resolvedDurationMonths,
@@ -885,7 +849,7 @@ public class ExperienceService {
                 resolvedLessons,
                 wouldRetry != null ? wouldRetry : Boolean.FALSE,
                 requestSupport.writeJson(marketingChannels == null ? List.of() : marketingChannels.stream().map(maskingService::maskText).toList()),
-                requestSupport.writeJson(structured)
+                requestSupport.writeJson(maskedStructured)
         );
     }
 

@@ -17,9 +17,9 @@ export default function ProgressHeader({ step, progress }: Props) {
         </div>
       </div>
 
-      <div className="h-[10px] w-full overflow-hidden rounded-[999px] bg-[#EEEEEE]">
+      <div className="h-[6px] w-full overflow-hidden rounded-[999px] bg-[#D8D8D8]">
         <div
-          className="h-[10px] rounded-[999px] bg-[#09090B] transition-all"
+          className="h-[6px] rounded-[999px] bg-[linear-gradient(90deg,#92BFA6_0%,#5A876E_100%)] transition-all"
           style={{ width: `${progress}%` }}
         />
       </div>

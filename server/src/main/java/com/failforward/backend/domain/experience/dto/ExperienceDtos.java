@@ -49,8 +49,10 @@ public final class ExperienceDtos {
             String difficultyExtra,
             String targetMarket,
             List<String> marketingChannels,
+            List<String> imageUrls,
             String lessonsLearned,
-            Boolean wouldRetry
+            Boolean wouldRetry,
+            AiSupplementRequest aiSupplement
     ) {
     }
 
@@ -72,8 +74,23 @@ public final class ExperienceDtos {
             String difficultyExtra,
             String targetMarket,
             List<String> marketingChannels,
+            List<String> imageUrls,
             String lessonsLearned,
-            Boolean wouldRetry
+            Boolean wouldRetry,
+            AiSupplementRequest aiSupplement
+    ) {
+    }
+
+    public record AiSupplementRequest(
+            String originalContent,
+            List<AiSupplementAnswer> answers
+    ) {
+    }
+
+    public record AiSupplementAnswer(
+            String slot,
+            String question,
+            String answer
     ) {
     }
 
@@ -236,6 +253,11 @@ public final class ExperienceDtos {
             String downloadImageUrl,
             String webUrl,
             String categoryName
+    ) {
+    }
+
+    public record ExperienceImageUploadResponse(
+            List<String> imageUrls
     ) {
     }
 

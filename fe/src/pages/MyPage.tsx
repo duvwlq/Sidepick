@@ -1,16 +1,10 @@
-import { ChevronDown } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import {
-  CardActionButton,
-  CaseBookmarkCount,
-  CaseChip,
-  CaseChipRow,
-  CaseReactionCount,
-  CaseTextLink,
-} from '../components/common/CaseUi';
+import CaseCard from '../components/common/CaseCard';
 import { ErrorState, ListSkeleton } from '../components/common/Skeleton';
+import { CaseTextLink } from '../components/common/CaseUi';
 import { useToast } from '../components/common/useToast';
 import BottomNav from '../components/layout/BottomNav';
 import {
@@ -128,7 +122,7 @@ function DraftCard() {
         onClick={() => navigate('/create')}
         className="flex h-[95px] w-full items-center justify-center rounded-[4px] bg-[#F8F8F8] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]"
       >
-        작성 중인 글은 아직 없어요
+        작성 중인 글이 없습니다
       </button>
     </section>
   );
@@ -145,122 +139,41 @@ function StoryCard({
 }) {
   const navigate = useNavigate();
   const imageUrls = extractExperienceImageUrls(experience);
-  const keywords = extractKeywordTags(experience);
-  const preview = sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기');
-  const bookmarkCount = resolveBookmarkCount(experience);
-  const showCta = experience.caseStatus === 'FAILURE';
-  const showImage = Boolean(imageUrls[0]);
-  const cardHeightClass = showCta ? 'min-h-[188px]' : 'min-h-[150px]';
+  const tags = [
+    experience.caseStatus === 'SUCCESS' ? '성공' : '실패',
+    sanitizeText(experience.category.name, '카테고리'),
+    ...extractKeywordTags(experience),
+  ].slice(0, 4);
 
   return (
     <div className="border-b border-[#F1F1F1] bg-white px-[16px] py-[12px] last:border-b-0">
-      <button
-        type="button"
-        onClick={() => navigate(`/experiences/${experience.id}`)}
-        className="block w-full overflow-hidden rounded-[4px] bg-white text-left shadow-[0_0_2px_rgba(0,0,0,0.1)]"
-      >
-        <article className={`flex w-full flex-col gap-[8px] bg-white px-[16px] py-[20px] ${cardHeightClass}`}>
-          <div className="flex flex-col gap-[8px]">
-            <CaseChipRow className="w-full overflow-hidden whitespace-nowrap">
-              <CaseChip
-                label={experience.caseStatus === 'SUCCESS' ? '성공' : '실패'}
-                tone={experience.caseStatus === 'SUCCESS' ? 'status-success' : 'status-failure'}
-                maxWidthClassName="max-w-[40px]"
-                className="h-[16px] px-[4px] py-0"
-              />
-              <CaseChip
-                label={sanitizeText(experience.category.name, '카테고리')}
-                tone="category"
-                maxWidthClassName="max-w-[108px]"
-                className="h-[16px] px-[4px] py-0"
-              />
-              {keywords.map((keyword, index) => (
-                <CaseChip
-                  key={`${experience.id}-${keyword}-${index}`}
-                  label={keyword}
-                  tone="keyword"
-                  maxWidthClassName="max-w-[58px]"
-                  className="h-[16px] px-[4px] py-0"
-                />
-              ))}
-            </CaseChipRow>
-
-            <div className="flex h-[60px] w-full items-start gap-[8px]">
-              {showImage ? (
-                <div className="relative h-[60px] w-[80px] shrink-0 overflow-hidden rounded-[4px] bg-[#D8D8D8]">
-                  <img src={imageUrls[0]} alt="" className="h-full w-full object-cover" />
-                  {imageUrls.length > 1 ? (
-                    <span className="absolute bottom-0 right-0 flex h-[16px] w-[16px] items-center justify-center rounded-[4px] bg-[rgba(0,0,0,0.25)] font-['Pretendard'] text-[12px] font-[500] leading-[16px] text-white">
-                      {imageUrls.length}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-
-              <div className={`flex h-[60px] min-w-0 flex-col ${showImage ? 'w-[223px] shrink-0' : 'w-full flex-1'} gap-[4px]`}>
-                <h3 className="line-clamp-1 min-w-0 font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-[#131416]">
-                  {sanitizeText(experience.title, '제목')}
-                </h3>
-                <p className={`${showImage ? 'line-clamp-1' : 'line-clamp-2'} min-w-0 font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]`}>
-                  {preview}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className={`mt-auto flex w-full flex-col ${showCta ? 'gap-[6px]' : 'gap-[8px]'}`}>
-            <div className="flex items-center justify-between gap-[8px]">
-              <div className="flex min-w-0 flex-1 items-center gap-[4px] truncate font-['Pretendard'] text-[12px] font-[300] leading-[16.8px] text-[#8A8A8A]">
-                <span>{sanitizeText(experience.author.nickname, '닉네임')}</span>
-                <span>•</span>
-                <span>{formatDate(experience.createdAt)}</span>
-                <span>•</span>
-                <span className="flex items-center gap-[2px]">
-                  <span>조회</span>
-                  <span>{experience.viewCount.toLocaleString()}</span>
-                </span>
-              </div>
-
-              <div className="flex shrink-0 items-center gap-[2px]">
-                <CaseReactionCount count={experience.likeCount} />
-                {mode === 'bookmarked' && onBookmarkRemove ? (
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      onBookmarkRemove(experience.id);
-                    }}
-                    className="inline-flex items-center"
-                    aria-label="북마크 해제"
-                  >
-                    <CaseBookmarkCount count={bookmarkCount} active />
-                  </button>
-                ) : (
-                  <CaseBookmarkCount count={bookmarkCount} active={mode === 'bookmarked'} />
-                )}
-              </div>
-            </div>
-
-            {showCta ? (
-              <div className="flex w-full items-center justify-end">
-                <CardActionButton
-                  label="CTA"
-                  className="h-[30px] min-w-[48px] rounded-[8px] px-[12px] text-[12px] font-[600] leading-[14.4px]"
-                  disabled={!experience.hasPatternAnalysis}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    if (experience.hasPatternAnalysis) {
-                      navigate(`/experiences/${experience.id}/success-comparison`);
-                    }
-                  }}
-                />
-              </div>
-            ) : null}
-          </div>
-        </article>
-      </button>
+      <CaseCard
+        tags={tags.map((tag, index) => ({
+          label: tag,
+          tone: (index === 0 ? (experience.caseStatus === 'SUCCESS' ? 'status-success' : 'status-failure') : index === 1 ? 'category' : 'keyword') as
+            | 'status-success'
+            | 'status-failure'
+            | 'category'
+            | 'keyword',
+          maxWidthClassName: index === 0 ? 'max-w-[40px]' : index === 1 ? 'max-w-[108px]' : 'max-w-[58px]',
+        }))}
+        title={sanitizeText(experience.title, '제목')}
+        preview={sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
+        nickname={sanitizeText(experience.author.nickname, '닉네임')}
+        createdAt={formatDate(experience.createdAt)}
+        viewCount={experience.viewCount}
+        thumbnailUrl={imageUrls[0] ?? null}
+        thumbnailCount={imageUrls.length}
+        heartCount={experience.likeCount}
+        bookmarkCount={resolveBookmarkCount(experience)}
+        bookmarkActive={mode === 'bookmarked'}
+        onBookmarkClick={mode === 'bookmarked' && onBookmarkRemove ? () => onBookmarkRemove(experience.id) : undefined}
+        showCta={experience.caseStatus === 'FAILURE'}
+        ctaLabel="성공 사례 보기"
+        ctaDisabled={!experience.hasPatternAnalysis}
+        onCtaClick={() => navigate(`/experiences/${experience.id}/success-comparison`)}
+        surfaceClassName="min-h-[171px]"
+      />
     </div>
   );
 }
@@ -394,7 +307,7 @@ export default function MyPage() {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white px-[16px] py-[40px]">
         <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]">로그인이 필요해요.</p>
-        <p className="mt-[8px] font-['Pretendard'] text-[14px] leading-[19.6px] text-[#6B6B6B]">마이페이지를 보려면 로그인해 주세요.</p>
+        <p className="mt-[8px] font-['Pretendard'] text-[14px] leading-[19.6px] text-[#6B6B6B]">저장한 목록을 보려면 로그인해 주세요.</p>
         <button
           type="button"
           onClick={() => navigate('/auth?next=%2Fmypage')}
@@ -424,7 +337,7 @@ export default function MyPage() {
           >
             <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
           </button>
-          <h1 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">마이페이지</h1>
+          <h1 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">저장됨</h1>
           <div className="h-[24px] w-[24px]" aria-hidden="true" />
         </div>
 
@@ -517,7 +430,7 @@ export default function MyPage() {
         ) : (
           <div className="px-[16px] py-[12px]">
             <div className="rounded-[4px] bg-white px-[16px] py-[32px] text-center font-['Pretendard'] text-[14px] text-[#8A8A8A]">
-              {activeTab === 'written' ? '작성한 글이 아직 없어요.' : activeTab === 'bookmarked' ? '북마크한 글이 아직 없어요.' : '최근 본 글이 아직 없어요.'}
+              {activeTab === 'written' ? '작성한 글이 없어요.' : activeTab === 'bookmarked' ? '북마크한 글이 없어요.' : '최근 본 글이 없어요.'}
             </div>
           </div>
         )}

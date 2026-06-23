@@ -50,7 +50,7 @@ class ExperienceRequestSupport {
     }
 
     Integer resolveDurationMonths(Integer durationMonths) {
-        return durationMonths != null && durationMonths > 0 ? durationMonths : 1;
+        return durationMonths != null && durationMonths >= 0 ? durationMonths : 1;
     }
 
     Integer resolveWeeklyHours(Integer weeklyHours) {
@@ -94,7 +94,8 @@ class ExperienceRequestSupport {
             String difficultyEtc,
             String difficultyExtra,
             String targetMarket,
-            Boolean wouldRetry
+            Boolean wouldRetry,
+            List<String> imageUrls
     ) {
         Map<String, Object> structured = new HashMap<>();
         structured.put("categoryId", categoryId);
@@ -110,6 +111,7 @@ class ExperienceRequestSupport {
         structured.put("difficultyExtra", difficultyExtra);
         structured.put("targetMarket", maskingService.maskText(targetMarket));
         structured.put("wouldRetry", wouldRetry != null ? wouldRetry : Boolean.FALSE);
+        structured.put("imageUrls", imageUrls == null ? List.of() : imageUrls.stream().filter(this::hasText).toList());
         return maskingService.maskObjectMap(structured);
     }
 

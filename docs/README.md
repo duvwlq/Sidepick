@@ -8,12 +8,13 @@ Sidepick의 공식 문서 허브입니다.
 ## Recommended Reading Order
 
 1. [Project Overview](./00_project_overview.md)
-2. [Current Architecture](./01_current_architecture.md)
-3. [API Contract](./02_api_contract.md)
-4. [Frontend Structure](./03_frontend_structure.md)
-5. [Backend Structure](./04_backend_structure.md)
-6. [AI Integration Contract](./05_ai_integration_contract.md)
-7. [Deployment Guide](./07_deployment.md)
+2. [Functional Specification](./08_functional_spec.md)
+3. [Current Architecture](./01_current_architecture.md)
+4. [API Contract](./02_api_contract.md)
+5. [Frontend Structure](./03_frontend_structure.md)
+6. [Backend Structure](./04_backend_structure.md)
+7. [AI Integration Contract](./05_ai_integration_contract.md)
+8. [Deployment Guide](./07_deployment.md)
 
 ---
 
@@ -22,6 +23,7 @@ Sidepick의 공식 문서 허브입니다.
 | 문서 | 설명 |
 | --- | --- |
 | [00_project_overview.md](./00_project_overview.md) | MVP 범위와 핵심 사용자 흐름 |
+| [08_functional_spec.md](./08_functional_spec.md) | 발표/운영 기준 기능명세 중앙 문서 |
 | [01_current_architecture.md](./01_current_architecture.md) | 현재 서비스 아키텍처와 런타임 구조 |
 | [02_api_contract.md](./02_api_contract.md) | 프론트-백엔드 API 계약 |
 | [03_frontend_structure.md](./03_frontend_structure.md) | 프론트엔드 구조와 화면 책임 |
@@ -32,6 +34,8 @@ Sidepick의 공식 문서 허브입니다.
 | [BE-40 에이전트 A 연결 계약.md](./BE-40%20에이전트%20A%20연결%20계약.md) | 질문 카드/Plan B 연결 계약 |
 | [BE-41 성공사례 MVP 계약.md](./BE-41%20성공사례%20MVP%20계약.md) | 성공사례 리스트/상세 MVP 계약 |
 | [BE-42 FAB 동작 규칙.md](./BE-42%20FAB%20동작%20규칙.md) | FAB 상태/라우팅 규칙 |
+| [BE-W1-W3 검증 메모.md](./BE-W1-W3%20검증%20메모.md) | W1~W3 현재 저장소 기준 재확인 메모 |
+| [BE-W4 작업 완료 정리.md](./BE-W4%20작업%20완료%20정리.md) | 4주차 백엔드 연결 작업 완료 요약 |
 | [06_demo_seed_and_scenario.md](./06_demo_seed_and_scenario.md) | 데모/시드 데이터 운영 메모 |
 | [07_deployment.md](./07_deployment.md) | 실제 운영 배포 경로와 배포 절차 |
 | [db-schema.md](./db-schema.md) | DB 스키마와 마이그레이션 기준 |

@@ -237,9 +237,6 @@ public class AIAnalysisService {
     }
 
     private List<MatchedCase> requestSimilarCases(FailureExperience experience, AiAnalysis analysis) {
-        if (!aiServerProperties.similarEnabled()) {
-            return List.of();
-        }
         String endpoint = aiServerProperties.url() + "/similar";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

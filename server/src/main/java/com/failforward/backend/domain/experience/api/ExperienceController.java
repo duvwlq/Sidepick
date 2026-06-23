@@ -4,6 +4,7 @@ import com.failforward.backend.common.api.ApiResponse;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.CompareRequest;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.CompareResponse;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceCreateRequest;
+import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceImageUploadResponse;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceListPayload;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceResponse;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceSharePageResponse;
@@ -14,6 +15,7 @@ import com.failforward.backend.domain.experience.service.ExperienceService;
 import com.failforward.backend.domain.experience.service.ExperienceSharePageRenderer;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping({"/api/experiences", "/experiences"})
@@ -103,6 +106,18 @@ public class ExperienceController {
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ExperienceResponse> createExperience(@Valid @RequestBody ExperienceCreateRequest request) {
         return ApiResponse.ok("Experience created.", experienceService.create(request));
+    }
+
+    @Operation(summary = "Upload experience images")
+    @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ExperienceImageUploadResponse> uploadExperienceImages(
+            @RequestParam("files") List<MultipartFile> files,
+            HttpServletRequest request
+    ) {
+        return ApiResponse.ok(
+                "Experience images uploaded.",
+                experienceService.uploadExperienceImages(files, resolvePublicBaseUrl(request))
+        );
     }
 
     @Operation(summary = "Get experience detail")
@@ -189,5 +204,21 @@ public class ExperienceController {
     @PostMapping("/compare")
     public ApiResponse<CompareResponse> compareExperiences(@RequestBody CompareRequest request) {
         return ApiResponse.ok("Experiences compared.", experienceService.compare(request.experienceIds()));
+    }
+
+    private String resolvePublicBaseUrl(HttpServletRequest request) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(request.getScheme())
+                .append("://")
+                .append(request.getServerName());
+        if (!isDefaultPort(request.getScheme(), request.getServerPort())) {
+            builder.append(":").append(request.getServerPort());
+        }
+        return builder.toString();
+    }
+
+    private boolean isDefaultPort(String scheme, int port) {
+        return ("http".equalsIgnoreCase(scheme) && port == 80)
+                || ("https".equalsIgnoreCase(scheme) && port == 443);
     }
 }
