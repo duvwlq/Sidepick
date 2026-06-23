@@ -41,7 +41,7 @@ const experiencesPayload = {
         },
         category: {
           id: 1,
-          name: '온라인 판매 · 이커머스',
+          name: '\uC628\uB77C\uC778 \uD310\uB9E4 \u00B7 \uC774\uCEE4\uBA38\uC2A4',
           description: '',
           icon: '',
           color: '#5A876E',
@@ -49,18 +49,19 @@ const experiencesPayload = {
           type: 'business_field',
         },
         caseStatus: 'FAILURE',
-        title: '시장 검증이 부족했던 온라인 판매 사례',
-        content: '초기 수요 확인 없이 상품을 먼저 올렸다가 유입과 전환이 모두 낮았던 경험입니다.',
-        businessType: '스마트스토어',
+        title: '\uC2DC\uC7A5 \uAC80\uC99D\uC774 \uBD80\uC871\uD588\uB358 \uC628\uB77C\uC778 \uD310\uB9E4 \uC0AC\uB840',
+        content:
+          '\uCD08\uAE30 \uC218\uC694 \uD655\uC778 \uC5C6\uC774 \uC0C1\uD488\uC744 \uBA3C\uC800 \uC62C\uB838\uB2E4\uAC00 \uC720\uC785\uACFC \uC804\uD658\uC774 \uBAA8\uB450 \uB0AE\uC558\uB358 \uACBD\uD5D8\uC785\uB2C8\uB2E4.',
+        businessType: '\uC2A4\uB9C8\uD2B8\uC2A4\uD1A0\uC5B4',
         investmentAmount: 300000,
         durationMonths: 4,
         weeklyHours: 12,
         averageDailyHours: null,
         isConcurrentWithMainJob: true,
         monthlyRevenue: null,
-        failureReason: '시장 조사 부족',
-        failureReasons: ['시장 조사 부족'],
-        difficulties: ['마케팅'],
+        failureReason: '\uC2DC\uC7A5 \uC870\uC0AC \uBD80\uC871',
+        failureReasons: ['\uC2DC\uC7A5 \uC870\uC0AC \uBD80\uC871'],
+        difficulties: ['\uB9C8\uCF00\uD305'],
         difficultyEtc: null,
         difficultyExtra: null,
         targetMarket: null,
@@ -70,8 +71,8 @@ const experiencesPayload = {
         analysis: {
           structuredSummary: '',
           extractedPatterns: [],
-          keywords: ['시장 조사 부족', '마케팅'],
-          failureCategory: '시장 조사 부족',
+          keywords: ['\uC2DC\uC7A5 \uC870\uC0AC \uBD80\uC871', '\uB9C8\uCF00\uD305'],
+          failureCategory: '\uC2DC\uC7A5 \uC870\uC0AC \uBD80\uC871',
           riskLevel: 'HIGH',
           riskFactors: [],
           successFactors: [],
@@ -101,10 +102,11 @@ const sufficientPatternStats = {
   message: 'OK',
   data: {
     category: 'online-commerce',
-    labelKo: '온라인 판매/이커머스',
+    labelKo: '\uC628\uB77C\uC778 \uD310\uB9E4/\uC774\uCEE4\uBA38\uC2A4',
     total: 12,
     sufficientData: true,
-    summary: '온라인 판매/이커머스 카테고리에서는 시장 조사 부족 비중이 가장 높습니다.',
+    summary:
+      '\uC628\uB77C\uC778 \uD310\uB9E4/\uC774\uCEE4\uBA38\uC2A4 \uCE74\uD14C\uACE0\uB9AC\uC5D0\uC11C \uC2DC\uC7A5 \uC870\uC0AC \uBD80\uC871 \uBE44\uC911\uC774 \uAC00\uC7A5 \uB192\uC2B5\uB2C8\uB2E4.',
     explanation: {
       chartType: 'pattern_ratio',
       totalCases: 12,
@@ -112,17 +114,13 @@ const sufficientPatternStats = {
       lastUpdated: '2026-06-02T16:55:20+09:00',
       sufficientData: true,
       minSampleSize: 10,
-      debug: {
-        category: 'online-commerce',
-        source: 'ai/data/failure_pattern.json',
-      },
     },
     patterns: [
-      { label: '시장 조사 부족', count: 6, percent: 50.0 },
-      { label: '마케팅 부족', count: 6, percent: 50.0 },
-      { label: '실행력 부족', count: 3, percent: 25.0 },
-      { label: '자본 부족', count: 3, percent: 25.0 },
-      { label: '시간 부족', count: 2, percent: 16.7 },
+      { label: '\uC2DC\uC7A5 \uC870\uC0AC \uBD80\uC871', count: 6, percent: 50.0 },
+      { label: '\uB9C8\uCF00\uD305 \uBD80\uC871', count: 6, percent: 50.0 },
+      { label: '\uC2E4\uD589\uB825 \uBD80\uC871', count: 3, percent: 25.0 },
+      { label: '\uC790\uBCF8 \uBD80\uC871', count: 3, percent: 25.0 },
+      { label: '\uC2DC\uAC04 \uBD80\uC871', count: 2, percent: 16.7 },
     ],
   },
   timestamp: '2026-06-12T00:00:00Z',
@@ -135,7 +133,8 @@ const sufficientTimingStats = {
     category: 'online-commerce',
     total: 12,
     sufficientData: true,
-    summary: '온라인 판매/이커머스 카테고리는 1년 이상 구간에 실패가 집중됩니다.',
+    summary:
+      '\uC628\uB77C\uC778 \uD310\uB9E4/\uC774\uCEE4\uBA38\uC2A4 \uCE74\uD14C\uACE0\uB9AC\uC758 1\uB144 \uC774\uC0C1 \uAD6C\uAC04\uC5D0\uC11C \uC2E4\uD328\uAC00 \uC9D1\uC911\uB429\uB2C8\uB2E4.',
     explanation: {
       chartType: 'timing_distribution',
       totalCases: 12,
@@ -143,18 +142,14 @@ const sufficientTimingStats = {
       lastUpdated: '2026-06-02T16:55:20+09:00',
       sufficientData: true,
       minSampleSize: 10,
-      debug: {
-        category: 'online-commerce',
-        source: 'ai/data/failure_timing.json',
-      },
     },
     peakBucket: 'over-1y',
     distribution: [
-      { bucket: 'under-1m', label: '1개월 미만', order: 1, count: 1, percent: 8.3 },
-      { bucket: '1-3m', label: '1~3개월', order: 2, count: 0, percent: 0.0 },
-      { bucket: '3-6m', label: '3~6개월', order: 3, count: 2, percent: 16.7 },
-      { bucket: '6-12m', label: '6개월~1년', order: 4, count: 3, percent: 25.0 },
-      { bucket: 'over-1y', label: '1년 이상', order: 5, count: 6, percent: 50.0 },
+      { bucket: 'under-1m', label: '1\uAC1C\uC6D4 \uBBF8\uB9CC', order: 1, count: 1, percent: 8.3 },
+      { bucket: '1-3m', label: '1~3\uAC1C\uC6D4', order: 2, count: 0, percent: 0.0 },
+      { bucket: '3-6m', label: '3~6\uAC1C\uC6D4', order: 3, count: 2, percent: 16.7 },
+      { bucket: '6-12m', label: '6\uAC1C\uC6D4~1\uB144', order: 4, count: 3, percent: 25.0 },
+      { bucket: 'over-1y', label: '1\uB144 \uC774\uC0C1', order: 5, count: 6, percent: 50.0 },
     ],
   },
   timestamp: '2026-06-12T00:00:00Z',
@@ -165,10 +160,10 @@ const insufficientPatternStats = {
   message: 'OK',
   data: {
     category: 'talent-freelance',
-    labelKo: '재능 판매/프리랜서',
+    labelKo: '\uC7AC\uB2A5 \uD310\uB9E4/\uD504\uB9AC\uB79C\uC11C',
     total: 9,
     sufficientData: false,
-    summary: '아직 통계 데이터가 충분하지 않습니다.',
+    summary: '\uC544\uC9C1 \uD1B5\uACC4 \uB370\uC774\uD130\uAC00 \uCDA9\uBD84\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.',
     explanation: {
       chartType: 'pattern_ratio',
       totalCases: 9,
@@ -176,15 +171,10 @@ const insufficientPatternStats = {
       lastUpdated: '2026-06-02T16:55:20+09:00',
       sufficientData: false,
       minSampleSize: 10,
-      insufficientMessage: '데이터를 수집 중이에요 (10건 이상 모이면 차트를 표시해요).',
-      debug: {
-        category: 'talent-freelance',
-        source: 'ai/data/failure_pattern.json',
-      },
+      insufficientMessage:
+        '\uB370\uC774\uD130\uB97C \uC218\uC9D1 \uC911\uC774\uC5D0\uC694 (10\uAC74 \uC774\uC0C1 \uBAA8\uC774\uBA74 \uCC28\uD2B8\uB97C \uD45C\uC2DC\uD574\uC694).',
     },
-    patterns: [
-      { label: '실행력 부족', count: 5, percent: 55.6 },
-    ],
+    patterns: [{ label: '\uC2E4\uD589\uB825 \uBD80\uC871', count: 5, percent: 55.6 }],
   },
   timestamp: '2026-06-12T00:00:00Z',
 };
@@ -196,7 +186,8 @@ const insufficientTimingStats = {
     category: 'talent-freelance',
     total: 9,
     sufficientData: false,
-    summary: '아직 실패 시점 분포를 보여주기에는 표본이 부족합니다.',
+    summary:
+      '\uC544\uC9C1 \uC2E4\uD328 \uC2DC\uC810 \uBD84\uD3EC\uB97C \uBCF4\uC5EC\uC8FC\uAE30\uC5D0\uB294 \uD45C\uBCF8\uC774 \uBD80\uC871\uD569\uB2C8\uB2E4.',
     explanation: {
       chartType: 'timing_distribution',
       totalCases: 9,
@@ -204,19 +195,16 @@ const insufficientTimingStats = {
       lastUpdated: '2026-06-02T16:55:20+09:00',
       sufficientData: false,
       minSampleSize: 10,
-      insufficientMessage: '데이터를 수집 중이에요 (10건 이상 모이면 차트를 표시해요).',
-      debug: {
-        category: 'talent-freelance',
-        source: 'ai/data/failure_timing.json',
-      },
+      insufficientMessage:
+        '\uB370\uC774\uD130\uB97C \uC218\uC9D1 \uC911\uC774\uC5D0\uC694 (10\uAC74 \uC774\uC0C1 \uBAA8\uC774\uBA74 \uCC28\uD2B8\uB97C \uD45C\uC2DC\uD574\uC694).',
     },
     peakBucket: 'over-1y',
     distribution: [
-      { bucket: 'under-1m', label: '1개월 미만', order: 1, count: 1, percent: 11.1 },
-      { bucket: '1-3m', label: '1~3개월', order: 2, count: 2, percent: 22.2 },
-      { bucket: '3-6m', label: '3~6개월', order: 3, count: 0, percent: 0.0 },
-      { bucket: '6-12m', label: '6개월~1년', order: 4, count: 1, percent: 11.1 },
-      { bucket: 'over-1y', label: '1년 이상', order: 5, count: 5, percent: 55.6 },
+      { bucket: 'under-1m', label: '1\uAC1C\uC6D4 \uBBF8\uB9CC', order: 1, count: 1, percent: 11.1 },
+      { bucket: '1-3m', label: '1~3\uAC1C\uC6D4', order: 2, count: 2, percent: 22.2 },
+      { bucket: '3-6m', label: '3~6\uAC1C\uC6D4', order: 3, count: 0, percent: 0.0 },
+      { bucket: '6-12m', label: '6\uAC1C\uC6D4~1\uB144', order: 4, count: 1, percent: 11.1 },
+      { bucket: 'over-1y', label: '1\uB144 \uC774\uC0C1', order: 5, count: 5, percent: 55.6 },
     ],
   },
   timestamp: '2026-06-12T00:00:00Z',
@@ -258,17 +246,26 @@ async function installApiMocks() {
   });
 }
 
-async function openStatsSection(categoryLabel) {
-  await page
-    .locator('button[aria-expanded]', { hasText: `${categoryLabel} 통계` })
-    .click({ position: { x: 24, y: 20 } });
+async function openStatsSection() {
+  await page.locator('button').filter({ hasText: '\uCE74\uD14C\uACE0\uB9AC' }).first().click();
 }
 
-async function waitForStatsContent() {
+async function selectCategory(label) {
+  await page.locator('button').filter({ hasText: label }).first().click();
+}
+
+async function waitForChartsState() {
   await Promise.race([
-    page.getByText('실패 요인 TOP3').waitFor({ state: 'visible', timeout: 10000 }),
-    page.getByText('데이터 수집 중이에요').waitFor({ state: 'visible', timeout: 10000 }),
-    page.getByText('카테고리 통계를 불러오지 못했습니다.').waitFor({ state: 'visible', timeout: 10000 }),
+    page.getByRole('heading', { name: '\uC2E4\uD328 \uC694\uC778 TOP3' }).waitFor({ state: 'visible', timeout: 10000 }),
+    page.getByRole('heading', { name: '\uC2E4\uD328 \uD328\uD134' }).waitFor({ state: 'visible', timeout: 10000 }),
+    page.getByRole('heading', { name: '\uC2E4\uD328 \uC2DC\uC810 \uBD84\uD3EC' }).waitFor({ state: 'visible', timeout: 10000 }),
+  ]);
+}
+
+async function waitForInsufficientState() {
+  await Promise.race([
+    page.getByText('\uB370\uC774\uD130\uB97C \uC218\uC9D1 \uC911\uC774\uC5D0\uC694').waitFor({ state: 'visible', timeout: 10000 }),
+    page.getByText('\uD1B5\uACC4 \uB370\uC774\uD130').waitFor({ state: 'visible', timeout: 10000 }),
   ]);
 }
 
@@ -278,11 +275,10 @@ try {
 
   await page.goto(absoluteUrl('/explore?categoryId=1'), { waitUntil: 'networkidle' });
   await waitForStableRender(page);
-  await page.locator('button[aria-expanded]').first().waitFor({ state: 'visible', timeout: 10000 });
-  await openStatsSection('온라인 판매 · 이커머스');
-  await waitForStatsContent();
-  await page.getByText('실패 요인 TOP3').waitFor({ state: 'visible', timeout: 10000 });
-
+  await page.locator('button').filter({ hasText: '\uCE74\uD14C\uACE0\uB9AC' }).first().waitFor({ state: 'visible', timeout: 10000 });
+  await openStatsSection();
+  await waitForChartsState();
+  await waitForStableRender(page);
   const chartsPath = await captureScreen(page, outputDir, 'explore-stats-charts.png');
   report.push({
     scenario: 'charts',
@@ -291,25 +287,12 @@ try {
     url: page.url(),
   });
 
-  await page.locator('button[aria-label="온라인 판매 · 이커머스 통계 설명 열기"]').click();
-  await page.getByRole('dialog', { name: '온라인 판매 · 이커머스 통계 설명' }).waitFor({ state: 'visible', timeout: 10000 });
+  await page.goto(absoluteUrl('/explore'), { waitUntil: 'networkidle' });
   await waitForStableRender(page);
-  const modalPath = await captureScreen(page, outputDir, 'explore-stats-modal.png');
-  report.push({
-    scenario: 'modal',
-    ok: true,
-    screenshotPath: modalPath,
-    url: page.url(),
-  });
-
-  await page.locator('button[aria-label="닫기"]').click();
-
-  await page.goto(absoluteUrl('/explore?categoryId=5'), { waitUntil: 'networkidle' });
-  await waitForStableRender(page);
-  await page.locator('button[aria-expanded]').first().waitFor({ state: 'visible', timeout: 10000 });
-  await openStatsSection('재능 판매 · 프리랜서');
-  await waitForStatsContent();
-  await page.getByText('데이터 수집 중이에요').waitFor({ state: 'visible', timeout: 10000 });
+  await selectCategory('\uC7AC\uB2A5 \uD310\uB9E4 \u00B7 \uD504\uB9AC\uB79C\uC11C');
+  await page.locator('button').filter({ hasText: '\uCE74\uD14C\uACE0\uB9AC' }).first().waitFor({ state: 'visible', timeout: 10000 });
+  await openStatsSection();
+  await waitForInsufficientState();
   await waitForStableRender(page);
   const insufficientPath = await captureScreen(page, outputDir, 'explore-stats-insufficient.png');
   report.push({

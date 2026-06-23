@@ -2,10 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import albumActionIcon from '../assets/mypage-profile-edit-figma/album-action.svg';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cameraActionIcon from '../assets/mypage-profile-edit-figma/camera-action.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
 import checkIcon from '../assets/mypage-figma/check.svg';
 import checkSelectedIcon from '../assets/mypage-figma/check-selected.svg';
 import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.svg';
@@ -28,21 +25,6 @@ const REGION_OPTIONS = ['서울', '경기', '인천', '강원', '충북', '충�
 
 function isAuthError(error: unknown) {
   return error instanceof ApiError && (error.status === 401 || error.status === 403);
-}
-
-function IosStatusBar() {
-  return (
-    <div className="flex h-[59px] items-center justify-between bg-white px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex min-w-0 flex-1 justify-center pt-[1.5px] font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">
-        9:41
-      </div>
-      <div className="flex min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px]" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px]" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px]" />
-      </div>
-    </div>
-  );
 }
 
 function FieldLabel({ children }: { children: ReactNode }) {
@@ -199,17 +181,6 @@ function RegionActionSheet({
   );
 }
 
-async function fileToDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ''));
-    reader.onerror = () => reject(new Error('파일을 읽지 못했어요.'));
-    reader.readAsDataURL(file);
-  });
-}
-
-void fileToDataUrl;
-
 export default function MyPageProfileEdit() {
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -296,7 +267,7 @@ export default function MyPageProfileEdit() {
         profileImage: payload.imageUrl,
       });
       setSheetOpen(false);
-      showToast('?꾨줈???대?吏瑜??낅줈?쒖뻽?댁슂.', 'success');
+      showToast('프로필 이미지를 업로드했어요.', 'success');
     } catch (error) {
       showToast(resolveErrorMessage(error, '이미지를 불러오지 못했어요.'), 'error');
     }
@@ -362,7 +333,6 @@ export default function MyPageProfileEdit() {
     <>
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
         <header className="bg-white">
-          <IosStatusBar />
           <div className="flex items-center justify-between px-[16px] py-[20px]">
             <button
               type="button"

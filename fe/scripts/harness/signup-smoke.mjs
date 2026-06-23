@@ -21,6 +21,10 @@ const report = {
   finalUrl: '',
 };
 
+const LABEL_VERIFY = '\uBCF8\uC778 \uC778\uC99D\uD558\uAE30';
+const LABEL_NEXT = '\uB2E4\uC74C\uC73C\uB85C';
+const LABEL_CHECK_DUPLICATE = '\uC911\uBCF5\uD655\uC778';
+
 async function installApiMocks() {
   await page.route('**/api/auth/email-verifications', async (route) => {
     if (route.request().method() === 'POST') {
@@ -73,30 +77,30 @@ try {
   await page.goto(absoluteUrl('/signup/email?next=%2F'), { waitUntil: 'networkidle' });
   report.landedOnSignup = page.url().includes('/signup/email');
   await page.locator('input[type="email"]').fill('harness@example.com');
-  await page.getByRole('button', { name: '본인 인증하기' }).click();
+  await page.getByRole('button', { name: LABEL_VERIFY }).click();
 
   await page.waitForURL(/signup\/identity/, { timeout: 10000 });
   report.movedToIdentity = page.url().includes('/signup/identity');
-  await page.locator('input[type="text"]').fill('0000003');
-  await page.getByRole('button', { name: '본인 인증하기' }).click();
+  await page.locator('input[type="text"]').fill('0101013');
+  await page.getByRole('button', { name: LABEL_VERIFY }).click();
 
   await page.waitForURL(/signup\/identity\/details/, { timeout: 10000 });
   report.movedToIdentityDetails = page.url().includes('/signup/identity/details');
-  await page.locator('input[type="text"]').nth(1).fill('홍길동');
-  await page.getByRole('button', { name: '본인 인증하기' }).click();
+  await page.locator('input[autocomplete="name"]').fill('\uD14C\uC2A4\uD2B8');
+  await page.getByRole('button', { name: LABEL_VERIFY }).click();
 
   await page.waitForURL(/signup\/verify/, { timeout: 10000 });
   report.movedToVerify = page.url().includes('/signup/verify');
   await captureScreen(page, outputDir, 'signup-verify.png');
 
   await page.locator('input').first().fill('123456');
-  await page.getByRole('button', { name: '다음으로' }).click();
+  await page.getByRole('button', { name: LABEL_NEXT }).click();
 
   await page.waitForURL(/signup\/username/, { timeout: 10000 });
   report.movedToUsername = page.url().includes('/signup/username');
   await page.locator('input[type="text"]').fill('harnessId');
-  await page.getByRole('button', { name: '중복확인' }).click();
-  await page.getByRole('button', { name: '다음으로' }).click();
+  await page.getByRole('button', { name: LABEL_CHECK_DUPLICATE }).click();
+  await page.getByRole('button', { name: LABEL_NEXT }).click();
 
   await page.waitForURL(/signup\/password/, { timeout: 10000 });
   report.movedToPassword = page.url().includes('/signup/password');

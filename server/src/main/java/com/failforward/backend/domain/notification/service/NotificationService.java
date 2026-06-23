@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NotificationService {
 
     public static final String TYPE_EXPERIENCE_LIKE = "EXPERIENCE_LIKE";
+    public static final String TYPE_EXPERIENCE_BOOKMARK = "EXPERIENCE_BOOKMARK";
     public static final String TARGET_TYPE_EXPERIENCE = "EXPERIENCE";
 
     private final NotificationRepository notificationRepository;
@@ -65,7 +66,40 @@ public class NotificationService {
                 TYPE_EXPERIENCE_LIKE,
                 TARGET_TYPE_EXPERIENCE,
                 experienceId,
-                actorUser.getNickname() + " liked your experience: " + experienceTitle
+                actorUser.getNickname() + "님이 회원님의 게시물에 좋아요를 눌렀습니다."
+        ));
+    }
+
+    @Transactional
+    public void createExperienceBookmarkNotification(
+            User recipient,
+            User actorUser,
+            Long experienceId,
+            String experienceTitle
+    ) {
+        if (recipient.getId().equals(actorUser.getId())) {
+            return;
+        }
+
+        boolean exists = notificationRepository.findByUserIdAndActorUserIdAndTypeAndTargetTypeAndTargetId(
+                recipient.getId(),
+                actorUser.getId(),
+                TYPE_EXPERIENCE_BOOKMARK,
+                TARGET_TYPE_EXPERIENCE,
+                experienceId
+        ).isPresent();
+
+        if (exists) {
+            return;
+        }
+
+        notificationRepository.save(Notification.create(
+                recipient,
+                actorUser,
+                TYPE_EXPERIENCE_BOOKMARK,
+                TARGET_TYPE_EXPERIENCE,
+                experienceId,
+                actorUser.getNickname() + "님이 회원님의 게시물을 북마크 했습니다."
         ));
     }
 }

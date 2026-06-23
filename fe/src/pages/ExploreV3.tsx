@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type MouseEvent, type WheelEvent } from 'react';
+import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import BottomNav from '../components/layout/BottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Arrow left.svg';
@@ -16,6 +16,7 @@ import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검
 import editIcon from '../assets/figma-downloaded-icons/home/Edit 3.svg';
 import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
+import HorizontalScroll from '../components/common/HorizontalScroll';
 import { useToast } from '../components/common/useToast';
 import {
   bookmarkExperience,
@@ -111,27 +112,6 @@ function formatCompactDate(value: string) {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(
     date.getDate(),
   ).padStart(2, '0')}`;
-}
-
-function handleHorizontalWheel(event: WheelEvent<HTMLDivElement>) {
-  const container = event.currentTarget;
-  if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
-    return;
-  }
-
-  const maxScrollLeft = container.scrollWidth - container.clientWidth;
-  if (maxScrollLeft <= 0) {
-    return;
-  }
-
-  const nextScrollLeft = Math.min(maxScrollLeft, Math.max(0, container.scrollLeft + event.deltaY));
-  if (nextScrollLeft === container.scrollLeft) {
-    return;
-  }
-
-  container.scrollLeft = nextScrollLeft;
-  event.preventDefault();
-  event.stopPropagation();
 }
 
 function stopEvent(event: MouseEvent<HTMLElement>) {
@@ -356,12 +336,11 @@ function HeaderBlock({
             <img src={filterIcon} alt="" className="h-[24px] w-[24px]" />
           </button>
 
-          <div
-            className="flex h-[26px] min-w-0 flex-1 overflow-x-auto overflow-y-hidden [&::-webkit-scrollbar]:hidden"
-            onWheel={handleHorizontalWheel}
-            style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
+          <HorizontalScroll
+            wrapperClassName="min-w-0 flex-1"
+            scrollerClassName="h-[26px] overflow-y-hidden pr-[16px]"
+            contentClassName="h-[26px] min-w-[860px] items-center gap-[6px]"
           >
-            <div className="flex h-[26px] min-w-[860px] items-center gap-[6px] pr-[16px]">
               {CATEGORY_OPTIONS.map((option) => {
                 const active = option.id === selectedCategoryId;
                 return (
@@ -384,8 +363,7 @@ function HeaderBlock({
                   </button>
                 );
               })}
-            </div>
-          </div>
+          </HorizontalScroll>
         </div>
 
         <div className="flex w-full items-center justify-between px-[16px]">

@@ -1,5 +1,5 @@
 import { ERROR_CODES } from './error-codes';
-import { clearSession } from './session';
+import { clearSession, getAccessToken } from './session';
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081/api';
@@ -35,12 +35,13 @@ type RequestOptions = {
 
 export async function request<T>(path: string, options: RequestOptions = {}) {
   const headers: Record<string, string> = {};
+  const effectiveToken = options.token ?? getAccessToken();
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
   if (options.body !== undefined && !isFormData) {
     headers['Content-Type'] = 'application/json';
   }
-  if (options.token) {
-    headers.Authorization = `Bearer ${options.token}`;
+  if (effectiveToken) {
+    headers.Authorization = `Bearer ${effectiveToken}`;
   }
 
   let response: Response;
@@ -72,7 +73,7 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
   }
 
   if (!response.ok || !json?.success) {
-    if (response.status === 401 && options.token) {
+    if (response.status === 401 && effectiveToken) {
       clearSession();
     }
 

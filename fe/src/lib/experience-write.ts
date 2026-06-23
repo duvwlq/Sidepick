@@ -5,7 +5,7 @@ export function parseNumber(value: string) {
 
 export function mapPeriodToMonths(value: string) {
   if (value === '1개월 미만') {
-    return 1;
+    return 0;
   }
   if (value === '1년 이상') {
     return 12;

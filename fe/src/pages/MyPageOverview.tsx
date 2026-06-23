@@ -1,4 +1,4 @@
-import { Bookmark, Edit, Eye, FileText, Plus, Settings } from 'lucide-react';
+import { Bookmark, Edit, Eye, FileText, Settings } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
@@ -566,31 +566,7 @@ export default function MyPageOverview() {
         ) : null}
       </main>
 
-      <div className="hidden fixed bottom-[110px] left-1/2 z-30 w-full max-w-[375px] -translate-x-1/2 justify-end px-[24px] py-[16px]">
-        <button
-          type="button"
-          onClick={() => navigate('/create')}
-          className="flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E]"
-          aria-label="경험 작성"
-        >
-          <Plus size={20} strokeWidth={2.2} color="#FFFFFF" />
-        </button>
-      </div>
-
-      <BottomNav
-        active="mypage"
-        accessoryLayout="end"
-        accessory={
-          <button
-            type="button"
-            onClick={() => navigate('/create')}
-            className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E]"
-            aria-label="경험 작성"
-          >
-            <Plus size={20} strokeWidth={2.2} color="#FFFFFF" />
-          </button>
-        }
-      />
+      <BottomNav active="mypage" showFab />
     </div>
   );
 }

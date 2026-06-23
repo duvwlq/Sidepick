@@ -2,9 +2,6 @@ import { X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
 import { KeywordChip } from '../components/common/Chip';
 import BottomNav from '../components/layout/BottomNav';
@@ -29,21 +26,6 @@ const FIXTURE_RECOMMENDED_KEYWORDS = [
   '전자책',
   '프리랜서',
 ];
-
-function StatusBar() {
-  return (
-    <div className="flex h-[59px] w-full items-center px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex h-[22px] min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] tracking-[0px] text-black">9:41</span>
-      </div>
-      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-      </div>
-    </div>
-  );
-}
 
 function Header({ onBack }: { onBack: () => void }) {
   return (
@@ -191,7 +173,6 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white pb-[136px]">
-        <StatusBar />
         <Header
           onBack={() => {
             if (window.history.length > 1) {

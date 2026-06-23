@@ -140,7 +140,7 @@ export default function Create() {
         PENDING_EXPERIENCE_CREATE_KEY,
         JSON.stringify({ payload: pendingPayload }),
       );
-      navigate('/analysis-result?pendingCreate=1');
+      navigate('/create');
     } catch (createError) {
       setSubmitError(
         resolveErrorMessage(

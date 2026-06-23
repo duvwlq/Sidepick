@@ -7,6 +7,8 @@ import com.failforward.backend.common.api.NotFoundException;
 import com.failforward.backend.common.config.AiServerProperties;
 import com.failforward.backend.domain.analysis.dto.AiServerDtos.AiAnalysisRequest;
 import com.failforward.backend.domain.analysis.dto.AiServerDtos.AiAnalysisResponse;
+import com.failforward.backend.domain.analysis.dto.AiServerDtos.AiSimilarCaseRequest;
+import com.failforward.backend.domain.analysis.dto.AiServerDtos.AiSimilarCaseResponse;
 import com.failforward.backend.domain.analysis.dto.AnalysisDtos.MatchedCaseResponse;
 import com.failforward.backend.domain.analysis.dto.AnalysisDtos.PatternAnalysisResponse;
 import com.failforward.backend.domain.analysis.dto.AnalysisDtos.AnalysisReportResponse;
@@ -17,6 +19,7 @@ import com.failforward.backend.domain.analysis.repository.MatchedCaseRepository;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -191,13 +194,16 @@ public class AIAnalysisService {
         }
         analysis = aiAnalysisRepository.save(analysis);
 
-        List<FailureExperience> similarExperiences = findSimilarExperiences(experience);
-        List<MatchedCase> matchedCases = analysisSupport.createMatchedCasesFromExperiences(
-                analysis,
-                experience,
-                similarExperiences,
-                response
-        );
+        List<MatchedCase> matchedCases = requestSimilarCases(experience, analysis);
+        if (matchedCases.isEmpty()) {
+            List<FailureExperience> similarExperiences = findSimilarExperiences(experience);
+            matchedCases = analysisSupport.createMatchedCasesFromExperiences(
+                    analysis,
+                    experience,
+                    similarExperiences,
+                    response
+            );
+        }
         if (!matchedCases.isEmpty()) {
             matchedCaseRepository.saveAll(matchedCases);
         }
@@ -228,6 +234,43 @@ public class AIAnalysisService {
                 experience.getCategory().getId(),
                 topThree
         );
+    }
+
+    private List<MatchedCase> requestSimilarCases(FailureExperience experience, AiAnalysis analysis) {
+        String endpoint = aiServerProperties.url() + "/similar";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<AiSimilarCaseRequest> request = new HttpEntity<>(AiSimilarCaseRequest.from(experience), headers);
+
+        try {
+            AiSimilarCaseResponse[] response = aiRestTemplate.postForObject(endpoint, request, AiSimilarCaseResponse[].class);
+            if (response == null || response.length == 0) {
+                return List.of();
+            }
+
+            return Arrays.stream(response)
+                    .filter(item -> item.caseId() != null && !item.caseId().isBlank())
+                    .map(item -> MatchedCase.create(
+                            analysis,
+                            item.caseId(),
+                            item.title() == null || item.title().isBlank() ? item.caseId() : item.title(),
+                            item.summary(),
+                            item.summary(),
+                            toMatchRate(item.similarityScore())
+                    ))
+                    .toList();
+        } catch (RestClientException exception) {
+            log.warn("ai_similar_case_request_failed experienceId={} detail={}", experience.getId(), exception.getMessage());
+            return List.of();
+        }
+    }
+
+    private int toMatchRate(Double similarityScore) {
+        if (similarityScore == null) {
+            return 0;
+        }
+        int scaled = (int) Math.round(similarityScore * 100.0d);
+        return Math.max(0, Math.min(100, scaled));
     }
 
     private Optional<AiAnalysis> persistDemoScenarioAnalysisIfMatched(

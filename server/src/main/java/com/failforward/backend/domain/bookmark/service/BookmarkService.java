@@ -6,6 +6,7 @@ import com.failforward.backend.domain.bookmark.entity.ExperienceBookmark;
 import com.failforward.backend.domain.bookmark.repository.ExperienceBookmarkRepository;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
+import com.failforward.backend.domain.notification.service.NotificationService;
 import com.failforward.backend.domain.user.entity.User;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class BookmarkService {
     private final ExperienceBookmarkRepository bookmarkRepository;
     private final FailureExperienceRepository experienceRepository;
     private final CurrentUserProvider currentUserProvider;
+    private final NotificationService notificationService;
 
     @Transactional
     public BookmarkStatusResponse bookmark(Long experienceId) {
@@ -31,6 +33,12 @@ public class BookmarkService {
         }
 
         bookmarkRepository.save(ExperienceBookmark.create(experience, user));
+        notificationService.createExperienceBookmarkNotification(
+                experience.getUser(),
+                user,
+                experience.getId(),
+                experience.getTitle()
+        );
         experience.increaseLikeCount();
         return new BookmarkStatusResponse(experienceId, true, bookmarkRepository.countByExperienceId(experienceId));
     }

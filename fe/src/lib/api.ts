@@ -215,6 +215,50 @@ export type ReactionSummaryPayload = {
   myReactions: ReactionType[];
 };
 
+export type NotificationItem = {
+  id: number;
+  type: string;
+  message: string;
+  isRead: boolean;
+  targetType: string;
+  targetId: number;
+  createdAt: string;
+};
+
+export type NotificationListPayload = {
+  items: NotificationItem[];
+};
+
+export type ExperienceGuidePayload = {
+  experienceId: number;
+  categoryId: number | null;
+  categoryKey: string;
+  difficultyKey: string;
+  guideLines: string[];
+};
+
+export type GuideWritingExamplesPayload = {
+  version: string;
+  lastUpdated: string;
+  author: string;
+  ticket: string;
+  dependsOn: string;
+  description: string;
+  guideline: {
+    length: string;
+    tone: string;
+    patterns: string[];
+  };
+  categories: Array<{
+    id: string;
+    category: string;
+    examples: Array<{
+      pattern: string;
+      text: string;
+    }>;
+  }>;
+};
+
 export type MyAnalysisItem = {
   experienceId: number;
   analysisId: number | null;
@@ -314,8 +358,21 @@ export type ExperienceUpsertInput = {
   difficultyExtra?: string;
   targetMarket?: string;
   marketingChannels?: string[];
+  imageUrls?: string[];
   lessonsLearned?: string;
   wouldRetry?: boolean;
+  aiSupplement?: {
+    originalContent: string;
+    answers: Array<{
+      slot: string;
+      question: string;
+      answer: string;
+    }>;
+  };
+};
+
+export type ExperienceImageUploadPayload = {
+  imageUrls: string[];
 };
 
 export type AgentAQuestionCard = {
@@ -592,6 +649,33 @@ export function getMyHomeFeed(token: string) {
   });
 }
 
+export function getNotifications(token: string, read?: boolean) {
+  const searchParams = new URLSearchParams();
+  if (read !== undefined) {
+    searchParams.set('read', String(read));
+  }
+
+  const query = searchParams.toString();
+  return request<NotificationListPayload>(`/notifications${query ? `?${query}` : ''}`, {
+    token,
+  });
+}
+
+export function markNotificationRead(token: string, notificationId: number | string) {
+  return request<NotificationItem>(`/notifications/${notificationId}/read`, {
+    method: 'PATCH',
+    token,
+  });
+}
+
+export function getExperienceGuide(experienceId: number | string) {
+  return request<ExperienceGuidePayload>(`/guides/experiences/${experienceId}`);
+}
+
+export function getGuideWritingExamples() {
+  return request<GuideWritingExamplesPayload>('/guides/writing-examples');
+}
+
 export function analyzeDraftWithAgentA(
   token: string,
   input: {
@@ -608,6 +692,16 @@ export function analyzeDraftWithAgentA(
     method: 'POST',
     token,
     body: input,
+  });
+}
+
+export function uploadExperienceImages(token: string, files: File[]) {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('files', file));
+  return request<ExperienceImageUploadPayload>('/experiences/images', {
+    method: 'POST',
+    token,
+    body: formData,
   });
 }
 

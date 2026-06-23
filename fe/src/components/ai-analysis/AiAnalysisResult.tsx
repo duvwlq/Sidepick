@@ -8,7 +8,6 @@ import BottomNav from '../layout/BottomNav';
 import {
   ApiError,
   bookmarkExperience,
-  createAnalysis,
   deleteExperience,
   getBookmarkStatus,
   getExperience,
@@ -118,6 +117,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [bookmarked, setBookmarked] = useState(false);
   const [relatedSuccessCount, setRelatedSuccessCount] = useState(0);
+  const [recommendedSuccessReason, setRecommendedSuccessReason] = useState('');
 
   const viewer = getStoredUser();
   const isOwner = useMemo(() => {
@@ -166,15 +166,19 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   useEffect(() => {
     if (!experience || experience.caseStatus === 'SUCCESS') {
       setRelatedSuccessCount(0);
+      setRecommendedSuccessReason('');
       return;
     }
 
     void getRelatedSuccessCases(experience.id, 10)
       .then((payload) => {
         setRelatedSuccessCount(payload.length);
+        const topReason = (payload[0] as Experience & { recommendationReason?: string | null } | undefined)?.recommendationReason?.trim();
+        setRecommendedSuccessReason(topReason || '');
       })
       .catch(() => {
         setRelatedSuccessCount(0);
+        setRecommendedSuccessReason('');
       });
   }, [experience]);
 
@@ -185,17 +189,13 @@ export default function AiAnalysisResult({ experienceId }: Props) {
     try {
       const experiencePayload = await getExperience(targetExperienceId);
       let reportPayload = await getReport(targetExperienceId);
-      const token = getAccessToken();
 
-      if (reportPayload.reportStatus === 'NOT_READY' && token) {
+      if (reportPayload.reportStatus === 'NOT_READY') {
         try {
-          await createAnalysis(token, targetExperienceId);
+          await new Promise((resolve) => window.setTimeout(resolve, 1200));
           reportPayload = await getReport(targetExperienceId);
         } catch (requestError) {
-          if (
-            requestError instanceof ApiError &&
-            (requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT || requestError.code === ERROR_CODES.AI_UPSTREAM_ERROR)
-          ) {
+          if (requestError instanceof ApiError && requestError.code === ERROR_CODES.ANALYSIS_TIMEOUT) {
             setExperience(experiencePayload);
             setReport(reportPayload);
             return;
@@ -283,6 +283,20 @@ export default function AiAnalysisResult({ experienceId }: Props) {
   const issueItems = useMemo(() => (report?.reportStatus === 'READY' ? buildIssueItems(report) : []), [report]);
   const patternItems = useMemo(() => (report?.reportStatus === 'READY' ? buildPatternItems(report) : []), [report]);
   const similarCases = useMemo(() => mappedReport?.similarCases.slice(0, 2) ?? [], [mappedReport]);
+  const similarCaseReasons = useMemo(
+    () =>
+      (report?.similarCases ?? []).slice(0, 2).map((item) => {
+        const matchedKeywords = item.explanation?.matchedKeywords?.filter(Boolean) ?? [];
+        if (matchedKeywords.length) {
+          return `${matchedKeywords.join(', ')} 기준으로 비슷한 사례로 분류했어요.`;
+        }
+        if (item.explanation?.source === 'ai-similar-search') {
+          return 'AI 유사도 검색 결과를 기준으로 가까운 사례로 분류했어요.';
+        }
+        return '같은 카테고리와 실패 맥락이 겹쳐 추천된 사례예요.';
+      }),
+    [report],
+  );
   const aiSummary = useMemo(
     () => report?.summary?.trim() || '아직 AI 요약이 준비되지 않았어요.',
     [report],
@@ -519,14 +533,18 @@ export default function AiAnalysisResult({ experienceId }: Props) {
             <SectionTitle title="유사 사례" description="비슷한 실패 경험을 가진 다른 사례를 추천해드립니다." />
             <div className="mt-[12px] flex flex-col gap-[10px]">
               {similarCases.length ? (
-                similarCases.map((item) => (
-                  <SimilarCaseCard
-                    key={item.caseId}
-                    title={item.title}
-                    summary={item.summary}
-                    similarity={item.similarity}
-                    onClick={() => handleSimilarCaseClick(item.caseId)}
-                  />
+                similarCases.map((item, index) => (
+                  <div key={item.caseId} className="flex flex-col gap-[6px]">
+                    <SimilarCaseCard
+                      title={item.title}
+                      summary={item.summary}
+                      similarity={item.similarity}
+                      onClick={() => handleSimilarCaseClick(item.caseId)}
+                    />
+                    <p className="px-[4px] text-[12px] leading-[18px] text-[#6B7280]">
+                      {similarCaseReasons[index] ?? '입력한 실패 맥락과 가까운 사례라서 추천했어요.'}
+                    </p>
+                  </div>
                 ))
               ) : (
                 <PageMessage message="유사 사례가 아직 없습니다." />
@@ -544,6 +562,11 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
           {experience.caseStatus !== 'SUCCESS' ? (
             <section className="px-[16px] pt-[12px]">
+              {recommendedSuccessReason ? (
+                <p className="mb-[10px] rounded-[12px] bg-[#F6FAF7] px-[12px] py-[10px] text-[12px] leading-[18px] text-[#4E6A59]">
+                  {recommendedSuccessReason}
+                </p>
+              ) : null}
               <FailureToSuccessButton caseId={experience.id} relatedSuccessCount={relatedSuccessCount} />
             </section>
           ) : null}

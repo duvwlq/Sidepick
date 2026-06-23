@@ -1,14 +1,12 @@
 ﻿import {
   ChevronRight,
+  Heart,
   X,
   Upload,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
 import aiGuideStarIcon from '../assets/detail-v1-figma/ai-guide-star.svg';
 import clockIcon from '../assets/detail-v1-figma/clock.svg';
 import dollarSignIcon from '../assets/detail-v1-figma/dollar-sign.svg';
@@ -28,6 +26,7 @@ import {
   deleteExperience,
   getBookmarkStatus,
   getExperience,
+  getExperienceGuide,
   getExperienceShare,
   getRelatedSuccessCases,
   type Experience,
@@ -35,6 +34,7 @@ import {
 } from '../lib/api';
 import { publishBookmarkSync } from '../lib/bookmark-sync';
 import { extractExperienceImageUrls } from '../lib/experience-images';
+import { resolveExperienceGuideLines } from '../lib/experience-guide-match';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
 
@@ -121,22 +121,18 @@ function buildIssueChips(experience: Experience) {
 }
 
 function buildGuideLines(experience: Experience) {
-  const successFactors = (experience.analysis?.successFactors ?? [])
+  const guideLines = (experience.analysis?.successFactors ?? [])
     .map((item) => sanitizeText(item, '').trim())
     .filter(Boolean);
-  const riskFactors = (experience.analysis?.riskFactors ?? [])
-    .map((item) => sanitizeText(item, '').trim())
-    .filter(Boolean);
-  const merged = [...successFactors, ...riskFactors];
 
-  if (merged.length) {
-    return Array.from(new Set(merged)).slice(0, 3);
+  if (guideLines.length) {
+    return Array.from(new Set(guideLines)).slice(0, 3);
   }
 
   return [
-    '시장 검증을 먼저 진행해 보세요.',
-    '초기 비용과 운영 시간을 작게 시작해 보세요.',
-    '같은 실패 원인이 반복되지 않도록 실행 기준을 정리해 보세요.',
+    '먼저 시장 반응을 가볍게 확인해 보세요.',
+    '초기 비용과 운영 시간은 부담되지 않는 범위에서 시작해 보세요.',
+    '비슷한 시행착오가 반복되지 않도록 실행 기준을 미리 정리해 두세요.',
   ];
 }
 
@@ -145,43 +141,36 @@ function buildPatternRows(experience: Experience) {
     experience.analysis?.failureCategory ?? '',
     ...(experience.analysis?.extractedPatterns ?? []),
     ...experience.failureReasons,
+    ...experience.difficulties,
   ]
     .map((item) => sanitizeText(item, '').trim())
     .filter(Boolean);
 
   const unique = Array.from(new Set(source)).slice(0, 3);
-  if (!unique.length) {
-    return [{ label: '실패 원인 분석 준비 중', percent: 100 }];
-  }
-  if (unique.length === 1) {
-    return [{ label: unique[0], percent: 100 }];
-  }
-  if (unique.length === 2) {
-    return [
-      { label: unique[0], percent: 60 },
-      { label: unique[1], percent: 40 },
-    ];
-  }
-  return [
-    { label: unique[0], percent: 50 },
-    { label: unique[1], percent: 30 },
-    { label: unique[2], percent: 20 },
-  ];
-}
+  const rows =
+    unique.length >= 3
+      ? [
+          { label: unique[0], percent: 50 },
+          { label: unique[1], percent: 30 },
+          { label: unique[2], percent: 20 },
+        ]
+      : unique.length === 2
+        ? [
+            { label: unique[0], percent: 60 },
+            { label: unique[1], percent: 40 },
+          ]
+        : unique.length === 1
+          ? [{ label: unique[0], percent: 100 }]
+          : [{ label: '실패 원인 분석 준비 중', percent: 0 }];
 
-function StatusBarV1() {
-  return (
-    <div className="flex h-[59px] w-full items-center px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex h-[22px] min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] tracking-[0px] text-black">9:41</span>
-      </div>
-      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-      </div>
-    </div>
-  );
+  while (rows.length < 3) {
+    rows.push({
+      label: '실패 원인 종류',
+      percent: 0,
+    });
+  }
+
+  return rows;
 }
 
 function MetricStatColumn({
@@ -232,6 +221,15 @@ function PatternRow({ label, percent }: { label: string; percent: number }) {
       <div className="h-[4px] w-full rounded-[999px] bg-[#D8D8D8]">
         <div className="h-full rounded-[999px] bg-gradient-to-r from-[#92BFA6] to-[#5A876E]" style={{ width: `${percent}%` }} />
       </div>
+    </div>
+  );
+}
+
+function GuideStepRow({ index, text }: { index: number; text: string }) {
+  return (
+    <div className="flex items-start gap-[6px] font-['Pretendard'] text-[12px] leading-[16.8px] tracking-[0px] text-[#494949]">
+      <span className="shrink-0 font-[600] text-[#131416]">{index}.</span>
+      <span className="font-[600]">{text}</span>
     </div>
   );
 }
@@ -311,17 +309,13 @@ function SimilarCaseCard({
           <span>{`조회 ${viewCount.toLocaleString()}`}</span>
         </div>
 
-        <div className="flex shrink-0 items-center gap-[4px] pt-[1px]">
+        <div className="flex shrink-0 items-center gap-[6px] pt-[1px]">
           <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-            <span className="inline-flex h-[20px] w-[20px] items-center justify-center">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-                <path d="M10.0006 17.2913L8.79232 16.1913C4.50065 12.2997 1.66732 9.73301 1.66732 6.58301C1.66732 4.01634 3.68398 1.99967 6.25065 1.99967C7.70065 1.99967 9.09232 2.67467 10.0006 3.74134C10.9089 2.67467 12.3007 1.99967 13.7507 1.99967C16.3173 1.99967 18.334 4.01634 18.334 6.58301C18.334 9.73301 15.5007 12.2997 11.2089 16.1913L10.0006 17.2913Z" stroke="#8A8A8A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </span>
+            <Heart size={14} strokeWidth={1.75} color="#8A8A8A" />
             <span>{likeCount.toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-[2px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
-            <img src={bookmarkIcon} alt="" className="h-[24px] w-[24px] shrink-0" />
+            <img src={bookmarkIcon} alt="" className="h-[14px] w-[14px] shrink-0" />
             <span>{bookmarkCount.toLocaleString()}</span>
           </div>
         </div>
@@ -348,6 +342,7 @@ export default function DetailV1() {
   const [deleting, setDeleting] = useState(false);
   const [successCases, setSuccessCases] = useState<Experience[]>([]);
   const [fabExpanded, setFabExpanded] = useState(false);
+  const [matchedGuideLines, setMatchedGuideLines] = useState<string[]>([]);
 
   const isOwner = useMemo(() => {
     if (!viewer || !experience) {
@@ -430,10 +425,47 @@ export default function DetailV1() {
     analysisSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [experience, location.search]);
 
+  useEffect(() => {
+    if (!experience) {
+      setMatchedGuideLines([]);
+      return;
+    }
+
+    let cancelled = false;
+
+    getExperienceGuide(experience.id)
+      .then((payload) => {
+        if (!cancelled) {
+          setMatchedGuideLines(payload.guideLines);
+        }
+      })
+      .catch(async () => {
+        try {
+          const fallbackGuideLines = await resolveExperienceGuideLines(experience);
+          if (!cancelled) {
+            setMatchedGuideLines(fallbackGuideLines);
+          }
+        } catch {
+          if (!cancelled) {
+            setMatchedGuideLines([]);
+          }
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [experience]);
+
   const imageUrls = useMemo(() => (experience ? extractExperienceImageUrls(experience) : []), [experience]);
   const tags = useMemo(() => (experience ? buildTopTags(experience) : []), [experience]);
   const issueChips = useMemo(() => (experience ? buildIssueChips(experience) : []), [experience]);
-  const guideLines = useMemo(() => (experience ? buildGuideLines(experience) : []), [experience]);
+  const guideLines = useMemo(() => {
+    if (matchedGuideLines.length) {
+      return matchedGuideLines;
+    }
+    return experience ? buildGuideLines(experience) : [];
+  }, [experience, matchedGuideLines]);
   const patternRows = useMemo(() => (experience ? buildPatternRows(experience) : []), [experience]);
 
   async function handleBookmarkToggle() {
@@ -564,7 +596,6 @@ export default function DetailV1() {
 
       <div className="relative min-h-screen bg-white">
         <div className="sticky top-0 z-30 bg-white">
-          <StatusBarV1 />
           <div className="flex h-[64px] items-center justify-between bg-white px-[16px] py-[20px]">
             <button
               type="button"
@@ -618,7 +649,7 @@ export default function DetailV1() {
                   </div>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-[4px]">
+                <div className="flex shrink-0 items-center gap-[8px]">
                   <button
                     type="button"
                     onClick={() => void handleShare()}
@@ -628,20 +659,24 @@ export default function DetailV1() {
                     <Upload size={20} strokeWidth={1.8} />
                   </button>
 
-                  {isOwner ? (
-                    <div className="relative shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setActionMenuOpen((current) => !current)}
-                        className="flex h-[20px] w-[20px] items-center justify-center text-[#1E1E1E]"
-                        aria-label="더보기"
-                      >
-                        <span className="relative h-[20px] w-[20px]">
-                          <img src={moreVerticalIcon} alt="" className="absolute left-[8.667px] top-[2.833px] h-[14.333px] w-[2.667px]" />
-                        </span>
-                      </button>
+                  <div className="relative shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!isOwner) {
+                          return;
+                        }
+                        setActionMenuOpen((current) => !current);
+                      }}
+                      className="flex h-[20px] w-[20px] items-center justify-center text-[#1E1E1E]"
+                      aria-label="더보기"
+                    >
+                      <span className="relative h-[20px] w-[20px]">
+                        <img src={moreVerticalIcon} alt="" className="absolute left-[8.667px] top-[2.833px] h-[14.333px] w-[2.667px]" />
+                      </span>
+                    </button>
 
-                      {actionMenuOpen ? (
+                    {isOwner && actionMenuOpen ? (
                         <div className="absolute right-0 top-[26px] z-50 flex w-[92px] flex-col rounded-[12px] border border-[#E6E6E6] bg-white p-[6px] shadow-[0_12px_24px_rgba(0,0,0,0.12)]">
                           <button
                             type="button"
@@ -659,9 +694,8 @@ export default function DetailV1() {
                             {deleting ? '삭제 중…' : '삭제'}
                           </button>
                         </div>
-                      ) : null}
-                    </div>
-                  ) : null}
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
@@ -755,14 +789,11 @@ export default function DetailV1() {
 
               <div className="flex w-[311px] flex-col gap-[10px]">
                 {guideLines.map((line, index) => (
-                  <p
-                    key={`${index}-${line}`}
-                    className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]"
-                  >
-                    {line}
-                  </p>
+                  <GuideStepRow key={`${index}-${line}`} index={index + 1} text={line} />
                 ))}
               </div>
+
+              <div className="mb-[10px] mt-[8px] h-px w-[311px] bg-[#D8D8D8]" />
 
               <div className="w-[311px] pt-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
                 <p>처음에는 작은 시도들이 쌓이면서 변화가 생기기 때문에</p>
@@ -771,10 +802,10 @@ export default function DetailV1() {
             </div>
           </section>
 
-          <section className="bg-white px-[16px] pb-[20px] pt-[10px]">
+          <section className="bg-white px-[16px] py-[12px]">
             <SectionBlockTitle title="실패 패턴" description="유사 카테고리 내 실패 원인 별 비중 그래프 데이터입니다." />
-            <div className="pt-[10px]">
-              <div className="flex flex-col gap-[16px]">
+            <div className="pt-[12px]">
+              <div className="flex flex-col gap-[16px] rounded-[10px] bg-[#F8F8F8] px-[16px] py-[16px]">
                 {patternRows.map((item) => (
                   <PatternRow key={item.label} label={item.label} percent={item.percent} />
                 ))}
@@ -839,8 +870,12 @@ export default function DetailV1() {
                 )}
               </div>
 
-              <div className="flex justify-center">
-                <CaseTextLink label="모든 사례 보기" onClick={() => navigate('/explore')} />
+              <div className="flex justify-center pt-[2px]">
+                <CaseTextLink
+                  label="모든 사례 보기"
+                  onClick={() => navigate('/explore')}
+                  className="text-[#5D5D5D] underline underline-offset-[1px]"
+                />
               </div>
               </div>
             </div>

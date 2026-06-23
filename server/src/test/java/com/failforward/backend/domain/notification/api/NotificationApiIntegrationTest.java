@@ -111,4 +111,24 @@ class NotificationApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.items.length()").value(1));
     }
+
+    @Test
+    void bookmarkingExperienceCreatesBookmarkNotification() throws Exception {
+        String ownerToken = registerAndLogin("notice_bookmark_owner@sidepick.dev", "password123", "noticeBookmarkOwner", "20s");
+        String actorToken = registerAndLogin("notice_bookmark_actor@sidepick.dev", "password123", "noticeBookmarkActor", "20s");
+        long experienceId = createExperience(ownerToken, "Bookmark target", "Bookmark target content");
+
+        mockMvc.perform(post("/api/experiences/{experienceId}/bookmarks", experienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(actorToken)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/notifications")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(ownerToken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.items.length()").value(1))
+                .andExpect(jsonPath("$.data.items[0].type").value("EXPERIENCE_BOOKMARK"))
+                .andExpect(jsonPath("$.data.items[0].targetType").value("EXPERIENCE"))
+                .andExpect(jsonPath("$.data.items[0].targetId").value(experienceId))
+                .andExpect(jsonPath("$.data.items[0].isRead").value(false));
+    }
 }

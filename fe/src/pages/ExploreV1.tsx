@@ -1,9 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
 import chevronDownIcon from '../assets/explore-figma/chevron-down.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
 import filterIcon from '../assets/explore-figma/filter.svg';
@@ -349,21 +346,6 @@ function buildCardTags(experience: Experience) {
     sanitizeDisplayText(keywordA, '키워드'),
     sanitizeDisplayText(keywordB, '키워드'),
   ];
-}
-
-function StatusBarV1() {
-  return (
-    <div className="flex h-[59px] w-full items-center px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex h-[22px] min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] tracking-[0px] text-black">9:41</span>
-      </div>
-      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-      </div>
-    </div>
-  );
 }
 
 function HeaderV1({
@@ -991,11 +973,11 @@ function buildMonthlyTimingSeries(stats: FailureTimingStatsPayload): MonthlyTimi
     }));
   }
 
-  const bucketToMonths: Record<string, number[]> = {
-    'under-1m': [1],
-    '1-3m': [2, 3],
-    '3-6m': [4, 5, 6],
-    '6-12m': [7, 8, 9, 10, 11],
+    const bucketToMonths: Record<string, number[]> = {
+      'under-1m': [0],
+      '1-3m': [1, 2, 3],
+      '3-6m': [4, 5, 6],
+      '6-12m': [7, 8, 9, 10, 11],
     'over-1y': [12],
   };
 
@@ -1632,7 +1614,6 @@ export default function ExploreV1() {
   return (
     <div className="min-h-screen bg-[#F8F8F8]">
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
-        <StatusBarV1 />
         <HeaderV1 searchMode={searchMode} onBack={handleBack} onSearchClick={handleHeaderSearchClick} />
         {searchMode ? (
           <div className="pt-[0px]">

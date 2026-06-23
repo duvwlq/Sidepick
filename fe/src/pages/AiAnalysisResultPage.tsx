@@ -266,9 +266,7 @@ export default function AiAnalysisResultPage() {
 
   return (
     <div className="mx-auto min-h-screen w-full max-w-[430px] bg-[#FFFFFF]">
-      <DeviceStatusBar />
-
-      <main className="flex min-h-[calc(100vh-61px)] flex-col items-center justify-center px-4 pb-[110px] pt-5">
+      <main className="flex min-h-screen flex-col items-center justify-center px-4 pb-[110px] pt-5">
         {error ? (
           <div className="w-full max-w-[320px]">
             <ErrorState message={error} />
@@ -299,30 +297,6 @@ function readPendingExperienceCreate(): PendingExperienceCreate | null {
   } catch {
     return null;
   }
-}
-
-function DeviceStatusBar() {
-  return (
-    <div className="flex h-[59px] items-center justify-between bg-white px-6 pb-[19px] pt-[21px]">
-      <div className="flex-1 text-[17px] font-semibold leading-[22px] text-black">9:41</div>
-      <div className="flex flex-1 items-center justify-end gap-[7px]">
-        <div className="flex h-[12px] items-end gap-[2px]">
-          <span className="block h-[4px] w-[3px] rounded-[1px] bg-black" />
-          <span className="block h-[6px] w-[3px] rounded-[1px] bg-black" />
-          <span className="block h-[8px] w-[3px] rounded-[1px] bg-black" />
-          <span className="block h-[10px] w-[3px] rounded-[1px] bg-black" />
-        </div>
-        <div className="relative h-[12px] w-[17px]">
-          <div className="absolute inset-0 rounded-[2px] border border-black/90" />
-          <div className="absolute left-[2px] top-[2px] h-[6px] w-[9px] rounded-[1px] bg-black" />
-          <div className="absolute right-[-2px] top-[3px] h-[4px] w-[1.5px] rounded-full bg-black" />
-        </div>
-        <div className="relative h-[13px] w-[27px] rounded-[4px] border border-black/60 p-[1px]">
-          <div className="h-full w-[70%] rounded-[3px] bg-black" />
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function AnalyzingScreen({ nickname }: { nickname: string }) {

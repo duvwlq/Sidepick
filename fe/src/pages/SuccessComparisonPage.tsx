@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import { ErrorState, LoadingState, PageMessage } from '../components/common/Skeleton';
 import {
@@ -25,23 +22,6 @@ function formatDate(value: string) {
   return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(
     date.getDate(),
   ).padStart(2, '0')}`;
-}
-
-function StatusBarV1() {
-  return (
-    <div className="flex h-[59px] w-full items-center px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex h-[22px] min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] tracking-[0px] text-black">
-          9:41
-        </span>
-      </div>
-      <div className="flex h-[22px] min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px] shrink-0" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px] shrink-0" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px] shrink-0" />
-      </div>
-    </div>
-  );
 }
 
 function HeaderV1({ onBack }: { onBack: () => void }) {
@@ -196,6 +176,7 @@ function CompareInsightSection({
 function SuccessCaseCard({ experience }: { experience: Experience }) {
   const tags = buildTags(experience);
   const imageMeta = getExperienceImageMeta(experience);
+  const recommendationReason = (experience as Experience & { recommendationReason?: string | null }).recommendationReason?.trim();
   const preview =
     experience.content.replace(/!\[[^\]]*]\(([^)]+)\)/g, '').replace(/\s+/g, ' ').trim() || '본문 미리보기를 준비 중입니다.';
 
@@ -237,6 +218,11 @@ function SuccessCaseCard({ experience }: { experience: Experience }) {
           <h2 className="line-clamp-2 font-['Pretendard'] text-[20px] font-[700] leading-[26px] tracking-[0px] text-[#131416]">
             {experience.title}
           </h2>
+          {recommendationReason ? (
+            <p className="mt-[8px] rounded-[12px] bg-[#F6FAF7] px-[10px] py-[8px] text-[12px] leading-[18px] text-[#4E6A59]">
+              {recommendationReason}
+            </p>
+          ) : null}
           <p
             className={`mt-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[22px] tracking-[0px] text-[#494949] ${
               imageMeta.primaryImageUrl ? 'line-clamp-3' : 'line-clamp-4'
@@ -308,7 +294,6 @@ export default function SuccessComparisonPage() {
   return (
     <div className="min-h-screen bg-[#D6ECE2]">
       <div className="mx-auto min-h-screen w-full max-w-[393px] bg-white">
-        <StatusBarV1 />
         <HeaderV1 onBack={() => navigate(-1)} />
 
         <div className="bg-white px-[16px] pb-[48px]">

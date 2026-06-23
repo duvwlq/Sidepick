@@ -2,9 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
 import CaseCard from '../components/common/CaseCard';
 import { ErrorState, ListSkeleton } from '../components/common/Skeleton';
 import { CaseTextLink } from '../components/common/CaseUi';
@@ -81,21 +78,6 @@ function sortExperiences(experiences: Experience[], sortOption: SortOption) {
   }
 
   return items.sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
-}
-
-function IosStatusBar() {
-  return (
-    <div className="flex h-[59px] items-center bg-white px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex min-w-0 flex-1 items-center">
-        <span className="font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">9:41</span>
-      </div>
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px]" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px]" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px]" />
-      </div>
-    </div>
-  );
 }
 
 function TabButton({
@@ -340,8 +322,6 @@ export default function MyPage() {
   return (
     <div className="mx-auto min-h-screen w-full max-w-[375px] bg-[#F8F8F8]">
       <header className="sticky top-0 z-20 bg-white">
-        <IosStatusBar />
-
         <div className="flex items-center justify-between px-[16px] py-[20px]">
           <button
             type="button"

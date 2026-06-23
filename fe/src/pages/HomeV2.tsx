@@ -18,6 +18,7 @@ import {
   getBookmarkStatus,
   getCategories,
   getExperiences,
+  getNotifications,
   getReactionSummary,
   getRelatedSuccessCases,
   reactToExperience,
@@ -285,7 +286,7 @@ const exploreCardsBySort: Record<ExploreSort, StoryCardData[]> = {
   popular: [],
 };
 
-function HomeHeader({ hasUnreadNotifications = true }: { hasUnreadNotifications?: boolean }) {
+function HomeHeader({ hasUnreadNotifications = false }: { hasUnreadNotifications?: boolean }) {
   const navigate = useNavigate();
 
   return (
@@ -300,7 +301,7 @@ function HomeHeader({ hasUnreadNotifications = true }: { hasUnreadNotifications?
         <button
           type="button"
           aria-label={hasUnreadNotifications ? '읽지 않은 알림' : '알림'}
-          onClick={() => navigate('/coming-soon')}
+          onClick={() => navigate('/notifications')}
           className="absolute right-[16px] top-[20px] flex h-[30px] w-[30px] items-center justify-center"
         >
           <img src={bellIcon} alt="" className="h-[30px] w-[30px]" />
@@ -872,6 +873,7 @@ export default function HomeV2() {
   const [latestExperiences, setLatestExperiences] = useState<Experience[]>([]);
   const [popularExperiences, setPopularExperiences] = useState<Experience[]>([]);
   const [interactionById, setInteractionById] = useState<Record<number, HomeCardInteraction>>({});
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
   void apiCategories;
 
   useEffect(() => {
@@ -905,6 +907,33 @@ export default function HomeV2() {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!accessToken) {
+      setHasUnreadNotifications(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    void getNotifications(accessToken, false)
+      .then((payload) => {
+        if (cancelled) {
+          return;
+        }
+
+        setHasUnreadNotifications(payload.items.length > 0);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setHasUnreadNotifications(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken]);
 
   const resolvedCategoryCards = useMemo(() => {
     return homeReviewCategoryCardsExact;
@@ -1094,7 +1123,7 @@ export default function HomeV2() {
     <div className="min-h-screen overflow-x-hidden bg-white">
       <div className="relative mx-auto w-full max-w-[375px] bg-white pt-[116px]" style={textFeatureStyle}>
         <div className="absolute left-0 top-0 z-10 w-full">
-          <HomeHeader />
+          <HomeHeader hasUnreadNotifications={hasUnreadNotifications} />
         </div>
         <main className="flex w-full flex-col bg-white pb-[220px]">
           <CategorySection cards={resolvedCategoryCards} expanded={categoryExpanded} onToggleExpanded={() => setCategoryExpanded((prev) => !prev)} />
@@ -1122,3 +1151,5 @@ export default function HomeV2() {
     </div>
   );
 }
+
+
