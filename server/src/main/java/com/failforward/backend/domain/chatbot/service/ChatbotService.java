@@ -34,7 +34,9 @@ public class ChatbotService {
     private static final String TYPE_REACT = "react";
     private static final String TYPE_GUIDE_REDIRECT = "guide_redirect";
     private static final String FALLBACK_REPLY =
-            "Only a simple guide is available right now. Please try again in a moment.";
+            "지금은 답변을 바로 정리하지 못하고 있어요. 잠시 후 다시 시도해 주세요.";
+    private static final String GUIDE_REDIRECT_REPLY =
+            "원하는 방향은 이해했어요. 가능하면 현재 상황, 쓸 수 있는 시간, 예산, 관심 분야를 한두 문장만 더 적어주시면 더 정확하게 안내해 드릴게요.";
 
     private final CurrentUserProvider currentUserProvider;
     private final ChatbotRateLimiter chatbotRateLimiter;
@@ -60,7 +62,7 @@ public class ChatbotService {
             if (chatbotSafetyService.needsGuideRedirect(normalizedMessage, routeHint)) {
                 return new ChatbotMessageResponse(
                         STATUS_SUCCESS,
-                        "Please share more detail so I can route you to the right case or stats guide.",
+                        GUIDE_REDIRECT_REPLY,
                         TYPE_GUIDE_REDIRECT,
                         List.of(),
                         Map.of("fallback", false, "reason", "input_too_short"),

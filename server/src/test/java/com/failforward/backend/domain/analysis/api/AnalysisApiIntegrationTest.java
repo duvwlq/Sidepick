@@ -10,6 +10,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.failforward.backend.domain.analysis.entity.AiAnalysis;
+import com.failforward.backend.domain.analysis.entity.MatchedCase;
+import com.failforward.backend.domain.analysis.repository.AiAnalysisRepository;
+import com.failforward.backend.domain.analysis.repository.MatchedCaseRepository;
+import com.failforward.backend.domain.experience.entity.FailureExperience;
+import com.failforward.backend.domain.experience.repository.FailureExperienceRepository;
 import com.failforward.backend.support.ApiIntegrationTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +45,15 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
 
     @Autowired
     private RestTemplate aiRestTemplate;
+
+    @Autowired
+    private AiAnalysisRepository aiAnalysisRepository;
+
+    @Autowired
+    private MatchedCaseRepository matchedCaseRepository;
+
+    @Autowired
+    private FailureExperienceRepository experienceRepository;
 
     private MockRestServiceServer mockServer;
 
@@ -175,6 +190,58 @@ class AnalysisApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.data.similarCases[0].explanation.matchedKeywords[0]").value("market research gap"))
                 .andExpect(jsonPath("$.data.similarCases[0].explanation.caseId").value(String.valueOf(similarExperienceId)))
                 .andExpect(jsonPath("$.data.similarCases[0].explanation.debug.source").value("server-generated"));
+
+        mockServer.verify();
+    }
+
+    @Test
+    void getReportSkipsSelfMatchWhenAiSimilarResponseIncludesCurrentExperience() throws Exception {
+        String token = registerAndLogin("report_self_match@sidepick.dev", "password123", "reportSelfMatch", "20s");
+        expectAiFailure();
+        expectAiFailure();
+        expectAiAnalysis();
+        long similarExperienceId = createExperience(
+                token,
+                "External similar case",
+                "This case should remain after the self match is removed."
+        );
+        long experienceId = createExperience(token, "Self match target", "This experience should not appear in its own similar cases.");
+
+        mockMvc.perform(post("/api/experiences/{experienceId}/analysis", experienceId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token)))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.success").value(true));
+
+        FailureExperience experience = experienceRepository.findWithUserAndCategoryById(experienceId)
+                .orElseThrow();
+        AiAnalysis analysis = aiAnalysisRepository.findByExperience(experience)
+                .orElseThrow();
+        matchedCaseRepository.deleteByAnalysis(analysis);
+        matchedCaseRepository.save(MatchedCase.create(
+                analysis,
+                String.valueOf(experienceId),
+                "Self match target",
+                "This is the current experience and must be filtered out.",
+                "This is the current experience and must be filtered out.",
+                99
+        ));
+        matchedCaseRepository.save(MatchedCase.create(
+                analysis,
+                String.valueOf(similarExperienceId),
+                "External similar case",
+                "This should remain in the final report.",
+                "This should remain in the final report.",
+                81
+        ));
+
+        mockMvc.perform(get("/api/reports/{experienceId}", experienceId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.similarCases.length()").value(1))
+                .andExpect(jsonPath("$.data.similarCases[0].caseId").value(String.valueOf(similarExperienceId)))
+                .andExpect(jsonPath("$.data.similarCases[0].caseId").value(org.hamcrest.Matchers.not(String.valueOf(experienceId))))
+                .andExpect(jsonPath("$.data.explanation.similarCasesUsed.length()").value(1))
+                .andExpect(jsonPath("$.data.explanation.similarCasesUsed[0]").value(String.valueOf(similarExperienceId)));
 
         mockServer.verify();
     }

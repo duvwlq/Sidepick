@@ -9,10 +9,22 @@ import { getAccessToken } from '../lib/session';
 
 const CHATBOT_SESSION_STORAGE_KEY = 'sidepick.chatbot.sessionId';
 const QUICK_PROMPTS = [
-  '스마트스토어를 시작하려는데 뭐부터 해야 할까요?',
-  '본업이랑 병행 가능한 부업을 찾고 싶어요.',
-  '초기 자본이 적을 때 현실적인 선택지가 있을까요?',
-];
+  {
+    label: '스마트스토어를 시작하려는데 뭐부터 해야 할까요?',
+    message:
+      '스마트스토어를 시작하려고 하는데 자본은 많지 않고 처음이라서요. 무엇부터 준비하면 좋을지 단계별로 알려주세요.',
+  },
+  {
+    label: '본업이랑 병행 가능한 부업을 찾고 싶어요.',
+    message:
+      '지금 본업을 하면서 퇴근 후 2~3시간 정도 쓸 수 있어요. 초기 비용이 크지 않고 병행 가능한 현실적인 부업 방향을 추천해 주세요.',
+  },
+  {
+    label: '초기 자본이 적을 때 현실적인 선택지가 있을까요?',
+    message:
+      '초기 자본이 많지 않은 상태에서 시작할 수 있는 부업이나 소규모 창업 선택지를 찾고 있어요. 위험을 줄이면서 시작하는 방법도 같이 알려주세요.',
+  },
+] as const;
 
 type ChatMessage = {
   id: string;
@@ -37,14 +49,10 @@ function readOrCreateSessionId() {
 }
 
 function buildAssistantMeta(payload: ChatbotMessagePayload) {
-  const metaParts: string[] = [];
-  if (payload.type) {
-    metaParts.push(payload.type);
+  if (payload.status === 'fallback') {
+    return 'AI 챗봇';
   }
-  if (payload.reason) {
-    metaParts.push(payload.reason);
-  }
-  return metaParts.length ? metaParts.join(' · ') : null;
+  return null;
 }
 
 export default function ChatbotPage() {
@@ -142,14 +150,14 @@ export default function ChatbotPage() {
           <div className="flex flex-wrap gap-[8px]">
             {QUICK_PROMPTS.map((prompt) => (
               <button
-                key={prompt}
+                key={prompt.label}
                 type="button"
                 onClick={() => {
-                  void submitMessage(prompt);
+                  void submitMessage(prompt.message);
                 }}
                 className="rounded-[999px] border border-[#D7E5DC] bg-white px-[12px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] text-[#375E49]"
               >
-                {prompt}
+                {prompt.label}
               </button>
             ))}
           </div>

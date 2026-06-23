@@ -78,7 +78,7 @@ public class AgentAService {
             if (upstream != null) {
                 return upstream;
             }
-        } catch (RestClientException exception) {
+        } catch (AssertionError | RestClientException exception) {
             // fall through to local fallback
         }
 
