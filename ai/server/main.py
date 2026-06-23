@@ -1,73 +1,72 @@
+from typing import Any, List, Optional
+
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import List, Optional
+
+from server.chatbot_api import chatbot_process
+from server.chatbot_llm import known_case_ids, llm_call as chatbot_llm_call
 from server.llm_analyzer import analyze_experience
 
 app = FastAPI(
     title="Sidepick AI Server",
-    description="부업 실패 경험 분석 AI 서버",
-    version="0.1.0"
+    description="Sidepick AI server",
+    version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
-# ===== 요청 데이터 모델 =====
 class AnalyzeRequest(BaseModel):
-    """분석 요청 데이터"""
-    category: str = Field(..., description="부업 카테고리 (예: 유튜브, 온라인 쇼핑몰)")
-    difficulties: List[str] = Field(default=[], description="어려웠던 점 체크 항목")
-    difficulty_etc: Optional[str] = Field(default="", description="어려웠던 점 - 기타 서술")
-    difficulty_extra: Optional[str] = Field(default="", description="보조 서술")
-    duration_months: int = Field(..., ge=1, description="부업 기간 (개월)")
-    weekly_hours: int = Field(..., ge=1, description="주당 할애 시간")
-    free_text: str = Field(..., min_length=10, description="자유서술 (최소 10자)")
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "category": "유튜브",
-                "difficulties": ["마케팅/홍보", "타겟 분석"],
-                "difficulty_etc": "",
-                "difficulty_extra": "구독자가 100명에서 안 늘어남",
-                "duration_months": 6,
-                "weekly_hours": 10,
-                "free_text": "유튜브 채널을 시작했는데 영상은 가끔 올리고 구독자도 잘 안 늘었어요."
-            }
-        }
+    category: str = Field(..., description="Side business category")
+    difficulties: List[str] = Field(default_factory=list, description="Selected difficulties")
+    difficulty_etc: Optional[str] = Field(default="", description="Difficulty etc field")
+    difficulty_extra: Optional[str] = Field(default="", description="Extra difficulty detail")
+    duration_months: int = Field(..., ge=1, description="Duration in months")
+    weekly_hours: int = Field(..., ge=1, description="Weekly hours")
+    free_text: str = Field(..., min_length=10, description="Free text body")
 
 
-# ===== 응답 데이터 모델 =====
 class AnalyzeResponse(BaseModel):
-    """분석 결과 응답"""
-    keywords: List[str] = Field(..., description="추출된 키워드 3개")
-    failure_category: str = Field(..., description="실패 카테고리")
-    summary: str = Field(..., description="1줄 요약")
-    risk_level: str = Field(..., description="위험도 (high/medium/low)")
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "keywords": ["비정기적 업로드", "구독자 정체", "지속성 부족"],
-                "failure_category": "시간관리",
-                "summary": "비정기적 업로드로 인한 채널 성장 정체",
-                "risk_level": "medium"
-            }
-        }
+    keywords: List[str] = Field(..., description="Extracted keywords")
+    failure_category: str = Field(..., description="Failure category")
+    summary: str = Field(..., description="One-line summary")
+    risk_level: str = Field(..., description="Risk level")
 
 
-# ===== API 엔드포인트 =====
+class ChatbotRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=600, description="Chatbot user message")
+    category_slug: Optional[str] = Field(default=None, description="Side business category slug")
 
-@app.get("/health", summary="서버 상태 확인")
+
+class ChatbotResponseModel(BaseModel):
+    status: str = Field(..., description="ok | fallback | blocked | guide_redirect")
+    reply: str
+    route: Optional[str] = None
+    cited_case_ids: List[str] = Field(default_factory=list)
+    plan_b_reason: Optional[str] = None
+    confidence: Optional[float] = None
+    tool_calls: List[dict[str, Any]] = Field(default_factory=list)
+    metadata: Optional[dict[str, Any]] = None
+
+
+@app.get("/health", summary="Health check")
 async def health_check():
-    """서버가 살아있는지 확인하는 헬스체크"""
     return {"status": "ok", "service": "sidepick-ai"}
 
 
-@app.post(
-    "/analyze",
-    response_model=AnalyzeResponse,
-    summary="부업 실패 경험 분석",
-    description="사용자의 부업 실패 경험을 LLM으로 분석하여 키워드, 실패 카테고리, 요약, 위험도를 반환합니다."
-)
+@app.post("/analyze", response_model=AnalyzeResponse, summary="Analyze experience")
 async def analyze(req: AnalyzeRequest):
     try:
         result = analyze_experience(
@@ -77,16 +76,62 @@ async def analyze(req: AnalyzeRequest):
             difficulty_extra=req.difficulty_extra or "",
             duration_months=req.duration_months,
             weekly_hours=req.weekly_hours,
-            free_text=req.free_text
+            free_text=req.free_text,
         )
         return result
-    except Exception as e:
+    except Exception as exc:
         raise HTTPException(
             status_code=500,
-            detail=f"AI 분석 실패: {type(e).__name__}: {str(e)}"
+            detail=f"AI analysis failed: {type(exc).__name__}: {exc}",
+        ) from exc
+
+
+@app.post(
+    "/api/chatbot/message",
+    response_model=ChatbotResponseModel,
+    summary="Process chatbot message",
+)
+async def chatbot_message(req: ChatbotRequest):
+    try:
+        captured: dict[str, Any] = {}
+
+        def wrapped_llm_call(**kwargs):
+            result = chatbot_llm_call(
+                message=kwargs["message"],
+                route=kwargs["route"],
+                category_slug=req.category_slug,
+            )
+            captured.update(result)
+            return result
+
+        result = chatbot_process(
+            message=req.message,
+            category_slug=req.category_slug,
+            known_case_ids=known_case_ids(),
+            llm_call=wrapped_llm_call,
         )
 
+        metadata: dict[str, Any] = dict(result.metadata or {})
+        metadata.update(
+            {
+                "model": captured.get("model"),
+                "tokens_in": captured.get("tokens_in"),
+                "tokens_out": captured.get("tokens_out"),
+            }
+        )
 
-# ===== 추후 추가될 엔드포인트 =====
-# @app.post("/similar") - SBERT/FAISS 유사 사례 검색 (내일 추가)
-# @app.post("/guide") - 성공 가이드 매칭 (내일 추가)
+        return ChatbotResponseModel(
+            status=result.status,
+            reply=result.reply,
+            route=result.route,
+            cited_case_ids=result.cited_case_ids or [],
+            plan_b_reason=result.plan_b_reason,
+            confidence=captured.get("confidence"),
+            tool_calls=captured.get("tool_calls", []),
+            metadata=metadata,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Chatbot processing failed: {type(exc).__name__}: {exc}",
+        ) from exc

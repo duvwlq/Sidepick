@@ -1,0 +1,1241 @@
+{
+  "version": "v2",
+  "generated_at": "2026-06-10T16:41:36+09:00",
+  "model": "snunlp/KR-SBERT-V40K-klueNLI-augSTS",
+  "dimension": 768,
+  "total_cases": 136,
+  "by_origin": {
+    "clean_cases": 36,
+    "pickply_100": 100
+  },
+  "by_case_type": {
+    "success_story": 32,
+    "failure_story": 104
+  },
+  "cases": [
+    {
+      "vector_index": 0,
+      "case_id": "blog_002",
+      "case_type": "success_story",
+      "category_slug": "investment",
+      "source": "blog",
+      "title": "2회 택배 및 공장 출근 안하게 된 이유 - 월 150 부업 성공 후기",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 1,
+      "case_id": "blog_049",
+      "case_type": "success_story",
+      "category_slug": "online-commerce",
+      "source": "blog",
+      "title": "적립으로  애드픽 네이버 포인트 수익 전환 부업성공후기",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 2,
+      "case_id": "blog_050",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "blog",
+      "title": "태식이 출연 토요일 배달 부업 쿠팡미션 성공후기 1213",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 3,
+      "case_id": "cafe_042",
+      "case_type": "success_story",
+      "category_slug": "online-commerce",
+      "source": "cafe",
+      "title": "악세사리부업 이거 진짜 돈될까? 직접 해본 리얼후기!",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 4,
+      "case_id": "dc_004",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "dc",
+      "title": "팬픽 딜레마 1위후기및 앞으로의 계획에 대해서",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 5,
+      "case_id": "dc_005",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "dc",
+      "title": "힛갤곤볼 완성 갈로아 \"과학만화 계속 그리고 싶어요\"",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 6,
+      "case_id": "dc_006",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "dc",
+      "title": "(스압)플컨후기(보다는 사실 대리구매후기)",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 7,
+      "case_id": "dc_007",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "dc",
+      "title": "세후 3백충 직장인인데 메이플 쌀먹으로부업한다...",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 8,
+      "case_id": "dc_009",
+      "case_type": "success_story",
+      "category_slug": "offline-sidejob",
+      "source": "dc",
+      "title": "[일기] 원조 퇴물의 라스트댄스",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 9,
+      "case_id": "clien_002",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "clien",
+      "title": "쏘카세차빌런, 2주정도 쏘카 핸들러라는걸 해보았습니다.(차량 탁송알바)",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 10,
+      "case_id": "clien_003",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "clien",
+      "title": "쿠팡이츠 도보 배달 후기",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 11,
+      "case_id": "clien_004",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "clien",
+      "title": "달러 환율 정확하게 맞춰서 유튜브 구독자 5000명 달성한 후기",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 12,
+      "case_id": "clien_005",
+      "case_type": "success_story",
+      "category_slug": "talent-freelance",
+      "source": "clien",
+      "title": "숨고 컴퓨터 수리 서비스 제공 경험기.txt",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 13,
+      "case_id": "clien_006",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "clien",
+      "title": "전기자전거로 배민 커넥터 된 이후 (2편)",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 14,
+      "case_id": "clien_007",
+      "case_type": "success_story",
+      "category_slug": "online-commerce",
+      "source": "clien",
+      "title": "에이전시,쇼핑몰등 온라인 10년째.. 넋두리 한번 해봅니다.",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 15,
+      "case_id": "clien_009",
+      "case_type": "success_story",
+      "category_slug": "offline-sidejob",
+      "source": "clien",
+      "title": "저는 100만원으로 창업했었습니다.",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 16,
+      "case_id": "clien_010",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "clien",
+      "title": "오랜 구직 실패에 여러 도전을 하다보니, 이제 좋을 날이 올지도 모르겠습니다.",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 17,
+      "case_id": "clien_011",
+      "case_type": "success_story",
+      "category_slug": "talent-freelance",
+      "source": "clien",
+      "title": "50대 1인 개발자 살아남기",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 18,
+      "case_id": "clien_014",
+      "case_type": "success_story",
+      "category_slug": "online-commerce",
+      "source": "clien",
+      "title": "이것 저것 부업해본 결과",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 19,
+      "case_id": "clien_016",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "clien",
+      "title": "맛집 유튜브 구독자 1,000명 달성 후기",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 20,
+      "case_id": "ppomppu_002",
+      "case_type": "success_story",
+      "category_slug": "online-commerce",
+      "source": "ppomppu",
+      "title": "N잡러를 위한부업별 수입 비교 (2020년 핫 했던 그부업5가지)8",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 21,
+      "case_id": "ppomppu_004",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "ppomppu",
+      "title": "비오는 날 배달 미안해하지 마세요 (저도부업배달러)14",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 22,
+      "case_id": "ppomppu_008",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "ppomppu",
+      "title": "유튜브 + 블로그부업2주간 일하고, 6개월간 테스트11",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 23,
+      "case_id": "ppomppu_010",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "ppomppu",
+      "title": "아래에수익형블로그관련글이 있어서19",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 24,
+      "case_id": "clien_017",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "clien",
+      "title": "배민투잡 일주일 후기 적어봐요~^^",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 25,
+      "case_id": "clien_019",
+      "case_type": "failure_story",
+      "category_slug": "etc",
+      "source": "clien",
+      "title": "알고보니 저도 가스라이팅을 당한적이 있더군요",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 26,
+      "case_id": "ppomppu_013",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "ppomppu",
+      "title": "배민 / 쿠팡이츠로 배달해본후기~!! (개인적 관점, Feat, 전동이동장치의 단점)5",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 27,
+      "case_id": "ppomppu_016",
+      "case_type": "success_story",
+      "category_slug": "investment",
+      "source": "ppomppu",
+      "title": "소소한 수익인증..신광슈퍼님 감사합니다.13",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 28,
+      "case_id": "ppomppu_017",
+      "case_type": "success_story",
+      "category_slug": "investment",
+      "source": "ppomppu",
+      "title": "2014년 현재까지 수익인증합니다38",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 29,
+      "case_id": "ppomppu_020",
+      "case_type": "success_story",
+      "category_slug": "content-sns",
+      "source": "ppomppu",
+      "title": "업무용으로 구매한 RTX 4070 탑재한 어로스 16X ASG-53KR4",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 30,
+      "case_id": "ppomppu_021",
+      "case_type": "success_story",
+      "category_slug": "investment",
+      "source": "ppomppu",
+      "title": "\"P2P 투자중입니다\"후기2    부제:탈출의 시기12",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 31,
+      "case_id": "ppomppu_024",
+      "case_type": "success_story",
+      "category_slug": "platform-labor",
+      "source": "ppomppu",
+      "title": "경기가 진짜 안좋긴 안 좋은가봐요.3",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 32,
+      "case_id": "ppomppu_025",
+      "case_type": "success_story",
+      "category_slug": "talent-freelance",
+      "source": "ppomppu",
+      "title": "[잡소리]타이어 뱅크 사건처럼, 컴퓨터도 쪽도 얼마나 해먹고 있는지 걍 끄적이고 싶어서 끄적 끄적합니다.36",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 33,
+      "case_id": "ppomppu_027",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "ppomppu",
+      "title": "큰 손실 이후 2~3년간 존버의 결과 입니다.31",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 34,
+      "case_id": "ppomppu_031",
+      "case_type": "failure_story",
+      "category_slug": "offline-sidejob",
+      "source": "ppomppu",
+      "title": "[펌] 제발.. 밀키트 창업 하지 마세요(이건 노예짓입니다)71",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 35,
+      "case_id": "ppomppu_032",
+      "case_type": "success_story",
+      "category_slug": "etc",
+      "source": "ppomppu",
+      "title": "회사다니면서 사업도 병행하는데 회사를 못그만두겠어요137",
+      "origin": "clean_cases"
+    },
+    {
+      "vector_index": 36,
+      "case_id": "pickply_1",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "본업말고 수익을 더 얻고싶어서 시작했는데 작업 특성상 주기적인 제안이 들",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 37,
+      "case_id": "pickply_2",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "유튜브보다가 부업좀찾고있었는데 쉽게 돈벌수 있딘고해서 몇개월 따라하다 수",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 38,
+      "case_id": "pickply_3",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "주식을 해서 수익을 보려했으나 투자가 실패하고있다.그래서 원금이 반토막이",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 39,
+      "case_id": "pickply_4",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "관심있어서 시작했으나 시장조사 및 원가,판매가 측정 어려움",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 40,
+      "case_id": "pickply_5",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "주식투자, 갑작스런 환경변화(전쟁 등)",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 41,
+      "case_id": "pickply_6",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "어디서부터 어떻게 시작해야할지 모르겠다. 어디에 힘을 더해야할지",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 42,
+      "case_id": "pickply_7",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "이동이 많아 카카오T 퀵 배달을 병행하였으나 기름값, 유지비 등 크게 수",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 43,
+      "case_id": "pickply_8",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "AI 툴을 이용해서 부업을 진행하려고 했는데 확실히 직장 병행이다 보니 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 44,
+      "case_id": "pickply_9",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "식비 충당을 위해 쿠팡 리뷰 체험단, 블로그 체험단 진행했습니다. 네이버",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 45,
+      "case_id": "pickply_10",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "플랫폼을 통한 탁송 업무이나 플랫폼 특성 상 불특정 다수가 동일 건을 두",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 46,
+      "case_id": "pickply_11",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "주변에서 스토어 사업을 하는 친구를 통해 처음 부업에 관심을 가지게 되었",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 47,
+      "case_id": "pickply_12",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "돈을 많이 벌자 라는 계기로 시작했지만 이것저것 하다보니 결국엔 몸이 아",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 48,
+      "case_id": "pickply_13",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "퍼스널브랜딩을 위해서 했는데 수익화가 안되네요.",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 49,
+      "case_id": "pickply_14",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "친구들의 추천으로.. 워낙 모르는 부분이라..선뜻 도전도 어려웠고..적극",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 50,
+      "case_id": "pickply_15",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "주식이 뜨고 크게 돈 벌고 싶은 마음에 시작 실행력이 부족해서 남들 딸때",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 51,
+      "case_id": "pickply_16",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "아이 간식값이랑 커피값정도 생각하며 시작했습니다 앱테크를 해보니 낮은 시",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 52,
+      "case_id": "pickply_17",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "중국,미국에 살았던 경험으로 알리바바, 쉬인 등 중국 도매 여러사이트에서",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 53,
+      "case_id": "pickply_18",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "직장 외 수입을 좀더 원해 시작했는데 시간도 많이할애하고 많이팔리지도않아",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 54,
+      "case_id": "pickply_19",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "지인 소개로 시작했어요. 경험이 부족하다 보니 여러모로 미흡했어요.",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 55,
+      "case_id": "pickply_20",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "수익이 적더라도 좋으니 시간 투자를 많이 하지 않고 가볍게 커피값 정도 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 56,
+      "case_id": "pickply_21",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "내 시간에 맞춰 할 수 있는 일을 찾던중에 시작하게되었고 본업 끝난 후 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 57,
+      "case_id": "pickply_22",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "여유자본의 활용 본업과 병행하기에 시간이 부족 정보의 부족",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 58,
+      "case_id": "pickply_23",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "노동소득만으로는 한계를 느껴 재테크를 시작했고 난해한 정보와 치열한 경쟁",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 59,
+      "case_id": "pickply_24",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "시작은 사소하게 일정 금액을 추가로 벌고 싶다는 생각이었는데 퇴근 후에 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 60,
+      "case_id": "pickply_25",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "주변에서 하는것을보고 나도할수있을것같아 시작했는데 생각보다 시간을 꽤 잡",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 61,
+      "case_id": "pickply_26",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "블로그로 시작했고 꾸준히 업로드하여 애드포스트. 자격을 획득하여 월평균 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 62,
+      "case_id": "pickply_27",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "지인 소개로 시작했고 자는 쉬간이 부족해서 채력적으로 힘들었다",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 63,
+      "case_id": "pickply_28",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "인터넷 광고 등에서 알아보고 시작했는데, 처음에는 수익 구조도 알아보기 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 64,
+      "case_id": "pickply_29",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "체험단으로 시작했고 제품홍보로 올리기 시작했습니다! 그러면서 점점 여러 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 65,
+      "case_id": "pickply_30",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "본업하면서 일거리가 많이 줄어들어 쉬는날도 늘고해서 겸업을 하려는데 시장",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 66,
+      "case_id": "pickply_31",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "돈이 필요해서 시작했지만 의지가 부족하고 자료도 부적하여 어려웠다.",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 67,
+      "case_id": "pickply_32",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "웹소설을 쓰기 시작했지만, 제가쓰는 스타일은 독자층이랑 맞지 않는 것 같",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 68,
+      "case_id": "pickply_33",
+      "case_type": "failure_story",
+      "category_slug": "offline-sidejob",
+      "source": "pickply",
+      "title": "색칠 부업인데 너무 티테일함을 요구하고 시간이 너무 오래걸렸다",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 69,
+      "case_id": "pickply_34",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "저의 곡들을 유튜브에 소개하고자 시작했고 곡들에 대한 평은 너무 좋았는데",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 70,
+      "case_id": "pickply_35",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "수입이 부족해 시작하게 되었습니다. 처음에는 간단한 부업들을 찾아봤으나 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 71,
+      "case_id": "pickply_36",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "월급으로 생계를 유지하는데 어려워서 추가로 도움이 되는 수익창출 파이프를",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 72,
+      "case_id": "pickply_37",
+      "case_type": "failure_story",
+      "category_slug": "offline-sidejob",
+      "source": "pickply",
+      "title": "취미로 하다가 판매하고 싶어 시작. 생각보다 많이 팔리지 않고 단가도 적",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 73,
+      "case_id": "pickply_38",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "본업 이외의 부수입을 원해서 예전부터 앱테크를 진행하고 있습니다. 새로운",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 74,
+      "case_id": "pickply_39",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "수입부족",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 75,
+      "case_id": "pickply_40",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "우연히 sns를 하다가 부업을 할수있게 강의를 해준다고 하여 클래스 결제",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 76,
+      "case_id": "pickply_41",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "블로그 광고 부업인데 건별로 광고비를 받거나 조회수에 따라 이익이 달라지",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 77,
+      "case_id": "pickply_42",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "경력단절로 인해 부업을 해볼까해서 시작했습니다 생각보다 시간도 많이 소요",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 78,
+      "case_id": "pickply_43",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "인터넷 시대에 쇼핑몰 앱을 개발하는 중 급변하는 소프트웨어의 신기술화로 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 79,
+      "case_id": "pickply_44",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "본업 수입이 적어서 진입이 쉬운 부업을 찾다가 배달일을 알게됨. 자동차만",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 80,
+      "case_id": "pickply_45",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "본업으론 경제적 자유화를 못누려습니다. 그래서 주식으로 수익을 얻고자 분",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 81,
+      "case_id": "pickply_46",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "생활비 부족해서 시작 했어요 배달의 일이라위험하고 시간 관리 잘하고 있어",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 82,
+      "case_id": "pickply_47",
+      "case_type": "failure_story",
+      "category_slug": "offline-sidejob",
+      "source": "pickply",
+      "title": "취미를 수익화하고 싶다는 생각에 시작함. 사전 정보 없이 무작정 뛰어들었",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 83,
+      "case_id": "pickply_48",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "많은 뉴스와 영상들을 보고 여러 커뮤니티들에서 정보취합 후 시작했습니다.",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 84,
+      "case_id": "pickply_49",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "지인하는거 보고 잘 모르는 상태에서 부업으로 시작하게 되었습니다. 처음에",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 85,
+      "case_id": "pickply_50",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "주변의 추천으로 시작하게 되었고, 부업에 투자할 시간적 여유와 정보의 부",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 86,
+      "case_id": "pickply_51",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "아무랴도 물가가 솟으니까 조금거벌어보려규했는대요? 아무리 모아보려고해도 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 87,
+      "case_id": "pickply_52",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "본업뿐만 아니라 또 부수입이 있길 바라는 마음 때문입니다",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 88,
+      "case_id": "pickply_53",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "유튜브 크레이티브로 영상콘텐츠로 부가 수입을 연출하려 시작하였다 그러나 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 89,
+      "case_id": "pickply_54",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "유튜브 보고 시작핬고 공부도 2년간 하면서 실행했어요.",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 90,
+      "case_id": "pickply_55",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "배달 - 본업 외에 쉽게 돈 버는 방법을 찾다 시작하게 되었고 오토바이나",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 91,
+      "case_id": "pickply_56",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "유튜브에서 물건을 때다가 팔아서 부업을 하는 유튜브를 보고 시작했지만 생",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 92,
+      "case_id": "pickply_57",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "sns광고 보고 무료로 알려준다고 해서 시작했지만 진짜 기본만 알려주고 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 93,
+      "case_id": "pickply_58",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "2022-2023 한창 해외주식 붐일 때 시작해서 처음에는 수익을 냈지만",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 94,
+      "case_id": "pickply_59",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "취미생활을 할 돈을 따로모으고 싶어서 하게 되었고 돈을 벌어보니 조금 더",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 95,
+      "case_id": "pickply_60",
+      "case_type": "failure_story",
+      "category_slug": "etc",
+      "source": "pickply",
+      "title": "급여로 생활하기 빠듯하다고 판단하여 시작하였고, 모으기 힘들었다",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 96,
+      "case_id": "pickply_61",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "월급에 대한 불만족으로 인해 시작했지만 과도한 정보의 홍수에서 어떤 것이",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 97,
+      "case_id": "pickply_62",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "ai 툴이 많이 생겨나면서 과거에 배웠던 걸 접목해서 본업 외 수익을 창",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 98,
+      "case_id": "pickply_63",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "소소한 시간 활용하려 했으나 활동에 비해 수입이 너무 적어서 포기할 수밖",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 99,
+      "case_id": "pickply_64",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "생활비에 보탬이 되고지 시작했는데, 확장하기에는 시간과 정보가 너무 부족",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 100,
+      "case_id": "pickply_65",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "취미로 시작했고 처음에는 고객을 유치하기위해 손이득을 보지말고로 시작했는",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 101,
+      "case_id": "pickply_66",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "코인이벤트 참여하면서 시작, 손절과 익절 시점을 잡기가 어려웠다",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 102,
+      "case_id": "pickply_67",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "본업 외 수익을 얻기 위해 시작해볼 생각이었는데 주변에서도 권유하길래 시",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 103,
+      "case_id": "pickply_68",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "개인 블로그를 하다가 부수입을 만들고 싶어서 시작했습니다. 블로그 운영이",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 104,
+      "case_id": "pickply_69",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "패시브 인컴, 일을 하지 않고도 돈을 벌수 있는 수단을 마련하기 위해 장",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 105,
+      "case_id": "pickply_70",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "네이버 애드포스트를 목적으로 시작했습니다 처음에 금융을 주제로 글을 작성",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 106,
+      "case_id": "pickply_71",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "추가적인 부가수입을 얻기위해서 했으나 본업과 병행하다보니 꾸준히 하는게 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 107,
+      "case_id": "pickply_72",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "계기는 추가적인 수입을 만들기 위해 시작했어요 가벼운 마음으로 시작했는데",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 108,
+      "case_id": "pickply_73",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "돈이 필요해서 시작했으며 수익을 올리는 방법을 찾는 것이 힘들고 본업을 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 109,
+      "case_id": "pickply_74",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "투잡으로 저축금액을 늘리고 싶어서",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 110,
+      "case_id": "pickply_75",
+      "case_type": "failure_story",
+      "category_slug": "offline-sidejob",
+      "source": "pickply",
+      "title": "핸드메이드로 폰줄이나 키링에 관심이 많아서 시작했는데 생각보다 판매가 어",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 111,
+      "case_id": "pickply_76",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "일단 배달은 본업으로는 형편이 어렵다고 생각해서 시작했고 본업이 끝나는시",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 112,
+      "case_id": "pickply_77",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "주변에서 많이 하길래 시작해보았고 24시간 열려있는 마켓이다보니 대응이 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 113,
+      "case_id": "pickply_78",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "친구가 주식 종목을 추천해줘서 한번해볼까해서 시작하게됐는데 처음에 수익 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 114,
+      "case_id": "pickply_79",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "용돈벌이로 시작햇다가 지속성에 어려움을느꼈어요 그래서 처음에는 꾸준히 하",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 115,
+      "case_id": "pickply_80",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "처음엔 수익 후기 보고 혹해서 시작했는데, 막상 해보니 꾸준한 시간 투자",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 116,
+      "case_id": "pickply_81",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "소소하게 시작하였으나 욕심이 커져 생각보다 일이커졌고 손절할 타이밍을 놓",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 117,
+      "case_id": "pickply_82",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "지인 추천으로 가볍게 시작했는데, 고객 확보가 생각보다 어렵고 시간 대비",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 118,
+      "case_id": "pickply_83",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "부수입을 위해 시작했으나 정보와 체력의 한계",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 119,
+      "case_id": "pickply_84",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "돈벌려고 시간마련",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 120,
+      "case_id": "pickply_85",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "블로그를 했는데 사람들이 뭘 좋아하는지, 그리고 그걸로 어떻게 수익을 내",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 121,
+      "case_id": "pickply_86",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "주변 지인의 추천으로 앱테크를 시작했고 처음엔 수익이 잘 나는듯 하였으나",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 122,
+      "case_id": "pickply_87",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "본업만으로 생계유지가 힘들고 시간이 남아서 찾아보다가 부업을 시작했습니다",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 123,
+      "case_id": "pickply_88",
+      "case_type": "failure_story",
+      "category_slug": "digital-products",
+      "source": "pickply",
+      "title": "인스타그램보고 시작했는데 희망심어주기만하고 쉽다해놓고 막상해보니 어렵더라",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 124,
+      "case_id": "pickply_89",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "여윳돈이 생겨서 공부고 해볼겸 투자를 시작햐봤는데 생각보다 성격이랑 맞지",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 125,
+      "case_id": "pickply_90",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "아기가 태어나서 돈이 쪼들렸기 때문에 부업을 고민하다가 시작하게 되었습니",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 126,
+      "case_id": "pickply_91",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "본업으로는 가정경제 상황을 유지하기 어려워서 쉽게 시작할 수 있는 배달 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 127,
+      "case_id": "pickply_92",
+      "case_type": "failure_story",
+      "category_slug": "talent-freelance",
+      "source": "pickply",
+      "title": "본업 외에 추가적인 수입을 원했으나 꾸준히 지속하기가 쉽지 않다.",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 128,
+      "case_id": "pickply_93",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "수익이 일정치 않아서 계속 해야하는지에대한 의문과 불안함으로 계속 이어나",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 129,
+      "case_id": "pickply_94",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "우연히 유튜브에서 보고 따라하기 시작했습니다 생각보다 적성에 맞아서 계속",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 130,
+      "case_id": "pickply_95",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "본업 수입 외 부가적인 수입으로 자산 증식 가속화를 꾀하려고 주식 투자를",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 131,
+      "case_id": "pickply_96",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "친구",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 132,
+      "case_id": "pickply_97",
+      "case_type": "failure_story",
+      "category_slug": "content-sns",
+      "source": "pickply",
+      "title": "생활비 마련하고자...좀 여유러운삶을 위해서 정보부족,자본투입을 해야 이",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 133,
+      "case_id": "pickply_98",
+      "case_type": "failure_story",
+      "category_slug": "investment",
+      "source": "pickply",
+      "title": "친구의 추천",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 134,
+      "case_id": "pickply_99",
+      "case_type": "failure_story",
+      "category_slug": "platform-labor",
+      "source": "pickply",
+      "title": "자투리시간 활용을 하면서 부수익을 벌기위해 앱테크를 시작하였는데 투자한 ",
+      "origin": "pickply_100"
+    },
+    {
+      "vector_index": 135,
+      "case_id": "pickply_100",
+      "case_type": "failure_story",
+      "category_slug": "online-commerce",
+      "source": "pickply",
+      "title": "유튜브 보던중 알고리즘으로 알게된 이후에 조금식 준비하고 시작했는데 경쟁",
+      "origin": "pickply_100"
+    }
+  ]
+}
