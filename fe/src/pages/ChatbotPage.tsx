@@ -85,15 +85,16 @@ export default function ChatbotPage() {
 
   const canSubmit = useMemo(() => draft.trim().length > 0 && !loading, [draft, loading]);
 
-  async function submitMessage(rawMessage: string) {
+  async function submitMessage(rawMessage: string, displayMessage?: string) {
     const message = rawMessage.trim();
+    const visibleMessage = (displayMessage ?? rawMessage).trim();
     if (!message || loading) {
       return;
     }
 
     setLoading(true);
     setDraft('');
-    setMessages((current) => [...current, { id: `user-${Date.now()}`, role: 'user', text: message }]);
+    setMessages((current) => [...current, { id: `user-${Date.now()}`, role: 'user', text: visibleMessage || message }]);
 
     try {
       const payload = await sendChatbotMessage({ sessionId, message });
@@ -153,7 +154,7 @@ export default function ChatbotPage() {
                 key={prompt.label}
                 type="button"
                 onClick={() => {
-                  void submitMessage(prompt.message);
+                  void submitMessage(prompt.message, prompt.label);
                 }}
                 className="rounded-[999px] border border-[#D7E5DC] bg-white px-[12px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] text-[#375E49]"
               >

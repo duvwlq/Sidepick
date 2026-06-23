@@ -36,7 +36,7 @@ public class ChatbotService {
     private static final String FALLBACK_REPLY =
             "지금은 답변을 바로 정리하지 못하고 있어요. 잠시 후 다시 시도해 주세요.";
     private static final String GUIDE_REDIRECT_REPLY =
-            "원하는 방향은 이해했어요. 가능하면 현재 상황, 쓸 수 있는 시간, 예산, 관심 분야를 한두 문장만 더 적어주시면 더 정확하게 안내해 드릴게요.";
+            "원하시는 방향은 이해했어요. 가능하면 현재 상황, 쓸 수 있는 시간, 예산, 관심 분야를 두세 문장만 더 적어주시면 더 정확하게 안내해드릴게요.";
 
     private final CurrentUserProvider currentUserProvider;
     private final ChatbotRateLimiter chatbotRateLimiter;
@@ -114,7 +114,8 @@ public class ChatbotService {
         String endpoint = aiServerProperties.url() + "/chatbot/message";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<AiChatbotRequest> entity = new HttpEntity<>(AiChatbotRequest.from(request, routeHint, analysisContext), headers);
+        HttpEntity<AiChatbotRequest> entity =
+                new HttpEntity<>(AiChatbotRequest.from(request, routeHint, analysisContext), headers);
         return aiRestTemplate.postForObject(endpoint, entity, AiChatbotResponse.class);
     }
 
@@ -123,7 +124,7 @@ public class ChatbotService {
         if (!analysisContext.isEmpty()) {
             Object summary = analysisContext.get("summary");
             if (summary instanceof String text && !text.isBlank()) {
-                reply = "현재는 간단한 안내만 가능하지만, 등록된 분석 기준으로 보면 " + text;
+                reply = "현재는 간단한 안내만 가능하지만 등록된 분석 기준으로 보면 " + text;
             }
         }
         Map<String, Object> explanation = new LinkedHashMap<>();
@@ -161,7 +162,10 @@ public class ChatbotService {
                     : report.explanation().matchedPatterns().stream().limit(3).toList());
             context.put("similarCases", report.similarCases() == null
                     ? List.of()
-                    : report.similarCases().stream().map(item -> item.title() == null ? item.caseId() : item.title()).limit(2).toList());
+                    : report.similarCases().stream()
+                            .map(item -> item.title() == null ? item.caseId() : item.title())
+                            .limit(2)
+                            .toList());
             return context;
         } catch (Exception exception) {
             log.debug("chatbot_analysis_context_unavailable experienceId={} detail={}", experienceId, exception.getMessage());
@@ -174,17 +178,22 @@ public class ChatbotService {
         if (normalized.isBlank()) {
             return TYPE_RAG;
         }
+        if (containsGuideIntent(normalized)) {
+            return TYPE_GUIDE_REDIRECT;
+        }
         if (containsAny(normalized,
                 "compare", "stats", "similar", "analysis", "case",
                 "비교", "통계", "유사", "분석", "사례")) {
             return TYPE_REACT;
         }
-        if (containsAny(normalized,
-                "guide", "help", "how", "what",
-                "가이드", "도움", "어떻게", "무엇")) {
-            return TYPE_GUIDE_REDIRECT;
-        }
         return normalized.length() < chatbotProperties.minimumGuideMessageLength() ? TYPE_RAG : TYPE_REACT;
+    }
+
+    private boolean containsGuideIntent(String message) {
+        return containsAny(message,
+                "guide", "help", "how", "what", "start", "begin", "first", "recommend", "possible",
+                "가이드", "도움", "어떻게", "무엇", "뭐부터", "어디서부터", "시작", "처음", "초기",
+                "추천", "가능", "할까요", "찾고 싶", "있을까요", "현실적");
     }
 
     private boolean containsAny(String message, String... keywords) {
