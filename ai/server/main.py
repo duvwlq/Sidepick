@@ -1,12 +1,27 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import Any, List, Optional
 from server.llm_analyzer import analyze_experience
+from server.chatbot_api import chatbot_process
+from server.chatbot_llm import llm_call as chatbot_llm_call, known_case_ids
 
 app = FastAPI(
     title="Sidepick AI Server",
     description="부업 실패 경험 분석 AI 서버",
     version="0.1.0"
+)
+
+# CORS — 로컬 FE 개발용 (localhost:5173 Vite default)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173", "http://127.0.0.1:5173",
+        "http://localhost:3000", "http://127.0.0.1:3000",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -84,6 +99,84 @@ async def analyze(req: AnalyzeRequest):
         raise HTTPException(
             status_code=500,
             detail=f"AI 분석 실패: {type(e).__name__}: {str(e)}"
+        )
+
+
+# ===== 챗봇 엔드포인트 (Pivot Day 데모용) =====
+
+class ChatbotRequest(BaseModel):
+    """챗봇 메시지 요청."""
+    message: str = Field(..., min_length=1, max_length=600, description="사용자 질문 (1~600자)")
+    category_slug: Optional[str] = Field(default=None, description="부업 카테고리 슬러그 (예: online-commerce)")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "message": "스마트스토어 시작 어떻게 해야 하나요?",
+                "category_slug": "online-commerce",
+            }
+        }
+
+
+class ChatbotResponseModel(BaseModel):
+    """챗봇 응답."""
+    status: str = Field(..., description="ok | fallback | blocked | guide_redirect")
+    reply: str
+    route: Optional[str] = None
+    cited_case_ids: List[str] = []
+    plan_b_reason: Optional[str] = None
+    confidence: Optional[float] = None
+    tool_calls: List[dict] = []
+    metadata: Optional[dict] = None
+
+
+@app.post(
+    "/api/chatbot/message",
+    response_model=ChatbotResponseModel,
+    summary="챗봇 메시지 처리",
+    description="입력 가드레일 → 라우팅 → Claude Sonnet 호출 → 출력 가드레일.",
+)
+async def chatbot_message(req: ChatbotRequest):
+    try:
+        # chatbot_process는 reply/cited만 보관하므로 llm 응답을 별도 보관
+        captured: dict[str, Any] = {}
+
+        def _llm_wrapper(**kw):
+            r = chatbot_llm_call(
+                message=kw["message"], route=kw["route"],
+                category_slug=req.category_slug,
+            )
+            captured.update(r)
+            return r
+
+        result = chatbot_process(
+            message=req.message,
+            category_slug=req.category_slug,
+            known_case_ids=known_case_ids(),
+            llm_call=_llm_wrapper,
+        )
+        meta: dict[str, Any] = dict(result.metadata or {})
+        meta.update({
+            "confidence": captured.get("confidence"),
+            "tool_calls": captured.get("tool_calls", []),
+            "model": captured.get("model"),
+            "tokens_in": captured.get("tokens_in"),
+            "tokens_out": captured.get("tokens_out"),
+        })
+        return ChatbotResponseModel(
+            status=result.status,
+            reply=result.reply,
+            route=result.route,
+            cited_case_ids=result.cited_case_ids or [],
+            plan_b_reason=result.plan_b_reason,
+            confidence=captured.get("confidence"),
+            tool_calls=captured.get("tool_calls", []),
+            metadata=meta,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"챗봇 처리 실패: {type(e).__name__}: {str(e)}",
         )
 
 
