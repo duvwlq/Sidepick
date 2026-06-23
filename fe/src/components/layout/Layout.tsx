@@ -1,4 +1,5 @@
-﻿import type { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import ChatbotFab from '../chatbot/ChatbotFab';
 import BottomNav from './BottomNav';
 import HeaderNav from './HeaderNav';
 
@@ -31,8 +32,6 @@ export default function Layout({
   onMenuClick,
   onRightIconClick,
 }: Props) {
-  void showStatusBar;
-
   return (
     <div
       className="mx-auto min-h-screen w-full max-w-[430px] overflow-x-clip bg-white notranslate"
@@ -44,6 +43,7 @@ export default function Layout({
           leftType={leftType}
           showRightIcon={showRightIcon}
           rightIcon={rightIcon}
+          showStatusBar={showStatusBar}
           onBack={onBack}
           onMenuClick={onMenuClick}
           onRightIconClick={onRightIconClick}
@@ -52,7 +52,7 @@ export default function Layout({
 
       <main
         translate="no"
-        className={`overflow-x-clip ${showHeader ? 'pt-[64px]' : ''} ${
+        className={`overflow-x-clip ${showHeader ? (showStatusBar ? 'pt-[123px]' : 'pt-[64px]') : ''} ${
           showBottomNav ? 'pb-[110px]' : ''
         }`}
       >
@@ -60,6 +60,8 @@ export default function Layout({
       </main>
 
       {showBottomNav ? <BottomNav /> : null}
+
+      <ChatbotFab />
     </div>
   );
 }
