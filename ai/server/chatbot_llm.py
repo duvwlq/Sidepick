@@ -28,8 +28,13 @@ from sentence_transformers import SentenceTransformer
 load_dotenv()
 
 AI_DIR = Path(__file__).resolve().parents[1]
-FAISS_PATH = AI_DIR / "data" / "faiss_index_v2.bin"
-METADATA_PATH = AI_DIR / "data" / "case_metadata_v2.json"
+# v2_with_faq: 사용자 사례 136 + 부업 가이드 FAQ 247 = 383 벡터 통합 인덱스
+FAISS_PATH = AI_DIR / "data" / "faiss_index_v2_with_faq.bin"
+METADATA_PATH = AI_DIR / "data" / "case_metadata_v2_with_faq.json"
+# 폴백: with_faq 인덱스가 없으면 v2 사례만 사용
+if not FAISS_PATH.exists():
+    FAISS_PATH = AI_DIR / "data" / "faiss_index_v2.bin"
+    METADATA_PATH = AI_DIR / "data" / "case_metadata_v2.json"
 FAILURE_PATTERN_PATH = AI_DIR / "data" / "failure_pattern.json"
 FAILURE_TIMING_PATH = AI_DIR / "data" / "failure_timing.json"
 
@@ -111,14 +116,18 @@ def search_cases(
         case = cases[idx]
         if category_slug and case.get("category_slug") != category_slug:
             continue
-        results.append({
+        item = {
             "case_id": case.get("case_id"),
             "title": case.get("title"),
             "category_slug": case.get("category_slug"),
             "case_type": case.get("case_type"),
             "source": case.get("source"),
             "similarity": float(score),
-        })
+        }
+        # FAQ 항목이면 answer 직접 노출 (RAG 컨텍스트에 사용)
+        if case.get("case_type") == "faq" and case.get("answer"):
+            item["answer"] = case["answer"]
+        results.append(item)
         if len(results) >= top_k:
             break
     return results
@@ -144,21 +153,23 @@ def known_case_ids() -> set[str]:
 SYSTEM_PROMPT = """당신은 사이드픽의 챗봇입니다. 부업 실패 분석 서비스 운영 중.
 
 [역할]
-- 사용자의 부업 질문에 대해 검색된 실제 사례 데이터만 인용하여 답변합니다.
-- 답변은 한국어, 50~200자, 친근한 톤.
-- 부업 분야 7개만 답변: online-commerce / content-sns / digital-products / platform-labor / talent-freelance / investment / offline-sidejob.
+- 사용자의 부업 질문에 대해 검색된 두 가지 데이터를 인용하여 답변합니다:
+  1) 사용자 작성 사례 (case_type: success_story / failure_story 등)
+  2) 부업 가이드 페이지 FAQ (case_type: faq) — answer 필드 직접 활용 가능
+- 답변은 한국어, 80~250자, 친근한 톤.
+- 부업 분야 7개 + 횡단 9개 모두 답변 가능: 사례는 부업 분야, FAQ는 모든 카테고리.
 
 [중요 안전 규칙]
-- 인용한 사례는 반드시 [case_id: blog_002] 형식으로 본문에 표기.
+- 인용한 항목은 반드시 [case_id: faq_online-commerce_1] 또는 [case_id: blog_002] 형식으로 본문에 표기.
 - 검색 결과에 없는 case_id를 만들어내지 마세요. 모르면 모른다고 답하세요.
+- FAQ 답변(case_type: faq)을 인용할 때는 그 답변 내용을 자연스럽게 풀어 쓰되 case_id 표기.
 - 광고·정치·욕설·의료·법률 전문 상담은 거부.
-- 횡단 주제(세금·마인드·법률)는 "부업 가이드 페이지를 참고하시는 게 좋아요" 안내.
 
 [출력 형식]
 JSON으로만 응답 (다른 설명 X):
 {
-  "reply": "답변 본문 (50~200자, [case_id] 인용 포함)",
-  "cited_case_ids": ["blog_002"],
+  "reply": "답변 본문 (80~250자, [case_id] 인용 포함)",
+  "cited_case_ids": ["faq_online-commerce_1", "blog_002"],
   "confidence": 0.85
 }
 """
@@ -173,11 +184,13 @@ def llm_call(
     client = _get_client()
 
     cases = search_cases(message, top_k=5, category_slug=category_slug)
-    case_context = "\n".join([
-        f"- [case_id: {c['case_id']}] {c['title']} "
-        f"(유사도 {c['similarity']:.2f}, {c['case_type']})"
-        for c in cases
-    ]) or "(검색된 사례 없음)"
+    # FAQ 항목은 answer까지 포함, 사례는 title만
+    def _fmt(c: dict) -> str:
+        base = f"- [case_id: {c['case_id']}] {c['title']} (유사도 {c['similarity']:.2f}, {c['case_type']})"
+        if c.get("case_type") == "faq" and c.get("answer"):
+            base += f"\n  답변: {c['answer'][:300]}"
+        return base
+    case_context = "\n".join([_fmt(c) for c in cases]) or "(검색된 사례 없음)"
 
     stats_context = ""
     if route == "react" and category_slug:
