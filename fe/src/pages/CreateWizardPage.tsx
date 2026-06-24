@@ -270,6 +270,24 @@ function buildAgentADraft(categorySlug: string, title: string, content: string) 
   };
 }
 
+function isNumericAgentAQuestion(slot: string) {
+  return slot === 'timeline' || slot === 'duration' || slot === 'daily_hours';
+}
+
+function getNumericAgentAPlaceholder(slot: string) {
+  if (slot === 'daily_hours') {
+    return '예: 2';
+  }
+  return '예: 3';
+}
+
+function getNumericAgentAUnit(slot: string) {
+  if (slot === 'daily_hours') {
+    return '시간';
+  }
+  return '개월';
+}
+
 function isValidationLikeError(error: unknown) {
   return error instanceof ApiError && (error.status === 400 || error.status === 422 || error.code === 'VALIDATION_ERROR');
 }
@@ -1191,7 +1209,25 @@ export default function CreateWizardPage() {
                     <p className="text-[12px] leading-[16.8px] text-[#8A8A8A]">{question.hint}</p>
                   ) : null}
 
-                  {question.input_type === 'select' && question.options?.length ? (
+                  {isNumericAgentAQuestion(question.slot) ? (
+                    <label className="flex h-[44px] items-center rounded-[12px] border border-[#E0E0E0] px-[12px]">
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        inputMode="numeric"
+                        value={agentAAnswers[question.slot] ?? ''}
+                        onChange={(event) =>
+                          setAgentAAnswers((current) => ({
+                            ...current,
+                            [question.slot]: event.target.value.replace(/[^\d]/g, ''),
+                          }))}
+                        placeholder={getNumericAgentAPlaceholder(question.slot)}
+                        className="flex-1 bg-transparent text-[14px] text-[#131416] outline-none placeholder:text-[#B6B6B6]"
+                      />
+                      <span className="text-[13px] text-[#8A8A8A]">{getNumericAgentAUnit(question.slot)}</span>
+                    </label>
+                  ) : question.input_type === 'select' && question.options?.length ? (
                     <div className="flex flex-wrap gap-[8px]">
                       {question.options.map((option) => {
                         const selected = agentAAnswers[question.slot] === option;
