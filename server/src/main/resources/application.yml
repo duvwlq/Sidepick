@@ -120,7 +120,7 @@ app:
   chatbot:
     rate-limit-per-min: ${APP_CHATBOT_RATE_LIMIT_PER_MIN:10}
     max-message-length: ${APP_CHATBOT_MAX_MESSAGE_LENGTH:500}
-    minimum-guide-message-length: ${APP_CHATBOT_MIN_GUIDE_MESSAGE_LENGTH:50}
+    minimum-guide-message-length: ${APP_CHATBOT_MIN_GUIDE_MESSAGE_LENGTH:25}
     queue-capacity: ${APP_CHATBOT_QUEUE_CAPACITY:20}
     daily-token-limit: ${APP_CHATBOT_DAILY_TOKEN_LIMIT:12000}
   latency-metrics:

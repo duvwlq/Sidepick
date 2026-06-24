@@ -46,7 +46,20 @@ public class ChatbotSafetyService {
     }
 
     public boolean needsGuideRedirect(String message, String routeHint) {
-        return message.length() < properties.minimumGuideMessageLength() && "rag".equals(routeHint);
+        return message.length() < properties.minimumGuideMessageLength()
+                && "rag".equals(routeHint)
+                && !hasExplicitQuestionIntent(message);
+    }
+
+    public boolean hasExplicitQuestionIntent(String message) {
+        String normalized = message == null ? "" : message.toLowerCase(Locale.ROOT);
+        if (normalized.contains("?") || normalized.contains("？")) {
+            return true;
+        }
+        return containsBannedPhrase(normalized, List.of(
+                "how", "what", "start", "begin", "recommend", "possible", "should i", "can i",
+                "어떻게", "뭐부터", "무엇", "추천", "가능", "시작", "병행", "현실적", "찾고 싶"
+        ));
     }
 
     public String validateUpstream(AiChatbotResponse response) {
