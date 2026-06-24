@@ -19,6 +19,13 @@ export type UserSummary = {
   createdAt: string;
 };
 
+export type PublicUserSummary = {
+  id: number;
+  nickname: string;
+  ageGroup: string | null;
+  profileImage: string | null;
+};
+
 export type AuthPayload = {
   user: UserSummary;
   tokenType: string;
@@ -58,7 +65,7 @@ export type AnalysisSummary = {
 
 export type Experience = {
   id: number;
-  author: UserSummary;
+  author: PublicUserSummary;
   category: Category;
   caseStatus: 'FAILURE' | 'SUCCESS';
   title: string;

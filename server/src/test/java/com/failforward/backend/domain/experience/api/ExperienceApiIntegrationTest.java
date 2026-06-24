@@ -125,7 +125,10 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.author.email").value("owner@sidepick.dev"))
+                .andExpect(jsonPath("$.data.author.nickname").value("ownerUser"))
+                .andExpect(jsonPath("$.data.author.email").doesNotExist())
+                .andExpect(jsonPath("$.data.author.fullName").doesNotExist())
+                .andExpect(jsonPath("$.data.author.birthDate").doesNotExist())
                 .andExpect(jsonPath("$.data.averageDailyHours").value("1_TO_3_HOURS"))
                 .andExpect(jsonPath("$.data.isConcurrentWithMainJob").value(true))
                 .andExpect(jsonPath("$.data.monthlyRevenue").value(150000))
@@ -137,11 +140,17 @@ class ExperienceApiIntegrationTest extends ApiIntegrationTestSupport {
         mockMvc.perform(get("/api/experiences"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.experiences[0].id").value(experienceId));
+                .andExpect(jsonPath("$.data.experiences[0].id").value(experienceId))
+                .andExpect(jsonPath("$.data.experiences[0].author.email").doesNotExist())
+                .andExpect(jsonPath("$.data.experiences[0].author.fullName").doesNotExist())
+                .andExpect(jsonPath("$.data.experiences[0].author.birthDate").doesNotExist());
 
         mockMvc.perform(get("/api/experiences/{experienceId}", experienceId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.id").value(experienceId))
+                .andExpect(jsonPath("$.data.author.email").doesNotExist())
+                .andExpect(jsonPath("$.data.author.fullName").doesNotExist())
+                .andExpect(jsonPath("$.data.author.birthDate").doesNotExist())
                 .andExpect(jsonPath("$.data.viewCount").value(1));
 
         mockMvc.perform(patch("/api/experiences/{experienceId}", experienceId)

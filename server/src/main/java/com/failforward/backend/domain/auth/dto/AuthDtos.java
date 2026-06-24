@@ -106,6 +106,22 @@ public final class AuthDtos {
         }
     }
 
+    public record PublicUserSummary(
+            Long id,
+            String nickname,
+            String ageGroup,
+            String profileImage
+    ) {
+        public static PublicUserSummary from(User user) {
+            return new PublicUserSummary(
+                    user.getId(),
+                    user.getNickname(),
+                    user.getAgeGroup(),
+                    user.getProfileImage()
+            );
+        }
+    }
+
     public record AuthPayload(
             UserSummary user,
             String tokenType,

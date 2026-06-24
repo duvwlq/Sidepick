@@ -3,7 +3,7 @@ package com.failforward.backend.domain.experience.dto;
 import com.failforward.backend.common.api.PageInfo;
 import com.failforward.backend.domain.analysis.dto.AnalysisDtos.PatternAnalysisResponse;
 import com.failforward.backend.domain.analysis.entity.AiAnalysis;
-import com.failforward.backend.domain.auth.dto.AuthDtos.UserSummary;
+import com.failforward.backend.domain.auth.dto.AuthDtos.PublicUserSummary;
 import com.failforward.backend.domain.category.dto.CategoryResponse;
 import com.failforward.backend.domain.experience.entity.FailureExperience;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -96,7 +96,7 @@ public final class ExperienceDtos {
 
     public record ExperienceResponse(
             Long id,
-            UserSummary author,
+            PublicUserSummary author,
             CategoryResponse category,
             String caseStatus,
             String title,
@@ -145,7 +145,7 @@ public final class ExperienceDtos {
             Map<String, Object> structured = parseObject(experience.getStructuredData());
             return new ExperienceResponse(
                     experience.getId(),
-                    UserSummary.from(experience.getUser()),
+                    PublicUserSummary.from(experience.getUser()),
                     CategoryResponse.from(experience.getCategory()),
                     experience.getCaseStatus(),
                     experience.getTitle(),

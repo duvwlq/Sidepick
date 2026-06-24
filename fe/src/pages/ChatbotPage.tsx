@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
 import BottomNav from '../components/layout/BottomNav';
@@ -8,21 +8,22 @@ import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken } from '../lib/session';
 
 const CHATBOT_SESSION_STORAGE_KEY = 'sidepick.chatbot.sessionId';
+
 const QUICK_PROMPTS = [
   {
     label: '스마트스토어를 시작하려는데 뭐부터 해야 할까요?',
     message:
-      '스마트스토어를 시작하려고 하는데 자본은 많지 않고 처음이라서요. 무엇부터 준비하면 좋을지 단계별로 알려주세요.',
+      '스마트스토어를 시작하려고 하는데 자본이 많지 않고 처음이라서요. 무엇부터 준비하면 좋을지 단계별로 알려주세요.',
   },
   {
     label: '본업이랑 병행 가능한 부업을 찾고 싶어요.',
     message:
-      '지금 본업을 하면서 퇴근 후 2~3시간 정도 쓸 수 있어요. 초기 비용이 크지 않고 병행 가능한 현실적인 부업 방향을 추천해 주세요.',
+      '지금 본업을 하면서 퇴근 후 2~3시간 정도만 쓸 수 있어요. 초기 비용이 적고 병행 가능한 현실적인 부업 방향을 추천해주세요.',
   },
   {
     label: '초기 자본이 적을 때 현실적인 선택지가 있을까요?',
     message:
-      '초기 자본이 많지 않은 상태에서 시작할 수 있는 부업이나 소규모 창업 선택지를 찾고 있어요. 위험을 줄이면서 시작하는 방법도 같이 알려주세요.',
+      '초기 자본이 많지 않은 상태에서 시작할 수 있는 부업이나 소자본 창업 선택지를 찾고 있어요. 위험은 줄이면서 시작하는 방법도 같이 알려주세요.',
   },
 ] as const;
 
@@ -52,12 +53,15 @@ function buildAssistantMeta(payload: ChatbotMessagePayload) {
   if (payload.status === 'fallback') {
     return 'AI 챗봇';
   }
+
   return null;
 }
 
 export default function ChatbotPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [sessionId] = useState(() => readOrCreateSessionId());
   const [draft, setDraft] = useState('');
   const [loading, setLoading] = useState(false);
@@ -82,6 +86,22 @@ export default function ChatbotPage() {
       { replace: true },
     );
   }, [navigate, token]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ block: 'end' });
+  }, [loading, messages]);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = '0px';
+    const nextHeight = Math.min(textarea.scrollHeight, 120);
+    textarea.style.height = `${Math.max(nextHeight, 44)}px`;
+    textarea.style.overflowY = textarea.scrollHeight > 120 ? 'auto' : 'hidden';
+  }, [draft]);
 
   const canSubmit = useMemo(() => draft.trim().length > 0 && !loading, [draft, loading]);
 
@@ -108,13 +128,13 @@ export default function ChatbotPage() {
         },
       ]);
     } catch (error) {
-      showToast(resolveErrorMessage(error, '챗봇 답변을 불러오지 못했습니다.'));
+      showToast(resolveErrorMessage(error, '챗봇 응답을 불러오지 못했습니다.'));
       setMessages((current) => [
         ...current,
         {
           id: `assistant-error-${Date.now()}`,
           role: 'assistant',
-          text: '지금은 답변을 불러오지 못하고 있어요. 잠시 후 다시 시도해 주세요.',
+          text: '지금은 응답을 불러오지 못하고 있어요. 잠시 후 다시 시도해주세요.',
           meta: '오류',
         },
       ]);
@@ -124,9 +144,9 @@ export default function ChatbotPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F8F8]">
-      <div className="mx-auto flex min-h-screen w-full max-w-[375px] flex-col bg-[#F8F8F8] pb-[104px]">
-        <header className="sticky top-0 z-10 bg-white">
+    <div className="min-h-[100svh] overflow-hidden bg-white md:px-[24px] md:py-[24px]">
+      <div className="mx-auto flex h-[100svh] w-full max-w-[375px] flex-col overflow-hidden bg-[#F8F8F8] md:h-[calc(100svh-48px)] md:max-h-[920px] md:rounded-[32px] md:bg-white md:shadow-none">
+        <header className="sticky top-0 z-10 bg-white shadow-[0_1px_0_0_rgba(19,20,22,0.06)]">
           <div className="flex h-[64px] items-center justify-between px-[16px] py-[20px]">
             <button
               type="button"
@@ -147,7 +167,7 @@ export default function ChatbotPage() {
           </div>
         </header>
 
-        <main className="flex flex-1 flex-col gap-[12px] px-[16px] py-[16px]">
+        <main className="chatbot-scroll flex min-h-0 flex-1 flex-col gap-[12px] overflow-y-auto px-[16px] py-[16px] pb-[188px]">
           <div className="flex flex-wrap gap-[8px]">
             {QUICK_PROMPTS.map((prompt) => (
               <button
@@ -156,20 +176,20 @@ export default function ChatbotPage() {
                 onClick={() => {
                   void submitMessage(prompt.message, prompt.label);
                 }}
-                className="rounded-[999px] border border-[#D7E5DC] bg-white px-[12px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] text-[#375E49]"
+                className="rounded-[999px] border border-[#D7E5DC] bg-white px-[12px] py-[8px] text-left font-['Pretendard'] text-[12px] font-[500] leading-[16.8px] text-[#375E49] transition-colors hover:border-[#BFD4C7] hover:bg-[#F8FCF9]"
               >
                 {prompt.label}
               </button>
             ))}
           </div>
 
-          <div className="flex flex-1 flex-col gap-[10px]">
+          <div className="flex flex-col gap-[10px]">
             {messages.map((message) => {
               const isAssistant = message.role === 'assistant';
               return (
                 <div key={message.id} className={`flex ${isAssistant ? 'justify-start' : 'justify-end'}`}>
                   <div
-                    className={`max-w-[287px] rounded-[16px] px-[14px] py-[12px] ${
+                    className={`max-w-[287px] rounded-[20px] px-[14px] py-[12px] shadow-[0_10px_24px_rgba(17,24,39,0.04)] ${
                       isAssistant ? 'bg-white text-[#131416]' : 'bg-[#5A876E] text-white'
                     }`}
                   >
@@ -182,7 +202,7 @@ export default function ChatbotPage() {
                         {message.meta}
                       </p>
                     ) : null}
-                    <p className="whitespace-pre-wrap font-['Pretendard'] text-[14px] font-[400] leading-[20px]">
+                    <p className="break-words whitespace-pre-wrap font-['Pretendard'] text-[13px] font-[400] leading-[19px]">
                       {message.text}
                     </p>
                   </div>
@@ -192,22 +212,30 @@ export default function ChatbotPage() {
 
             {loading ? (
               <div className="flex justify-start">
-                <div className="rounded-[16px] bg-white px-[14px] py-[12px] font-['Pretendard'] text-[14px] font-[400] leading-[20px] text-[#6B6B6B]">
+                <div className="rounded-[20px] bg-white px-[14px] py-[12px] font-['Pretendard'] text-[13px] font-[400] leading-[19px] text-[#6B6B6B] shadow-[0_10px_24px_rgba(17,24,39,0.04)]">
                   답변을 정리하는 중입니다...
                 </div>
               </div>
             ) : null}
+            <div ref={messagesEndRef} />
           </div>
         </main>
 
-        <div className="fixed bottom-[84px] left-1/2 z-20 flex w-full max-w-[375px] -translate-x-1/2 bg-[#F8F8F8] px-[16px] py-[12px]">
-          <div className="flex w-full items-end gap-[8px] rounded-[20px] border border-[#DDE5E0] bg-white p-[8px]">
+        <div className="fixed bottom-[96px] left-1/2 z-20 flex w-full max-w-[375px] -translate-x-1/2 bg-white px-[16px] py-[12px] md:rounded-b-[32px]">
+          <div className="flex w-full items-end gap-[8px] rounded-[22px] border border-[#DDE5E0] bg-white p-[8px] shadow-[0_8px_24px_rgba(90,135,110,0.08)]">
             <textarea
+              ref={textareaRef}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  void submitMessage(draft);
+                }
+              }}
               placeholder="예: 퇴근 후 2시간으로 시작할 수 있는 부업이 있을까요?"
               rows={1}
-              className="max-h-[120px] min-h-[44px] flex-1 resize-none bg-transparent px-[8px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[20px] text-[#131416] outline-none placeholder:text-[#B3B3B3]"
+              className="chatbot-textarea min-h-[44px] flex-1 resize-none overflow-hidden bg-transparent px-[8px] py-[10px] font-['Pretendard'] text-[14px] font-[400] leading-[20px] text-[#131416] outline-none placeholder:text-[#B3B3B3]"
             />
             <button
               type="button"
@@ -215,7 +243,7 @@ export default function ChatbotPage() {
                 void submitMessage(draft);
               }}
               disabled={!canSubmit}
-              className={`h-[44px] shrink-0 rounded-[14px] px-[14px] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] ${
+              className={`h-[44px] shrink-0 rounded-[14px] px-[14px] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] transition-colors ${
                 canSubmit ? 'bg-[#5A876E] text-white' : 'bg-[#E5E5E5] text-[#9A9A9A]'
               }`}
             >

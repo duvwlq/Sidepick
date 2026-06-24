@@ -51,6 +51,9 @@ class CommentApiNoTransactionIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.id").value(commentId))
                 .andExpect(jsonPath("$.data.content").value("Comment after update"))
-                .andExpect(jsonPath("$.data.author.email").value("comment_no_tx@sidepick.dev"));
+                .andExpect(jsonPath("$.data.author.nickname").value("commentNoTx"))
+                .andExpect(jsonPath("$.data.author.email").doesNotExist())
+                .andExpect(jsonPath("$.data.author.fullName").doesNotExist())
+                .andExpect(jsonPath("$.data.author.birthDate").doesNotExist());
     }
 }
