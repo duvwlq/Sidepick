@@ -14,13 +14,13 @@ class ChatbotLlmTest(unittest.TestCase):
     def test_returns_fallback_when_search_raises(self) -> None:
         with patch.object(chatbot_llm, "search_cases", side_effect=RuntimeError("embedder unavailable")):
             result = chatbot_llm.llm_call("스마트스토어 시작은 어떻게 해요?", category_slug="online-commerce")
-        self.assertEqual("fallback", result["status"])
+        self.assertNotIn("status", result)
         self.assertIn("search_error:RuntimeError:embedder unavailable", result["error"])
 
     def test_returns_fallback_when_search_results_missing(self) -> None:
         with patch.object(chatbot_llm, "search_cases", return_value=[]):
             result = chatbot_llm.llm_call("스마트스토어 시작은 어떻게 해요?", category_slug="online-commerce")
-        self.assertEqual("ok", result["status"])
+        self.assertNotIn("status", result)
         self.assertEqual([], result["cited_case_ids"])
 
     def test_returns_fallback_on_upstream_exception(self) -> None:
@@ -30,7 +30,7 @@ class ChatbotLlmTest(unittest.TestCase):
             return_value=[{"case_id": "blog_001", "title": "제목", "similarity": 0.9, "case_type": "failure"}],
         ), patch.object(chatbot_llm, "_get_client", side_effect=RuntimeError("missing key")):
             result = chatbot_llm.llm_call("스마트스토어 시작은 어떻게 해요?", category_slug="online-commerce")
-        self.assertEqual("fallback", result["status"])
+        self.assertNotIn("status", result)
         self.assertIn("upstream_error:RuntimeError:missing key", result["error"])
 
     def test_returns_fallback_on_invalid_json(self) -> None:
@@ -59,7 +59,7 @@ class ChatbotLlmTest(unittest.TestCase):
             return_value=[{"case_id": "blog_001", "title": "제목", "similarity": 0.9, "case_type": "failure"}],
         ), patch.object(chatbot_llm, "_get_client", return_value=Client()):
             result = chatbot_llm.llm_call("스마트스토어 시작은 어떻게 해요?", category_slug="online-commerce")
-        self.assertEqual("fallback", result["status"])
+        self.assertNotIn("status", result)
         self.assertTrue(result["error"].startswith("json_parse:"))
 
 
@@ -71,7 +71,7 @@ class ChatbotLlmTest(unittest.TestCase):
                 category_slug="online-commerce",
             )
         search_cases.assert_not_called()
-        self.assertEqual("ok", result["status"])
+        self.assertNotIn("status", result)
         self.assertEqual([], result["cited_case_ids"])
 
 

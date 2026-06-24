@@ -1,8 +1,21 @@
+"""
+chatbot_llm.py — 챗봇 LLM 실호출 + Tool 함수 (Pivot Day 데모용)
+
+chatbot_api.py의 stub `llm_call`을 대체할 실제 구현.
+- search_cases(query, category): FAISS v2 유사 사례 검색
+- query_stats(category): 카테고리별 통계 조회
+- llm_call(message, route): Claude Sonnet 4.5 호출 (RAG + JSON 응답)
+
+격리 원칙: chatbot_api.py는 건드리지 않음. 이 파일만 import해서 주입.
+
+작성: 팀장(오혜림) — 2026-06-24
+의존: ANTHROPIC_API_KEY / faiss_index_v2.bin / case_metadata_v2.json
+"""
+
 from __future__ import annotations
 
 import json
 import os
-import re
 from pathlib import Path
 from typing import Any
 
@@ -35,8 +48,13 @@ except ImportError:  # pragma: no cover - environment dependent
 load_dotenv()
 
 AI_DIR = Path(__file__).resolve().parents[1]
-FAISS_PATH = AI_DIR / "data" / "faiss_index_v2.bin"
-METADATA_PATH = AI_DIR / "data" / "case_metadata_v2.json"
+# v2_with_faq: 사용자 사례 136 + 부업 가이드 FAQ 247 = 383 벡터 통합 인덱스
+FAISS_PATH = AI_DIR / "data" / "faiss_index_v2_with_faq.bin"
+METADATA_PATH = AI_DIR / "data" / "case_metadata_v2_with_faq.json"
+# 폴백: with_faq 인덱스가 없으면 v2 사례만 사용
+if not FAISS_PATH.exists():
+    FAISS_PATH = AI_DIR / "data" / "faiss_index_v2.bin"
+    METADATA_PATH = AI_DIR / "data" / "case_metadata_v2.json"
 FAILURE_PATTERN_PATH = AI_DIR / "data" / "failure_pattern.json"
 FAILURE_TIMING_PATH = AI_DIR / "data" / "failure_timing.json"
 
@@ -76,7 +94,7 @@ def _get_index():
     return _index
 
 
-def _get_metadata() -> dict[str, Any]:
+def _get_metadata() -> dict:
     global _metadata
     if _metadata is None and METADATA_PATH.exists():
         _metadata = json.loads(METADATA_PATH.read_text(encoding="utf-8"))
@@ -92,14 +110,14 @@ def _get_embedder():
     return _embedder
 
 
-def _get_failure_pattern() -> dict[str, Any]:
+def _get_failure_pattern() -> dict:
     global _failure_pattern
     if _failure_pattern is None and FAILURE_PATTERN_PATH.exists():
         _failure_pattern = json.loads(FAILURE_PATTERN_PATH.read_text(encoding="utf-8"))
     return _failure_pattern or {}
 
 
-def _get_failure_timing() -> dict[str, Any]:
+def _get_failure_timing() -> dict:
     global _failure_timing
     if _failure_timing is None and FAILURE_TIMING_PATH.exists():
         _failure_timing = json.loads(FAILURE_TIMING_PATH.read_text(encoding="utf-8"))
@@ -107,37 +125,47 @@ def _get_failure_timing() -> dict[str, Any]:
 
 
 def _tokenize(text: str) -> list[str]:
-    return [token for token in re.split(r"\W+", text.lower()) if len(token) >= 2]
+    tokens: list[str] = []
+    current: list[str] = []
+    for char in text.lower():
+        if char.isalnum() or char in {"-", "_"}:
+            current.append(char)
+            continue
+        if len(current) >= 2:
+            tokens.append("".join(current))
+        current = []
+    if len(current) >= 2:
+        tokens.append("".join(current))
+    return tokens
 
 
 def _lexical_search_cases(
     query: str,
-    cases: list[dict[str, Any]],
+    cases: list[dict],
     *,
     top_k: int,
     category_slug: str | None,
-) -> list[dict[str, Any]]:
+) -> list[dict]:
     query_tokens = set(_tokenize(query))
     if not query_tokens:
         return []
 
-    scored: list[tuple[float, dict[str, Any]]] = []
+    scored: list[tuple[float, dict]] = []
     for case in cases:
         if category_slug and case.get("category_slug") != category_slug:
             continue
-        title = str(case.get("title") or "")
-        title_tokens = set(_tokenize(title))
+        haystack = " ".join(
+            str(case.get(field) or "")
+            for field in ("title", "answer", "category_slug", "case_type")
+        )
+        title_tokens = set(_tokenize(haystack))
         if not title_tokens:
             continue
         overlap = len(query_tokens & title_tokens)
         if overlap == 0:
             continue
         score = overlap / len(query_tokens | title_tokens)
-        scored.append((score, case))
-
-    scored.sort(key=lambda item: item[0], reverse=True)
-    return [
-        {
+        item = {
             "case_id": case.get("case_id"),
             "title": case.get("title"),
             "category_slug": case.get("category_slug"),
@@ -145,108 +173,106 @@ def _lexical_search_cases(
             "source": case.get("source"),
             "similarity": float(score),
         }
-        for score, case in scored[:top_k]
-    ]
+        if case.get("case_type") == "faq" and case.get("answer"):
+            item["answer"] = case["answer"]
+        scored.append((score, item))
+
+    scored.sort(key=lambda pair: pair[0], reverse=True)
+    return [item for _, item in scored[:top_k]]
 
 
-def search_cases(query: str, top_k: int = 5, category_slug: str | None = None) -> list[dict[str, Any]]:
+def search_cases(
+    query: str, top_k: int = 5, category_slug: str | None = None,
+) -> list[dict]:
+    """FAISS v2 유사 사례 검색 (Tool 1)."""
     index = _get_index()
-    metadata = _get_metadata()
-    cases = metadata.get("cases", [])
+    meta = _get_metadata()
+    cases = meta.get("cases", [])
     if not cases:
         return []
     if not index or np is None or SentenceTransformer is None:
         return _lexical_search_cases(query, cases, top_k=top_k, category_slug=category_slug)
 
-    vector = _get_embedder().encode([query], convert_to_numpy=True)
-    norm = np.linalg.norm(vector, axis=1, keepdims=True)
-    norm[norm == 0] = 1.0
-    vector = (vector / norm).astype("float32")
+    embedder = _get_embedder()
+    vec = embedder.encode([query], convert_to_numpy=True)
+    vec = vec / np.linalg.norm(vec, axis=1, keepdims=True)
+    vec = vec.astype("float32")
 
     fetch_k = top_k * 3 if category_slug else top_k
-    scores, indices = index.search(vector, min(fetch_k, len(cases)))
+    scores, indices = index.search(vec, min(fetch_k, len(cases)))
 
-    results: list[dict[str, Any]] = []
+    results: list[dict] = []
     for idx, score in zip(indices[0], scores[0]):
         if idx < 0 or idx >= len(cases):
             continue
         case = cases[idx]
         if category_slug and case.get("category_slug") != category_slug:
             continue
-        results.append(
-            {
-                "case_id": case.get("case_id"),
-                "title": case.get("title"),
-                "category_slug": case.get("category_slug"),
-                "case_type": case.get("case_type"),
-                "source": case.get("source"),
-                "similarity": float(score),
-            }
-        )
+        item = {
+            "case_id": case.get("case_id"),
+            "title": case.get("title"),
+            "category_slug": case.get("category_slug"),
+            "case_type": case.get("case_type"),
+            "source": case.get("source"),
+            "similarity": float(score),
+        }
+        # FAQ 항목이면 answer 직접 노출 (RAG 컨텍스트에 사용)
+        if case.get("case_type") == "faq" and case.get("answer"):
+            item["answer"] = case["answer"]
+        results.append(item)
         if len(results) >= top_k:
             break
     return results
 
 
-def query_stats(category_slug: str) -> dict[str, Any]:
+def query_stats(category_slug: str) -> dict:
+    """카테고리별 실패 패턴·시점 통계 (Tool 2)."""
+    pattern = _get_failure_pattern()
+    timing = _get_failure_timing()
     return {
         "category_slug": category_slug,
-        "failure_pattern": _get_failure_pattern().get(category_slug, {}),
-        "failure_timing": _get_failure_timing().get(category_slug, {}),
+        "failure_pattern": pattern.get(category_slug, {}),
+        "failure_timing": timing.get(category_slug, {}),
     }
 
 
 def known_case_ids() -> set[str]:
-    metadata = _get_metadata()
-    return {case.get("case_id") for case in metadata.get("cases", []) if case.get("case_id")}
+    """출력 가드레일용 — 메타데이터에 있는 case_id 전체."""
+    meta = _get_metadata()
+    return {c.get("case_id") for c in meta.get("cases", []) if c.get("case_id")}
 
 
-SYSTEM_PROMPT = """당신은 사이드픽의 챗봇입니다. 부업 실패 분석 서비스 운영 중입니다.
+SYSTEM_PROMPT = """당신은 사이드픽의 챗봇입니다. 부업 실패 분석 서비스 운영 중.
 
 [역할]
-- 사용자의 부업 질문에 대해 검색된 실제 사례 데이터만 인용하여 답변합니다.
-- 답변은 한국어, 50~200자, 친근한 톤입니다.
-- 검색 결과에 없는 case_id를 만들어내지 않습니다.
+- 사용자의 부업 질문에 대해 검색된 두 가지 데이터를 인용하여 답변합니다:
+  1) 사용자 작성 사례 (case_type: success_story / failure_story 등)
+  2) 부업 가이드 페이지 FAQ (case_type: faq) — answer 필드 직접 활용 가능
+- 답변은 한국어, 80~250자, 친근한 톤.
+- 부업 분야 7개 + 횡단 9개 모두 답변 가능: 사례는 부업 분야, FAQ는 모든 카테고리.
+
+[중요 안전 규칙]
+- 인용한 항목은 반드시 [case_id: faq_online-commerce_1] 또는 [case_id: blog_002] 형식으로 본문에 표기.
+- 검색 결과에 없는 case_id를 만들어내지 마세요. 모르면 모른다고 답하세요.
+- FAQ 답변(case_type: faq)을 인용할 때는 그 답변 내용을 자연스럽게 풀어 쓰되 case_id 표기.
+- 광고·정치·욕설·의료·법률 전문 상담은 거부.
 
 [출력 형식]
-JSON으로만 응답하세요:
+JSON으로만 응답 (다른 설명 X):
 {
-  "reply": "답변 본문",
-  "cited_case_ids": ["blog_002"],
+  "reply": "답변 본문 (80~250자, [case_id] 인용 포함)",
+  "cited_case_ids": ["faq_online-commerce_1", "blog_002"],
   "confidence": 0.85
 }
 """
 
 
-def _format_success(
-    *,
-    reply: str,
-    cited_case_ids: list[str],
-    confidence: float,
-    model: str | None,
-    tokens_in: int | None,
-    tokens_out: int | None,
-    tool_calls: list[dict[str, Any]],
-) -> dict[str, Any]:
-    return {
-        "status": "ok",
-        "reply": reply,
-        "cited_case_ids": cited_case_ids,
-        "confidence": confidence,
-        "model": model,
-        "tokens_in": tokens_in,
-        "tokens_out": tokens_out,
-        "tool_calls": tool_calls,
-    }
-
-
 def _format_guide_redirect(
     reply: str = GUIDE_REDIRECT_REPLY,
     *,
-    tool_calls: list[dict[str, Any]] | None = None,
-) -> dict[str, Any]:
+    tool_calls: list[dict] | None = None,
+) -> dict:
     return {
-        "status": "ok",
         "reply": reply,
         "cited_case_ids": [],
         "confidence": 0.35,
@@ -261,16 +287,17 @@ def _format_fallback(
     reply: str,
     *,
     error: str,
-    tool_calls: list[dict[str, Any]] | None = None,
-) -> dict[str, Any]:
+    tool_calls: list[dict] | None = None,
+) -> dict:
     return {
-        "status": "fallback",
         "reply": reply,
         "cited_case_ids": [],
         "confidence": 0.0,
         "error": error,
-        "tool_calls": tool_calls or [],
         "model": LLM_MODEL,
+        "tokens_in": None,
+        "tokens_out": None,
+        "tool_calls": tool_calls or [],
     }
 
 
@@ -278,30 +305,42 @@ def llm_call(
     message: str,
     route: str = "simple_rag",
     category_slug: str | None = None,
-) -> dict[str, Any]:
+) -> dict:
+    """챗봇 LLM 호출 — chatbot_api.chatbot_process의 llm_call 인자로 주입."""
     if route == "guide_redirect":
         return _format_guide_redirect(
             tool_calls=[{"name": "search_cases", "result_count": 0, "skipped": True}]
         )
 
     try:
-        cases = search_cases(message, top_k=5, category_slug=category_slug)
-    except Exception as exc:
+        client = _get_client()
+    except Exception as e:
         return _format_fallback(
-            "지금은 검색 모델을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
-            error=f"search_error:{type(exc).__name__}:{exc}",
+            "지금은 AI 응답 연결이 불안정해요. 잠시 후 다시 시도해주세요.",
+            error=f"upstream_error:{type(e).__name__}:{e}",
             tool_calls=[{"name": "search_cases", "result_count": 0}],
         )
 
-    tool_calls: list[dict[str, Any]] = [{"name": "search_cases", "result_count": len(cases)}]
-    if not cases:
-        if route == "simple_rag":
-            return _format_guide_redirect(tool_calls=tool_calls)
+    try:
+        cases = search_cases(message, top_k=5, category_slug=category_slug)
+    except Exception as e:
         return _format_fallback(
-            "아직 참고할 사례가 부족해서 바로 답하기 어려워요. 질문을 더 구체적으로 적어주시거나 잠시 후 다시 시도해주세요.",
-            error="no_search_results",
-            tool_calls=tool_calls,
+            "지금은 검색 모델을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
+            error=f"search_error:{type(e).__name__}:{e}",
+            tool_calls=[{"name": "search_cases", "result_count": 0}],
         )
+
+    tool_calls: list[dict] = [{"name": "search_cases", "result_count": len(cases)}]
+    if not cases and route == "simple_rag":
+        return _format_guide_redirect(tool_calls=tool_calls)
+
+    # FAQ 항목은 answer까지 포함, 사례는 title만
+    def _fmt(c: dict) -> str:
+        base = f"- [case_id: {c['case_id']}] {c['title']} (유사도 {c['similarity']:.2f}, {c['case_type']})"
+        if c.get("case_type") == "faq" and c.get("answer"):
+            base += f"\n  답변: {c['answer'][:300]}"
+        return base
+    case_context = "\n".join([_fmt(c) for c in cases]) or "(검색된 사례 없음)"
 
     stats_context = ""
     if route == "react" and category_slug:
@@ -309,10 +348,6 @@ def llm_call(
         stats_context = f"\n\n[통계 데이터]\n{json.dumps(stats, ensure_ascii=False)[:500]}"
         tool_calls.append({"name": "query_stats", "category": category_slug})
 
-    case_context = "\n".join(
-        f"- [case_id: {case['case_id']}] {case['title']} (유사도 {case['similarity']:.2f}, {case['case_type']})"
-        for case in cases
-    )
     user_prompt = (
         f"사용자 질문: {message}\n"
         f"카테고리: {category_slug or '미지정'}\n"
@@ -322,41 +357,57 @@ def llm_call(
     )
 
     try:
-        response = _get_client().messages.create(
+        response = client.messages.create(
             model=LLM_MODEL,
             max_tokens=600,
             temperature=0.2,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
         )
-    except Exception as exc:
-        return _format_fallback(
-            "지금은 AI 응답 연결이 불안정해요. 잠시 후 다시 시도해주세요.",
-            error=f"upstream_error:{type(exc).__name__}:{exc}",
-            tool_calls=tool_calls,
-        )
+        text = response.content[0].text.strip()
 
-    text = response.content[0].text.strip()
-    if "```json" in text:
-        text = text.split("```json", 1)[1].split("```", 1)[0].strip()
-    elif "```" in text:
-        text = text.split("```", 1)[1].split("```", 1)[0].strip()
+        if "```json" in text:
+            text = text.split("```json", 1)[1].split("```", 1)[0].strip()
+        elif "```" in text:
+            text = text.split("```", 1)[1].split("```", 1)[0].strip()
 
-    try:
         result = json.loads(text)
-    except json.JSONDecodeError as exc:
-        return _format_fallback(
-            "응답 형식 오류가 생겼어요. 다시 질문해주세요.",
-            error=f"json_parse:{exc}",
-            tool_calls=tool_calls,
-        )
+        return {
+            "reply": result.get("reply", ""),
+            "cited_case_ids": result.get("cited_case_ids", []) or [],
+            "confidence": float(result.get("confidence", 0.7)),
+            "tokens_in": response.usage.input_tokens,
+            "tokens_out": response.usage.output_tokens,
+            "model": LLM_MODEL,
+            "tool_calls": tool_calls,
+        }
+    except json.JSONDecodeError as e:
+        return {
+            "reply": "응답 형식 오류가 생겼어요. 다시 질문해주세요.",
+            "cited_case_ids": [],
+            "confidence": 0.0,
+            "error": f"json_parse:{e}",
+        }
+    except Exception as e:
+        return {
+            "reply": "AI 응답 중 오류가 발생했습니다.",
+            "cited_case_ids": [],
+            "confidence": 0.0,
+            "error": f"{type(e).__name__}:{e}",
+        }
 
-    return _format_success(
-        reply=result.get("reply", ""),
-        cited_case_ids=result.get("cited_case_ids", []) or [],
-        confidence=float(result.get("confidence", 0.7)),
-        model=LLM_MODEL,
-        tokens_in=getattr(response.usage, "input_tokens", None),
-        tokens_out=getattr(response.usage, "output_tokens", None),
-        tool_calls=tool_calls,
+
+if __name__ == "__main__":
+    print("=== search_cases 테스트 ===")
+    for c in search_cases("스마트스토어 시작 어떻게 해야해", top_k=3):
+        print(f"  {c['case_id']} | {c['title'][:30]} | sim={c['similarity']:.2f}")
+
+    print("\n=== llm_call 테스트 ===")
+    r = llm_call(
+        "스마트스토어 시작 어떻게 하나요",
+        route="simple_rag", category_slug="online-commerce",
     )
+    print(f"  reply: {r.get('reply')}")
+    print(f"  cited: {r.get('cited_case_ids')}")
+    print(f"  confidence: {r.get('confidence')}")
+    print(f"  tokens: in={r.get('tokens_in')} out={r.get('tokens_out')}")

@@ -15,10 +15,17 @@ class ChatbotApiTest(unittest.TestCase):
         self.assertEqual("blocked", result.status)
         self.assertEqual("too_short", result.plan_b_reason)
 
-    def test_redirects_cross_topic(self) -> None:
-        result = chatbot_process(message="세금 신고는 어떻게 해요?", category_slug="tax-business")
-        self.assertEqual("guide_redirect", result.status)
-        self.assertEqual("cross_topic", result.plan_b_reason)
+    def test_allows_guide_category_slug(self) -> None:
+        result = chatbot_process(
+            message="세금 신고는 어떻게 해요?",
+            category_slug="tax-business",
+            llm_call=lambda **_: {
+                "reply": "종합소득세 신고 일정을 먼저 확인하세요. [case_id: faq_tax-business_3]",
+                "cited_case_ids": ["faq_tax-business_3"],
+            },
+        )
+        self.assertEqual("ok", result.status)
+        self.assertEqual(["faq_tax-business_3"], result.cited_case_ids)
 
     def test_fallbacks_on_upstream_error(self) -> None:
         result = chatbot_process(
@@ -48,10 +55,9 @@ class ChatbotApiTest(unittest.TestCase):
         self.assertEqual("fallback", result.status)
         self.assertTrue((result.plan_b_reason or "").startswith("unknown_case_ids:"))
 
-
     def test_prefers_backend_route_hint_for_guide_redirect(self) -> None:
         result = chatbot_process(
-            message="?ㅻ쭏?몄뒪?좎뼱 ?쒖옉? ?대뼸寃??댁슂?",
+            message="짧아도 질문 의도가 분명한 예시",
             category_slug="online-commerce",
             preferred_route="guide_redirect",
             llm_call=lambda **_: {
