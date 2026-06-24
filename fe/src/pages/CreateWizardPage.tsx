@@ -5,6 +5,7 @@ import { useRef } from 'react';
 import ExampleCard from '../components/create/ExampleCard';
 import { useToast } from '../components/common/useToast';
 import {
+  ApiError,
   analyzeDraftWithAgentA,
   createExperience,
   getCategories,
@@ -261,6 +262,10 @@ function buildAgentADraft(categorySlug: string, title: string, content: string) 
       body: content.trim(),
     },
   };
+}
+
+function isValidationLikeError(error: unknown) {
+  return error instanceof ApiError && (error.status === 400 || error.status === 422 || error.code === 'VALIDATION_ERROR');
 }
 
 function Header({ onClose }: { onClose: () => void }) {
@@ -661,6 +666,17 @@ export default function CreateWizardPage() {
       setSubmitting(true);
       await submitCreatedExperience(token, pendingCreatePayload, skipAnswers ? undefined : agentAAnswers);
     } catch (error) {
+      if (!skipAnswers && isValidationLikeError(error)) {
+        try {
+          await submitCreatedExperience(token, pendingCreatePayload);
+          showToast('보완 답변 반영 없이 기본 내용으로 저장했어요.', 'info');
+          return;
+        } catch (retryError) {
+          showToast(resolveErrorMessage(retryError, '경험을 처리하지 못했어요.'), 'error');
+          return;
+        }
+      }
+
       showToast(resolveErrorMessage(error, '경험을 처리하지 못했어요.'), 'error');
     } finally {
       setSubmitting(false);
