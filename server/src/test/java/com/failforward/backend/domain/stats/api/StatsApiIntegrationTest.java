@@ -111,6 +111,13 @@ class StatsApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 
+    @Test
+    void statsRootReturnsNotFoundInsteadOfInternalServerError() throws Exception {
+        mockMvc.perform(get("/api/stats"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.errorCode").value("RESOURCE_NOT_FOUND"));
+    }
+
     private void createExperience(
             String token,
             Long categoryId,

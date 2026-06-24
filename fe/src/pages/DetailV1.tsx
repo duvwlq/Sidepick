@@ -26,10 +26,12 @@ import {
   deleteExperience,
   getBookmarkStatus,
   getExperience,
+  getSimilarExperiences,
   getExperienceGuide,
   getExperienceShare,
   getRelatedSuccessCases,
   type Experience,
+  type SimilarExperienceMatch,
   unbookmarkExperience,
 } from '../lib/api';
 import { publishBookmarkSync } from '../lib/bookmark-sync';
@@ -82,10 +84,9 @@ function formatMoneyValue(value: number | null) {
 
 function buildTopTags(experience: Experience) {
   const raw = [
-    experience.category.name,
+    ...(experience.analysis?.keywords ?? []),
     ...experience.failureReasons,
     ...experience.difficulties,
-    ...(experience.analysis?.keywords ?? []),
   ]
     .map((item) => sanitizeText(item, '').trim())
     .filter(Boolean);
@@ -93,17 +94,36 @@ function buildTopTags(experience: Experience) {
   const deduped = Array.from(new Set(raw));
   const category = sanitizeText(experience.category.name, '카테고리');
   const type = sanitizeText(experience.businessType, '부업');
-  const keywords = deduped.filter((item) => item !== category).slice(0, 2);
+  const keywords = deduped
+    .filter((item) => item !== category && item !== type && item !== 'SUCCESS_STORY')
+    .slice(0, 2);
 
   return [
-    type,
     category,
+    type,
     keywords[0] ?? '키워드',
     keywords[1] ?? '키워드',
   ];
 }
 
 function buildIssueChips(experience: Experience) {
+  const successSource = [
+    ...(experience.analysis?.successFactors ?? []),
+    ...experience.marketingChannels,
+    ...(experience.analysis?.keywords ?? []),
+    ...experience.difficulties,
+  ]
+    .map((item) => sanitizeText(item, '').trim())
+    .filter(Boolean);
+
+  if (experience.caseStatus === 'SUCCESS') {
+    const unique = Array.from(new Set(successSource));
+    if (unique.length) {
+      return unique.filter((item) => item !== 'SUCCESS_STORY').slice(0, 4);
+    }
+    return ['꾸준한 실행', '시장 조사', '가격 전략', '운영 루틴'];
+  }
+
   const source = [
     ...(experience.analysis?.keywords ?? []),
     ...experience.failureReasons,
@@ -137,6 +157,43 @@ function buildGuideLines(experience: Experience) {
 }
 
 function buildPatternRows(experience: Experience) {
+  if (experience.caseStatus === 'SUCCESS') {
+    const source = [
+      ...(experience.analysis?.successFactors ?? []),
+      ...experience.marketingChannels,
+      ...(experience.analysis?.keywords ?? []),
+      ...experience.difficulties,
+    ]
+      .map((item) => sanitizeText(item, '').trim())
+      .filter(Boolean);
+
+    const unique = Array.from(new Set(source)).slice(0, 3);
+    const rows =
+      unique.length >= 3
+        ? [
+            { label: unique[0], percent: 45 },
+            { label: unique[1], percent: 35 },
+            { label: unique[2], percent: 20 },
+          ]
+        : unique.length === 2
+          ? [
+              { label: unique[0], percent: 60 },
+              { label: unique[1], percent: 40 },
+            ]
+          : unique.length === 1
+            ? [{ label: unique[0], percent: 100 }]
+            : [{ label: '성공 요인 분석 준비 중', percent: 0 }];
+
+    while (rows.length < 3) {
+      rows.push({
+        label: '성공 요인',
+        percent: 0,
+      });
+    }
+
+    return rows;
+  }
+
   const source = [
     experience.analysis?.failureCategory ?? '',
     ...(experience.analysis?.extractedPatterns ?? []),
@@ -171,6 +228,41 @@ function buildPatternRows(experience: Experience) {
   }
 
   return rows;
+}
+
+function resolveGuideCategoryId(experience: Experience) {
+  const slug = experience.category.slug?.trim().toLowerCase();
+  if (slug) {
+    return slug;
+  }
+
+  const categoryName = sanitizeText(experience.category.name, '').toLowerCase();
+  const businessType = sanitizeText(experience.businessType, '').toLowerCase();
+  const source = `${categoryName} ${businessType}`;
+
+  if (source.includes('이커머스') || source.includes('온라인 판매') || source.includes('스마트스토어') || source.includes('온라인 스토어')) {
+    return 'online-commerce';
+  }
+  if (source.includes('콘텐츠') || source.includes('sns') || source.includes('유튜브') || source.includes('인스타')) {
+    return 'content-sns';
+  }
+  if (source.includes('디지털') || source.includes('전자책') || source.includes('pdf') || source.includes('강의')) {
+    return 'digital-products';
+  }
+  if (source.includes('플랫폼') || source.includes('배달') || source.includes('대리') || source.includes('노동')) {
+    return 'platform-labor';
+  }
+  if (source.includes('프리랜서') || source.includes('디자인') || source.includes('개발') || source.includes('번역')) {
+    return 'talent-freelance';
+  }
+  if (source.includes('투자') || source.includes('재테크') || source.includes('주식') || source.includes('코인')) {
+    return 'investment';
+  }
+  if (source.includes('오프라인') || source.includes('매장') || source.includes('공방') || source.includes('클래스')) {
+    return 'offline-sidejob';
+  }
+
+  return 'all';
 }
 
 function MetricStatColumn({
@@ -341,6 +433,7 @@ export default function DetailV1() {
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [successCases, setSuccessCases] = useState<Experience[]>([]);
+  const [similarCases, setSimilarCases] = useState<SimilarExperienceMatch[]>([]);
   const [fabExpanded, setFabExpanded] = useState(false);
   const [matchedGuideLines, setMatchedGuideLines] = useState<string[]>([]);
 
@@ -395,6 +488,17 @@ export default function DetailV1() {
         } catch {
           if (!cancelled) {
             setSuccessCases([]);
+          }
+        }
+
+        try {
+          const similar = await getSimilarExperiences(payload.id, 6);
+          if (!cancelled) {
+            setSimilarCases(similar);
+          }
+        } catch {
+          if (!cancelled) {
+            setSimilarCases([]);
           }
         }
       } catch (requestError) {
@@ -467,6 +571,27 @@ export default function DetailV1() {
     return experience ? buildGuideLines(experience) : [];
   }, [experience, matchedGuideLines]);
   const patternRows = useMemo(() => (experience ? buildPatternRows(experience) : []), [experience]);
+  const experienceKey = experience?.id ?? null;
+  const isSuccessCase = experience?.caseStatus === 'SUCCESS';
+  const relatedFailureCases = useMemo(
+    () =>
+      similarCases
+        .map((item) => item.similarExperience)
+        .filter((item) => item.id !== experienceKey && item.caseStatus === 'FAILURE')
+        .slice(0, 1),
+    [experienceKey, similarCases],
+  );
+  const relatedSuccessCards = useMemo(() => {
+    const fromSimilar = similarCases
+      .map((item) => item.similarExperience)
+      .filter((item) => item.id !== experienceKey && item.caseStatus === 'SUCCESS');
+
+    if (isSuccessCase) {
+      return fromSimilar.slice(0, 1);
+    }
+
+    return successCases.slice(0, 1);
+  }, [experienceKey, isSuccessCase, similarCases, successCases]);
 
   async function handleBookmarkToggle() {
     if (!experience) {
@@ -521,7 +646,13 @@ export default function DetailV1() {
   }
 
   function moveToGuide() {
-    navigate('/faq');
+    if (!experience) {
+      navigate('/faq');
+      return;
+    }
+
+    const categoryId = resolveGuideCategoryId(experience);
+    navigate(categoryId === 'all' ? '/faq' : `/faq?category=${encodeURIComponent(categoryId)}`);
   }
 
   async function handleShare() {
@@ -721,10 +852,15 @@ export default function DetailV1() {
               ) : null}
 
               <CaseChipRow>
-                <CaseChip label={tags[0] ?? '부업'} tone="type" maxWidthClassName="max-w-[44px]" />
-                <CaseChip label={tags[1] ?? '카테고리'} tone="category" maxWidthClassName="max-w-[116px]" />
-                <CaseChip label={tags[2] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
-                <CaseChip label={tags[3] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
+                <CaseChip
+                  label={isSuccessCase ? '성공' : '실패'}
+                  tone={isSuccessCase ? 'status-success' : 'status-failure'}
+                  maxWidthClassName="max-w-[44px]"
+                />
+                <CaseChip label={tags[0] ?? '카테고리'} tone="category" maxWidthClassName="max-w-[116px]" />
+                <CaseChip label={tags[1] ?? '부업'} tone="type" maxWidthClassName="max-w-[72px]" />
+                <CaseChip label={tags[2] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[72px]" />
+                <CaseChip label={tags[3] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[72px]" />
               </CaseChipRow>
 
               <div className="flex items-stretch gap-[8px] rounded-[4px] bg-white">
@@ -762,7 +898,10 @@ export default function DetailV1() {
           </section>
 
           <section className="bg-white px-[16px] pb-[20px] pt-[10px]">
-            <SectionBlockTitle title="핵심 이슈" description="해당 사례에서 찾아볼 수 있는 핵심 이슈입니다." />
+            <SectionBlockTitle
+              title={isSuccessCase ? '성공 포인트' : '핵심 이슈'}
+              description={isSuccessCase ? '이 사례에서 성과를 만든 핵심 포인트입니다.' : '해당 사례에서 찾아볼 수 있는 핵심 이슈입니다.'}
+            />
             <div className="pt-[10px]">
               <div className="flex flex-wrap gap-[6px]">
                 {issueChips.map((item) => (
@@ -778,11 +917,18 @@ export default function DetailV1() {
                 <div className="flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-[4px] bg-gradient-to-b from-[#92BFA6] to-[#5A876E]">
                   <img src={aiGuideStarIcon} alt="" className="h-[12.201px] w-[12px]" />
                 </div>
-                <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#5A876E]">AI 가이드</p>
+                <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] tracking-[0px] text-[#5A876E]">
+                  {isSuccessCase ? 'AI 인사이트' : 'AI 가이드'}
+                </p>
               </div>
 
               <p className="w-[311px] pt-[12px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
-                {sanitizeText(experience.analysis?.structuredSummary, '실패 원인을 정리하고 다음 행동으로 이어질 수 있도록 핵심 포인트를 추렸습니다.')}
+                {sanitizeText(
+                  experience.analysis?.structuredSummary,
+                  isSuccessCase
+                    ? '성과를 만든 요소를 정리하고, 다른 사람도 재현할 수 있도록 핵심 포인트를 추렸습니다.'
+                    : '실패 원인을 정리하고 다음 행동으로 이어질 수 있도록 핵심 포인트를 추렸습니다.',
+                )}
               </p>
 
               <div className="mb-[12px] mt-[8px] h-px w-[311px] bg-[#D8D8D8]" />
@@ -796,14 +942,30 @@ export default function DetailV1() {
               <div className="mb-[10px] mt-[8px] h-px w-[311px] bg-[#D8D8D8]" />
 
               <div className="w-[311px] pt-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#5E5E5E]">
-                <p>처음에는 작은 시도들이 쌓이면서 변화가 생기기 때문에</p>
-                <p>하루에 한 가지씩만 꾸준히 시도해도 충분합니다.</p>
+                {isSuccessCase ? (
+                  <>
+                    <p>이 사례는 한 번의 성과보다 반복 가능한 운영 습관이 중요하다는 점을 보여줍니다.</p>
+                    <p>바로 따라 하기보다 본인 상황에 맞게 작은 단위로 재현해 보세요.</p>
+                  </>
+                ) : (
+                  <>
+                    <p>처음에는 작은 시도들이 쌓이면서 변화가 생기기 때문에</p>
+                    <p>하루에 한 가지씩만 꾸준히 시도해도 충분합니다.</p>
+                  </>
+                )}
               </div>
             </div>
           </section>
 
           <section className="bg-white px-[16px] py-[12px]">
-            <SectionBlockTitle title="실패 패턴" description="유사 카테고리 내 실패 원인 별 비중 그래프 데이터입니다." />
+            <SectionBlockTitle
+              title={isSuccessCase ? '성공 요인' : '실패 패턴'}
+              description={
+                isSuccessCase
+                  ? '이 사례에서 반복적으로 드러난 성과 요인입니다.'
+                  : '유사 카테고리 내 실패 원인 별 비중 그래프 데이터입니다.'
+              }
+            />
             <div className="pt-[12px]">
               <div className="flex flex-col gap-[16px] rounded-[10px] bg-[#F8F8F8] px-[16px] py-[16px]">
                 {patternRows.map((item) => (
@@ -827,27 +989,36 @@ export default function DetailV1() {
                 <div className="pb-[4px]">
                   <p className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#5A876E]">실패 사례</p>
                 </div>
-                <SimilarCaseCard
-                  title={sanitizeText(experience.title, '제목')}
-                  summary={sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
-                  tags={buildTopTags(experience).slice(1)}
-                  success={false}
-                  likeCount={experience.likeCount}
-                  bookmarkCount={experience.bookmarkCount ?? 0}
-                  viewCount={experience.viewCount}
-                  author={sanitizeText(experience.author.nickname, '닉네임')}
-                  createdAt={formatDate(experience.createdAt)}
-                  onClick={() => navigate(`/experiences/${experience.id}`)}
-                />
+                {relatedFailureCases.length ? (
+                  relatedFailureCases.map((item) => (
+                    <SimilarCaseCard
+                      key={item.id}
+                      title={sanitizeText(item.title, '제목')}
+                      summary={sanitizeText(stripImageMarkdown(item.content), '본문 텍스트 미리보기')}
+                      tags={buildTopTags(item).slice(1)}
+                      success={false}
+                      likeCount={item.likeCount}
+                      bookmarkCount={item.bookmarkCount ?? 0}
+                      viewCount={item.viewCount}
+                      author={sanitizeText(item.author.nickname, '닉네임')}
+                      createdAt={formatDate(item.createdAt)}
+                      onClick={() => navigate(`/experiences/${item.id}`)}
+                    />
+                  ))
+                ) : (
+                  <div className="rounded-[4px] bg-[#F8F8F8] px-[14px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+                    아직 추천할 실패 사례가 없어요.
+                  </div>
+                )}
               </div>
 
               <div className="flex w-[311px] flex-col gap-[4px]">
                 <div className="pb-[4px]">
                   <p className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#5A876E]">성공 사례</p>
                 </div>
-                {successCases.length ? (
+                {relatedSuccessCards.length ? (
                   <div className="flex flex-col gap-[4px]">
-                    {successCases.slice(0, 1).map((item) => (
+                    {relatedSuccessCards.map((item) => (
                       <SimilarCaseCard
                         key={item.id}
                         title={sanitizeText(item.title, '제목')}

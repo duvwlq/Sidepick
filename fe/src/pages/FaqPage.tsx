@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
 import BottomNav from '../components/layout/BottomNav';
 import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
@@ -813,6 +813,7 @@ function BottomNavigation({
 void BottomNavigation; */
 
 export default function FaqPage() {
+  const location = useLocation();
   const navigate = useNavigate();
   const [selectedTagId, setSelectedTagId] = useState(ALL_TAG_ID);
   const [searchQuery, setSearchQuery] = useState('');
@@ -823,6 +824,20 @@ export default function FaqPage() {
     () => buildVisibleRows(selectedTagId, searchQuery),
     [selectedTagId, searchQuery],
   );
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const requestedCategory = searchParams.get('category')?.trim();
+    if (!requestedCategory) {
+      setSelectedTagId(ALL_TAG_ID);
+      setExpandedKey(null);
+      return;
+    }
+
+    const hasCategory = TAG_DEFINITIONS.some((tag) => tag.id === requestedCategory);
+    setSelectedTagId(hasCategory ? requestedCategory : ALL_TAG_ID);
+    setExpandedKey(null);
+  }, [location.search]);
 
   function moveBack() {
     if (window.history.length <= 1 || document.referrer === '' || !document.referrer.startsWith(window.location.origin)) {

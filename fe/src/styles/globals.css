@@ -193,6 +193,24 @@ textarea {
   font: inherit;
 }
 
+.chatbot-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatbot-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.chatbot-textarea {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chatbot-textarea::-webkit-scrollbar {
+  display: none;
+}
+
 p,
 h1,
 h2,

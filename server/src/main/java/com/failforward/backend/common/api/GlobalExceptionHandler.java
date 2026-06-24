@@ -17,6 +17,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -179,6 +181,24 @@ public class GlobalExceptionHandler {
         logWarn(request, HttpStatus.METHOD_NOT_ALLOWED, ErrorCode.METHOD_NOT_ALLOWED, exception.getMessage(), null,
                 exception);
         return build(request, HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 요청 방식이에요.", ErrorCode.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoHandlerFound(
+            NoHandlerFoundException exception,
+            HttpServletRequest request
+    ) {
+        logWarn(request, HttpStatus.NOT_FOUND, ErrorCode.RESOURCE_NOT_FOUND, exception.getMessage(), null, exception);
+        return build(request, HttpStatus.NOT_FOUND, "Requested resource was not found.", ErrorCode.RESOURCE_NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(
+            NoResourceFoundException exception,
+            HttpServletRequest request
+    ) {
+        logWarn(request, HttpStatus.NOT_FOUND, ErrorCode.RESOURCE_NOT_FOUND, exception.getMessage(), null, exception);
+        return build(request, HttpStatus.NOT_FOUND, "Requested resource was not found.", ErrorCode.RESOURCE_NOT_FOUND);
     }
 
     @ExceptionHandler(Exception.class)
