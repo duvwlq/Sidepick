@@ -10,7 +10,7 @@ const USER_ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.AI_PARSE_ERROR]: '분석 결과를 정리하지 못했어요. 잠시 후 다시 시도해주세요.',
   [ERROR_CODES.REPORT_NOT_FOUND]: '분석 결과를 찾을 수 없어요.',
   [ERROR_CODES.EXPERIENCE_NOT_FOUND]: '사례를 찾을 수 없어요.',
-  [ERROR_CODES.AUTH_REQUIRED]: '로그인 시간이 만료되었어요. 다시 로그인해주세요.',
+  [ERROR_CODES.AUTH_REQUIRED]: '로그인 시간이 만료됐어요. 다시 로그인해주세요.',
   [ERROR_CODES.FORBIDDEN]: '접근 권한이 없어요.',
   [ERROR_CODES.NETWORK_ERROR]: '네트워크 연결을 확인한 뒤 다시 시도해주세요.',
   [ERROR_CODES.VALIDATION_ERROR]: '입력한 정보가 올바르지 않아요. 다시 확인해주세요.',

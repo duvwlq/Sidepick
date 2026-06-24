@@ -1,9 +1,6 @@
 import { Bookmark, Edit, Eye, FileText, Settings } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
-import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
-import wifiIcon from '../assets/auth-figma/wifi.svg';
 import avatarPlaceholderIcon from '../assets/mypage-overview-figma/avatar-placeholder.svg';
 import cameraIcon from '../assets/mypage-overview-figma/camera.svg';
 import chevronIcon from '../assets/mypage-overview-figma/chevron.svg';
@@ -62,21 +59,6 @@ function extractKeywordTags(experience: Experience) {
 
 function resolveBookmarkCount(experience: Experience) {
   return experience.bookmarkCount ?? 0;
-}
-
-function IosStatusBar() {
-  return (
-    <div className="flex h-[59px] items-center bg-white px-[24px] pb-[19px] pt-[21px]">
-      <div className="flex min-w-0 flex-1 justify-center pt-[1.5px] font-['SF_Pro'] text-[17px] font-[590] leading-[22px] text-black">
-        9:41
-      </div>
-      <div className="flex min-w-0 flex-1 items-center justify-center gap-[7px] pr-[1px] pt-[1px]">
-        <img src={cellularConnectionIcon} alt="" className="h-[12.226px] w-[19.2px]" />
-        <img src={wifiIcon} alt="" className="h-[12.328px] w-[17.142px]" />
-        <img src={batteryFrameIcon} alt="" className="h-[13px] w-[27.328px]" />
-      </div>
-    </div>
-  );
 }
 
 function SectionHeader({
@@ -523,7 +505,6 @@ export default function MyPageOverview() {
   return (
     <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
       <header className="bg-white">
-        <IosStatusBar />
         <div className="flex items-center justify-between px-[16px] py-[20px]">
           <div className="h-[24px] w-[24px]" aria-hidden="true" />
           <h1 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">마이페이지</h1>

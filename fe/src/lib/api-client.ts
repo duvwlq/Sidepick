@@ -4,6 +4,23 @@ import { clearSession, getAccessToken } from './session';
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081/api';
 
+function sanitizeServerMessage(value: unknown) {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  if (!normalized) {
+    return undefined;
+  }
+
+  if (normalized.includes('�') || /\?{3,}/.test(normalized)) {
+    return undefined;
+  }
+
+  return normalized;
+}
+
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -85,11 +102,14 @@ export async function request<T>(path: string, options: RequestOptions = {}) {
         ? json.data.detail
         : undefined;
 
+    const safeMessage = sanitizeServerMessage(json?.message) ?? '요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.';
+    const safeRawMessage = sanitizeServerMessage(detail) ?? sanitizeServerMessage(json?.message);
+
     throw new ApiError(
-      json?.message ?? '요청을 처리하지 못했어요. 잠시 후 다시 시도해주세요.',
+      safeMessage,
       response.status,
       json?.errorCode ?? fallbackErrorCode(response.status),
-      detail ?? json?.message,
+      safeRawMessage,
     );
   }
 
