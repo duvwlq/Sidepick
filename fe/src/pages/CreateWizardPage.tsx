@@ -30,6 +30,7 @@ import { getAccessToken, getStoredUser } from '../lib/session';
 
 const MIN_CONTENT_LENGTH = 10;
 const MAX_CONTENT_LENGTH = 2000;
+const MAX_JAVA_INT = 2147483647;
 const DURATION_OPTIONS = ['1개월 미만', '1개월', '2개월', '3개월', '4개월', '5개월', '6개월', '7개월', '8개월', '9개월', '10개월', '11개월', '1년 이상'];
 const DAILY_TIME_OPTIONS = ['1시간 미만', '1시간', '2시간', '3시간', '4시간', '5시간', '6시간', '7시간', '8시간 이상'];
 const DIFFICULTY_OPTIONS = ['고객 확보(마케팅)', '수익 구조 이해', '시간 관리', '수익화 연결', '운영 지속성', '정보 부족', '경쟁 심화', '기타'];
@@ -132,6 +133,11 @@ function buildFallbackCategories(): Category[] {
 function parseAmount(value: string) {
   const digits = value.replace(/[^\d]/g, '');
   return digits ? Number(digits) : undefined;
+}
+
+function exceedsJavaIntRange(value: string) {
+  const amount = parseAmount(value);
+  return amount !== undefined && amount > MAX_JAVA_INT;
 }
 
 function mapDurationToMonths(value: string | null) {
@@ -751,6 +757,16 @@ export default function CreateWizardPage() {
 
     if (!selectedCategory || !matchedCategory || !duration || !dailyTime || isConcurrentWithMainJob === null) {
       showToast('필수 정보를 모두 입력해 주세요.', 'error');
+      return;
+    }
+
+    if (exceedsJavaIntRange(investmentAmount)) {
+      showToast('투자 금액은 21억 4748만 3647원 이하로 입력해 주세요.', 'error');
+      return;
+    }
+
+    if (exceedsJavaIntRange(monthlyRevenue)) {
+      showToast('수익 금액은 21억 4748만 3647원 이하로 입력해 주세요.', 'error');
       return;
     }
 
