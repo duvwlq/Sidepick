@@ -189,8 +189,8 @@ public class ChatbotService {
         if (normalized.isBlank()) {
             return TYPE_RAG;
         }
-        if (containsGuideIntent(normalized)) {
-            return TYPE_GUIDE_REDIRECT;
+        if (containsGuideIntent(normalized) || chatbotSafetyService.hasExplicitQuestionIntent(normalized)) {
+            return TYPE_RAG;
         }
         if (containsAny(normalized,
                 "compare", "stats", "similar", "analysis", "case",

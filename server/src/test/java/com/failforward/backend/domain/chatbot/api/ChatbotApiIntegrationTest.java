@@ -117,8 +117,8 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
                 .andExpect(method(POST))
                 .andRespond(withSuccess("""
                         {
-                          "reply": "퇴근 후 운영 가능한 방식부터 정리해볼게요.",
-                          "type": "guide_redirect",
+                          "reply": "질문 의도가 분명해서 바로 답변을 이어갈게요.",
+                          "type": "rag",
                           "sources": [],
                           "status": "success"
                         }
@@ -135,9 +135,39 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("success"))
-                .andExpect(jsonPath("$.data.type").value("guide_redirect"))
+                .andExpect(jsonPath("$.data.type").value("rag"))
                 .andExpect(jsonPath("$.data.reason").doesNotExist())
-                .andExpect(jsonPath("$.data.reply").value("퇴근 후 운영 가능한 방식부터 정리해볼게요."));
+                .andExpect(jsonPath("$.data.reply").value("질문 의도가 분명해서 바로 답변을 이어갈게요."));
+    }
+
+    @Test
+    void chatbotMessageAllowsShortButExplicitGuideQuestionToReachUpstream() throws Exception {
+        String token = registerAndLogin("chatbot_short_intent@sidepick.dev", "password123", "chatbotShortIntent", "20s");
+        mockServer.expect(requestTo("http://localhost:8001/api/chatbot/message"))
+                .andExpect(method(POST))
+                .andRespond(withSuccess("""
+                        {
+                          "reply": "짧은 질문이지만 의도가 분명해서 바로 추천을 이어갈게요.",
+                          "type": "rag",
+                          "sources": [],
+                          "status": "success"
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(post("/api/chatbot/message")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "session_id": "session-short-intent",
+                                  "message": "부업 추천해줘?"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("success"))
+                .andExpect(jsonPath("$.data.type").value("rag"))
+                .andExpect(jsonPath("$.data.reason").doesNotExist())
+                .andExpect(jsonPath("$.data.reply").value("짧은 질문이지만 의도가 분명해서 바로 추천을 이어갈게요."));
     }
 
     @Test
