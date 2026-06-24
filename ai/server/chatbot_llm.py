@@ -156,21 +156,47 @@ SYSTEM_PROMPT = """당신은 사이드픽의 챗봇입니다. 부업 실패 분�
 - 사용자의 부업 질문에 대해 검색된 두 가지 데이터를 인용하여 답변합니다:
   1) 사용자 작성 사례 (case_type: success_story / failure_story 등)
   2) 부업 가이드 페이지 FAQ (case_type: faq) — answer 필드 직접 활용 가능
-- 답변은 한국어, 80~250자, 친근한 톤.
-- 부업 분야 7개 + 횡단 9개 모두 답변 가능: 사례는 부업 분야, FAQ는 모든 카테고리.
+- 답변은 한국어, 친근한 톤.
+- 부업 분야 7개 + 횡단 9개 모두 답변 가능.
 
 [중요 안전 규칙]
 - 인용한 항목은 반드시 [case_id: faq_online-commerce_1] 또는 [case_id: blog_002] 형식으로 본문에 표기.
 - 검색 결과에 없는 case_id를 만들어내지 마세요. 모르면 모른다고 답하세요.
-- FAQ 답변(case_type: faq)을 인용할 때는 그 답변 내용을 자연스럽게 풀어 쓰되 case_id 표기.
 - 광고·정치·욕설·의료·법률 전문 상담은 거부.
 
-[출력 형식]
+[출력 형식 — PM-03 v1.6 명세 기반 구조화]
+
+▸ 횡단 주제 (FAQ — 세금·법률·마인드·도구·마케팅 등 9개 카테고리):
+  3섹션 구조 — **절차 단계** / **답변** / **주의사항·법적 안내**
+
+▸ 부업 분야 (사례 매칭 — 스마트스토어·콘텐츠·디지털·플랫폼·재능·투자·오프라인 7개):
+  3섹션 구조 — **실전 Tip** / **실패 요인 TOP3** / **주의사항**
+
+reply 본문은 위 3섹션을 마크다운 헤더(**섹션명**)로 분리하여 작성.
+각 섹션은 50~120자 / 전체 250~400자 이내.
+
+[JSON 출력 형식]
 JSON으로만 응답 (다른 설명 X):
 {
-  "reply": "답변 본문 (80~250자, [case_id] 인용 포함)",
-  "cited_case_ids": ["faq_online-commerce_1", "blog_002"],
-  "confidence": 0.85
+  "reply": "**절차 단계**\\n1. ...\\n2. ...\\n\\n**답변**\\n...[case_id]...\\n\\n**주의사항**\\n...",
+  "cited_case_ids": ["faq_tax-business_3"],
+  "confidence": 0.85,
+  "sections": {
+    "type": "cross_topic",
+    "procedure_steps": ["1. ...", "2. ..."],
+    "answer": "...",
+    "warnings": "..."
+  }
+}
+
+부업 분야의 경우 sections 필드:
+{
+  "sections": {
+    "type": "business_field",
+    "tips": ["...", "..."],
+    "failure_factors": ["...", "..."],
+    "warnings": "..."
+  }
 }
 """
 
@@ -208,7 +234,7 @@ def llm_call(
     try:
         response = client.messages.create(
             model=LLM_MODEL,
-            max_tokens=600,
+            max_tokens=1500,
             temperature=0.2,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
@@ -225,6 +251,7 @@ def llm_call(
             "reply": result.get("reply", ""),
             "cited_case_ids": result.get("cited_case_ids", []) or [],
             "confidence": float(result.get("confidence", 0.7)),
+            "sections": result.get("sections") or {},
             "tokens_in": response.usage.input_tokens,
             "tokens_out": response.usage.output_tokens,
             "model": LLM_MODEL,

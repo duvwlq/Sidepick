@@ -127,6 +127,7 @@ class ChatbotResponseModel(BaseModel):
     plan_b_reason: Optional[str] = None
     confidence: Optional[float] = None
     tool_calls: List[dict] = []
+    sections: Optional[dict] = Field(default=None, description="PM-03 v1.6 구조 — cross_topic(절차/답변/주의) 또는 business_field(Tip/실패요인/주의)")
     metadata: Optional[dict] = None
 
 
@@ -171,6 +172,7 @@ async def chatbot_message(req: ChatbotRequest):
             plan_b_reason=result.plan_b_reason,
             confidence=captured.get("confidence"),
             tool_calls=captured.get("tool_calls", []),
+            sections=captured.get("sections") or None,
             metadata=meta,
         )
     except Exception as e:
