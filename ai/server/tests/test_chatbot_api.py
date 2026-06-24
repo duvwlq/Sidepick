@@ -49,5 +49,20 @@ class ChatbotApiTest(unittest.TestCase):
         self.assertTrue((result.plan_b_reason or "").startswith("unknown_case_ids:"))
 
 
+    def test_prefers_backend_route_hint_for_guide_redirect(self) -> None:
+        result = chatbot_process(
+            message="?ㅻ쭏?몄뒪?좎뼱 ?쒖옉? ?대뼸寃??댁슂?",
+            category_slug="online-commerce",
+            preferred_route="guide_redirect",
+            llm_call=lambda **_: {
+                "status": "ok",
+                "reply": "가이드 답변",
+                "cited_case_ids": [],
+            },
+        )
+        self.assertEqual("ok", result.status)
+        self.assertEqual("guide_redirect", result.route)
+
+
 if __name__ == "__main__":
     unittest.main()
