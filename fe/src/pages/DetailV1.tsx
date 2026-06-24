@@ -13,6 +13,7 @@ import dollarSignIcon from '../assets/detail-v1-figma/dollar-sign.svg';
 import moreVerticalIcon from '../assets/detail-v1-figma/more-vertical.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
 import editIcon from '../assets/explore-figma/edit.svg';
+import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import HeaderBookmarkIcon from '../components/common/HeaderBookmarkIcon';
 import BottomNav from '../components/layout/BottomNav';
 import { CaseChip, CaseChipRow, CaseTextLink } from '../components/common/CaseUi';
@@ -694,6 +695,11 @@ export default function DetailV1() {
     navigate('/create');
   }
 
+  function handleChatbotClick() {
+    setFabExpanded(false);
+    navigate('/chatbot');
+  }
+
   if (loading) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
@@ -1076,15 +1082,26 @@ export default function DetailV1() {
 
           <div className="pointer-events-auto relative h-[36px] w-[36px] shrink-0">
             {fabExpanded ? (
-              <button
-                type="button"
-                onClick={handleCreateClick}
-                className="pointer-events-auto absolute right-0 top-[-52px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-                aria-label="경험 작성 열기"
-              >
-                <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
-              </button>
+              <div className="pointer-events-auto absolute right-0 top-[-104px] flex w-max flex-col items-start gap-[12px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]">
+                <button
+                  type="button"
+                  onClick={handleChatbotClick}
+                  className="flex items-center gap-[8px] whitespace-nowrap"
+                  aria-label="AI 챗봇 열기"
+                >
+                  <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCreateClick}
+                  className="flex items-center gap-[8px] whitespace-nowrap"
+                  aria-label="경험 작성 열기"
+                >
+                  <img src={editIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+                  <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
+                </button>
+              </div>
             ) : null}
 
             <button
