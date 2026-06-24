@@ -103,6 +103,9 @@ const OTHER_GUIDE_FIXTURE = {
   ],
 };
 
+void BUSINESS_GUIDE_FIXTURE;
+void OTHER_GUIDE_FIXTURE;
+
 const FIGMA_FAQ_INTRO = {
   eyebrow: '사이드픽 부업 가이드',
   titleLines: ['부업, 정답은 없어요.', '먼저 걸어본 사람들의 이야기를 모았어요.'],
@@ -187,6 +190,19 @@ function buildVisibleRows(selectedTagId: string, searchQuery: string) {
         displayLabel,
       }));
   }).slice(0, selectedTagId === ALL_TAG_ID && !normalizedQuery ? DEFAULT_PLACEHOLDER_COUNT : undefined);
+}
+
+function buildAnswerParagraphs(answer: string) {
+  const sentences = splitSentences(answer);
+  if (!sentences.length) {
+    return [normalizeText(answer)];
+  }
+
+  const paragraphs: string[] = [];
+  for (let index = 0; index < sentences.length; index += 2) {
+    paragraphs.push(sentences.slice(index, index + 2).join(' '));
+  }
+  return paragraphs;
 }
 
 function Header({ onBack }: { onBack: () => void }) {
@@ -458,11 +474,43 @@ function BusinessExpandedContent({
   displayLabel: string;
   onExplore: () => void;
 }) {
-  const checklistItems = BUSINESS_GUIDE_FIXTURE.checklist;
-  const failureItems = BUSINESS_GUIDE_FIXTURE.failures;
-  const tipItems = BUSINESS_GUIDE_FIXTURE.tips;
+  const paragraphs = buildAnswerParagraphs(item.answer);
+  const checklistItems: string[] = [];
+  const failureItems: string[] = [];
+  const tipItems: string[] = [];
   void category;
-  void item;
+
+  return (
+    <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
+      <div className="rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+        <p className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#5A876E]">
+          답변
+        </p>
+        <div className="pt-[12px]">
+          <SectionDivider />
+        </div>
+        <div className="flex flex-col gap-[10px] pt-[12px]">
+          {paragraphs.map((entry, index) => (
+            <p
+              key={`${item.id}-${index}`}
+              className="font-['Pretendard'] text-[13px] font-[400] leading-[20px] tracking-[0px] text-[#131416]"
+            >
+              {entry}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+        <p className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#5A876E]">
+          추천 탐색
+        </p>
+        <div className="pt-[12px]">
+          <SimilarCaseCard categoryLabel={displayLabel} onClick={onExplore} />
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
@@ -538,10 +586,37 @@ function OtherExpandedContent({
   category: GuideCategory;
   item: GuideItem;
 }) {
+  const paragraphs = buildAnswerParagraphs(item.answer);
   const steps = OTHER_GUIDE_FIXTURE.steps;
   const faqs = OTHER_GUIDE_FIXTURE.faqs;
   const legalLines = OTHER_GUIDE_FIXTURE.legalLines;
-  void item;
+  void category;
+  void steps;
+  void faqs;
+  void legalLines;
+
+  return (
+    <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
+      <div className="rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+        <p className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-[#131416]">
+          답변
+        </p>
+        <div className="pt-[8px]">
+          <SectionDivider />
+        </div>
+        <div className="flex flex-col gap-[10px] pt-[12px]">
+          {paragraphs.map((entry, index) => (
+            <p
+              key={`${item.id}-${index}`}
+              className="font-['Pretendard'] text-[13px] font-[400] leading-[20px] tracking-[0px] text-[#131416]"
+            >
+              {entry}
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
