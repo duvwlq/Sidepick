@@ -13,7 +13,7 @@ import plusIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검�
 import searchNavIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
 import userIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
 import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
-import editIcon from '../assets/figma-downloaded-icons/home/Edit 3.svg';
+import editIcon from '../assets/explore-figma/edit.svg';
 import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import HorizontalScroll from '../components/common/HorizontalScroll';
@@ -845,7 +845,7 @@ function ReviewCardRow({
                   className="flex flex-col justify-center text-center text-[12px] font-[600] leading-[0] text-white"
                   style={textFeatureStyle}
                 >
-                  <span className="leading-[14.4px]">성공</span>
+                  <span className="leading-[14.4px]">CTA</span>
                 </div>
               </button>
             </div>
