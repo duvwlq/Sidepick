@@ -42,6 +42,10 @@ FAILURE_TIMING_PATH = AI_DIR / "data" / "failure_timing.json"
 
 EMBEDDING_MODEL = "snunlp/KR-SBERT-V40K-klueNLI-augSTS"
 LLM_MODEL = "claude-sonnet-4-5"
+GUIDE_REDIRECT_REPLY = (
+    "원하시는 방향은 이해했어요. 현재 상황, 쓸 수 있는 시간, 예산, 관심 분야를 "
+    "두세 문장만 더 적어주시면 더 정확하게 안내해드릴게요."
+)
 
 _index = None
 _metadata = None
@@ -236,6 +240,23 @@ def _format_success(
     }
 
 
+def _format_guide_redirect(
+    reply: str = GUIDE_REDIRECT_REPLY,
+    *,
+    tool_calls: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    return {
+        "status": "ok",
+        "reply": reply,
+        "cited_case_ids": [],
+        "confidence": 0.35,
+        "model": LLM_MODEL,
+        "tokens_in": None,
+        "tokens_out": None,
+        "tool_calls": tool_calls or [],
+    }
+
+
 def _format_fallback(
     reply: str,
     *,
@@ -258,6 +279,11 @@ def llm_call(
     route: str = "simple_rag",
     category_slug: str | None = None,
 ) -> dict[str, Any]:
+    if route == "guide_redirect":
+        return _format_guide_redirect(
+            tool_calls=[{"name": "search_cases", "result_count": 0, "skipped": True}]
+        )
+
     try:
         cases = search_cases(message, top_k=5, category_slug=category_slug)
     except Exception as exc:
@@ -269,6 +295,8 @@ def llm_call(
 
     tool_calls: list[dict[str, Any]] = [{"name": "search_cases", "result_count": len(cases)}]
     if not cases:
+        if route == "simple_rag":
+            return _format_guide_redirect(tool_calls=tool_calls)
         return _format_fallback(
             "아직 참고할 사례가 부족해서 바로 답하기 어려워요. 질문을 더 구체적으로 적어주시거나 잠시 후 다시 시도해주세요.",
             error="no_search_results",

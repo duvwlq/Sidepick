@@ -140,6 +140,7 @@ def chatbot_process(
     *,
     message: str,
     category_slug: str | None = None,
+    preferred_route: str | None = None,
     known_case_ids: set[str] | None = None,
     llm_call: Any = None,
 ) -> ChatbotResponse:
@@ -155,7 +156,7 @@ def chatbot_process(
                 plan_b_reason=guard.reason,
             )
 
-    route = route_query(message)
+    route = preferred_route or route_query(message)
 
     if llm_call is None:
         return ChatbotResponse(
