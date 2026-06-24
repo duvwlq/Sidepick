@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
 ALTER TABLE failure_experiences
     ADD COLUMN IF NOT EXISTS average_daily_hours VARCHAR(30) NULL AFTER duration_months,
     ADD COLUMN IF NOT EXISTS is_concurrent_with_main_job BOOLEAN NULL AFTER average_daily_hours,
-    ADD COLUMN IF NOT EXISTS monthly_revenue INTEGER NULL AFTER is_concurrent_with_main_job,
+    ADD COLUMN IF NOT EXISTS monthly_revenue BIGINT NULL AFTER is_concurrent_with_main_job,
     ADD COLUMN IF NOT EXISTS failure_reasons JSON NULL AFTER failure_reason,
     ADD COLUMN IF NOT EXISTS difficulties JSON NULL AFTER failure_reasons;
 

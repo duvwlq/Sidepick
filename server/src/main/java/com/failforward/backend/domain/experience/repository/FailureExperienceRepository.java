@@ -51,8 +51,8 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
             @Param("failureReason") String failureReason,
             @Param("durationMonthsMin") Integer durationMonthsMin,
             @Param("durationMonthsMax") Integer durationMonthsMax,
-            @Param("investmentAmountMin") Integer investmentAmountMin,
-            @Param("investmentAmountMax") Integer investmentAmountMax
+            @Param("investmentAmountMin") Long investmentAmountMin,
+            @Param("investmentAmountMax") Long investmentAmountMax
     );
 
     @EntityGraph(attributePaths = {"user", "category"})
@@ -83,8 +83,8 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
             @Param("failureReason") String failureReason,
             @Param("durationMonthsMin") Integer durationMonthsMin,
             @Param("durationMonthsMax") Integer durationMonthsMax,
-            @Param("investmentAmountMin") Integer investmentAmountMin,
-            @Param("investmentAmountMax") Integer investmentAmountMax
+            @Param("investmentAmountMin") Long investmentAmountMin,
+            @Param("investmentAmountMax") Long investmentAmountMax
     );
 
     @EntityGraph(attributePaths = {"user", "category"})

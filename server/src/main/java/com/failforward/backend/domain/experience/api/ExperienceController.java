@@ -56,8 +56,8 @@ public class ExperienceController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Integer durationMonthsMin,
             @RequestParam(required = false) Integer durationMonthsMax,
-            @RequestParam(required = false) Integer investmentAmountMin,
-            @RequestParam(required = false) Integer investmentAmountMax
+            @RequestParam(required = false) Long investmentAmountMin,
+            @RequestParam(required = false) Long investmentAmountMax
     ) {
         return ApiResponse.ok("Experiences loaded.", experienceService.getList(
                 page,
@@ -84,8 +84,8 @@ public class ExperienceController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Integer durationMonthsMin,
             @RequestParam(required = false) Integer durationMonthsMax,
-            @RequestParam(required = false) Integer investmentAmountMin,
-            @RequestParam(required = false) Integer investmentAmountMax
+            @RequestParam(required = false) Long investmentAmountMin,
+            @RequestParam(required = false) Long investmentAmountMax
     ) {
         return ApiResponse.ok("Cases search loaded.", experienceService.getList(
                 page,

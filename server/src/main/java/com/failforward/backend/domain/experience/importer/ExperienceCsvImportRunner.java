@@ -258,9 +258,9 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
         String title = trimToLength(resolveTitle(row, content, index), 100);
         String averageDailyHours = mapAverageDailyHours(row.dailyHours());
         Integer weeklyHours = mapWeeklyHours(row.dailyHours());
-        Integer investmentAmount = parseInteger(row.investAmount());
+        Long investmentAmount = parseLongValue(row.investAmount());
         Integer durationMonths = parseInteger(row.duration());
-        Integer monthlyRevenue = parseInteger(row.revenueAmount());
+        Long monthlyRevenue = parseLongValue(row.revenueAmount());
         Boolean concurrentWithMainJob = parseBoolean(row.hasMainJob());
         Boolean wouldRetry = "SUCCESS".equals(caseStatus) ? Boolean.TRUE : Boolean.FALSE;
 
@@ -704,6 +704,11 @@ public class ExperienceCsvImportRunner implements ApplicationRunner {
     private Integer parseInteger(String raw) {
         Double value = parseDouble(raw);
         return value == null ? null : (int) Math.round(value);
+    }
+
+    private Long parseLongValue(String raw) {
+        Double value = parseDouble(raw);
+        return value == null ? null : Math.round(value);
     }
 
     private Double parseDouble(String raw) {
