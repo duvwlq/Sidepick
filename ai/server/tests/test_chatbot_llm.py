@@ -20,8 +20,8 @@ class ChatbotLlmTest(unittest.TestCase):
     def test_returns_fallback_when_search_results_missing(self) -> None:
         with patch.object(chatbot_llm, "search_cases", return_value=[]):
             result = chatbot_llm.llm_call("스마트스토어 시작은 어떻게 해요?", category_slug="online-commerce")
-        self.assertEqual("fallback", result["status"])
-        self.assertEqual("no_search_results", result["error"])
+        self.assertEqual("ok", result["status"])
+        self.assertEqual([], result["cited_case_ids"])
 
     def test_returns_fallback_on_upstream_exception(self) -> None:
         with patch.object(
@@ -61,6 +61,18 @@ class ChatbotLlmTest(unittest.TestCase):
             result = chatbot_llm.llm_call("스마트스토어 시작은 어떻게 해요?", category_slug="online-commerce")
         self.assertEqual("fallback", result["status"])
         self.assertTrue(result["error"].startswith("json_parse:"))
+
+
+    def test_returns_guide_redirect_without_search_when_route_hint_matches(self) -> None:
+        with patch.object(chatbot_llm, "search_cases") as search_cases:
+            result = chatbot_llm.llm_call(
+                "?ㅻ쭏?몄뒪?좎뼱 ?쒖옉? ?대뼸寃??댁슂?",
+                route="guide_redirect",
+                category_slug="online-commerce",
+            )
+        search_cases.assert_not_called()
+        self.assertEqual("ok", result["status"])
+        self.assertEqual([], result["cited_case_ids"])
 
 
 if __name__ == "__main__":

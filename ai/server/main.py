@@ -48,14 +48,15 @@ class AnalyzeResponse(BaseModel):
 class ChatbotRequest(BaseModel):
     message: str = Field(..., min_length=1, max_length=600, description="Chatbot user message")
     category_slug: Optional[str] = Field(default=None, description="Side business category slug")
+    route_hint: Optional[str] = Field(default=None, description="Preferred route from backend")
 
 
 class ChatbotResponseModel(BaseModel):
     status: str = Field(..., description="ok | fallback | blocked | guide_redirect")
     reply: str
-    route: Optional[str] = None
-    cited_case_ids: List[str] = Field(default_factory=list)
-    plan_b_reason: Optional[str] = None
+    type: Optional[str] = None
+    sources: List[str] = Field(default_factory=list)
+    reason: Optional[str] = None
     confidence: Optional[float] = None
     tool_calls: List[dict[str, Any]] = Field(default_factory=list)
     metadata: Optional[dict[str, Any]] = None
@@ -107,6 +108,7 @@ async def chatbot_message(req: ChatbotRequest):
         result = chatbot_process(
             message=req.message,
             category_slug=req.category_slug,
+            preferred_route=req.route_hint,
             known_case_ids=known_case_ids(),
             llm_call=wrapped_llm_call,
         )
@@ -123,9 +125,9 @@ async def chatbot_message(req: ChatbotRequest):
         return ChatbotResponseModel(
             status=result.status,
             reply=result.reply,
-            route=result.route,
-            cited_case_ids=result.cited_case_ids or [],
-            plan_b_reason=result.plan_b_reason,
+            type=result.route,
+            sources=result.cited_case_ids or [],
+            reason=result.plan_b_reason,
             confidence=captured.get("confidence"),
             tool_calls=captured.get("tool_calls", []),
             metadata=metadata,
