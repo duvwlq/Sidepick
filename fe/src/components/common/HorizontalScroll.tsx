@@ -33,7 +33,11 @@ export default function HorizontalScroll({
     let dragState: DragState | undefined;
 
     function handlePointerDown(event: PointerEvent) {
-      if (event.pointerType === 'mouse' && event.button !== 0) {
+      if (event.pointerType !== 'mouse') {
+        return;
+      }
+
+      if (event.button !== 0) {
         return;
       }
 
