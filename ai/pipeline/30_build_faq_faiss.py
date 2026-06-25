@@ -67,9 +67,10 @@ def parse_faq_ts(path: Path) -> list[dict]:
         r"\{\s*id:\s*['\"]([^'\"]+)['\"]\s*,\s*label:\s*['\"]([^'\"]+)['\"]\s*,\s*items:\s*\[(.*?)\]\s*,?\s*\}",
         re.DOTALL,
     )
+    # single-quoted string만 매칭 (faqData.ts 형식). \\' 는 스킵.
     item_pattern = re.compile(
-        r"\{\s*id:\s*(\d+)\s*,\s*question:\s*['\"]([^'\"]+(?:[^'\"]|\\['\"])*?)['\"]\s*,"
-        r"\s*answer:\s*\n?\s*['\"]([^'\"]+(?:[^'\"]|\\['\"])*?)['\"]\s*,?\s*\}",
+        r"\{\s*id:\s*(\d+)\s*,\s*question:\s*'((?:[^'\\]|\\.)*)'\s*,"
+        r"\s*answer:\s*\n?\s*'((?:[^'\\]|\\.)*)'\s*,?\s*\}",
         re.DOTALL,
     )
 
