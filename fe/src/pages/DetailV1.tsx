@@ -29,6 +29,7 @@ import {
   getExperience,
   getSimilarExperiences,
   getExperienceGuide,
+  getRelatedFailureCases,
   getExperienceShare,
   getRelatedSuccessCases,
   type Experience,
@@ -433,6 +434,7 @@ export default function DetailV1() {
   const [bookmarked, setBookmarked] = useState(false);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [failureCases, setFailureCases] = useState<Experience[]>([]);
   const [successCases, setSuccessCases] = useState<Experience[]>([]);
   const [similarCases, setSimilarCases] = useState<SimilarExperienceMatch[]>([]);
   const [fabExpanded, setFabExpanded] = useState(false);
@@ -489,6 +491,21 @@ export default function DetailV1() {
         } catch {
           if (!cancelled) {
             setSuccessCases([]);
+          }
+        }
+
+        try {
+          if (payload.caseStatus === 'SUCCESS') {
+            const relatedFailures = await getRelatedFailureCases(payload.id, 2);
+            if (!cancelled) {
+              setFailureCases(relatedFailures);
+            }
+          } else if (!cancelled) {
+            setFailureCases([]);
+          }
+        } catch {
+          if (!cancelled) {
+            setFailureCases([]);
           }
         }
 
@@ -576,11 +593,13 @@ export default function DetailV1() {
   const isSuccessCase = experience?.caseStatus === 'SUCCESS';
   const relatedFailureCases = useMemo(
     () =>
-      similarCases
-        .map((item) => item.similarExperience)
-        .filter((item) => item.id !== experienceKey && item.caseStatus === 'FAILURE')
-        .slice(0, 1),
-    [experienceKey, similarCases],
+      isSuccessCase
+        ? failureCases.slice(0, 1)
+        : similarCases
+            .map((item) => item.similarExperience)
+            .filter((item) => item.id !== experienceKey && item.caseStatus === 'FAILURE')
+            .slice(0, 1),
+    [experienceKey, failureCases, isSuccessCase, similarCases],
   );
   const relatedSuccessCards = useMemo(() => {
     const fromSimilar = similarCases

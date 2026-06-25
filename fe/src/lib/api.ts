@@ -574,6 +574,10 @@ export function getRelatedSuccessCases(id: number | string, limit = 10) {
   return request<Experience[]>(`/experiences/${id}/success-cases?limit=${limit}`);
 }
 
+export function getRelatedFailureCases(id: number | string, limit = 10) {
+  return request<Experience[]>(`/experiences/${id}/failure-cases?limit=${limit}`);
+}
+
 export function getSimilarExperiences(id: number | string, limit = 10) {
   return request<SimilarExperienceMatch[]>(`/experiences/${id}/similar?limit=${limit}`);
 }
