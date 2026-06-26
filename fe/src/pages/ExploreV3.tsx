@@ -1,3 +1,4 @@
+import { PencilLine } from 'lucide-react';
 import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import BottomNav from '../components/layout/BottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,7 +14,6 @@ import plusIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검�
 import searchNavIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
 import userIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
 import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
-import editIcon from '../assets/figma-downloaded-icons/home/Edit 3.svg';
 import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import HorizontalScroll from '../components/common/HorizontalScroll';
@@ -1019,7 +1019,7 @@ function SharedFooterArea({
                 <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
               </button>
               <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
-                <img src={editIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
+                <PencilLine size={20} strokeWidth={2.1} className="shrink-0 text-black" />
                 <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
               </button>
             </div>
@@ -1343,7 +1343,7 @@ export default function ExploreV3() {
 
   function handleOpenGuide() {
     setFabOpen(false);
-    navigate('/faq');
+    navigate('/chatbot');
   }
 
   function handleCreateClick() {
