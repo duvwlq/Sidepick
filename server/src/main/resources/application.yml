@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   application:
     name: failforward-backend
 
@@ -77,14 +77,14 @@ app:
     default-case-status: ${APP_EXPERIENCE_IMPORT_DEFAULT_CASE_STATUS:FAILURE}
     default-category-id: ${APP_EXPERIENCE_IMPORT_DEFAULT_CATEGORY_ID:8}
     category-map:
-      "[?�라?�판�??�커머스]": 1
-      "[콘텐�?SNS]": 2
-      "[?��??�상??지?�판�?": 3
-      "[?�랫?�노??": 4
-      "[?�능_?�리?�서]": 5
-      "[?�자_?�테??": 6
-      "[?�프?�인부??": 7
-      "[기�?]": 8
+      "[?⑤씪?명뙋留??댁빱癒몄뒪]": 1
+      "[肄섑뀗痢?SNS]": 2
+      "[?붿??몄긽??吏?앺뙋留?": 3
+      "[?뚮옯?쇰끂??": 4
+      "[?щ뒫_?꾨━?쒖꽌]": 5
+      "[?ъ옄_?ы뀒??": 6
+      "[?ㅽ봽?쇱씤遺??": 7
+      "[湲고?]": 8
   demo-seed:
     enabled: ${APP_DEMO_SEED_ENABLED:false}
   mail:
@@ -150,3 +150,4 @@ ai:
     url: ${AI_SERVER_URL:http://localhost:8001}
     connect-timeout: ${AI_SERVER_CONNECT_TIMEOUT:3000}
     read-timeout: ${AI_SERVER_READ_TIMEOUT:120000}
+
