@@ -1,8 +1,7 @@
-﻿import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
+﻿import { PencilLine, X } from 'lucide-react';
+import type { MouseEvent, ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import editIcon from '../../assets/explore-figma/edit.svg';
 import guideIcon from '../../assets/figma-downloaded-icons/home/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
 import homeIcon from '../../assets/figma-downloaded-icons/home/Home.svg';
 import plusIcon from '../../assets/figma-downloaded-icons/home/Plus.svg';
@@ -62,7 +61,6 @@ const NAV_ITEMS: NavItem[] = [
     icon: guideIcon,
     matches: (pathname) =>
       pathname === '/faq' ||
-      pathname === '/chatbot' ||
       pathname.startsWith('/guide') ||
       pathname === '/mypage/faq',
   },
@@ -109,22 +107,35 @@ function DefaultFabMenu({
   onCreateClick: () => void;
 }) {
   const navigate = useNavigate();
+  const handleChatbotClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onToggle();
+    navigate('/chatbot');
+  };
 
   return (
-    <div className="relative flex h-[36px] w-[36px] items-center justify-center">
+    <div className="relative z-50 flex h-[36px] w-[36px] items-center justify-center">
       <div
-        className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+        className={`pointer-events-auto absolute bottom-[52px] right-[-10px] z-50 flex min-w-[132px] flex-col items-stretch rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
           expanded
             ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
             : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
         }`}
       >
-        <button type="button" onClick={() => navigate('/chatbot')} className="flex items-center gap-[8px] whitespace-nowrap">
+        <button
+          type="button"
+          onClick={handleChatbotClick}
+          className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+        >
           <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
           <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
         </button>
-        <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
-          <img src={editIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
+        <button
+          type="button"
+          onClick={onCreateClick}
+          className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+        >
+          <PencilLine size={18} strokeWidth={2} className="shrink-0 text-black" />
           <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
         </button>
       </div>
@@ -284,3 +295,5 @@ export default function BottomNav({
     </div>
   );
 }
+
+
