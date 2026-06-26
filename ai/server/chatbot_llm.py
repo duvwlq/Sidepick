@@ -19,31 +19,11 @@ import os
 from pathlib import Path
 from typing import Any
 
-try:
-    import faiss
-except ImportError:  # pragma: no cover - environment dependent
-    faiss = None
-
-try:
-    import numpy as np
-except ImportError:  # pragma: no cover - environment dependent
-    np = None  # type: ignore[assignment]
-
-try:
-    from anthropic import Anthropic
-except ImportError:  # pragma: no cover - environment dependent
-    Anthropic = None  # type: ignore[assignment]
-
-try:
-    from dotenv import load_dotenv
-except ImportError:  # pragma: no cover - environment dependent
-    def load_dotenv() -> bool:
-        return False
-
-try:
-    from sentence_transformers import SentenceTransformer
-except ImportError:  # pragma: no cover - environment dependent
-    SentenceTransformer = None  # type: ignore[assignment]
+import faiss
+import numpy as np
+from anthropic import Anthropic
+from dotenv import load_dotenv
+from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
@@ -60,10 +40,6 @@ FAILURE_TIMING_PATH = AI_DIR / "data" / "failure_timing.json"
 
 EMBEDDING_MODEL = "snunlp/KR-SBERT-V40K-klueNLI-augSTS"
 LLM_MODEL = "claude-sonnet-4-5"
-GUIDE_REDIRECT_REPLY = (
-    "원하시는 방향은 이해했어요. 현재 상황, 쓸 수 있는 시간, 예산, 관심 분야를 "
-    "두세 문장만 더 적어주시면 더 정확하게 안내해드릴게요."
-)
 
 _index = None
 _metadata = None
@@ -75,20 +51,13 @@ _failure_timing = None
 
 def _get_client() -> Anthropic:
     global _client
-    api_key = os.getenv("ANTHROPIC_API_KEY")
-    if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY is not configured")
-    if Anthropic is None:
-        raise RuntimeError("anthropic package is not installed")
     if _client is None:
-        _client = Anthropic(api_key=api_key)
+        _client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     return _client
 
 
 def _get_index():
     global _index
-    if faiss is None:
-        return None
     if _index is None and FAISS_PATH.exists():
         _index = faiss.read_index(str(FAISS_PATH))
     return _index
@@ -103,10 +72,8 @@ def _get_metadata() -> dict:
 
 def _get_embedder():
     global _embedder
-    if SentenceTransformer is None:
-        raise RuntimeError("sentence-transformers package is not installed")
     if _embedder is None:
-        _embedder = SentenceTransformer(EMBEDDING_MODEL, local_files_only=True)
+        _embedder = SentenceTransformer(EMBEDDING_MODEL)
     return _embedder
 
 
@@ -124,63 +91,6 @@ def _get_failure_timing() -> dict:
     return _failure_timing or {}
 
 
-def _tokenize(text: str) -> list[str]:
-    tokens: list[str] = []
-    current: list[str] = []
-    for char in text.lower():
-        if char.isalnum() or char in {"-", "_"}:
-            current.append(char)
-            continue
-        if len(current) >= 2:
-            tokens.append("".join(current))
-        current = []
-    if len(current) >= 2:
-        tokens.append("".join(current))
-    return tokens
-
-
-def _lexical_search_cases(
-    query: str,
-    cases: list[dict],
-    *,
-    top_k: int,
-    category_slug: str | None,
-) -> list[dict]:
-    query_tokens = set(_tokenize(query))
-    if not query_tokens:
-        return []
-
-    scored: list[tuple[float, dict]] = []
-    for case in cases:
-        if category_slug and case.get("category_slug") != category_slug:
-            continue
-        haystack = " ".join(
-            str(case.get(field) or "")
-            for field in ("title", "answer", "category_slug", "case_type")
-        )
-        title_tokens = set(_tokenize(haystack))
-        if not title_tokens:
-            continue
-        overlap = len(query_tokens & title_tokens)
-        if overlap == 0:
-            continue
-        score = overlap / len(query_tokens | title_tokens)
-        item = {
-            "case_id": case.get("case_id"),
-            "title": case.get("title"),
-            "category_slug": case.get("category_slug"),
-            "case_type": case.get("case_type"),
-            "source": case.get("source"),
-            "similarity": float(score),
-        }
-        if case.get("case_type") == "faq" and case.get("answer"):
-            item["answer"] = case["answer"]
-        scored.append((score, item))
-
-    scored.sort(key=lambda pair: pair[0], reverse=True)
-    return [item for _, item in scored[:top_k]]
-
-
 def search_cases(
     query: str, top_k: int = 5, category_slug: str | None = None,
 ) -> list[dict]:
@@ -188,10 +98,8 @@ def search_cases(
     index = _get_index()
     meta = _get_metadata()
     cases = meta.get("cases", [])
-    if not cases:
+    if not index or not cases:
         return []
-    if not index or np is None or SentenceTransformer is None:
-        return _lexical_search_cases(query, cases, top_k=top_k, category_slug=category_slug)
 
     embedder = _get_embedder()
     vec = embedder.encode([query], convert_to_numpy=True)
@@ -248,57 +156,49 @@ SYSTEM_PROMPT = """당신은 사이드픽의 챗봇입니다. 부업 실패 분�
 - 사용자의 부업 질문에 대해 검색된 두 가지 데이터를 인용하여 답변합니다:
   1) 사용자 작성 사례 (case_type: success_story / failure_story 등)
   2) 부업 가이드 페이지 FAQ (case_type: faq) — answer 필드 직접 활용 가능
-- 답변은 한국어, 80~250자, 친근한 톤.
-- 부업 분야 7개 + 횡단 9개 모두 답변 가능: 사례는 부업 분야, FAQ는 모든 카테고리.
+- 답변은 한국어, 친근한 톤.
+- 부업 분야 7개 + 횡단 9개 모두 답변 가능.
 
 [중요 안전 규칙]
 - 인용한 항목은 반드시 [case_id: faq_online-commerce_1] 또는 [case_id: blog_002] 형식으로 본문에 표기.
 - 검색 결과에 없는 case_id를 만들어내지 마세요. 모르면 모른다고 답하세요.
-- FAQ 답변(case_type: faq)을 인용할 때는 그 답변 내용을 자연스럽게 풀어 쓰되 case_id 표기.
 - 광고·정치·욕설·의료·법률 전문 상담은 거부.
 
-[출력 형식]
+[출력 형식 — PM-03 v1.6 명세 기반 구조화]
+
+▸ 횡단 주제 (FAQ — 세금·법률·마인드·도구·마케팅 등 9개 카테고리):
+  3섹션 구조 — **절차 단계** / **답변** / **주의사항·법적 안내**
+
+▸ 부업 분야 (사례 매칭 — 스마트스토어·콘텐츠·디지털·플랫폼·재능·투자·오프라인 7개):
+  3섹션 구조 — **실전 Tip** / **실패 요인 TOP3** / **주의사항**
+
+reply 본문은 위 3섹션을 마크다운 헤더(**섹션명**)로 분리하여 작성.
+각 섹션은 50~120자 / 전체 250~400자 이내.
+
+[JSON 출력 형식]
 JSON으로만 응답 (다른 설명 X):
 {
-  "reply": "답변 본문 (80~250자, [case_id] 인용 포함)",
-  "cited_case_ids": ["faq_online-commerce_1", "blog_002"],
-  "confidence": 0.85
+  "reply": "**절차 단계**\\n1. ...\\n2. ...\\n\\n**답변**\\n...[case_id]...\\n\\n**주의사항**\\n...",
+  "cited_case_ids": ["faq_tax-business_3"],
+  "confidence": 0.85,
+  "sections": {
+    "type": "cross_topic",
+    "procedure_steps": ["1. ...", "2. ..."],
+    "answer": "...",
+    "warnings": "..."
+  }
+}
+
+부업 분야의 경우 sections 필드:
+{
+  "sections": {
+    "type": "business_field",
+    "tips": ["...", "..."],
+    "failure_factors": ["...", "..."],
+    "warnings": "..."
+  }
 }
 """
-
-
-def _format_guide_redirect(
-    reply: str = GUIDE_REDIRECT_REPLY,
-    *,
-    tool_calls: list[dict] | None = None,
-) -> dict:
-    return {
-        "reply": reply,
-        "cited_case_ids": [],
-        "confidence": 0.35,
-        "model": LLM_MODEL,
-        "tokens_in": None,
-        "tokens_out": None,
-        "tool_calls": tool_calls or [],
-    }
-
-
-def _format_fallback(
-    reply: str,
-    *,
-    error: str,
-    tool_calls: list[dict] | None = None,
-) -> dict:
-    return {
-        "reply": reply,
-        "cited_case_ids": [],
-        "confidence": 0.0,
-        "error": error,
-        "model": LLM_MODEL,
-        "tokens_in": None,
-        "tokens_out": None,
-        "tool_calls": tool_calls or [],
-    }
 
 
 def llm_call(
@@ -307,33 +207,9 @@ def llm_call(
     category_slug: str | None = None,
 ) -> dict:
     """챗봇 LLM 호출 — chatbot_api.chatbot_process의 llm_call 인자로 주입."""
-    if route == "guide_redirect":
-        return _format_guide_redirect(
-            tool_calls=[{"name": "search_cases", "result_count": 0, "skipped": True}]
-        )
+    client = _get_client()
 
-    try:
-        client = _get_client()
-    except Exception as e:
-        return _format_fallback(
-            "지금은 AI 응답 연결이 불안정해요. 잠시 후 다시 시도해주세요.",
-            error=f"upstream_error:{type(e).__name__}:{e}",
-            tool_calls=[{"name": "search_cases", "result_count": 0}],
-        )
-
-    try:
-        cases = search_cases(message, top_k=5, category_slug=category_slug)
-    except Exception as e:
-        return _format_fallback(
-            "지금은 검색 모델을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
-            error=f"search_error:{type(e).__name__}:{e}",
-            tool_calls=[{"name": "search_cases", "result_count": 0}],
-        )
-
-    tool_calls: list[dict] = [{"name": "search_cases", "result_count": len(cases)}]
-    if not cases and route == "simple_rag":
-        return _format_guide_redirect(tool_calls=tool_calls)
-
+    cases = search_cases(message, top_k=5, category_slug=category_slug)
     # FAQ 항목은 answer까지 포함, 사례는 title만
     def _fmt(c: dict) -> str:
         base = f"- [case_id: {c['case_id']}] {c['title']} (유사도 {c['similarity']:.2f}, {c['case_type']})"
@@ -346,7 +222,6 @@ def llm_call(
     if route == "react" and category_slug:
         stats = query_stats(category_slug)
         stats_context = f"\n\n[통계 데이터]\n{json.dumps(stats, ensure_ascii=False)[:500]}"
-        tool_calls.append({"name": "query_stats", "category": category_slug})
 
     user_prompt = (
         f"사용자 질문: {message}\n"
@@ -359,7 +234,7 @@ def llm_call(
     try:
         response = client.messages.create(
             model=LLM_MODEL,
-            max_tokens=600,
+            max_tokens=1500,
             temperature=0.2,
             system=SYSTEM_PROMPT,
             messages=[{"role": "user", "content": user_prompt}],
@@ -376,10 +251,17 @@ def llm_call(
             "reply": result.get("reply", ""),
             "cited_case_ids": result.get("cited_case_ids", []) or [],
             "confidence": float(result.get("confidence", 0.7)),
+            "sections": result.get("sections") or {},
             "tokens_in": response.usage.input_tokens,
             "tokens_out": response.usage.output_tokens,
             "model": LLM_MODEL,
-            "tool_calls": tool_calls,
+            "tool_calls": [
+                {"name": "search_cases", "result_count": len(cases)},
+                *(
+                    [{"name": "query_stats", "category": category_slug}]
+                    if stats_context else []
+                ),
+            ],
         }
     except json.JSONDecodeError as e:
         return {

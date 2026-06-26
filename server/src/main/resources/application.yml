@@ -120,14 +120,12 @@ app:
   chatbot:
     rate-limit-per-min: ${APP_CHATBOT_RATE_LIMIT_PER_MIN:10}
     max-message-length: ${APP_CHATBOT_MAX_MESSAGE_LENGTH:500}
-    minimum-guide-message-length: ${APP_CHATBOT_MIN_GUIDE_MESSAGE_LENGTH:25}
+    minimum-guide-message-length: ${APP_CHATBOT_MIN_GUIDE_MESSAGE_LENGTH:50}
     queue-capacity: ${APP_CHATBOT_QUEUE_CAPACITY:20}
     daily-token-limit: ${APP_CHATBOT_DAILY_TOKEN_LIMIT:12000}
   latency-metrics:
     max-samples-per-endpoint: ${APP_LATENCY_METRICS_MAX_SAMPLES_PER_ENDPOINT:200}
     max-endpoints: ${APP_LATENCY_METRICS_MAX_ENDPOINTS:128}
-  ai-assets:
-    success-analysis-drafts-path: ${APP_AI_SUCCESS_ANALYSIS_DRAFTS_PATH:ai/data/success_analysis_drafts.json}
   stats:
     failure-pattern-path: ${APP_STATS_FAILURE_PATTERN_PATH:ai/data/failure_pattern.json}
     failure-timing-path: ${APP_STATS_FAILURE_TIMING_PATH:ai/data/failure_timing.json}
@@ -150,6 +148,5 @@ app:
 ai:
   server:
     url: ${AI_SERVER_URL:http://localhost:8001}
-    similar-enabled: ${AI_SERVER_SIMILAR_ENABLED:false}
     connect-timeout: ${AI_SERVER_CONNECT_TIMEOUT:3000}
     read-timeout: ${AI_SERVER_READ_TIMEOUT:10000}

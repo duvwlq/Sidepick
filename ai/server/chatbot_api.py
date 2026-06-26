@@ -8,7 +8,7 @@ from typing import Any, Iterator
 INPUT_MAX_LEN = 500
 INPUT_HARD_MIN = 5
 
-REACT_KEYWORDS = ("비교", "통계", "유사", "분석", "차이", "추천", "계산")
+REACT_KEYWORDS = ("비교", "통계", "유사", "분석", "차이", "추천", "랭킹")
 
 ALLOWED_CATEGORY_SLUGS = (
     "online-commerce",
@@ -19,8 +19,7 @@ ALLOWED_CATEGORY_SLUGS = (
     "investment",
     "offline-sidejob",
 )
-
-GUIDE_CATEGORY_SLUGS = ALLOWED_CATEGORY_SLUGS + (
+CROSS_TOPIC_SLUGS = (
     "before-start",
     "tax-business",
     "work-plus-sidejob",
@@ -71,9 +70,9 @@ class ChatbotResponse:
 def input_length_guard(message: str) -> GuardResult:
     length = len(message or "")
     if length < INPUT_HARD_MIN:
-        return GuardResult(False, "too_short", "조금 더 구체적으로 적어주실 수 있을까요?")
+        return GuardResult(False, "too_short", "조금 더 구체적으로 적어주실 수 있어요?")
     if length > INPUT_MAX_LEN:
-        return GuardResult(False, "too_long", f"500자 이내로 줄여주세요. 현재 {length}자예요.")
+        return GuardResult(False, "too_long", f"500자 이내로 줄여주세요 (현재 {length}자).")
     return GuardResult(True)
 
 
@@ -86,7 +85,7 @@ def input_banned_guard(message: str) -> GuardResult:
         return GuardResult(
             False,
             f"banned_word:{hit}",
-            "정책상 제한된 표현이 있어요. 다른 표현으로 다시 질문해주세요.",
+            "정책 위반 표현이에요. 다른 표현으로 다시 질문해주세요.",
         )
     return GuardResult(True)
 
@@ -94,7 +93,13 @@ def input_banned_guard(message: str) -> GuardResult:
 def category_whitelist_check(category_slug: str | None) -> GuardResult:
     if category_slug is None:
         return GuardResult(True)
-    if category_slug not in GUIDE_CATEGORY_SLUGS:
+    if category_slug in CROSS_TOPIC_SLUGS:
+        return GuardResult(
+            False,
+            "cross_topic",
+            "이 주제는 부업 가이드 페이지에서 자세히 확인하실 수 있어요. 챗봇은 부업 분야별 사례·통계 분석을 도와드려요.",
+        )
+    if category_slug not in ALLOWED_CATEGORY_SLUGS:
         return GuardResult(False, f"invalid_category:{category_slug}", "지원하지 않는 분야예요.")
     return GuardResult(True)
 
@@ -107,7 +112,7 @@ def verify_cited_case_ids(cited: list[str], allowed_case_ids: set[str]) -> Guard
         return GuardResult(
             False,
             f"unknown_case_ids:{','.join(unknown[:3])}",
-            "응답 검증에 실패해서 일반 안내로 전환됐어요. 다시 질문해주세요.",
+            "응답 검증 실패로 일반 안내로 전환했어요. 다시 질문해주세요.",
         )
     return GuardResult(True)
 
@@ -122,9 +127,9 @@ def route_query(message: str) -> str:
 
 def stream_tool_stages() -> Iterator[dict[str, Any]]:
     stages = [
-        ("tool_selection", "도구를 선택하고 있어요."),
-        ("tool_executing", "검색 중이에요."),
-        ("result_analyzing", "결과를 정리하고 있어요."),
+        ("tool_selection", "도구를 선택하고 있어요..."),
+        ("tool_executing", "FAISS 검색 중..."),
+        ("result_analyzing", "결과 분석 중..."),
         ("done", None),
     ]
     for stage, message in stages:
@@ -145,7 +150,11 @@ def chatbot_process(
         category_whitelist_check(category_slug),
     ):
         if not guard.passed:
-            return ChatbotResponse("blocked", guard.user_message or "", plan_b_reason=guard.reason)
+            return ChatbotResponse(
+                "guide_redirect" if guard.reason == "cross_topic" else "blocked",
+                guard.user_message or "",
+                plan_b_reason=guard.reason,
+            )
 
     route = preferred_route or route_query(message)
 
@@ -160,9 +169,7 @@ def chatbot_process(
     llm_result = llm_call(message=message, route=route)
     reply = llm_result.get("reply", "")
     cited_case_ids = llm_result.get("cited_case_ids", []) or []
-    upstream_status = llm_result.get("status")
-    if upstream_status is None:
-        upstream_status = "fallback" if llm_result.get("error") else "ok"
+    upstream_status = llm_result.get("status", "ok")
 
     if upstream_status != "ok":
         return ChatbotResponse(

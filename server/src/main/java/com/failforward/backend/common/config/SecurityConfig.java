@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/auth/**",
                                 "/api/health",
+                                "/api/chatbot/message",
                                 "/api/reports/**",
                                 "/uploads/**",
                                 "/api/experiences/compare",
