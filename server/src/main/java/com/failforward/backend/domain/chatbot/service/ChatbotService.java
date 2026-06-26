@@ -2,7 +2,9 @@ package com.failforward.backend.domain.chatbot.service;
 
 import com.failforward.backend.common.config.AiServerProperties;
 import com.failforward.backend.common.config.ChatbotProperties;
+import com.failforward.backend.common.security.AuthenticatedUser;
 import com.failforward.backend.common.security.CurrentUserProvider;
+import com.failforward.backend.common.api.UnauthorizedException;
 import com.failforward.backend.domain.chatbot.dto.ChatbotDtos.AiChatbotRequest;
 import com.failforward.backend.domain.chatbot.dto.ChatbotDtos.AiChatbotResponse;
 import com.failforward.backend.domain.chatbot.dto.ChatbotDtos.ChatbotMessageRequest;
@@ -44,7 +46,7 @@ public class ChatbotService {
     private final ChatbotProperties chatbotProperties;
 
     public ChatbotMessageResponse sendMessage(ChatbotMessageRequest request) {
-        Long userId = currentUserProvider.getCurrentUser().id();
+        Long userId = resolveRequesterId(request);
         chatbotRateLimiter.checkLimit(userId);
 
         String normalizedMessage = chatbotSafetyService.validateAndNormalizeMessage(request);
@@ -91,11 +93,24 @@ public class ChatbotService {
     }
 
     private AiChatbotResponse requestUpstream(ChatbotMessageRequest request, String routeHint) {
-        String endpoint = aiServerProperties.url() + "/chatbot/message";
+        String endpoint = aiServerProperties.url() + "/api/chatbot/message";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AiChatbotRequest> entity = new HttpEntity<>(AiChatbotRequest.from(request, routeHint), headers);
         return aiRestTemplate.postForObject(endpoint, entity, AiChatbotResponse.class);
+    }
+
+    private Long resolveRequesterId(ChatbotMessageRequest request) {
+        try {
+            AuthenticatedUser currentUser = currentUserProvider.getCurrentUser();
+            return currentUser.id();
+        } catch (UnauthorizedException exception) {
+            String sessionId = request.sessionId();
+            if (sessionId == null || sessionId.isBlank()) {
+                return 0L;
+            }
+            return 1_000_000_000L + Integer.toUnsignedLong(sessionId.hashCode());
+        }
     }
 
     private ChatbotMessageResponse fallback(String reason, String routeHint) {
