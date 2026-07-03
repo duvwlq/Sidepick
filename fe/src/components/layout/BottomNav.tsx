@@ -16,6 +16,8 @@ type BottomNavAccessoryLayout = 'center' | 'end' | 'between';
 type BottomNavProps = {
   active?: BottomNavKey;
   showFab?: boolean;
+  showCenterCreateButton?: boolean;
+  accessoryBottom?: number;
   fabExpanded?: boolean;
   onFabToggle?: () => void;
   onCreateClick?: () => void;
@@ -155,9 +157,58 @@ function DefaultFabMenu({
   );
 }
 
+function CenterCreateButton({ onCreateClick }: { onCreateClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="경험 작성"
+      onClick={onCreateClick}
+      className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#5A876E] shadow-[0_6px_14px_rgba(90,135,110,0.22)]"
+    >
+      <img src={plusIcon} alt="" aria-hidden="true" className="h-[20px] w-[20px]" />
+    </button>
+  );
+}
+
+function NavButton({
+  item,
+  isActive,
+  onClick,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-[40px] flex-col items-center justify-start gap-[4px]"
+      aria-current={isActive ? 'page' : undefined}
+    >
+      <img
+        src={item.icon}
+        alt=""
+        aria-hidden="true"
+        className="block h-[24px] w-[24px]"
+        style={{ filter: buildIconFilter(isActive) }}
+      />
+      <span
+        className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
+          isActive ? 'font-[600] text-[#5A876E]' : 'font-[400] text-[#BABABA]'
+        }`}
+      >
+        {item.label}
+      </span>
+    </button>
+  );
+}
+
 export default function BottomNav({
   active,
   showFab = false,
+  showCenterCreateButton = false,
+  accessoryBottom = 88,
   fabExpanded = false,
   onFabToggle,
   onCreateClick,
@@ -226,30 +277,31 @@ export default function BottomNav({
     navigate('/create');
   }
 
-  const resolvedAccessory =
-    accessory ??
-    (showFab ? (
-      <DefaultFabMenu
-        expanded={expanded}
-        onToggle={() => {
-          if (onFabToggle) {
-            onFabToggle();
-            return;
-          }
+  const resolvedAccessory = accessory ?? null;
+  const resolvedFab = showFab ? (
+    <DefaultFabMenu
+      expanded={expanded}
+      onToggle={() => {
+        if (onFabToggle) {
+          onFabToggle();
+          return;
+        }
 
-          setInternalExpanded((current) => !current);
-        }}
-        onCreateClick={handleCreateClick}
-      />
-    ) : null);
+        setInternalExpanded((current) => !current);
+      }}
+      onCreateClick={handleCreateClick}
+    />
+  ) : null;
 
   const hasAccessory = Boolean(resolvedAccessory);
+  const hasFabAccessory = Boolean(resolvedFab);
   const accessoryLayoutClass =
     accessoryLayout === 'between'
       ? 'justify-between'
       : accessoryLayout === 'center'
         ? 'justify-center'
         : 'justify-end';
+  const shouldShowCenterCreateButton = showCenterCreateButton || (showFab && !accessory);
 
   return (
     <div
@@ -257,40 +309,46 @@ export default function BottomNav({
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       {hasAccessory ? (
-        <div className={`absolute inset-x-0 bottom-[84px] flex h-[68px] items-center px-[24px] py-[16px] ${accessoryLayoutClass}`}>
-          {resolvedAccessory}
+        <div
+          className={`absolute inset-x-0 flex items-end px-[24px] ${accessoryLayoutClass}`}
+          style={{ bottom: `${accessoryBottom}px` }}
+        >
+          <div className="pointer-events-auto">{resolvedAccessory}</div>
         </div>
       ) : null}
 
-      <nav className="pointer-events-auto relative flex h-[84px] w-full items-start justify-between rounded-t-[20px] bg-white px-[40px] pb-[32px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
-        {NAV_ITEMS.map((item) => {
-          const isActive = visualActive === item.key;
+      {hasFabAccessory ? (
+        <div className="absolute right-[24px] flex items-end" style={{ bottom: `${accessoryBottom}px` }}>
+          <div className="pointer-events-auto">{resolvedFab}</div>
+        </div>
+      ) : null}
 
-          return (
-            <button
+      <nav className="pointer-events-auto relative flex h-[92px] w-full items-start rounded-t-[20px] bg-white px-[32px] pb-[32px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
+        <div className="flex w-full items-end justify-between">
+          {NAV_ITEMS.slice(0, 2).map((item) => (
+            <NavButton
               key={item.key}
-              type="button"
+              item={item}
+              isActive={visualActive === item.key}
               onClick={() => move(item)}
-              className={`flex w-[40px] flex-col items-center justify-start gap-[4px] ${isActive ? 'opacity-100' : 'opacity-30'}`}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <img
-                src={item.icon}
-                alt=""
-                aria-hidden="true"
-                className="block h-[24px] w-[24px]"
-                style={{ filter: buildIconFilter(isActive) }}
-              />
-              <span
-                className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
-                  isActive ? 'font-[600] text-[#5A876E]' : 'font-[400] text-black'
-                }`}
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
+            />
+          ))}
+
+          {shouldShowCenterCreateButton ? (
+            <div className="flex w-[50px] shrink-0 justify-center">
+              <CenterCreateButton onCreateClick={handleCreateClick} />
+            </div>
+          ) : null}
+
+          {NAV_ITEMS.slice(2).map((item) => (
+            <NavButton
+              key={item.key}
+              item={item}
+              isActive={visualActive === item.key}
+              onClick={() => move(item)}
+            />
+          ))}
+        </div>
       </nav>
     </div>
   );
