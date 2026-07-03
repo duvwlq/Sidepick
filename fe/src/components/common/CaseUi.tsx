@@ -33,13 +33,13 @@ export function CaseChip({
 }) {
   const toneClass =
     tone === 'type'
-      ? 'bg-[#C06D43] font-[500] text-white'
+      ? 'bg-[#F14F5A] font-[500] text-white'
       : tone === 'status-success'
-        ? 'bg-[#5A876E] font-[500] text-white'
+        ? 'bg-[#559A0B] font-[500] text-white'
         : tone === 'status-failure'
-          ? 'bg-[#C06D43] font-[500] text-white'
+          ? 'bg-[#F14F5A] font-[500] text-white'
           : tone === 'category'
-            ? 'bg-[#CBE5D8] font-[500] text-[#5A876E]'
+            ? 'bg-[#BEE8CF] font-[500] text-[#5A876E]'
             : 'bg-[#E6E6E6] font-[500] text-[#8A8A8A]';
 
   const widthClass =

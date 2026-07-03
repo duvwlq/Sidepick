@@ -117,12 +117,12 @@ function Badge({
   label: string;
   tone: 'status' | 'category' | 'keyword';
 }) {
-  const toneClass =
-    tone === 'status'
-      ? 'bg-[#C06D43] text-white'
-      : tone === 'category'
-        ? 'bg-[#CBE5D8] text-[#5A876E]'
-        : 'bg-[#E6E6E6] text-[#8A8A8A]';
+    const toneClass =
+      tone === 'status'
+      ? 'bg-[#F14F5A] text-white'
+        : tone === 'category'
+        ? 'bg-[#BEE8CF] text-[#5A876E]'
+          : 'bg-[#E6E6E6] text-[#8A8A8A]';
 
   return (
     <span className={`inline-flex h-[16px] items-center rounded-[4px] px-[4px] font-['Pretendard'] text-[10px] font-[500] leading-[12px] ${toneClass}`}>

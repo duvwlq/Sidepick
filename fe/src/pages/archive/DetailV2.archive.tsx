@@ -220,10 +220,10 @@ function SimilarCard({ card, onClick }: { card: SimilarCardModel; onClick: () =>
     >
       <div className="flex items-center justify-between gap-[8px]">
         <div className="flex min-w-0 flex-wrap gap-[4px]">
-          <span className="rounded-[4px] bg-[#C06D43] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-white">
+          <span className="rounded-[4px] bg-[#F14F5A] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-white">
             실패
           </span>
-          <span className="rounded-[4px] bg-[#CBE5D8] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-[#5A876E]">
+          <span className="rounded-[4px] bg-[#BEE8CF] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-[#5A876E]">
             {card.category}
           </span>
           {card.keywords.map((keyword) => (
@@ -524,9 +524,9 @@ export default function DetailV2() {
                   key={`${tag}-${index}`}
                   className={`rounded-[4px] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] ${
                     index === 0
-                      ? 'bg-[#C06D43] text-white'
+                      ? 'bg-[#F14F5A] text-white'
                       : index === 1
-                        ? 'bg-[#5A876E] text-white'
+                        ? 'bg-[#559A0B] text-white'
                         : 'bg-[#E6E6E6] text-[#8A8A8A]'
                   }`}
                 >

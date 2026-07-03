@@ -44,8 +44,6 @@ export default function HorizontalScroll({
         scrollLeft: scroller.scrollLeft,
         dragging: false,
       };
-
-      scroller.setPointerCapture(event.pointerId);
     }
 
     function handlePointerMove(event: PointerEvent) {
@@ -61,6 +59,7 @@ export default function HorizontalScroll({
           return;
         }
         dragState.dragging = true;
+        scroller.setPointerCapture(event.pointerId);
       }
 
       event.preventDefault();

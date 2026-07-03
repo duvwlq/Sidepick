@@ -73,9 +73,9 @@ function FailureSummaryCard({ experience }: { experience: Experience }) {
             key={`${experience.id}-${tag}-${index}`}
             className={`flex h-[18px] max-w-[80px] items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px] ${
               index === 0
-                ? 'bg-[#C06D43] font-[400] text-white'
+                ? 'bg-[#F14F5A] font-[400] text-white'
                 : index === 1
-                  ? 'bg-[#CBE5D8] font-[500] text-[#5A876E]'
+                  ? 'bg-[#BEE8CF] font-[500] text-[#5A876E]'
                   : 'bg-[#D8D8D8] font-[400] text-white'
             }`}
           >
@@ -191,9 +191,9 @@ function SuccessCaseCard({ experience }: { experience: Experience }) {
             key={`${experience.id}-${tag}-${index}`}
             className={`flex h-[18px] max-w-[80px] items-center justify-center rounded-[4px] px-[4px] py-[2px] font-['Pretendard'] text-[12px] leading-[14.4px] tracking-[0px] ${
               index === 0
-                ? 'bg-[#5A876E] font-[400] text-white'
+                ? 'bg-[#559A0B] font-[400] text-white'
                 : index === 1
-                  ? 'bg-[#CBE5D8] font-[500] text-[#5A876E]'
+                  ? 'bg-[#BEE8CF] font-[500] text-[#5A876E]'
                   : 'bg-[#D8D8D8] font-[400] text-white'
             }`}
           >

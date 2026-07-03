@@ -628,12 +628,12 @@ function ExploreCard({
       <article className="flex h-full w-full flex-col gap-[8px] bg-white px-[16px] py-[20px]">
         <div className="flex w-full items-start justify-between">
           <div className="flex min-w-0 items-start gap-[4px] overflow-hidden">
-            <span className={`flex h-[16px] shrink-0 items-center justify-center rounded-[4px] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] ${
-              isSuccess ? 'bg-[#5A876E] text-white' : 'bg-[#C06D43] text-white'
-            }`}>{tags[0]}</span>
-            <span className="flex h-[16px] shrink-0 items-center justify-center rounded-[4px] bg-[#CBE5D8] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-[#5A876E]">
-              {tags[1]}
-            </span>
+              <span className={`flex h-[16px] shrink-0 items-center justify-center rounded-[4px] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] ${
+               isSuccess ? 'bg-[#559A0B] text-white' : 'bg-[#F14F5A] text-white'
+              }`}>{tags[0]}</span>
+             <span className="flex h-[16px] shrink-0 items-center justify-center rounded-[4px] bg-[#BEE8CF] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-[#5A876E]">
+                {tags[1]}
+              </span>
             <span className="flex h-[16px] shrink-0 items-center justify-center rounded-[4px] bg-[#E6E6E6] px-[4px] py-[2px] text-[10px] font-[500] leading-[12px] text-[#8A8A8A]">
               {tags[2]}
             </span>

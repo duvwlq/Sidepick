@@ -71,6 +71,7 @@ type HomeCardInteraction = ReactionSummaryPayload & {
 };
 
 const textFeatureStyle = { fontFeatureSettings: '"case" 1' } as const;
+const relatedSuccessLabel = '유사 성공 사례';
 const previewClampStyle = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
@@ -184,7 +185,11 @@ function toStoryCardData(experience: Experience, compact = false): StoryCardData
       ? experience.structuredData.figmaCardShowCta
       : !compactResolved;
   const ctaLabel =
-    typeof experience.structuredData.figmaCardCtaLabel === 'string' ? experience.structuredData.figmaCardCtaLabel : 'CTA';
+    typeof experience.structuredData.figmaCardCtaLabel === 'string' &&
+    experience.structuredData.figmaCardCtaLabel.trim() &&
+    experience.structuredData.figmaCardCtaLabel !== 'CTA'
+      ? experience.structuredData.figmaCardCtaLabel
+      : relatedSuccessLabel;
   const ctaDisabled = experience.structuredData.figmaCardCtaDisabled === true;
   const ctaHref =
     experience.caseStatus === 'FAILURE'
@@ -409,7 +414,7 @@ function CategorySection({
           aria-expanded={expanded}
           onClick={onToggleExpanded}
           className="inline-flex min-w-[88px] items-center justify-center font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] text-[#757575] underline underline-offset-[1px]"
-          style={textFeatureStyle}
+          style={{ ...textFeatureStyle, fontSize: '12px', lineHeight: '14.4px' }}
         >
           {expanded ? '접기' : '펼쳐 보기'}
         </button>
@@ -425,14 +430,14 @@ function StoryBadge({
   label: string;
   tone?: 'failure' | 'success' | 'category' | 'keyword';
 }) {
-  const toneClass =
-    tone === 'failure'
-      ? 'bg-[#C06D43] text-white'
-      : tone === 'success'
-        ? 'bg-[#5A876E] text-white'
-        : tone === 'category'
-          ? 'bg-[#CBE5D8] text-[#5A876E]'
-          : 'bg-[#E6E6E6] text-[#8A8A8A]';
+    const toneClass =
+      tone === 'failure'
+      ? 'bg-[#F14F5A] text-white'
+        : tone === 'success'
+        ? 'bg-[#559A0B] text-white'
+          : tone === 'category'
+          ? 'bg-[#BEE8CF] text-[#5A876E]'
+            : 'bg-[#E6E6E6] text-[#8A8A8A]';
 
   return (
     <span
@@ -641,7 +646,7 @@ function StoryCard({
               }}
               disabled={card.ctaDisabled}
               aria-label={`${card.ctaLabel} 이동`}
-              className={`flex h-[30px] w-[48px] items-start justify-start rounded-[8px] px-[12px] py-[8px] ${
+              className={`flex h-[30px] min-w-[96px] items-start justify-start rounded-[8px] px-[12px] py-[8px] ${
                 card.ctaDisabled ? 'bg-[#CBE5D8]' : 'bg-[#5A876E]'
               }`}
             >

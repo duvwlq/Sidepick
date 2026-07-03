@@ -110,7 +110,7 @@ function DefaultFabMenu({
   const navigate = useNavigate();
 
   return (
-    <div className="relative flex h-[36px] w-[36px] items-center justify-center">
+    <div className="relative z-50 mb-[15px] flex h-[36px] w-[36px] items-center justify-center">
       <div
         className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
           expanded

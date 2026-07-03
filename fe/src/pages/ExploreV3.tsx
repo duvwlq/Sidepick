@@ -45,6 +45,7 @@ import { getAccessToken } from '../lib/session';
 type FeedMode = 'all' | 'failure' | 'success';
 type SortKey = 'latest' | 'likes' | 'views';
 type PrimaryTone = 'success' | 'failure';
+type FilterSheetTab = 'type' | 'category';
 
 type ExploreCategoryOption = {
   id: number | null;
@@ -58,6 +59,8 @@ type CardInteractionState = ReactionSummaryPayload & {
 };
 
 const textFeatureStyle = { fontFeatureSettings: '"case" 1' } as const;
+const relatedSuccessLabel = '\uC720\uC0AC \uC131\uACF5\uC0AC\uB840';
+const relatedSuccessAriaLabel = `${relatedSuccessLabel} \uC774\uB3D9`;
 
 const CATEGORY_OPTIONS: ExploreCategoryOption[] = [
   { id: null, label: '전체', slug: null },
@@ -224,7 +227,7 @@ function PrimaryBadge({ label, tone }: { label: string; tone: PrimaryTone }) {
   return (
     <span
       className={`inline-flex h-[16px] items-center justify-center rounded-[4px] px-[4px] text-[10px] font-[500] leading-[12px] text-white ${
-        tone === 'success' ? 'bg-[#5A876E]' : 'bg-[#C06D43]'
+        tone === 'success' ? 'bg-[#559A0B]' : 'bg-[#F14F5A]'
       }`}
       style={textFeatureStyle}
     >
@@ -236,7 +239,7 @@ function PrimaryBadge({ label, tone }: { label: string; tone: PrimaryTone }) {
 function CategoryBadge({ label }: { label: string }) {
   return (
     <span
-      className="inline-flex h-[16px] items-center justify-center rounded-[4px] bg-[#CBE5D8] px-[4px] text-[10px] font-[500] leading-[12px] text-[#5A876E]"
+      className="inline-flex h-[16px] items-center justify-center rounded-[4px] bg-[#BEE8CF] px-[4px] text-[10px] font-[500] leading-[12px] text-[#5A876E]"
       style={textFeatureStyle}
     >
       {label}
@@ -266,6 +269,172 @@ function OverflowBadge({ count }: { count: number }) {
   );
 }
 
+function FilterBottomSheet({
+  open,
+  activeTab,
+  draftFeedMode,
+  draftFeedModeTouched,
+  draftCategoryId,
+  onTabChange,
+  onSelectFeedMode,
+  onClearFeedMode,
+  onSelectCategory,
+  onReset,
+  onClose,
+  onComplete,
+}: {
+  open: boolean;
+  activeTab: FilterSheetTab;
+  draftFeedMode: FeedMode;
+  draftFeedModeTouched: boolean;
+  draftCategoryId: number | null;
+  onTabChange: (tab: FilterSheetTab) => void;
+  onSelectFeedMode: (mode: FeedMode) => void;
+  onClearFeedMode: () => void;
+  onSelectCategory: (categoryId: number | null) => void;
+  onReset: () => void;
+  onClose: () => void;
+  onComplete: () => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  const selectedChips = [
+    ...((draftFeedMode !== 'all' || draftFeedModeTouched)
+      ? [{ key: `type-${draftFeedMode}`, label: FEED_OPTIONS.find((option) => option.key === draftFeedMode)?.label ?? '' }]
+      : []),
+    ...(draftCategoryId !== null
+      ? [
+          {
+            key: `category-${draftCategoryId}`,
+            label: CATEGORY_OPTIONS.find((option) => option.id === draftCategoryId)?.label ?? '',
+          },
+        ]
+      : []),
+  ];
+  const hasSelectedFilters = selectedChips.length > 0;
+  const categoryOptions = CATEGORY_OPTIONS.filter((option) => option.id !== null);
+  const optionTextClass = "text-[12px] font-[400] leading-[16.8px] text-[#131416]";
+
+  return (
+    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-[rgba(0,0,0,0.28)]">
+      <button type="button" aria-label="필터 닫기" className="absolute inset-0" onClick={onClose} />
+      <div className="relative flex h-[455px] w-full max-w-[375px] flex-col rounded-t-[20px] bg-white">
+        <div className="flex shrink-0 justify-center px-[24px] pb-[16px] pt-[24px]">
+          <h2 className="text-[16px] font-[600] leading-[19.2px] text-[#111111]" style={textFeatureStyle}>
+            필터
+          </h2>
+        </div>
+
+        <div className="flex shrink-0 border-b border-[#E6E6E6]">
+          {[
+            { key: 'type', label: '타입' },
+            { key: 'category', label: '카테고리' },
+          ].map((tab) => {
+            const active = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => onTabChange(tab.key as FilterSheetTab)}
+                className={`flex h-[28px] flex-1 items-start justify-center border-b-[1.5px] text-[16px] font-[600] leading-[19.2px] ${
+                  active ? 'border-[#5A876E] text-[#5A876E]' : 'border-transparent text-[#BABABA]'
+                }`}
+                style={textFeatureStyle}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="flex shrink-0 items-center justify-between px-[24px] pb-[16px] pt-[16px]">
+          <div className="flex h-[22px] min-w-0 flex-1 items-center gap-[8px] overflow-hidden">
+            {hasSelectedFilters ? (
+              selectedChips.map((chip) => (
+                <button
+                  key={chip.key}
+                  type="button"
+                  onClick={() => {
+                    if (chip.key.startsWith('type-')) {
+                      onClearFeedMode();
+                      return;
+                    }
+                    onSelectCategory(null);
+                  }}
+                  className="inline-flex h-[22px] shrink-0 items-center gap-[4px] rounded-[999px] border border-[#BEE8CF] bg-white px-[8px] py-[4px]"
+                >
+                  <span className="text-[12px] font-[400] leading-[14.4px] text-[#5A876E]" style={textFeatureStyle}>
+                    {chip.label}
+                  </span>
+                  <span className="text-[12px] leading-none text-[#8A8A8A]">×</span>
+                </button>
+              ))
+            ) : (
+              <div className="h-[22px] w-[1px] opacity-0" aria-hidden="true" />
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={onReset}
+            disabled={!hasSelectedFilters}
+            className={`flex h-[14px] shrink-0 items-center pl-[24px] font-[400] ${
+              hasSelectedFilters ? 'text-[#111111]' : 'text-[#D9D9D9]'
+            }`}
+            style={{ ...textFeatureStyle, fontSize: '12px', lineHeight: '14.4px' }}
+          >
+            초기화
+          </button>
+        </div>
+
+        <div className="flex min-h-0 flex-1 flex-col px-[24px]">
+          {activeTab === 'type' ? (
+            <div className="flex flex-col gap-[16px] text-[12px]">
+              {FEED_OPTIONS.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => onSelectFeedMode(option.key)}
+                  className={`flex h-[14px] items-center text-left ${optionTextClass}`}
+                  style={textFeatureStyle}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col gap-[16px] text-[12px]">
+              {categoryOptions.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => onSelectCategory(draftCategoryId === option.id ? null : option.id)}
+                  className={`flex h-[14px] items-center text-left ${optionTextClass}`}
+                  style={textFeatureStyle}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex shrink-0 px-[24px] pb-[48px] pt-[16px]">
+          <button
+            type="button"
+            onClick={onComplete}
+            className="h-[43px] w-full rounded-[8px] bg-[#5A876E] text-[16px] font-[600] leading-[19.2px] text-white"
+            style={textFeatureStyle}
+          >
+            완료
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 function HeaderBlock({
   selectedCategoryId,
   resultCount,
@@ -274,6 +443,7 @@ function HeaderBlock({
   onSelectCategory,
   onToggleSort,
   onSelectSort,
+  onOpenFilterSheet,
 }: {
   selectedCategoryId: number | null;
   resultCount: number;
@@ -282,6 +452,7 @@ function HeaderBlock({
   onSelectCategory: (value: number | null) => void;
   onToggleSort: () => void;
   onSelectSort: (value: SortKey) => void;
+  onOpenFilterSheet: () => void;
 }) {
   const navigate = useNavigate();
 
@@ -330,7 +501,7 @@ function HeaderBlock({
         <div className="flex w-full items-center gap-[8px] px-[16px]">
           <button
             type="button"
-            onClick={() => onSelectCategory(null)}
+            onClick={onOpenFilterSheet}
             className="flex h-[26px] w-[26px] items-center justify-center rounded-[4px]"
           >
             <img src={filterIcon} alt="" className="h-[24px] w-[24px]" />
@@ -834,18 +1005,18 @@ function ReviewCardRow({
             <div className="flex w-full items-center justify-end">
               <button
                 type="button"
-                aria-label="CTA 이동"
-                className="relative z-[1] flex h-[30px] w-[48px] shrink-0 items-start justify-start rounded-[8px] bg-[#5A876E] px-[12px] py-[8px]"
+                aria-label={relatedSuccessAriaLabel}
+                className="relative z-[1] flex h-[30px] min-w-[96px] shrink-0 items-center justify-center rounded-[8px] bg-[#5A876E] px-[12px] py-[8px]"
                 onClick={(event) => {
                   stopEvent(event);
                   onCtaClick(experience);
                 }}
               >
                 <div
-                  className="flex flex-col justify-center text-center text-[12px] font-[600] leading-[0] text-white"
+                  className="flex flex-col justify-center whitespace-nowrap text-center text-[12px] font-[600] leading-[0] text-white"
                   style={textFeatureStyle}
                 >
-                  <span className="leading-[14.4px]">성공</span>
+                  <span className="leading-[14.4px]">{relatedSuccessLabel}</span>
                 </div>
               </button>
             </div>
@@ -1056,6 +1227,11 @@ export default function ExploreV3() {
   const [sortOpen, setSortOpen] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(false);
   const [feedMode, setFeedMode] = useState<FeedMode>('all');
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [filterSheetTab, setFilterSheetTab] = useState<FilterSheetTab>('type');
+  const [draftFeedMode, setDraftFeedMode] = useState<FeedMode>('all');
+  const [draftFeedModeTouched, setDraftFeedModeTouched] = useState(false);
+  const [draftCategoryId, setDraftCategoryId] = useState<number | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -1361,6 +1537,26 @@ export default function ExploreV3() {
     navigate('/create');
   }
 
+  function openFilterSheet() {
+    setFilterSheetTab('type');
+    setDraftFeedMode(feedMode);
+    setDraftFeedModeTouched(feedMode !== 'all');
+    setDraftCategoryId(selectedCategoryId);
+    setFilterSheetOpen(true);
+  }
+
+  function closeFilterSheet() {
+    setFilterSheetOpen(false);
+    setDraftFeedMode(feedMode);
+    setDraftFeedModeTouched(feedMode !== 'all');
+    setDraftCategoryId(selectedCategoryId);
+  }
+
+  function handleCompleteFilterSheet() {
+    setFeedMode(draftFeedMode);
+    handleSelectCategory(draftCategoryId);
+    setFilterSheetOpen(false);
+  }
   function handleSelectCategory(categoryId: number | null) {
     const params = new URLSearchParams(location.search);
 
@@ -1390,12 +1586,13 @@ export default function ExploreV3() {
             sortKey={sortKey}
             sortOpen={sortOpen}
             onSelectCategory={handleSelectCategory}
-            onToggleSort={() => setSortOpen((prev) => !prev)}
-            onSelectSort={(value) => {
-              setSortKey(value);
-              setSortOpen(false);
-            }}
-          />
+          onToggleSort={() => setSortOpen((prev) => !prev)}
+          onSelectSort={(value) => {
+            setSortKey(value);
+            setSortOpen(false);
+          }}
+          onOpenFilterSheet={openFilterSheet}
+        />
 
           {!isEmptyState ? (
             <StatsAccordion
@@ -1454,6 +1651,31 @@ export default function ExploreV3() {
           onToggleFab={() => setFabOpen((prev) => !prev)}
           onOpenGuide={handleOpenGuide}
           onCreateClick={handleCreateClick}
+        />
+
+        <FilterBottomSheet
+          open={filterSheetOpen}
+          activeTab={filterSheetTab}
+          draftFeedMode={draftFeedMode}
+          draftFeedModeTouched={draftFeedModeTouched}
+          draftCategoryId={draftCategoryId}
+          onTabChange={setFilterSheetTab}
+          onSelectFeedMode={(mode) => {
+            setDraftFeedMode(mode);
+            setDraftFeedModeTouched(true);
+          }}
+          onClearFeedMode={() => {
+            setDraftFeedMode('all');
+            setDraftFeedModeTouched(false);
+          }}
+          onSelectCategory={setDraftCategoryId}
+          onReset={() => {
+            setDraftFeedMode('all');
+            setDraftFeedModeTouched(false);
+            setDraftCategoryId(null);
+          }}
+          onClose={closeFilterSheet}
+          onComplete={handleCompleteFilterSheet}
         />
       </div>
     </div>
