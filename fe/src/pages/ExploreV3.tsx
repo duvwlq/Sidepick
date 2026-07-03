@@ -341,7 +341,7 @@ function FilterBottomSheet({
           })}
         </div>
 
-        <div className="flex shrink-0 items-center justify-between px-[24px] py-[16px]">
+        <div className="flex shrink-0 items-center justify-between px-[24px] pb-[16px] pt-[16px]">
           <div className="flex h-[22px] min-w-0 flex-1 items-center gap-[8px] overflow-hidden">
             {hasSelectedFilters ? (
               selectedChips.map((chip) => (
@@ -372,7 +372,7 @@ function FilterBottomSheet({
             type="button"
             onClick={onReset}
             disabled={!hasSelectedFilters}
-            className={`shrink-0 pl-[24px] text-[16px] font-[400] leading-[19.2px] ${
+            className={`flex h-[14px] shrink-0 items-center pl-[24px] text-[12px] font-[400] leading-[14.4px] ${
               hasSelectedFilters ? 'text-[#111111]' : 'text-[#D9D9D9]'
             }`}
             style={textFeatureStyle}
@@ -383,13 +383,13 @@ function FilterBottomSheet({
 
         <div className="flex min-h-0 flex-1 flex-col px-[24px]">
           {activeTab === 'type' ? (
-            <div className="flex flex-col gap-[20px]">
+            <div className="flex flex-col gap-[16px] text-[12px]">
               {FEED_OPTIONS.map((option) => (
                 <button
                   key={option.key}
                   type="button"
                   onClick={() => onSelectFeedMode(option.key)}
-                  className={`flex items-center text-left ${optionTextClass}`}
+                  className={`flex h-[14px] items-center text-left ${optionTextClass}`}
                   style={textFeatureStyle}
                 >
                   {option.label}
@@ -397,13 +397,13 @@ function FilterBottomSheet({
               ))}
             </div>
           ) : (
-            <div className="flex flex-col gap-[20px]">
+            <div className="flex flex-col gap-[16px] text-[12px]">
               {categoryOptions.map((option) => (
                 <button
                   key={option.id}
                   type="button"
                   onClick={() => onSelectCategory(draftCategoryId === option.id ? null : option.id)}
-                  className={`flex items-center text-left ${optionTextClass}`}
+                  className={`flex h-[14px] items-center text-left ${optionTextClass}`}
                   style={textFeatureStyle}
                 >
                   {option.label}
@@ -1125,14 +1125,10 @@ function FooterArea({
 }
 
 function SharedFooterArea({
-  feedMode,
-  onSelectFeedMode,
   fabOpen,
   onToggleFab,
   onCreateClick,
 }: {
-  feedMode: FeedMode;
-  onSelectFeedMode: (mode: FeedMode) => void;
   fabOpen: boolean;
   onToggleFab: () => void;
   onCreateClick: () => void;
@@ -1141,39 +1137,9 @@ function SharedFooterArea({
     <BottomNav
       active="explore"
       showFab
-      accessoryBottom={108}
-      accessoryLayout="center"
       fabExpanded={fabOpen}
       onFabToggle={onToggleFab}
       onCreateClick={onCreateClick}
-      accessory={
-        <div className="pointer-events-auto flex h-[38px] w-[135px] items-center rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
-          <div className="flex w-full items-center gap-[4px]">
-            {FEED_OPTIONS.map((option) => {
-              const active = option.key === feedMode;
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => onSelectFeedMode(option.key)}
-                  className={`flex h-[26px] min-w-0 flex-1 items-center justify-center rounded-[999px] px-[8px] py-[6px] ${
-                    active ? 'bg-[#315441]' : 'bg-white'
-                  }`}
-                >
-                  <span
-                    className={`text-[12px] font-[400] leading-[14.4px] ${
-                      active ? 'text-white' : 'text-[#131416]'
-                    }`}
-                    style={textFeatureStyle}
-                  >
-                    {option.label}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      }
     />
   );
 }
@@ -1601,8 +1567,6 @@ export default function ExploreV3() {
         </div>
 
         <SharedFooterArea
-          feedMode={feedMode}
-          onSelectFeedMode={setFeedMode}
           fabOpen={fabOpen}
           onToggleFab={() => setFabOpen((prev) => !prev)}
           onCreateClick={handleCreateClick}

@@ -7,6 +7,7 @@ import homeIcon from '../../assets/figma-downloaded-icons/home/Home.svg';
 import plusIcon from '../../assets/figma-downloaded-icons/home/Plus.svg';
 import searchIcon from '../../assets/figma-downloaded-icons/home/Search.svg';
 import subtractIcon from '../../assets/figma-downloaded-icons/home/Subtract.svg';
+import subtractCenterIcon from '../../assets/figma-downloaded-icons/home/SubtractCenter.svg';
 import userIcon from '../../assets/figma-downloaded-icons/home/User.svg';
 import { getAccessToken } from '../../lib/session';
 
@@ -30,6 +31,7 @@ type NavItem = {
   label: string;
   path: string;
   icon: string;
+  iconClassName: string;
   requiresAuth?: boolean;
   matches: (pathname: string) => boolean;
 };
@@ -41,6 +43,7 @@ const NAV_ITEMS: NavItem[] = [
     label: '홈',
     path: '/',
     icon: homeIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     matches: (pathname) => pathname === '/' || pathname === '/v1/home' || pathname === '/home-legacy',
   },
   {
@@ -48,6 +51,7 @@ const NAV_ITEMS: NavItem[] = [
     label: '탐색',
     path: '/explore',
     icon: searchIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     matches: (pathname) =>
       pathname === '/explore' ||
       pathname === '/v1/explore' ||
@@ -61,6 +65,7 @@ const NAV_ITEMS: NavItem[] = [
     label: '가이드',
     path: '/faq',
     icon: guideIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     matches: (pathname) =>
       pathname === '/faq' ||
       pathname.startsWith('/guide') ||
@@ -71,6 +76,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'MY',
     path: '/mypage',
     icon: userIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     requiresAuth: true,
     matches: (pathname) => pathname === '/mypage' || pathname.startsWith('/mypage/'),
   },
@@ -93,10 +99,16 @@ function writeStoredNavContext(value: BottomNavKey) {
   window.sessionStorage.setItem(NAV_CONTEXT_STORAGE_KEY, value);
 }
 
-function buildIconFilter(isActive: boolean) {
-  return isActive
-    ? 'brightness(0) saturate(100%) invert(47%) sepia(16%) saturate(661%) hue-rotate(96deg) brightness(92%) contrast(85%)'
-    : 'brightness(0) saturate(100%) invert(0%)';
+function buildIconFilter(itemKey: BottomNavKey, isActive: boolean) {
+  if (isActive) {
+    return 'brightness(0) saturate(100%) invert(47%) sepia(16%) saturate(661%) hue-rotate(96deg) brightness(92%) contrast(85%)';
+  }
+
+  if (itemKey === 'explore') {
+    return 'brightness(0) saturate(100%) invert(74%) sepia(0%) saturate(0%) hue-rotate(187deg) brightness(93%) contrast(88%)';
+  }
+
+  return 'none';
 }
 
 function DefaultFabMenu({
@@ -165,7 +177,7 @@ function CenterCreateButton({ onCreateClick }: { onCreateClick: () => void }) {
       onClick={onCreateClick}
       className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#5A876E] shadow-[0_6px_14px_rgba(90,135,110,0.22)]"
     >
-      <img src={plusIcon} alt="" aria-hidden="true" className="h-[20px] w-[20px]" />
+      <img src={subtractCenterIcon} alt="" aria-hidden="true" className="h-[24px] w-[24px]" />
     </button>
   );
 }
@@ -190,8 +202,8 @@ function NavButton({
         src={item.icon}
         alt=""
         aria-hidden="true"
-        className="block h-[24px] w-[24px]"
-        style={{ filter: buildIconFilter(isActive) }}
+        className={`block ${item.iconClassName}`}
+        style={{ filter: buildIconFilter(item.key, isActive) }}
       />
       <span
         className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
@@ -208,7 +220,7 @@ export default function BottomNav({
   active,
   showFab = false,
   showCenterCreateButton = false,
-  accessoryBottom = 88,
+  accessoryBottom = 100,
   fabExpanded = false,
   onFabToggle,
   onCreateClick,
