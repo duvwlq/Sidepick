@@ -57,6 +57,8 @@ type CardInteractionState = ReactionSummaryPayload & {
 };
 
 const textFeatureStyle = { fontFeatureSettings: '"case" 1' } as const;
+const relatedSuccessLabel = '\uC720\uC0AC \uC131\uACF5\uC0AC\uB840';
+const relatedSuccessAriaLabel = `${relatedSuccessLabel} \uC774\uB3D9`;
 
 const CATEGORY_OPTIONS: ExploreCategoryOption[] = [
   { id: null, label: '전체', slug: null },
@@ -223,7 +225,7 @@ function PrimaryBadge({ label, tone }: { label: string; tone: PrimaryTone }) {
   return (
     <span
       className={`inline-flex h-[16px] items-center justify-center rounded-[4px] px-[4px] text-[10px] font-[500] leading-[12px] text-white ${
-        tone === 'success' ? 'bg-[#5A876E]' : 'bg-[#C06D43]'
+        tone === 'success' ? 'bg-[#559A0B]' : 'bg-[#F14F5A]'
       }`}
       style={textFeatureStyle}
     >
@@ -235,7 +237,7 @@ function PrimaryBadge({ label, tone }: { label: string; tone: PrimaryTone }) {
 function CategoryBadge({ label }: { label: string }) {
   return (
     <span
-      className="inline-flex h-[16px] items-center justify-center rounded-[4px] bg-[#CBE5D8] px-[4px] text-[10px] font-[500] leading-[12px] text-[#5A876E]"
+      className="inline-flex h-[16px] items-center justify-center rounded-[4px] bg-[#BEE8CF] px-[4px] text-[10px] font-[500] leading-[12px] text-[#5A876E]"
       style={textFeatureStyle}
     >
       {label}
@@ -269,9 +271,11 @@ function FilterBottomSheet({
   open,
   activeTab,
   draftFeedMode,
+  draftFeedModeTouched,
   draftCategoryId,
   onTabChange,
   onSelectFeedMode,
+  onClearFeedMode,
   onSelectCategory,
   onReset,
   onClose,
@@ -280,9 +284,11 @@ function FilterBottomSheet({
   open: boolean;
   activeTab: FilterSheetTab;
   draftFeedMode: FeedMode;
+  draftFeedModeTouched: boolean;
   draftCategoryId: number | null;
   onTabChange: (tab: FilterSheetTab) => void;
   onSelectFeedMode: (mode: FeedMode) => void;
+  onClearFeedMode: () => void;
   onSelectCategory: (categoryId: number | null) => void;
   onReset: () => void;
   onClose: () => void;
@@ -293,7 +299,7 @@ function FilterBottomSheet({
   }
 
   const selectedChips = [
-    ...(draftFeedMode !== 'all'
+    ...((draftFeedMode !== 'all' || draftFeedModeTouched)
       ? [{ key: `type-${draftFeedMode}`, label: FEED_OPTIONS.find((option) => option.key === draftFeedMode)?.label ?? '' }]
       : []),
     ...(draftCategoryId !== null
@@ -350,7 +356,7 @@ function FilterBottomSheet({
                   type="button"
                   onClick={() => {
                     if (chip.key.startsWith('type-')) {
-                      onSelectFeedMode('all');
+                      onClearFeedMode();
                       return;
                     }
                     onSelectCategory(null);
@@ -372,10 +378,10 @@ function FilterBottomSheet({
             type="button"
             onClick={onReset}
             disabled={!hasSelectedFilters}
-            className={`flex h-[14px] shrink-0 items-center pl-[24px] text-[12px] font-[400] leading-[14.4px] ${
+            className={`flex h-[14px] shrink-0 items-center pl-[24px] font-[400] ${
               hasSelectedFilters ? 'text-[#111111]' : 'text-[#D9D9D9]'
             }`}
-            style={textFeatureStyle}
+            style={{ ...textFeatureStyle, fontSize: '12px', lineHeight: '14.4px' }}
           >
             초기화
           </button>
@@ -998,18 +1004,18 @@ function ReviewCardRow({
             <div className="flex w-full items-center justify-end">
               <button
                 type="button"
-                aria-label="CTA 이동"
-                className="relative z-[1] flex h-[30px] w-[48px] shrink-0 items-start justify-start rounded-[8px] bg-[#5A876E] px-[12px] py-[8px]"
+                aria-label={relatedSuccessAriaLabel}
+                className="relative z-[1] flex h-[30px] min-w-[96px] shrink-0 items-center justify-center rounded-[8px] bg-[#5A876E] px-[12px] py-[8px]"
                 onClick={(event) => {
                   stopEvent(event);
                   onCtaClick(experience);
                 }}
               >
                 <div
-                  className="flex flex-col justify-center text-center text-[12px] font-[600] leading-[0] text-white"
+                  className="flex flex-col justify-center whitespace-nowrap text-center text-[12px] font-[600] leading-[0] text-white"
                   style={textFeatureStyle}
                 >
-                  <span className="leading-[14.4px]">성공</span>
+                  <span className="leading-[14.4px]">{relatedSuccessLabel}</span>
                 </div>
               </button>
             </div>
@@ -1125,10 +1131,14 @@ function FooterArea({
 }
 
 function SharedFooterArea({
+  feedMode,
+  onSelectFeedMode,
   fabOpen,
   onToggleFab,
   onCreateClick,
 }: {
+  feedMode: FeedMode;
+  onSelectFeedMode: (mode: FeedMode) => void;
   fabOpen: boolean;
   onToggleFab: () => void;
   onCreateClick: () => void;
@@ -1137,9 +1147,41 @@ function SharedFooterArea({
     <BottomNav
       active="explore"
       showFab
+      showCenterCreateButton
+      accessoryBottom={108}
+      accessoryLayout="center"
       fabExpanded={fabOpen}
       onFabToggle={onToggleFab}
       onCreateClick={onCreateClick}
+      accessory={
+        <div className="pointer-events-auto inline-flex items-start rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+          <div className="flex items-center gap-[4px]">
+            {FEED_OPTIONS.map((option) => {
+              const active = option.key === feedMode;
+
+              return (
+                <button
+                  key={option.key}
+                  type="button"
+                  onClick={() => onSelectFeedMode(option.key)}
+                  className={`flex shrink-0 items-center justify-center rounded-[999px] px-[8px] py-[6px] ${
+                    active ? 'bg-[#315441]' : 'bg-white'
+                  }`}
+                >
+                  <span
+                    className={`whitespace-nowrap text-[12px] font-[400] leading-[14.4px] ${
+                      active ? 'text-white' : 'text-[#131416]'
+                    }`}
+                    style={textFeatureStyle}
+                  >
+                    {option.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      }
     />
   );
 }
@@ -1159,6 +1201,7 @@ export default function ExploreV3() {
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
   const [filterSheetTab, setFilterSheetTab] = useState<FilterSheetTab>('type');
   const [draftFeedMode, setDraftFeedMode] = useState<FeedMode>('all');
+  const [draftFeedModeTouched, setDraftFeedModeTouched] = useState(false);
   const [draftCategoryId, setDraftCategoryId] = useState<number | null>(null);
   const [fabOpen, setFabOpen] = useState(false);
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -1463,6 +1506,7 @@ export default function ExploreV3() {
   function openFilterSheet() {
     setFilterSheetTab('type');
     setDraftFeedMode(feedMode);
+    setDraftFeedModeTouched(feedMode !== 'all');
     setDraftCategoryId(selectedCategoryId);
     setFilterSheetOpen(true);
   }
@@ -1470,6 +1514,7 @@ export default function ExploreV3() {
   function closeFilterSheet() {
     setFilterSheetOpen(false);
     setDraftFeedMode(feedMode);
+    setDraftFeedModeTouched(feedMode !== 'all');
     setDraftCategoryId(selectedCategoryId);
   }
 
@@ -1567,6 +1612,8 @@ export default function ExploreV3() {
         </div>
 
         <SharedFooterArea
+          feedMode={feedMode}
+          onSelectFeedMode={setFeedMode}
           fabOpen={fabOpen}
           onToggleFab={() => setFabOpen((prev) => !prev)}
           onCreateClick={handleCreateClick}
@@ -1576,12 +1623,21 @@ export default function ExploreV3() {
           open={filterSheetOpen}
           activeTab={filterSheetTab}
           draftFeedMode={draftFeedMode}
+          draftFeedModeTouched={draftFeedModeTouched}
           draftCategoryId={draftCategoryId}
           onTabChange={setFilterSheetTab}
-          onSelectFeedMode={setDraftFeedMode}
+          onSelectFeedMode={(mode) => {
+            setDraftFeedMode(mode);
+            setDraftFeedModeTouched(true);
+          }}
+          onClearFeedMode={() => {
+            setDraftFeedMode('all');
+            setDraftFeedModeTouched(false);
+          }}
           onSelectCategory={setDraftCategoryId}
           onReset={() => {
             setDraftFeedMode('all');
+            setDraftFeedModeTouched(false);
             setDraftCategoryId(null);
           }}
           onClose={closeFilterSheet}

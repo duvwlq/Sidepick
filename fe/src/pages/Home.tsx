@@ -367,6 +367,7 @@ export default function Home() {
               onClick={() => setExpandedCategories((prev) => !prev)}
               className="text-[12px] font-[400] leading-[14px] text-[#757575] underline"
               aria-expanded={expandedCategories}
+              style={{ fontSize: '12px', lineHeight: '14px' }}
             >
               {expandedCategories ? '접어 보기' : '펼쳐 보기'}
             </button>
