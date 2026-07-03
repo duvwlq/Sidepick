@@ -1,0 +1,30 @@
+서비스명: Sidepick
+한 줄 설명: AI 기반 부업 실패 분석 플랫폼
+
+[서비스 링크]
+https://side-pick.app
+
+[API 링크]
+https://api.side-pick.app/api
+
+[Health Check]
+https://api.side-pick.app/api/health
+
+[GitHub Repository]
+https://github.com/duvwlq/Sidepick
+
+[설명 짧은 버전]
+Sidepick은 부업 실패 경험을 구조화해 기록하고, AI가 유사 사례와 다음 액션을 분석해 주는 실패 학습 플랫폼입니다.
+
+[설명 2문장 버전]
+Sidepick은 흩어진 부업 실패 후기를 탐색 가능한 데이터로 바꾸는 서비스입니다.
+사용자는 실패 경험을 기록하고, AI 분석과 유사 사례 비교를 통해 다음 선택의 판단 기준을 얻을 수 있습니다.
+
+[최종 확인 메모]
+- 제출 직전 서비스 URL 접속 확인
+- 제출 직전 Health Check 응답 확인
+- GitHub README 최신 상태 확인
+
+[검증 기록]
+- 서비스 URL `https://side-pick.app` : HTTP 200 확인 (2026-06-24 KST 기준)
+- Health Check `https://api.side-pick.app/api/health` : HTTP 200 / status UP 확인 (2026-06-24 KST 기준)

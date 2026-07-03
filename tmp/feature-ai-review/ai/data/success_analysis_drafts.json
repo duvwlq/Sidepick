@@ -1,0 +1,1240 @@
+{
+  "version": "AI-18-v1",
+  "generated_at": "2026-06-10T16:54:21+09:00",
+  "model": "claude-sonnet-4-5-20250929",
+  "prompt_version": "AI-14-v1",
+  "summary": {
+    "total_cases": 32,
+    "successful_drafts": 31,
+    "errors": 1,
+    "total_input_tokens": 84388,
+    "total_output_tokens": 27236,
+    "estimated_cost_usd": 0.6617,
+    "elapsed_sec": 523.1,
+    "total_validation_issues": 22
+  },
+  "drafts": [
+    {
+      "category_inferred": "investment",
+      "industry": "주식 투자 + 틱톡 라이브 + 공간임대업 복합",
+      "success_factors": [
+        {
+          "title": "남들이 말릴 때 행동",
+          "description": "주변에서 틱톡과 주식 투자를 말렸지만 '한번 해보자. 초기 투자금도 없는데 까이꺼 일을 저질러보자'는 마음으로 직접 부딪혔어요. 이 분은 남들 쉴 때 움직이며 시행착오를 두려워하지 않았던 것 같아요.",
+          "quoted_phrase": "한번 해보자. 초기 투자금도 없는데 까이꺼 일을 저질러보자"
+        },
+        {
+          "title": "현장 경험으로 돈의 무게 체득",
+          "description": "새벽 4시 반 출근, 푸드공장과 택배 현장 아르바이트를 병행하며 '몸으로 돈을 버는 법'을 먼저 배웠어요. 이 과정에서 현타를 느끼고 '돈이 일하게 하는 법'으로 방향을 전환했던 게 핵심이에요.",
+          "quoted_phrase": "공장에서 일하면서 '몸으로 돈을 버는 법'을 배웠다면"
+        },
+        {
+          "title": "외국어 강점 활용한 틱톡 라이브",
+          "description": "5년째 영어회화를 가르친 경험과 유학 배경을 살려 틱톡에서 외국인들과 소통했어요. '언어가 통해야 진짜 세상을 볼 수 있다'는 철학으로 3개월 만에 후원 금액이 올라오며 재미를 느꼈다고 해요.",
+          "quoted_phrase": "언어가 통해야 진짜 세상을 볼 수 있다고 생각했거든요"
+        }
+      ],
+      "difference_from_failures": "일반적으로 부업 실패자들은 주변의 만류에 포기하거나 한 가지 방법만 고집하는 경우가 많아요. 하지만 이 분은 공장·택배 현장에서 몸으로 부딪히며 현실을 체감한 뒤, 틱톡 라이브와 주식 투자로 방향을 전환했어요. '남들 쉴 때 움직였다'는 표현처럼, 시행착오를 두려워하지 않고 여러 채널을 동시에 실험하며 자신만의 방식을 만들어간 점이 달라요.",
+      "confidence_score": 0.82,
+      "_meta": {
+        "case_id": "blog_002",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 14.21,
+        "input_tokens": 4039,
+        "output_tokens": 865,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:한번 해보자. 초기 투자금도 없는데 까이꺼 일을 저질러",
+          "quoted_phrase_not_in_body:공장에서 일하면서 '몸으로 돈을 버는 법'을 배웠다면"
+        ]
+      },
+      "_source": {
+        "title": "2회 택배 및 공장 출근 안하게 된 이유 - 월 150 부업 성공 후기",
+        "link": "https://blog.naver.com/bbiku123/224073266438",
+        "category_slug_clean": "investment",
+        "source": "blog"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "적립 플랫폼 (애드픽 경유 적립)",
+      "success_factors": [
+        {
+          "title": "일상 쇼핑 경로 변경",
+          "description": "쿠팡, 오늘의집, 지마켓 등 원래 사용하던 쇼핑 사이트를 애드픽 경유로 접속하는 방식으로 추가 비용 없이 적립을 받았어요. 본문에서 \"다이렉트로 어플 클릭을 하지 않고 애드픽에서 링크를 만들어서 들어가서 구매하면 적립해주네요\"라고 설명하고 있어요.",
+          "quoted_phrase": "다이렉트로 어플 클릭을 하지 않고 애드픽에서 링크를 만들어서 들어가서 구매하면 적립해주네요"
+        },
+        {
+          "title": "3개월 꾸준한 사용",
+          "description": "단기간이 아닌 3개월 동안 꾸준히 경유 적립을 활용해서 5만원 이상을 모았어요. \"저렇게 모으는데 3개월정도 걸렸고 아직도 돈 받을게 남아있어요\"라는 구절에서 인내심 있는 활용을 확인할 수 있어요.",
+          "quoted_phrase": "저렇게 모으는데 3개월정도 걸렸고 아직도 돈 받을게 남아있어요"
+        },
+        {
+          "title": "네이버페이 포인트 전환",
+          "description": "적립금을 네이버페이 포인트로 교환해서 실생활에서 바로 사용할 수 있는 형태로 만들었어요. \"네이버페이 포인트로 교환 방법은 생활 이용권 누르고 네이버 페이 누르면 끝\"이라며 실제 활용 방법까지 공유하고 있어요.",
+          "quoted_phrase": "네이버페이 포인트로 교환 방법은 생활 이용권 누르고 네이버 페이 누르면 끝"
+        }
+      ],
+      "difference_from_failures": "이 분은 경유 적립의 단점(적립 기간이 오래 걸림)을 명확히 인지하면서도 3개월간 꾸준히 사용했어요. 많은 사람들이 즉시 적립되지 않는다는 이유로 중도 포기하는 것과 달리, 일상적인 쇼핑 습관에 경유 링크를 자연스럽게 통합시켜서 추가 노력 없이 수익을 만들어냈어요. 또한 \"내돈 나가는 것도 없고 사기도 아니고\"라며 리스크 없는 부업임을 강조하면서도, 마지막에 더 나은 대안을 찾았다고 솔직하게 밝히는 현실적인 태도를 보여줘요.",
+      "confidence_score": 0.72,
+      "_meta": {
+        "case_id": "blog_049",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 17.44,
+        "input_tokens": 1937,
+        "output_tokens": 975,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:다이렉트로 어플 클릭을 하지 않고 애드픽에서 링크를 만",
+          "quoted_phrase_not_in_body:저렇게 모으는데 3개월정도 걸렸고 아직도 돈 받을게 남",
+          "quoted_phrase_not_in_body:네이버페이 포인트로 교환 방법은 생활 이용권 누르고 네"
+        ]
+      },
+      "_source": {
+        "title": "적립으로  애드픽 네이버 포인트 수익 전환 부업성공후기",
+        "link": "https://blog.naver.com/syd04172/223892057637",
+        "category_slug_clean": "online-commerce",
+        "source": "blog"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "배달대행 (쿠팡이츠·배달의민족)",
+      "success_factors": [
+        {
+          "title": "미션 완료를 통한 추가 수익",
+          "description": "이 분은 쿠팡 미션 3건을 완료해 9만원의 추가 수입을 얻었어요. 기본 배달료 외에 미션 보너스를 적극 활용해 시간당 수입을 5만원대로 끌어올렸어요.",
+          "quoted_phrase": "미션 : 쿠팡 3건 9 만원"
+        },
+        {
+          "title": "본업과 병행 가능한 시간 활용",
+          "description": "본업 퇴근 후 저녁 5시부터 자정까지 7시간 30분 동안 배달을 진행했어요. 미션이 주어지면 바로 출발하는 유연한 스케줄 관리로 본업에 지장 없이 부업을 이어가고 있어요.",
+          "quoted_phrase": "본업 일이 쌓여 출근하고 저녁에 미션주면 퇴근하고 안주면 밤까지 일할려고"
+        },
+        {
+          "title": "높은 시간당 건수 처리",
+          "description": "7시간 30분 동안 39건을 배달해 시간당 5.2건의 높은 처리율을 기록했어요. 효율적인 동선 관리와 빠른 배달 완료로 건당 평균 9,802원의 수입을 유지했어요.",
+          "quoted_phrase": "시간당 배달 건수 : 5.2건"
+        }
+      ],
+      "difference_from_failures": "일반적으로 배달 부업 실패자들은 미션 보너스를 놓치거나 본업과의 시간 조율에 실패해요. 이 분은 본업 일정에 따라 유연하게 배달 시간을 조정하면서도, 미션이 주어지면 즉시 출발해 추가 수익을 확보했어요. 또한 시간당 5건 이상의 높은 배달 건수를 유지하며 효율성을 극대화했고, 바쁜 와중에도 꾸준히 후기를 작성하며 자기 관리를 이어가는 점이 달라요.",
+      "confidence_score": 0.95,
+      "_meta": {
+        "case_id": "blog_050",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 14.22,
+        "input_tokens": 1277,
+        "output_tokens": 766,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "태식이 출연 토요일 배달 부업 쿠팡미션 성공후기 1213",
+        "link": "https://blog.naver.com/tuning7wh/224128839496",
+        "category_slug_clean": "platform-labor",
+        "source": "blog"
+      }
+    },
+    {
+      "category_inferred": "online-commerce",
+      "industry": "온라인 악세사리 판매",
+      "success_factors": [
+        {
+          "title": "빠른 첫 판매 달성",
+          "description": "1주일이라는 짧은 기간 안에 첫 판매를 성공시켰어요. 초기 성과를 빠르게 만들어내면서 부업에 대한 확신과 동기부여를 얻을 수 있었던 것 같아요.",
+          "quoted_phrase": "1주일 안에 첫 판매 성공했어요"
+        },
+        {
+          "title": "본격적인 시작 결심",
+          "description": "단순히 생각만 하는 것이 아니라 실제로 본격적으로 시작하기로 결심하고 행동에 옮긴 점이 중요했어요. 망설이지 않고 실행에 옮긴 것이 성공의 첫걸음이었던 것 같아요.",
+          "quoted_phrase": "본격적으로 시작하게 됐어요"
+        },
+        {
+          "title": "긍정적 마인드 유지",
+          "description": "첫 판매 성공 시 큰 감동을 느끼고, 누구나 가능하다는 긍정적인 마인드를 유지했어요. 이런 태도가 지속적인 동기부여와 꾸준한 활동으로 이어졌을 것으로 보여요.",
+          "quoted_phrase": "누구나 충분히 가능하다고"
+        }
+      ],
+      "difference_from_failures": "많은 분들이 악세사리 부업을 생각만 하고 실행하지 못하거나, 시작해도 첫 판매까지 오래 걸려 포기하는 경우가 많아요. 하지만 이 분은 망설임 없이 본격적으로 시작했고, 1주일이라는 짧은 기간에 첫 성과를 만들어냈어요. 또한 작은 성공에도 큰 의미를 부여하며 긍정적인 태도를 유지한 점이 달랐던 것 같아요. 실패하는 분들은 완벽을 추구하며 시작을 미루거나, 초기 어려움에 쉽게 좌절하는 경향이 있는데, 이 분은 일단 시작하고 작은 성과에 감사하며 앞으로 나아간 점이 차이를 만들었어요.",
+      "confidence_score": 0.45,
+      "_meta": {
+        "case_id": "cafe_042",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 13.72,
+        "input_tokens": 1000,
+        "output_tokens": 797,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "악세사리부업 이거 진짜 돈될까? 직접 해본 리얼후기!",
+        "link": "http://cafe.naver.com/koarane/145846",
+        "category_slug_clean": "online-commerce",
+        "source": "cafe"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "웹소설 플랫폼 (네이버 시리즈)",
+      "success_factors": [
+        {
+          "title": "가정사를 창작 동력으로 전환",
+          "description": "이 분은 6.25 간접 피해와 보수적 가정환경 속에서 '사회와 역사에 대해 공부를 할수밖에 없었고', 그 무거운 경험을 웹소설 소재로 승화시켰어요. 일반적인 20대와 다른 현실적 시각이 독자들에게 차별화된 서사로 다가간 것 같아요.",
+          "quoted_phrase": "사회와 역사에 대해 공부를 할수밖에 없었고"
+        },
+        {
+          "title": "실패 후에도 즉시 재도전",
+          "description": "작성자는 2500만원 대출로 철학관 사업이 실패했지만, '내가 하루라도 어릴때 도전을 하고. 또 해서 계속 정상을 향해 달려야한다'며 곧바로 웹소설 연재를 시작했어요. 좌절보다 행동이 앞선 점이 1위 달성의 원동력이 된 것 같아요.",
+          "quoted_phrase": "내가 하루라도 어릴때 도전을 하고. 또 해서 계속 정상을 향해 달려야한다"
+        },
+        {
+          "title": "어머니의 칼럼니스트 경험 계승",
+          "description": "어머니가 '공기업에서 일했지만, 글도 쓰셨고 부업으로 언론사에서 칼럼니스트로도 일했'던 점을 보며, 자신도 '글을 쓰는데엔 저의 재능이 있었다는걸' 깨달았어요. 가족 내 글쓰기 DNA가 실전 연재력으로 이어진 사례예요.",
+          "quoted_phrase": "부업으로 언론사에서 칼럼니스트로도 일했"
+        }
+      ],
+      "difference_from_failures": "일반적으로 웹소설 지망생들은 첫 연재 실패 후 포기하거나 장기간 휴식을 취하는 경우가 많아요. 하지만 이 분은 철학관 사업 실패라는 더 큰 좌절 이후에도 '생각한 것을 실현하고. 행동으로 옮기는 능력은 누구보다 빠르고 확실했'다고 스스로 평가하며, 즉시 웹소설 연재로 전환했어요. 또한 단순히 취미가 아닌 '데뷔하고 싶다'는 명확한 목표와 '현금회수율을 높이고 싶다'는 사업적 관점을 동시에 가진 점이 달라요.",
+      "confidence_score": 0.82,
+      "_meta": {
+        "case_id": "dc_004",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 15.66,
+        "input_tokens": 4015,
+        "output_tokens": 937,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:사회와 역사에 대해 공부를 할수밖에 없었고",
+          "quoted_phrase_not_in_body:내가 하루라도 어릴때 도전을 하고. 또 해서 계속 정상"
+        ]
+      },
+      "_source": {
+        "title": "팬픽 딜레마 1위후기및 앞으로의 계획에 대해서",
+        "link": "https://gall.dcinside.com/mini/board/view/?id=night_art&no=25",
+        "category_slug_clean": "content-sns",
+        "source": "dc"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "과학만화 콘텐츠 제작 (디시인사이드·블로그·페이스북 연재)",
+      "success_factors": [
+        {
+          "title": "무료 전면 공개 전략",
+          "description": "생계형 작가가 아니기에 가능했던 선택이에요. 정식 연재 의뢰를 거절하고 인터넷에 무료로 뿌려서 인지도를 먼저 쌓았고, 그 결과 책이 베스트셀러가 됐어요.",
+          "quoted_phrase": "아예 곤충 만화를 인터넷에 뿌리는 식으로 연재하겠다고 생각을 했어요"
+        },
+        {
+          "title": "교육+재미 융합 콘텐츠",
+          "description": "어려운 곤충·공룡 지식을 합성 필수요소와 유행어로 풀어냈어요. 독자들이 '고퀄리티 만화를 무료로'라며 찬사를 보냈고, 교육과 재미 두 마리 토끼를 잡았다는 평가를 받았어요.",
+          "quoted_phrase": "교육과 재미 두 마리의 토끼를 모두 잡는 데 성공했다는 평가를 받았습니다"
+        },
+        {
+          "title": "본업 기반 전문성 확보",
+          "description": "곤충 연구실을 오가며 실제 곤충을 연구하는 학생이에요. 섬에서 곤충을 직접 먹어본 경험까지 콘텐츠로 만들면서, 진짜 전문가만 낼 수 있는 깊이와 신뢰를 확보했어요.",
+          "quoted_phrase": "곤충 연구실 왔다 갔다 하면서 곤충 연구를 하려 하고, 부업으로 만화를 하고 있습니다"
+        }
+      ],
+      "difference_from_failures": "대부분의 콘텐츠 창작자는 수익화를 서두르지만, 이 분은 본업(곤충 연구)이 따로 있어서 '인지도 우선' 전략을 과감히 실행했어요. 다른 작가들이 '생계형이 아니라서 가능한 도박'이라고 평가할 만큼 위험한 선택이었지만, 무료 전면 공개로 팬층을 먼저 확보한 뒤 출판으로 연결하면서 베스트셀러 작가가 됐어요. 전문성(곤충 연구 경력)과 대중성(유행어·밈 활용)을 동시에 갖춘 점도 차별화 요소예요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "dc_005",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.04,
+        "input_tokens": 4124,
+        "output_tokens": 894,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "힛갤곤볼 완성 갈로아 \"과학만화 계속 그리고 싶어요\"",
+        "link": "https://gall.dcinside.com/board/view/?id=dcinterview&no=28629",
+        "category_slug_clean": "content-sns",
+        "source": "dc"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "서바이벌게임 용품 대리구매 대행",
+      "success_factors": [
+        {
+          "title": "신뢰 기반 선입금 시스템",
+          "description": "33명의 의뢰인이 선입금을 해주고 전국 각지(부산, 제주도, 군부대)에서 주문이 들어올 정도로 신뢰를 쌓았어요. 이미 검증된 대리구매자로서의 평판이 있었던 것으로 보여요.",
+          "quoted_phrase": "의뢰인 33명께서 선입금해주신 비용"
+        },
+        {
+          "title": "체계적 사전 준비와 소통",
+          "description": "판매자가 개인 대량 판매를 꺼릴 것을 예상하고 의뢰인과 품목 명단을 표로 제작해서 갔어요. 이런 준비성이 52장이라는 대량 구매를 성공시킨 핵심이었어요.",
+          "quoted_phrase": "의뢰인과 품목명단을 표로 제작해서 갔습니다"
+        },
+        {
+          "title": "낮은 수익률 감수와 성실함",
+          "description": "33명 대리구매를 해서 남은 수고비가 돈까스 한 끼 값뿐이었지만, 일일이 검수하고 포장해서 발송하는 성실함을 보였어요. 단기 수익보다 신뢰 구축에 집중한 거예요.",
+          "quoted_phrase": "딱 돈까스세트 하나 사먹을수고비 나오더라구유"
+        }
+      ],
+      "difference_from_failures": "일반적인 대리구매 실패 사례는 신뢰 부족으로 선입금을 받지 못하거나, 대량 구매 시 판매자와의 사전 협의 없이 진행해서 거절당하는 경우가 많아요. 이 분은 이미 커뮤니티에서 검증된 신뢰를 바탕으로 33명의 선입금을 받았고, 표로 정리한 명단을 준비해서 판매자를 설득했어요. 또한 수익이 거의 없는데도 꼼꼼한 검수와 포장, 발송 일정 공지 등 책임감 있는 사후관리를 했다는 점이 달라요.",
+      "confidence_score": 0.88,
+      "_meta": {
+        "case_id": "dc_006",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.2,
+        "input_tokens": 2481,
+        "output_tokens": 793,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:딱 돈까스세트 하나 사먹을수고비 나오더라구유"
+        ]
+      },
+      "_source": {
+        "title": "(스압)플컨후기(보다는 사실 대리구매후기)",
+        "link": "https://gall.dcinside.com/mgallery/board/view/?id=airsoftgun&no=77469",
+        "category_slug_clean": "platform-labor",
+        "source": "dc"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "게임 아이템 파밍(메이플스토리)",
+      "success_factors": [
+        {
+          "title": "점심시간 활용 루틴화",
+          "description": "하루 1시간, 점심시간에 집에 가서 작업하는 방식으로 일상에 자연스럽게 녹여냈어요. 별도 시간 투자 없이 월 29시간만으로 안정적 수익을 만들어낸 점이 핵심이에요.",
+          "quoted_phrase": "점심때 집감"
+        },
+        {
+          "title": "고정수익 + 변동수익 구조",
+          "description": "월 85만원의 베이스 수익에 아이템 드랍 시 추가 수익이 발생하는 구조예요. 최소 보장 금액이 있어 안정적이면서도 운이 따르면 더 벌 수 있는 시스템을 구축했어요.",
+          "quoted_phrase": "월85만원 고정수익 & 아이템뜨면 +@"
+        },
+        {
+          "title": "수익금 전액 재투자 체계",
+          "description": "부업 수익 100만원을 생활비로 쓰고, 본업 급여는 전액 투자(월 100만원 적금, 200만원 구글 주식)에 활용하는 구조예요. 부업이 생활비를 커버해서 본업 소득을 온전히 자산 증식에 쓸 수 있게 됐어요.",
+          "quoted_phrase": "월 100 ggll 월 200 구글본주 넣는중"
+        }
+      ],
+      "difference_from_failures": "일반적인 게임 부업 시도자들은 장시간 투자 대비 수익이 불안정하거나, 본업에 지장을 주는 경우가 많아요. 하지만 이 분은 점심시간이라는 '버려지는 시간'을 활용해 본업과 충돌 없이 루틴을 만들었고, 고정수익 구조를 확보해서 예측 가능한 캐시플로우를 만든 점이 달라요. 또한 부업 수익을 소비가 아닌 본업 급여의 투자 여력 확대로 연결시켜, 단순 용돈벌이가 아닌 자산 증식 시스템으로 발전시켰어요.",
+      "confidence_score": 0.88,
+      "_meta": {
+        "case_id": "dc_007",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.26,
+        "input_tokens": 1008,
+        "output_tokens": 783,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "세후 3백충 직장인인데 메이플 쌀먹으로부업한다...",
+        "link": "https://gall.dcinside.com/mgallery/board/view/?id=stockus&no=14396659",
+        "category_slug_clean": "platform-labor",
+        "source": "dc"
+      }
+    },
+    {
+      "category_inferred": "offline-sidejob",
+      "industry": "지방 소도시 커피숍",
+      "success_factors": [
+        {
+          "title": "유튜브 독학 + 알바 기술이전",
+          "description": "빵 제조 경험이 전혀 없던 70대 사장님이 유튜브로 제빵을 배우고, 다른 카페 경험이 있는 알바들을 통해 커피 레시피를 확보했어요. 전문성이 없어도 학습 의지와 인력 활용으로 기술 격차를 메운 거예요.",
+          "quoted_phrase": "빵을 어떻게 만드는지 유튜브를 보고 처음 배우셨음"
+        },
+        {
+          "title": "현장 재량권 부여 + 고객 감동",
+          "description": "버스기사 출신 메니저가 진상 대응에 능숙했고, 아이 동반 손님에게 메뉴에 없는 요구르트나 아이스크림을 제공하는 등 현장 직원에게 비용 재량권을 줘서 고객 만족도를 높였어요.",
+          "quoted_phrase": "홀(현장)에 있는 사람들에게 비용에 대한 재량권을 부여해준 것도 이유가 되겠다"
+        },
+        {
+          "title": "저가 + 주차 편의로 시니어 타겟 전환",
+          "description": "아메리카노 2천원 저가 전략이 40~70대 시니어층을 끌어들였고, 허허벌판 입지 덕분에 주차가 편해 차량 이동이 많은 중장년층의 단골 모임 장소가 됐어요. 약점이 강점으로 바뀐 케이스예요.",
+          "quoted_phrase": "시니어들은 자동차로 대부분 이동하기에 번화가보다는 주차가 잘되는 곳을 선호하게 됨"
+        }
+      ],
+      "difference_from_failures": "일반적인 카페 창업 실패 사례는 '좋은 입지 + 높은 임대료 + 경쟁 과다'로 요약되는데, 이 분은 정반대 조건에서 성공했어요. 70대 비전문가가 최악의 입지(유동인구 없음)에서 스타벅스와 경쟁하는 상황이었지만, 타겟을 젊은층이 아닌 시니어로 전환하면서 '주차 편의 + 저렴한 가격 + 인간미 있는 서비스'라는 차별화 포인트를 만들어냈어요. 특히 현장 직원에게 재량권을 주고 고객 감동을 유도한 점, 유튜브 독학으로 기술 장벽을 낮춘 점이 실패자들과의 결정적 차이예요.",
+      "confidence_score": 0.88,
+      "_meta": {
+        "case_id": "dc_009",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 18.17,
+        "input_tokens": 4089,
+        "output_tokens": 940,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:시니어들은 자동차로 대부분 이동하기에 번화가보다는 주차"
+        ]
+      },
+      "_source": {
+        "title": "[일기] 원조 퇴물의 라스트댄스",
+        "link": "https://gall.dcinside.com/mgallery/board/view/?id=github&no=84371",
+        "category_slug_clean": "offline-sidejob",
+        "source": "dc"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "쏘카 핸들러 (차량 탁송)",
+      "success_factors": [
+        {
+          "title": "장거리 배차 선택적 수행",
+          "description": "작성자는 단거리 미션(4천원)보다 장거리 배차(전주-인천, 전주-광주 등)를 집중 수행해서 2주차에 25만원을 넘겼어요. 일반 미션만 하면 시급도 안 나오지만, 장거리를 전략적으로 선택하면 일당 10만원 가까이 가능했다고 해요.",
+          "quoted_phrase": "이번주에는 장거리 이동건을 몇건 했더니 25만원을 넘긴 상태입니다"
+        },
+        {
+          "title": "운전 취미와 결합한 동기",
+          "description": "이 분은 원래 운전을 좋아해서 '취미 삼아 생활비를 벌 수 있어서 좋았다'고 표현했어요. 단순 수익보다 다양한 차종을 경험하는 재미가 지속 동력이 되었고, 이게 초기 허탈감을 버티게 한 요인이에요.",
+          "quoted_phrase": "운전을 원래 좋아해서 취미 삼아 생활비를 벌 수 있어서 좋았지만"
+        },
+        {
+          "title": "대중교통 이동 범위 설정",
+          "description": "작성자는 걸어서나 대중교통으로 이동 가능한 범위로 미션을 제한했어요. 이동 비용을 최소화하려는 전략이었고, 무작정 먼 미션을 잡지 않고 귀가 동선을 고려한 점이 실수익을 지킨 방법이에요.",
+          "quoted_phrase": "걸어서 이동하거나, 대중교통으로 이동할 수 있는 범위로 정했습니다"
+        }
+      ],
+      "difference_from_failures": "일반적으로 플랫폼 노동 실패자들은 단가만 보고 뛰어들지만, 이 분은 이동 비용과 시간을 계산해서 '실제로 남는 게 적다'는 걸 빠르게 파악했어요. 매크로 경쟁, 콜 뺏김, 귀가 비용까지 냉정하게 분석하면서도, 운전 취미라는 비금전적 동기로 버틸 수 있었던 점이 달라요. 또 장거리 배차를 전략적으로 선택해서 2주차 수익을 2배 가까이 올린 점도 차별화 요소예요.",
+      "confidence_score": 0.88,
+      "_meta": {
+        "case_id": "clien_002",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 17.88,
+        "input_tokens": 2547,
+        "output_tokens": 884,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "쏘카세차빌런, 2주정도 쏘카 핸들러라는걸 해보았습니다.(차량 탁송알바)",
+        "link": "https://www.clien.net/service/board/park/18754797",
+        "category_slug_clean": "platform-labor",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "쿠팡이츠 도보 배달",
+      "success_factors": [
+        {
+          "title": "이벤트 타이밍 활용",
+          "description": "연휴기간 도보 15건 배달 시 5만원 보너스 이벤트를 발견하고 즉시 실행에 옮긴 점이 핵심이에요. 평소엔 콜이 전혀 오지 않았지만, 이벤트 기간에는 콜이 연속으로 들어왔어요.",
+          "quoted_phrase": "연휴기간인 22일부터 25일 사이에 도보로 15건을 배달하면 5만원을 보너스로 준다"
+        },
+        {
+          "title": "즉각적인 실행력",
+          "description": "이벤트 메시지를 받고 망설이지 않고 바로 앱을 켜서 배달가능 상태로 전환했어요. 첫 콜이 들어왔을 때도 시스템을 잘 몰랐지만 일단 수락하고 행동으로 옮긴 점이 달라요.",
+          "quoted_phrase": "혹시나 하는 마음에 배달앱을 켜고 배달가능상태로 바꿔보았습니다. 다음순간 띠링, 하는 소리와 함께 동네 피자집에서 배달콜이 들어왔습니다"
+        },
+        {
+          "title": "체계적인 학습과 적응",
+          "description": "배달 과정에서 배차종료 체크, 콜 배정 거리 기준(1.5km 이내) 등 시스템을 빠르게 파악하고 다음 배달에 활용했어요. PC방에서 휴식하며 체력과 배터리를 관리한 것도 지속가능성을 높였어요.",
+          "quoted_phrase": "도보배달은 배달기사의 현재 위치에서 픽업지까지의 거리 + 픽업지에서 배달지까지의 거리를 기준으로 배정되는데, 이 거리가 도합 1.5km 정도 이내일 때에만 콜이 들어오는 것 같았습니다"
+        }
+      ],
+      "difference_from_failures": "일반적으로 플랫폼 노동 실패자들은 평상시 조건만 보고 포기하는 경우가 많아요. 이 분은 예전에 한 번 실패했지만(콜이 안 와서 포기), 이벤트라는 특수 상황을 포착하고 재도전했어요. 또한 시스템을 몰라도 일단 실행하면서 배우는 태도, 그리고 배터리·체력 관리 등 실전에서 발생하는 문제를 현장에서 해결하는 능력이 달랐어요. 단순히 '도보는 안 된다'고 단정하지 않고 타이밍과 조건을 찾아낸 점이 핵심 차이예요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_003",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 21.27,
+        "input_tokens": 4082,
+        "output_tokens": 981,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:혹시나 하는 마음에 배달앱을 켜고 배달가능상태로 바꿔보"
+        ]
+      },
+      "_source": {
+        "title": "쿠팡이츠 도보 배달 후기",
+        "link": "https://www.clien.net/service/board/use/18493904",
+        "category_slug_clean": "platform-labor",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "경제·투자 분석 유튜브",
+      "success_factors": [
+        {
+          "title": "달러 환율 예측 적중",
+          "description": "작성자는 '달러 환율' 분석이 신의 한 수로 작용했다고 밝혔어요. 환율 흐름을 정확히 짚어내면서 수출입업자, 유학생, 해외여행객 등 다양한 층의 시청자를 확보할 수 있었죠.",
+          "quoted_phrase": "이중에서도 '달러 환율' 분석이 신의 한 수로 작용했습니다"
+        },
+        {
+          "title": "10년 이상 쌓은 전문성",
+          "description": "대학 시절부터 주식 관련 책을 섭렵하고 2012년부터 블로그를 운영하며 경제 분야 파워블로거로 성장했어요. 이렇게 축적된 지식과 자체 분석 모델이 콘텐츠의 신뢰도를 높였답니다.",
+          "quoted_phrase": "당시 책에 나온 기술적 분석, 기본적 분석을 따라 하는데 엄청난 희열을 느꼈습니다"
+        },
+        {
+          "title": "명확한 타겟층 설정",
+          "description": "주식시장과 환율 분석을 메인으로, 글로벌 경제 이슈 해설을 서브로 삼으며 콘텐츠 방향을 명확히 했어요. 한국은행, 기재부, 은행 외환거래부서, PB 등 전문가 집단까지 시청자로 확보했답니다.",
+          "quoted_phrase": "국내외 주식시장과 환율 분석을 메인으로, 글로벌 경제 이슈 해설을 서브로 삼고 있습니다"
+        }
+      ],
+      "difference_from_failures": "일반적으로 경제 유튜브 실패 사례는 트렌드만 쫓거나 피상적인 정보를 전달하는 경우가 많아요. 하지만 이 분은 10년 이상 축적한 전문성을 바탕으로 자체 분석 모델을 구축했고, 특히 달러 환율이라는 틈새 영역에서 정확한 예측을 제공하며 차별화했어요. 2020년 경제 유튜브 붐 시기를 놓쳤음에도 2022년 10개월 만에 5000명을 달성한 건, 유행이 아닌 실력으로 승부했기 때문이에요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_004",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 14.3,
+        "input_tokens": 3876,
+        "output_tokens": 862,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "달러 환율 정확하게 맞춰서 유튜브 구독자 5000명 달성한 후기",
+        "link": "https://www.clien.net/service/board/use/17923551",
+        "category_slug_clean": "content-sns",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "talent-freelance",
+      "industry": "숨고 컴퓨터 수리 서비스",
+      "success_factors": [
+        {
+          "title": "전문성 기반 합리적 가격 책정",
+          "description": "다른 업체가 메인보드 교체로 15만원 견적을 제시한 문제를 소프트웨어 문제로 정확히 진단하고 3만원에 해결했어요. 전문 지식을 바탕으로 불필요한 부품 교체 없이 근본 원인을 찾아낸 점이 차별화 요소예요.",
+          "quoted_phrase": "다른 곳에 문의 드려보니까 15만원 든다고 했다고"
+        },
+        {
+          "title": "끝까지 해결하는 책임감",
+          "description": "40분간 시도해도 안 되자 임시방편으로 마무리하려 했지만, 들인 시간도 아깝고 찜찜해서 바이오스 설정부터 청소까지 2시간 동안 완벽하게 해결했어요. 쉬운 마무리 대신 고객 만족을 선택한 자세가 성공 요인이에요.",
+          "quoted_phrase": "들인 시간도 아깝고 이대로 가면 너무 찜찜할 것 같은겁니다"
+        },
+        {
+          "title": "고객 입장에서 생각하는 태도",
+          "description": "20대 초반 만원 2만원이 아까운 시기라는 점을 공감하며 업체 눈탱이 안 맞게 해드린 것에 보람을 느꼈어요. 단순히 돈을 버는 것이 아니라 고객이 부당한 비용을 내지 않도록 도운 점이 차별화예요.",
+          "quoted_phrase": "20대 초반 만원 2만원이 아까운 시기에 업체 눈탱이 안맞게 해드리고"
+        }
+      ],
+      "difference_from_failures": "일반적인 실패 사례는 빠른 수익만 추구하거나 어려운 문제를 회피하는 경향이 있어요. 하지만 이 분은 40분간 해결 안 되는 상황에서도 포기하지 않고 바이오스 설정, 드라이버 재설치, 청소까지 2시간 동안 완벽하게 해결했어요. 또한 전문 지식을 바탕으로 불필요한 부품 교체 없이 합리적인 가격으로 문제를 해결해서 고객 신뢰를 얻었고, 금전적 이익보다 고객 만족과 보람을 우선시하는 태도가 장기적 성공의 기반이 되었어요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_005",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.97,
+        "input_tokens": 2845,
+        "output_tokens": 902,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:들인 시간도 아깝고 이대로 가면 너무 찜찜할 것 같은겁"
+        ]
+      },
+      "_source": {
+        "title": "숨고 컴퓨터 수리 서비스 제공 경험기.txt",
+        "link": "https://www.clien.net/service/board/use/16768176",
+        "category_slug_clean": "talent-freelance",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "배달대행 (배민 커넥트 전기자전거)",
+      "success_factors": [
+        {
+          "title": "친숙한 지역부터 시작",
+          "description": "첫 배차는 숙소 인근에서 평소 봤던 음식점을 선택했어요. 픽업지 거리가 가깝고 위치를 알고 있어서 찾아가기 쉬웠다는 점이 초반 적응에 도움이 됐어요.",
+          "quoted_phrase": "숙소 인근에서 오가며 봤던 음식점 입니다. 픽업지(음식점) 거리도 가깝고 위치를 알고 있어 찾아가기 쉬웠습니다"
+        },
+        {
+          "title": "사전 정보 수집과 실전 적용",
+          "description": "배달 전에 미리 알아본 팁들을 실제로 활용했어요. 가게에 도착하면 금액을 말하고, 주문번호를 확인하는 등 사전 학습한 내용을 바로 적용하면서 시행착오를 줄였어요.",
+          "quoted_phrase": "사전에 알아보니 배달건이 여러건인지라 통상 금액을 알려주면 금방 받을 수 있다고 했거든요"
+        },
+        {
+          "title": "심리적 장벽 극복과 목표 상기",
+          "description": "주변 시선이 의식될 때 늘어나는 뱃살과 돈을 다시 상기시키며 심리적 장벽을 넘었어요. 게임하고 영화보다 뭔가 열심히 사는 기분이 든다는 긍정적 마인드셋을 유지했어요.",
+          "quoted_phrase": "늘어나는 뱃살 + '돈' 을 다시 상기시키며 나섭니다"
+        }
+      ],
+      "difference_from_failures": "이 분은 첫 배달부터 체계적으로 접근했어요. 낯선 지역이 아닌 아는 곳부터 시작하고, 사전에 정보를 수집해서 실수를 최소화했어요. 실수(배달완료 오터치)가 발생해도 당황하지 않고 센터와 소통하며 해결했고, 심리적 부담감도 구체적인 목표(건강+수입)로 극복했어요. 단순히 시작만 하는 게 아니라 시행착오를 줄이는 전략적 접근이 차이점이에요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_006",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 18.74,
+        "input_tokens": 4011,
+        "output_tokens": 842,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:사전에 알아보니 배달건이 여러건인지라 통상 금액을 알려"
+        ]
+      },
+      "_source": {
+        "title": "전기자전거로 배민 커넥터 된 이후 (2편)",
+        "link": "https://www.clien.net/service/board/use/15237037",
+        "category_slug_clean": "platform-labor",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "online-commerce",
+      "industry": "성인용품 쇼핑몰",
+      "success_factors": [
+        {
+          "title": "1년간 포기하지 않은 끈기",
+          "description": "처음 1년은 매출이 거의 없고 월 100만원도 가져가기 힘든 상황이었지만, 친구와 서로 힘이 되어 하루하루 버텼어요. 집은 1주일에 1~2번 들어가고 사무실과 찜질방에서 자면서 고생한 끝에 조금씩 빛이 보이기 시작했대요.",
+          "quoted_phrase": "매출이 없었고 하는 일만 엄청많았습니다"
+        },
+        {
+          "title": "실전 경험으로 쌓은 노하우",
+          "description": "1년의 시간동안 다양한 마케팅 시도와 노가다를 반복하면서 자연스럽게 노하우가 생겼어요. 특히 블로그 3개를 소소하게 글쓰면서 키웠더니 최적화 블로그가 되어 있었다고 해요.",
+          "quoted_phrase": "1년의 시간동안 우리는 일을 했었고 노하우가 생겼던 거죠"
+        },
+        {
+          "title": "고객 관점의 기능 개발",
+          "description": "친구 쇼핑몰을 만들 때 견적 이상의 일을 해주면서 새벽 타임세일, 하루 한상품 파격세일, 회원/비회원 가격 차별화 등 트렌드를 분석해서 실용적인 기능들을 추가했어요.",
+          "quoted_phrase": "새벽시간에는 더 싸지는 타임세일기능, 당시 유행하던 소셜커머스에서 따온 하루 한상품 파격세일"
+        }
+      ],
+      "difference_from_failures": "일반적으로 쇼핑몰 창업자들이 초반 매출 부진에 포기하는 것과 달리, 이 분은 1년간 월 100만원도 못 버는 상황에서도 동업 파트너와 서로 의지하며 버텼어요. 또한 단순히 쇼핑몰만 만드는 게 아니라 개발자 출신답게 직접 차별화된 기능을 구현하고, 블로그 마케팅 등 다양한 방법을 시도하면서 실전 노하우를 쌓아갔다는 점이 달라요.",
+      "confidence_score": 0.85,
+      "_meta": {
+        "case_id": "clien_007",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 15.98,
+        "input_tokens": 4089,
+        "output_tokens": 832,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:새벽시간에는 더 싸지는 타임세일기능, 당시 유행하던 소"
+        ]
+      },
+      "_source": {
+        "title": "에이전시,쇼핑몰등 온라인 10년째.. 넋두리 한번 해봅니다.",
+        "link": "https://www.clien.net/service/board/park/13028340",
+        "category_slug_clean": "online-commerce",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "offline-sidejob",
+      "industry": "소프트웨어 개발 및 출판 편집·인쇄",
+      "success_factors": [
+        {
+          "title": "위기를 기회로 전환",
+          "description": "책이 비에 젖는 사고 후 '새로운 방법이 필요하다'고 판단하고, 500만원짜리 고속복사기 대신 10만원 레이저프린터 6대로 같은 효용을 달성하는 방식을 고안했어요. 이 창의적 문제해결이 회사 성장의 전환점이 되었어요.",
+          "quoted_phrase": "새로운 방법이 필요하다"
+        },
+        {
+          "title": "최소자본으로 시작",
+          "description": "각자 '없어도 크게 힘들지 않은 자본' 100만원씩 모아 총 200만원으로 창업했어요. 30만원 중고 노트북으로 시작해 감당 가능한 범위에서 리스크를 관리하며 사업을 키워나갔어요.",
+          "quoted_phrase": "없어도 크게 힘들지 않은 자본"
+        },
+        {
+          "title": "즉각 매출 확보 전략",
+          "description": "개발자 출신이 아니라 난관을 만나자, 오랫동안 알바로 했던 책 편집 일을 받아 주 1회 40만원씩 수익을 만들었어요. 본업 준비 중에도 현금흐름을 유지하며 버틸 수 있는 기반을 마련했어요.",
+          "quoted_phrase": "즉각 매출을 올릴 수 있는 무언가가 필요했습니다"
+        }
+      ],
+      "difference_from_failures": "이 분은 '순간의 사건을 어떻게 생각하는가'에 집중했어요. 책이 젖는 사고를 단순 손실로 보지 않고 시스템 개선의 신호로 받아들였고, 고가 장비 대신 저가 장비 조합으로 같은 효과를 내는 창의적 해법을 찾아냈어요. 또한 감당 가능한 최소자본으로 시작해 실패해도 재기 가능한 구조를 만들었고, 본업 준비 중에도 편집 일로 현금흐름을 유지하며 버텼어요. 일반적인 실패 사례는 큰 자본을 투입하거나 위기 상황에서 포기하는 경우가 많은데, 이 분은 문제를 기회로 전환하는 사고방식으로 3년 만에 매출 몇억 회사를 만들었어요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_009",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 17.13,
+        "input_tokens": 2908,
+        "output_tokens": 882,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "저는 100만원으로 창업했었습니다.",
+        "link": "https://www.clien.net/service/board/park/16657055",
+        "category_slug_clean": "offline-sidejob",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "사진·카메라 콘텐츠 크리에이터 + 필름감성 카메라 앱 개발",
+      "success_factors": [
+        {
+          "title": "좋아하는 것으로 시작",
+          "description": "구직 실패 기간 동안 취미로 즐기던 사진과 카메라를 수익화 대상으로 선택했어요. '내가 좋아하는 것으로 1원이라도 벌어 보는 것'을 작은 목표로 잡아서 유튜브와 인스타를 시작했고, 이후 자연스럽게 앱 개발까지 확장했어요.",
+          "quoted_phrase": "내가 좋아하는 것으로 1원이라도 벌어 보는 것을 작은 목표로 잡아서"
+        },
+        {
+          "title": "기존 역량의 창의적 결합",
+          "description": "개발자 경력 5년을 사진 취미와 결합해 '사진찍는 개발자'라는 독자적 정체성을 만들었어요. 이 정체성을 유지하기 위해 노출계앱과 필름 감성 카메라 앱을 직접 개발하며 콘텐츠와 제품을 동시에 생산하는 구조를 만들었어요.",
+          "quoted_phrase": "사진찍는 개발자로 칭호를 붙였던것 때문에"
+        },
+        {
+          "title": "빠른 실행과 다방면 학습",
+          "description": "한 달 전 콘텐츠 시작, 1주일 만에 앱 개발 착수, 사업자·통신판매업 등 모르는 것을 하나하나 챙기며 영상편집·개발·디자인을 동시에 진행했어요. '생각보다 짧은 시간에도 많은 것을 할수 있었기에' 계속 도전하는 동기를 얻었어요.",
+          "quoted_phrase": "생각보다 짧은 시간에도 많은 것을 할수 있었기에"
+        }
+      ],
+      "difference_from_failures": "일반적으로 부업 실패자들은 수익이 나지 않으면 빠르게 포기하거나 단일 채널에만 집중하는 경우가 많아요. 하지만 이 분은 아직 1원도 못 벌었음에도 '큰 동기부여와 성취감'을 느끼며 유튜브·인스타·앱 개발을 동시에 진행하고 있어요. 또한 5월 투입 예정인 본업 계약까지 병행하면서도 중장기 목표(핫셀블라드 광고)를 설정해 지속 가능한 구조를 만들고 있다는 점이 달라요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_010",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 15.6,
+        "input_tokens": 1701,
+        "output_tokens": 917,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "오랜 구직 실패에 여러 도전을 하다보니, 이제 좋을 날이 올지도 모르겠습니다.",
+        "link": "https://www.clien.net/service/board/park/19168043",
+        "category_slug_clean": "content-sns",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "talent-freelance",
+      "industry": "1인 개발자 (재택 프리랜서)",
+      "success_factors": [
+        {
+          "title": "유지보수 계약 전략",
+          "description": "단건 개발비 대신 월 정액 유지보수 계약으로 전환해서 1년간 고정 수익을 확보했어요. 이 분은 \"1년간의 고정 금액을 만드는 것은 생각외로 큰 효과가 있습니다. 1인 개발자로서의 심리적 안정감이죠\"라고 설명하고 있어요.",
+          "quoted_phrase": "1년간의 고정 금액을 만드는 것은 생각외로 큰 효과가 있습니다. 1인 개발자로서의 심리적 안정감이죠"
+        },
+        {
+          "title": "성실함을 통한 신뢰 구축",
+          "description": "재택근무 환경에서 약속된 날짜에 결과물을 제공하고 미리미리 소통하면서 클라이언트 신뢰를 쌓았어요. 작성자는 \"성실함을 인정 받아 또 다른 일을 만들어내는 구조가 되어야 1인 개발자로 살아 남기가 가능해지는게 아닐까 싶습니다\"라고 강조했어요.",
+          "quoted_phrase": "성실함을 인정 받아 또 다른 일을 만들어내는 구조가 되어야 1인 개발자로 살아 남기가 가능해지는게 아닐까 싶습니다"
+        },
+        {
+          "title": "AI 도입으로 재미 회복",
+          "description": "매너리즘에 빠졌던 시기에 AI를 코딩에 도입해서 업무 속도를 높이고 개발 재미를 되찾았어요. 이 분은 \"코딩에 AI 를 도입하면서 재미를 되찾게 되었고 단순하고 귀찮은 부분들을 AI가 커버해주면서 개발자로서 마치 새로운 생명력을 얻은 기분\"이라고 표현했어요.",
+          "quoted_phrase": "코딩에 AI 를 도입하면서 재미를 되찾게 되었고 단순하고 귀찮은 부분들을 AI가 커버해주면서 개발자로서 마치 새로운 생명력을 얻은 기분"
+        }
+      ],
+      "difference_from_failures": "일반적인 프리랜서 개발자들은 단건 계약으로 일이 끝나면 다시 영업해야 하는 불안정성을 겪지만, 이 분은 처음부터 월 정액 유지보수 계약 구조를 설계해서 심리적 안정감과 지속 가능한 수익 구조를 만들었어요. 또한 5년간 같은 업체와 꾸준히 일하면서 신뢰 기반의 장기 관계를 구축했고, 50대 개발자로서 매너리즘을 극복하기 위해 AI를 적극 활용해서 경쟁력을 유지했다는 점이 달라요.",
+      "confidence_score": 0.95,
+      "_meta": {
+        "case_id": "clien_011",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 15.3,
+        "input_tokens": 3962,
+        "output_tokens": 1037,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "50대 1인 개발자 살아남기",
+        "link": "https://www.clien.net/service/board/use/18991126",
+        "category_slug_clean": "talent-freelance",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "online-commerce",
+      "industry": "스마트스토어 자체제작 상품",
+      "success_factors": [
+        {
+          "title": "직접 제작·판매 방식 선택",
+          "description": "단순 중개나 구매대행이 아닌 '직접 제작해서 판매하는 방식'을 택해서 마진율을 높이고 차별화된 상품을 만들 수 있었어요. 실용신안 특허까지 확보하면서 경쟁력을 더욱 강화했어요.",
+          "quoted_phrase": "직접 제작해서 판매하는 방식"
+        },
+        {
+          "title": "전 과정 직접 수행",
+          "description": "상품 개발부터 설계, 부자재 소싱, 마케팅, 제작, CS까지 모든 과정을 직접 담당하면서 비용을 절감하고 품질을 통제할 수 있었어요. 힘들지만 사업 전반을 이해하고 개선할 수 있는 구조를 만들었어요.",
+          "quoted_phrase": "상품 개발부터 설계. 부자재 소싱, 마케팅, 제작, CS"
+        },
+        {
+          "title": "다양한 부업 경험 후 선택",
+          "description": "배달, 블로그, 유튜브 등 여러 부업을 직접 경험하면서 각각의 장단점을 파악했어요. 그 과정에서 자신에게 맞는 온라인쇼핑몰을 찾아냈고, 유튜브 같은 기존 채널과의 시너지도 계획하고 있어요.",
+          "quoted_phrase": "배민 쿠팡 배달도 해보고, 블로그 + 애드센스도 해보고, 유튜브도 해봤는데"
+        }
+      ],
+      "difference_from_failures": "이 분은 여러 부업을 시도하다 포기하는 게 아니라, 각 경험에서 배운 점을 다음 선택에 활용했어요. 배달은 체력 문제와 가족 반대로, 블로그는 수익성 한계로 본업으로 삼지 않았지만, 그 과정에서 자신에게 맞는 방식을 찾아냈어요. 특히 단순 재판매가 아닌 직접 제작 방식을 선택해서 차별화했고, 실용신안 특허까지 확보하며 진입장벽을 만들었어요. 유튜브 채널도 병행하면서 향후 콜라보 가능성까지 열어두는 등 장기적 관점으로 접근하고 있어요.",
+      "confidence_score": 0.95,
+      "_meta": {
+        "case_id": "clien_014",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 15.79,
+        "input_tokens": 1454,
+        "output_tokens": 871,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "이것 저것 부업해본 결과",
+        "link": "https://www.clien.net/service/board/park/19050739",
+        "category_slug_clean": "online-commerce",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "유튜브 맛집 쇼츠",
+      "success_factors": [
+        {
+          "title": "꾸준한 일일 업로드",
+          "description": "주 5일 매일 오후 5시에 영상을 올리며 직장 근처 맛집을 찾아다녔어요. 출퇴근길에 스마트폰 앱으로 편집하고 더빙하는 것이 일상이 되었다고 해요.",
+          "quoted_phrase": "주 5일(월~금) 매일 오후 5시쯤에 영상을 올렸습니다"
+        },
+        {
+          "title": "트렌드 키워드 편승",
+          "description": "포켓몬빵이라는 핫한 이슈를 빠르게 포착해 영상을 올렸어요. 11종 띠부씰 전체를 한 화면에 담은 희소성 있는 콘텐츠로 83만 조회수를 기록했다고 해요.",
+          "quoted_phrase": "지금 유튜브에서 제일 핫한 주제가 '포켓몬빵' 이더군요"
+        },
+        {
+          "title": "신속한 후속 콘텐츠",
+          "description": "포켓몬빵 영상이 터진 후 고객센터 문의 영상, 신상 롤케익 영상 등 관련 콘텐츠를 빠르게 제작했어요. 미리 출시일과 판매처 정보를 확보해 선점했다고 해요.",
+          "quoted_phrase": "신상 포켓몬롤케익이 나오자말자 쿠팡 프레시로 구해서 후다닥 영상 찍어 올렸습니다"
+        }
+      ],
+      "difference_from_failures": "이 분은 조회수가 처참해도 8개월간 꾸준히 업로드를 멈추지 않았어요. 일반적으로 초기에 조회수가 안 나오면 포기하는 경우가 많은데, 이 분은 출퇴근 시간을 활용해 편집하며 루틴을 만들었다고 해요. 또한 배우자의 제안을 처음엔 거부했지만 결국 수용해 트렌드 콘텐츠를 만들었고, 한 번의 성공 후에도 관련 후속 영상을 신속하게 제작하며 모멘텀을 이어갔어요. 맛집이라는 본래 주제에 집착하지 않고 콘텐츠 폭을 넓힌 유연성도 차이점이에요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_016",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 17.5,
+        "input_tokens": 3654,
+        "output_tokens": 857,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:지금 유튜브에서 제일 핫한 주제가 '포켓몬빵' 이더군요"
+        ]
+      },
+      "_source": {
+        "title": "맛집 유튜브 구독자 1,000명 달성 후기",
+        "link": "https://www.clien.net/service/board/use/17243057",
+        "category_slug_clean": "content-sns",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "online-commerce",
+      "industry": "스마트스토어 위탁판매 및 해외구매대행",
+      "success_factors": [
+        {
+          "title": "차별화된 상품 페이지 구성",
+          "description": "작성자는 단순히 도매사이트 이미지를 그대로 쓰지 않고 '대표이미지 변경, 제목변경, 상세페이지 리터치, 키워드관리 등을 통해 차별화'를 꾀했어요. 이를 통해 경쟁이 심한 위탁판매 시장에서도 남들보다 좋은 성과를 낼 수 있었답니다.",
+          "quoted_phrase": "대표이미지 변경, 제목변경, 상세페이지 리터치, 키워드관리 등을 통해 차별화"
+        },
+        {
+          "title": "마진율 높은 구매대행 선택",
+          "description": "이 분은 위탁판매(마진 10%)보다 해외구매대행(마진 30~100%)을 선택해서 '월 수익 50~100만원'을 달성했어요. 업무가 복잡하지만 마진이 좋은 분야를 선택한 것이 핵심이에요.",
+          "quoted_phrase": "보통 판매가격 대비 30~100%의 마진이 생긴다"
+        },
+        {
+          "title": "실전 경험과 도구 활용",
+          "description": "작성자는 직접 쿠팡 스토어를 운영하며 '경험상 50~100만원 사이의 수익'을 얻었고, 셀러클라우드 같은 전문 도구를 활용해 효율을 높였어요. 이론이 아닌 실전 경험이 수익으로 이어진 사례예요.",
+          "quoted_phrase": "글쓴이가 운영하는 #쿠팡 스토어를 기준으로 경험상 50~100만원 사이의 수익을 얻을 수 있었다"
+        }
+      ],
+      "difference_from_failures": "일반적으로 부업 초보자들은 위탁판매 도매사이트의 이미지와 설명을 그대로 복사해서 올리는 경우가 많아요. 하지만 이 분은 상세페이지 리터치와 키워드 최적화로 차별화했고, 마진이 낮은 위탁판매보다 복잡하지만 수익성 높은 해외구매대행을 선택했어요. 또한 셀러클라우드 같은 전문 도구를 활용해 업무 효율을 높였답니다. 단순히 '쉬운 부업'을 찾기보다 마진율과 차별화 전략을 고민한 점이 달라요.",
+      "confidence_score": 0.88,
+      "_meta": {
+        "case_id": "ppomppu_002",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 14.86,
+        "input_tokens": 3728,
+        "output_tokens": 901,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:글쓴이가 운영하는 #쿠팡 스토어를 기준으로 경험상 50"
+        ]
+      },
+      "_source": {
+        "title": "N잡러를 위한부업별 수입 비교 (2020년 핫 했던 그부업5가지)8",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=soho&no=23692",
+        "category_slug_clean": "online-commerce",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "배달 플랫폼 (자전거 라이더)",
+      "success_factors": [
+        {
+          "title": "우천 시 수익 극대화 전략",
+          "description": "비 오는 날에는 배달 수요가 증가하고 경쟁이 줄어들어 평소 20만원 벌던 수입이 30~40만원 이상으로 늘어나는 점을 활용하고 있어요. 날씨에 따른 수익 변동성을 이해하고 있는 게 강점이에요.",
+          "quoted_phrase": "평소에 20만원 벌었으면 우천시에는 30이나 40이상도"
+        },
+        {
+          "title": "본업과 병행 가능한 시간 관리",
+          "description": "직장을 다니면서도 일반자전거로 배달 부업을 병행해 월 100만원의 부수입을 만들어내고 있어요. 무리하지 않고 자신의 페이스를 유지하면서도 안정적인 수익을 확보하는 방식이에요.",
+          "quoted_phrase": "직장다니고 부업인 일반자전거 라이더라"
+        },
+        {
+          "title": "안전 우선 원칙 준수",
+          "description": "비 오는 날에는 위험을 감수하지 않고 쉬는 선택을 하면서도 평상시 꾸준히 활동해 월 100만원 수익을 유지해요. 단기 수익보다 장기적 지속가능성을 중시하는 태도예요.",
+          "quoted_phrase": "비올때는 쉬어요"
+        }
+      ],
+      "difference_from_failures": "많은 배달 부업 시도자들이 단순히 시간만 투입하면 돈을 벌 수 있다고 생각하지만, 이 분은 날씨별 수익 구조를 정확히 파악하고 있어요. 또한 본업을 유지하면서 무리하지 않는 범위에서 활동해 번아웃 없이 지속 가능한 수익 구조를 만들었다는 점이 달라요. 위험한 날씨에는 과감히 쉬면서도 월 100만원이라는 목표 수익을 달성하는 균형감각이 핵심 차이점이에요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "ppomppu_004",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 15.16,
+        "input_tokens": 1036,
+        "output_tokens": 767,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "비오는 날 배달 미안해하지 마세요 (저도부업배달러)14",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=freeboard&no=9503049",
+        "category_slug_clean": "platform-labor",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "유튜브·블로그 SEO 최적화 콘텐츠",
+      "success_factors": [
+        {
+          "title": "SEO 전문지식 사전 보유",
+          "description": "작성자는 'SEO 개념은 잘 이해하고 있기 때문에 검색에 잘걸리게는 했습니다'라고 밝혔어요. 일반인보다 유리한 출발선에서 시작해 블로그 방문자를 빠르게 늘릴 수 있었던 핵심 요인이에요.",
+          "quoted_phrase": "SEO 개념은 잘 이해하고 있기 때문에 검색에 잘걸리게는 했습니다"
+        },
+        {
+          "title": "2주 집중 제작 후 자동화",
+          "description": "이 분은 '2주간 모든 컨텐츠를 다 만들었고 3개월간 나눠서 업로드 되도록 해놓았습니다'라는 전략을 썼어요. 초반 몰아서 작업한 뒤 예약 발행으로 지속성을 확보한 방식이에요.",
+          "quoted_phrase": "2주간 모든 컨텐츠를 다 만들었고 3개월간 나눠서 업로드 되도록 해놓았습니다"
+        },
+        {
+          "title": "블로그 중심 수익화 전환",
+          "description": "'유튜브는 수익내가 참 어렵다. 블로그는 그래도 진입장벽이 낮아 잔돈 벌이가 된다'는 판단 아래, 수익성 낮은 유튜브보다 블로그에 집중해 매달 30~50달러를 안정적으로 확보했어요.",
+          "quoted_phrase": "블로그는 그래도 진입장벽이 낮아 잔돈 벌이가 된다"
+        }
+      ],
+      "difference_from_failures": "일반 실패자들은 SEO 지식 없이 무작정 콘텐츠를 올리거나, 매일 꾸준히 작업해야 한다는 부담 때문에 중도 포기하는 경우가 많아요. 반면 이 분은 SEO 전문성으로 검색 유입을 설계했고, 2주 집중 제작 + 예약 발행 자동화로 '방치형 수익 구조'를 만들었어요. 또한 유튜브 수익화 실패를 빠르게 인정하고 블로그로 전환해 실질 수익을 확보한 점도 달라요. 단기 성과에 집착하지 않고 장기 테스트 관점으로 접근한 것도 차이점이에요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "ppomppu_008",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.08,
+        "input_tokens": 1755,
+        "output_tokens": 895,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "유튜브 + 블로그부업2주간 일하고, 6개월간 테스트11",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=whatever&no=23607",
+        "category_slug_clean": "content-sns",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "애드센스 수익형 블로그 (티스토리/워드프레스)",
+      "success_factors": [
+        {
+          "title": "2년간 꾸준한 학습과 실행",
+          "description": "이 분은 아무것도 모르는 상태에서 시작해서 월 300만원 수익까지 2년이 걸렸어요. 유료 강의 없이 도서관 책, 유튜브, 애드센스 포럼 게시판 정독만으로 충분히 학습하셨고, 편법 대신 정석적인 방법을 선택하셨어요.",
+          "quoted_phrase": "아무것도 모르는 상태에서 시작을 해서, 저 정도 수익을 올리는데, 대략 2년 정도 걸린 것 같습니다"
+        },
+        {
+          "title": "키워드와 SEO 체계적 공부",
+          "description": "작성자는 일기 같은 글이 아니라 검색 유입을 고려한 콘텐츠를 작성하셨어요. 키워드 연구와 구글 SEO에 대한 공부를 필수로 강조하시며, 노출과 방문자 확보를 위한 기술적 접근을 하셨어요.",
+          "quoted_phrase": "키워드에 대한 공부도 필요하고. 구글 seo에 대한 공부도 필요합니다"
+        },
+        {
+          "title": "하루 3시간 1년 이상 지속",
+          "description": "이 분은 개인 사업으로 시간이 남아돌 때 시작했지만, 꾸준함을 가장 중요하게 보셨어요. 100명이 시작하면 2~3명만 끝까지 가는 분야에서, 하루 3시간씩 1년 이상 지속할 수 있는 체질과 인내심이 성공의 핵심이었어요.",
+          "quoted_phrase": "1년 이상 하루 3시간 정도씩 꾸준히 하실 자신이 있으시다면 상당히 괜찮은 부업이 되리라 생각합니다"
+        }
+      ],
+      "difference_from_failures": "일반 실패자들은 '쉽게 월급만큼 벌 수 있다'는 광고에 현혹되어 유료 강의를 사거나 편법을 쓰다가 며칠 만에 포기하는 경우가 많아요. 반면 이 분은 무료 자료만으로 체계적으로 학습하고, 2년간 정석적인 방법으로 꾸준히 콘텐츠를 생산하셨어요. 100명 중 97명이 중도 포기하는 분야에서 '하루 3시간, 1년 이상'이라는 명확한 기준을 세우고 실천하신 점이 결정적 차이예요. 또한 편법이 결국 걸린다는 것을 알고 장기적 관점으로 접근하셨어요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "ppomppu_010",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.79,
+        "input_tokens": 2857,
+        "output_tokens": 986,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "아래에수익형블로그관련글이 있어서19",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=whatever&no=25804",
+        "category_slug_clean": "content-sns",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "배달대행 (배민커넥트·쿠팡이츠)",
+      "success_factors": [
+        {
+          "title": "지역 특성 파악 후 라인 고정",
+          "description": "원룸과 대단지 아파트가 밀집된 곡반정동의 지역 특성을 파악하고, 멀리 가지 않고 해당 동네 배달 위주로만 라인을 잡아서 효율을 높였어요.",
+          "quoted_phrase": "원룸이 많고 중심삼가 기준으로 좌우측 대단지 아파트가 형성 되어 있어서 라인잡고 멀리가지 않고 곡반정동 배달위주로만"
+        },
+        {
+          "title": "욕심 없는 목표 설정과 콜 선택",
+          "description": "하루 10건 3만원이라는 현실적 목표를 세우고, 1키로 이내 단거리 위주로 콜을 선택하며 동 넘어가는 비효율 콜은 거부했어요. 그 시간에 단타 두 개 잡는 게 더 이득이라는 걸 깨달았대요.",
+          "quoted_phrase": "전 욕심 안내고 하루 10건 3만원으로 잡았습니다"
+        },
+        {
+          "title": "긍정적 마인드와 감사",
+          "description": "최저시급보다 못하지만 이것이라도 할 수 있음에 감사하며, 사장님들의 작은 호의에서 인류애를 느끼고, 아무리 힘들어도 긍정적인 마인드를 유지하며 일하고 있어요.",
+          "quoted_phrase": "이것이라도 할수있음에 너무 감사하며 일하고 있습니다 아무리 힘들어도 긍정적인 마인드는 잃지않고"
+        }
+      ],
+      "difference_from_failures": "많은 배달 라이더들이 무작정 콜을 많이 잡으려 하거나 먼 거리 고액 콜에 욕심을 내는 반면, 이 분은 지역 특성을 철저히 분석해서 라인을 고정하고 단거리 위주로 효율을 극대화했어요. 또한 하루 목표를 현실적으로 설정하고, 주말엔 무리하지 않고 휴식을 취하는 등 지속 가능한 방식으로 접근했어요. 무엇보다 힘든 상황 속에서도 작은 것에 감사하고 긍정적 마인드를 유지하는 태도가 번아웃 없이 꾸준히 할 수 있는 원동력이 된 것 같아요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "clien_017",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 14.56,
+        "input_tokens": 2425,
+        "output_tokens": 904,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:원룸이 많고 중심삼가 기준으로 좌우측 대단지 아파트가 ",
+          "quoted_phrase_not_in_body:이것이라도 할수있음에 너무 감사하며 일하고 있습니다 아"
+        ]
+      },
+      "_source": {
+        "title": "배민투잡 일주일 후기 적어봐요~^^",
+        "link": "https://www.clien.net/service/board/park/18909041",
+        "category_slug_clean": "platform-labor",
+        "source": "clien"
+      }
+    },
+    {
+      "category_inferred": "investment",
+      "industry": "주식 투자 (커뮤니티 정보 활용)",
+      "success_factors": [
+        {
+          "title": "신뢰할 수 있는 정보원 확보",
+          "description": "작성자는 '신광슈퍼님처럼 근거 있는 추천과 사후 코멘트까지 해주시는 분'을 통해 검증된 정보를 얻고 있어요. 단순 종목 추천이 아닌 근거와 후속 분석이 있는 정보를 선별해서 활용하는 게 핵심이에요.",
+          "quoted_phrase": "신광슈퍼님처럼 근거 있는 추천과 사후 코멘트까지 해주시는 분"
+        },
+        {
+          "title": "커뮤니티 정보의 적극 활용",
+          "description": "이 분은 하루에 한두 번 게시판에 들어와서 다른 분들이 추천하거나 언급한 종목을 찾아보는 루틴을 만들었어요. 직장인으로서 시간이 부족한 상황에서 커뮤니티를 정보 수집 채널로 활용하고 있어요.",
+          "quoted_phrase": "하루에 한두번 여기 게시판 들어와서 다른 분들이 추천하거나 언급하신 종목은 잠시라도 찾아봅니다"
+        },
+        {
+          "title": "직장인 맞춤형 투자 전략",
+          "description": "작성자는 '부업으로 주식 하는 직장인들에게는 이슈가 되는 종목 자체를 찾기가 힘들다'는 자신의 한계를 인정하고, 그에 맞는 정보 수집 방식을 구축했어요. 본업과 병행 가능한 투자 방식을 선택한 거예요.",
+          "quoted_phrase": "부업으로 주식 하는 직장인들에게는 이슈가 되는 종목 자체를 찾기가 힘들기 때문에"
+        }
+      ],
+      "difference_from_failures": "일반적으로 주식 투자 실패자들은 검증되지 않은 정보를 무분별하게 따르거나, 커뮤니티 정보를 체계적으로 활용하지 못해요. 이 분은 '근거 있는 추천'과 '사후 코멘트'라는 기준으로 정보를 선별하고, 하루 한두 번이라는 루틴으로 꾸준히 정보를 수집하면서도 본업에 지장을 주지 않는 균형을 찾았어요. 직장인이라는 자신의 상황을 인정하고 그에 맞는 투자 방식을 구축한 점이 차이예요.",
+      "confidence_score": 0.82,
+      "_meta": {
+        "case_id": "ppomppu_016",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 14.97,
+        "input_tokens": 1169,
+        "output_tokens": 914,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:하루에 한두번 여기 게시판 들어와서 다른 분들이 추천하"
+        ]
+      },
+      "_source": {
+        "title": "소소한 수익인증..신광슈퍼님 감사합니다.13",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=stock&no=88100",
+        "category_slug_clean": "investment",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "investment",
+      "industry": "주식 투자 (저평가 우량주 중장기 + 테마주 단타)",
+      "success_factors": [
+        {
+          "title": "8:2 포트폴리오 분산 전략",
+          "description": "저평가 우량주 중장기 매매 80%와 테마주 단타 20%로 포트를 나눠서 운영하고 있어요. 안정적인 장기 투자와 공격적인 단기 매매를 균형있게 배분해 리스크를 관리하는 방식이에요.",
+          "quoted_phrase": "저평가 우량주를 위주로 중장기 매매 80% 테마주 위주의 단타나 스윙매매 20% 비중으로 포트 운영"
+        },
+        {
+          "title": "직장인 투자 병행 가능성",
+          "description": "30대 직장인으로서 본업을 유지하면서 틈틈이 주식 투자를 하고 있어요. 중장기 투자 비중이 높아서 매일 시장을 모니터링하지 않아도 되는 구조로 운영하고 있는 것으로 보여요.",
+          "quoted_phrase": "주식을 부업 삼아 틈틈히 하고 있는 30대 직장인"
+        },
+        {
+          "title": "실패 경험 인정과 학습",
+          "description": "더 큰 수익 기회를 놓치거나 손실을 본 경험을 솔직하게 인정하고 있어요. 이런 태도는 과신을 막고 지속적으로 투자 전략을 개선할 수 있는 기반이 되는 것 같아요.",
+          "quoted_phrase": "더 대박이 날 수 있었던 기회도 있었지만 몇번 날려 먹어서 아쉬움이 남긴하지만"
+        }
+      ],
+      "difference_from_failures": "일반적으로 실패하는 투자자들은 단기 수익에만 집중하거나 한 가지 방식에만 올인하는 경우가 많은데, 이 분은 안정적인 중장기 투자를 기본으로 하면서 소액으로 단타 기회도 활용하는 균형잡힌 접근을 하고 있어요. 또한 손실 경험을 부정하지 않고 인정하면서도 장기적 관점을 유지하는 태도가 차이점이에요.",
+      "confidence_score": 0.85,
+      "_meta": {
+        "case_id": "ppomppu_017",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 13.99,
+        "input_tokens": 1081,
+        "output_tokens": 799,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:저평가 우량주를 위주로 중장기 매매 80% 테마주 위주"
+        ]
+      },
+      "_source": {
+        "title": "2014년 현재까지 수익인증합니다38",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=stock&no=79911",
+        "category_slug_clean": "investment",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "content-sns",
+      "industry": "유튜브 콘텐츠 제작 (영상 편집)",
+      "success_factors": [
+        {
+          "title": "명확한 목적 설정",
+          "description": "단순히 업무용이 아니라 '부업으로 유튭을 시작'하면서 프리미어프로, 포토샵, 에펙 사용을 고려해 전반적으로 활용 가능한 장비를 선택했어요. 목적에 맞는 투자가 성공의 첫걸음이었던 거예요.",
+          "quoted_phrase": "부업으로 유튭을 시작하기도 해서 가끔 프리미어프로, 포토샵, 에펙도 사용할 용도"
+        },
+        {
+          "title": "철저한 사전 조사",
+          "description": "쿠팡과 후기글을 틈틈히 살펴보고, 여러 브랜드(HP 오멘, 레노버 리전 등)를 비교하며 메인보드와 그래픽카드 제조사의 신뢰도까지 고려했어요. 충분한 정보 수집이 만족스러운 선택으로 이어졌어요.",
+          "quoted_phrase": "쿠팡이랑 후기글 틈틈히 살펴보면서 검색해 보고 구매한 제품"
+        },
+        {
+          "title": "장기적 관점의 투자",
+          "description": "가격이 비싸더라도 마감과 설계 품질, 2년 AS 등을 고려해 기왕이면 좋은 제품을 선택했어요. 단기 절약보다 장기적 만족도를 우선시한 판단이 부업 지속성에 도움이 될 거예요.",
+          "quoted_phrase": "기왕 비싼돈 주고 사는거 기왕이면 좋은제품 산다는 생각"
+        }
+      ],
+      "difference_from_failures": "이 분은 단순히 '노트북이 필요해서' 구매한 게 아니라, 부업(유튜브)과 본업을 모두 고려한 명확한 목적 설정이 있었어요. 많은 분들이 막연히 '좋은 장비면 되겠지'라고 생각하지만, 작성자는 여러 브랜드를 비교하고 제조사의 전문성까지 따져보며 철저히 준비했어요. 또한 가격보다 품질과 AS를 우선시하는 장기적 관점이 있었고, 구매 후에도 '은혜를 베풀듯' 후기를 남기며 커뮤니티에 기여하는 태도를 보였어요. 이런 체계적 접근과 공유 정신이 차이를 만드는 거예요.",
+      "confidence_score": 0.72,
+      "_meta": {
+        "case_id": "ppomppu_020",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.49,
+        "input_tokens": 2846,
+        "output_tokens": 911,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "업무용으로 구매한 RTX 4070 탑재한 어로스 16X ASG-53KR4",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=review2&no=66295",
+        "category_slug_clean": "content-sns",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "investment",
+      "industry": "P2P 대출 투자",
+      "success_factors": [
+        {
+          "title": "포트폴리오 위험 분산",
+          "description": "작성자는 저/중/고 위험군을 4:3:3 비율로 나눠 투자했어요. 저위험군은 탄탄한 P2P법인의 15% 미만 아파트담보대출 위주로, 중위험군은 준공 직전 PF상품, 고위험군은 부실 가능성을 인지하고 투자했죠.",
+          "quoted_phrase": "저위험군/중위험군/고위험군을(1억이라보면 4천/3천/3천) 4 : 3 : 3 정도의 비율로 하자"
+        },
+        {
+          "title": "업체 추심능력 중시",
+          "description": "작성자는 P2P 투자에서 가장 중요한 요소로 업체의 추심능력을 꼽았어요. 연체 발생 시 강제집행을 통해 원금을 회수할 수 있는 업체의 능력이 실제 수익률을 결정한다는 점을 강조했죠.",
+          "quoted_phrase": "전문적으로 돌리시는 분들이 가장중시하는게 무엇이냐하면.... 업체의 추심능력입니다"
+        },
+        {
+          "title": "적시 투자금 회수 전략",
+          "description": "작성자는 1년간 투자 후 시장 위험성을 감지하고 투자금을 다이어트하며 상환되는 족족 빼내는 전략을 취했어요. P2P 업체들이 줄줄이 터지기 전에 선제적으로 자금을 회수한 거예요.",
+          "quoted_phrase": "요즘은 최대한 투자금을 다이어트해서 상환족족 빼고 있습니다"
+        }
+      ],
+      "difference_from_failures": "일반 투자자들은 고수익에만 집중하지만, 이 분은 처음부터 위험을 계량화하고 포트폴리오를 구성했어요. 고위험군 투자 시 '반은 연체, 일부는 손실'을 예상하고 들어갔고, 실제로 고위험군이 전부 연체되었지만 저위험군의 안정적 수익으로 본전을 맞출 수 있었죠. 또한 시장 분위기가 나빠지자 즉시 회수 모드로 전환한 판단력도 차이점이에요.",
+      "confidence_score": 0.88,
+      "_meta": {
+        "case_id": "ppomppu_021",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 20.87,
+        "input_tokens": 3909,
+        "output_tokens": 834,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:저위험군/중위험군/고위험군을(1억이라보면 4천/3천/3"
+        ]
+      },
+      "_source": {
+        "title": "\"P2P 투자중입니다\"후기2    부제:탈출의 시기12",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=money&no=276729",
+        "category_slug_clean": "investment",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "category_inferred": "platform-labor",
+      "industry": "배달대행(오토바이)",
+      "success_factors": [
+        {
+          "title": "빠른 반응속도와 접수 능력",
+          "description": "배달대행 앱에 나타나는 리스트는 1초 내에 접수되는 시스템이에요. 작성자는 이 경쟁에서 승리해 구역 내 상위 10명 안에 드는 실력을 갖췄고, 이를 통해 월 400만원의 수입을 올리고 있어요.",
+          "quoted_phrase": "배달대행 어플에 나타나는 리스트는 엥간히 밀리지 않는한 등록후 1초 내에 접수됩니다"
+        },
+        {
+          "title": "장비에 대한 지속적 투자",
+          "description": "급가속과 급정지가 필요한 배달 특성상 타이어, 브레이크, 엔진오일 등 고급 소모품에 꾸준히 투자해요. 겨울엔 윈터타이어, 브랜드 상급 패드, 주 1회 고급 엔진오일 교체 등으로 안전과 속도를 확보했어요.",
+          "quoted_phrase": "투자한 만큼 안전에 도움이 되는"
+        },
+        {
+          "title": "업계 환경 적응력",
+          "description": "고등학생 동료들의 흡연 등 거친 업계 문화를 받아들이고 적응했어요. 50대 신입이 하루 만에 그만둔 환경에서도 오래 버티며 탑클래스 기사로 성장한 점이 차별화 요소예요.",
+          "quoted_phrase": "그 애들은 부모 말도 안들어서 하라는 공부 안하고 배달하고 있는 애들입니다"
+        }
+      ],
+      "difference_from_failures": "일반적으로 배달대행에 실패하는 분들은 스마트폰 터치 속도가 느려 일감 자체를 못 잡거나, 업계의 거친 문화(고등학생 동료의 흡연 등)에 적응하지 못해 조기 퇴사하는 경우가 많아요. 또한 소모품 투자를 아껴서 저가 타이어나 엔진오일을 사용하다가 사고로 이어지기도 해요. 반면 이 분은 1초 단위 경쟁에서 이기는 반응속도, 업계 문화 적응력, 그리고 안전을 위한 지속적 장비 투자로 구역 내 상위권 수입을 유지하고 있어요.",
+      "confidence_score": 0.92,
+      "_meta": {
+        "case_id": "ppomppu_024",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 16.91,
+        "input_tokens": 3091,
+        "output_tokens": 870,
+        "validation_issues": []
+      },
+      "_source": {
+        "title": "경기가 진짜 안좋긴 안 좋은가봐요.3",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=soho&no=19857",
+        "category_slug_clean": "platform-labor",
+        "source": "ppomppu"
+      }
+    },
+    {
+      "_meta": {
+        "case_id": "ppomppu_025",
+        "error": "Expecting ',' delimiter: line 7 column 29 (char 165)"
+      }
+    },
+    {
+      "category_inferred": "etc",
+      "industry": "미공개 사업 (구체적 업종 언급 없음)",
+      "success_factors": [
+        {
+          "title": "점진적 매출 성장 경험",
+          "description": "처음엔 소일거리로 시작해서 월 5만원부터 시작했지만, 꾸준히 성장해서 3년 만에 월 평균 1000만원까지 도달했어요. 급하게 성과를 내려 하지 않고 단계적으로 성장한 게 핵심이에요.",
+          "quoted_phrase": "달달이 5만원 20만원 50만원 200만원 벌다가 어느새 올해 평균으로 따졌을때 월 1000만원을 벌게 됐습니다"
+        },
+        {
+          "title": "본업 유지로 리스크 관리",
+          "description": "사업 소득이 높아졌지만 회사 월급 300만원을 보험처럼 유지하면서 매출이 적을 때 버팀목으로 활용했어요. 안정적인 수입원을 확보한 상태에서 사업을 키운 전략이 효과적이었어요.",
+          "quoted_phrase": "고정수입 300만원은 보험 느낌도 있고 매출이 적을때 버팀목이 되는 소득원"
+        },
+        {
+          "title": "현실적 목표 설정",
+          "description": "40대에 가족 부양 필요성을 느끼고 월급만으론 부족하다는 명확한 동기로 시작했어요. 큰 꿈보다는 실질적인 생활비 보충이라는 구체적 목표가 지속 가능한 동력이 됐어요.",
+          "quoted_phrase": "역시 애생기니 월급만으론 부족해서 3년전에 소일거리로 부업을 시작"
+        }
+      ],
+      "difference_from_failures": "이 분은 처음부터 큰 수익을 기대하지 않고 '소일거리'로 접근했어요. 많은 실패자들이 단기간에 큰 돈을 벌려다 포기하는 것과 달리, 3년간 월 5만원부터 1000만원까지 점진적으로 성장시켰죠. 또한 본업을 유지하면서 리스크를 관리한 점도 중요해요. 사업 소득이 불안정할 수 있다는 걸 인정하고, 안정적인 월급을 버팀목으로 활용한 현실적 접근이 차별점이에요.",
+      "confidence_score": 0.65,
+      "_meta": {
+        "case_id": "ppomppu_032",
+        "model": "claude-sonnet-4-5-20250929",
+        "prompt_version": "AI-14-v1",
+        "elapsed_sec": 15.2,
+        "input_tokens": 1392,
+        "output_tokens": 838,
+        "validation_issues": [
+          "quoted_phrase_not_in_body:달달이 5만원 20만원 50만원 200만원 벌다가 어느",
+          "quoted_phrase_not_in_body:역시 애생기니 월급만으론 부족해서 3년전에 소일거리로 "
+        ]
+      },
+      "_source": {
+        "title": "회사다니면서 사업도 병행하는데 회사를 못그만두겠어요137",
+        "link": "https://www.ppomppu.co.kr/zboard/view.php?id=soho&no=24461",
+        "category_slug_clean": "etc",
+        "source": "ppomppu"
+      }
+    }
+  ]
+}

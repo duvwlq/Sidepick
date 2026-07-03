@@ -28,7 +28,7 @@ class ExperienceComparisonSupport {
         }
 
         if (target.getInvestmentAmount() != null && candidate.getInvestmentAmount() != null) {
-            int gap = Math.abs(target.getInvestmentAmount() - candidate.getInvestmentAmount());
+            long gap = Math.abs(target.getInvestmentAmount() - candidate.getInvestmentAmount());
             if (gap <= 500000) {
                 score += 0.1;
                 matching.add("Similar investment amount");

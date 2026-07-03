@@ -31,7 +31,7 @@ const MIN_CONTENT_LENGTH = 10;
 const MAX_CONTENT_LENGTH = 2000;
 const DURATION_OPTIONS = ['1개월 미만', '1개월', '2개월', '3개월', '4개월', '5개월', '6개월', '7개월', '8개월', '9개월', '10개월', '11개월', '1년 이상'];
 const DAILY_TIME_OPTIONS = ['1시간 미만', '1시간', '2시간', '3시간', '4시간', '5시간', '6시간', '7시간', '8시간 이상'];
-const DIFFICULTY_OPTIONS = ['고객 확보(마케팅)', '수익 구조 이해', '시간 관리', '수익화 연결', '운영 지속성', '정보 부족', '경쟁 심화', '기타'];
+const DIFFICULTY_OPTIONS = ['고객 확보 (마케팅)', '수익 구조 이해', '시간 관리', '수익화 연결', '운영 지속성', '정보 부족', '경쟁 심화', '기타'];
 const EXTRA_CATEGORY_CARD = { id: 8, key: 'common', label: '기타', descriptionLines: [] as string[], icon: <span className="h-[50px] w-[50px]" /> };
 const CATEGORY_CARDS = [...CATEGORY_VISUALS, EXTRA_CATEGORY_CARD];
 
@@ -96,7 +96,7 @@ const CATEGORY_KEY_BY_LABEL: Record<string, string> = {
 };
 
 const GUIDE_PATTERN_BY_DIFFICULTY_LABEL: Record<string, string> = {
-  '고객 확보(마케팅)': '마케팅 부족',
+  '고객 확보 (마케팅)': '마케팅 부족',
   '수익 구조 이해': '수익 구조 이해 부족',
   '시간 관리': '시간 관리',
   '수익화 연결': '수익화 연결',
@@ -364,6 +364,7 @@ export default function CreateWizardPage() {
   const [agentAQuestions, setAgentAQuestions] = useState<AgentAQuestionCard[]>([]);
   const [agentAAnswers, setAgentAAnswers] = useState<AgentAAnswerMap>({});
   const [agentAMessage, setAgentAMessage] = useState<string | null>(null);
+  const [activeAgentAQuestionIndex, setActiveAgentAQuestionIndex] = useState(0);
   const [pendingCreatePayload, setPendingCreatePayload] = useState<PendingPayload | null>(null);
   const galleryImageInputRef = useRef<HTMLInputElement | null>(null);
   const cameraImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -533,6 +534,7 @@ export default function CreateWizardPage() {
   const selectedCategory = useMemo(() => getCategoryLabelByKey(selectedCategoryKey), [selectedCategoryKey]);
   const uploadingImages = uploadStatus === 'uploading';
   const uploadErrorOpen = uploadStatus === 'error';
+  const currentAgentAQuestion = agentAQuestions[activeAgentAQuestionIndex] ?? null;
 
   const matchedCategory = useMemo(
     () => findMatchedCategory(selectedCategoryKey, selectedCategory, categories),
@@ -610,6 +612,7 @@ export default function CreateWizardPage() {
     setAgentAQuestions([]);
     setAgentAAnswers({});
     setAgentAMessage(null);
+    setActiveAgentAQuestionIndex(0);
     setPendingCreatePayload(null);
   }
 
@@ -665,6 +668,34 @@ export default function CreateWizardPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function goToNextAgentAQuestion() {
+    if (!currentAgentAQuestion) {
+      return;
+    }
+
+    const answer = agentAAnswers[currentAgentAQuestion.slot]?.trim();
+    if (currentAgentAQuestion.required && !answer) {
+      showToast('필수 질문에 답변해 주세요.', 'error');
+      return;
+    }
+
+    if (activeAgentAQuestionIndex === agentAQuestions.length - 1) {
+      void handleAgentASubmit(false);
+      return;
+    }
+
+    setActiveAgentAQuestionIndex((current) => current + 1);
+  }
+
+  function skipCurrentAgentAQuestion() {
+    if (activeAgentAQuestionIndex === agentAQuestions.length - 1) {
+      void handleAgentASubmit(true);
+      return;
+    }
+
+    setActiveAgentAQuestionIndex((current) => current + 1);
   }
 
   async function handleImageSelection(fileList: FileList | null) {
@@ -782,6 +813,7 @@ export default function CreateWizardPage() {
           setAgentAQuestions(agentAResult.questions);
           setAgentAAnswers(Object.fromEntries(agentAResult.questions.map((question) => [question.slot, ''])));
           setAgentAMessage(agentAResult.message);
+          setActiveAgentAQuestionIndex(0);
           setAgentAOpen(true);
           return;
         }
@@ -822,7 +854,7 @@ export default function CreateWizardPage() {
                       key={category.id}
                       type="button"
                       onClick={() => setSelectedCategoryKey(category.key)}
-                      className={`flex h-[151px] flex-col rounded-[16px] border bg-white px-[14px] py-[16px] text-left transition ${
+                      className={`flex h-[169px] flex-col rounded-[16px] border bg-white px-[14px] py-[16px] text-left transition ${
                         selected ? 'border-[#5A876E] shadow-[0_0_0_1px_rgba(90,135,110,0.08)]' : 'border-[#E6E6E6]'
                       }`}
                     >
@@ -847,7 +879,7 @@ export default function CreateWizardPage() {
               <SectionTitle title="어떤 상황에서 시작하셨나요?" subtitle="경험을 이해하는 데 필요한 정보들이에요" />
               <div className="flex flex-col gap-[16px]">
                 <SelectField label="총 진행 기간 *" value={duration} placeholder="선택 안 함" onClick={() => setOpenSheet('duration')} />
-                <SelectField label="평균 하루 할애 시간" value={dailyTime} placeholder="선택 안 함" onClick={() => setOpenSheet('dailyTime')} />
+                <SelectField label="평균 하루 할애 시간 *" value={dailyTime} placeholder="선택 안 함" onClick={() => setOpenSheet('dailyTime')} />
                 <MoneyField label="투자 금액" value={investmentAmount} placeholder="예: 1,000,000" onChange={setInvestmentAmount} />
                 <MoneyField label="수익 (월 단위로 작성해주세요)" value={monthlyRevenue} placeholder="예: 1,000,000" onChange={setMonthlyRevenue} />
                 <div className="flex flex-col gap-[8px]">
@@ -889,11 +921,11 @@ export default function CreateWizardPage() {
                       key={item}
                       type="button"
                       onClick={() => toggleDifficulty(item)}
-                      className={`flex h-[37px] items-center rounded-[10px] border px-[12px] text-left text-[14px] ${selected ? 'border-[#D9D9D9] bg-white text-[#494949]' : 'border-[#E6E6E6] bg-white text-[#8A8A8A]'}`}
+                      className={`flex h-[37px] items-center rounded-[10px] border px-[12px] text-left text-[14px] ${selected ? 'border-[#5A876E] bg-white text-[#5A876E]' : 'border-[#E6E6E6] bg-white text-[#8A8A8A]'}`}
                     >
                       <span className="mr-[8px] inline-flex h-[16px] w-[16px] items-center justify-center">
                         <svg viewBox="0 0 16 16" className="h-[14px] w-[14px]" aria-hidden="true">
-                          <path d="M3 8.5L6.2 11.5L13 4.5" fill="none" stroke={selected ? '#9A9A9A' : '#D9D9D9'} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M3 8.5L6.2 11.5L13 4.5" fill="none" stroke={selected ? '#5A876E' : '#D9D9D9'} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </span>
                       <span className={selected ? 'font-[500]' : 'font-[400]'}>{item}</span>
@@ -936,8 +968,7 @@ export default function CreateWizardPage() {
                 examples={guideExamples}
                 exampleIndex={exampleIndex}
                 onToggleVisible={() => setExampleVisible((current) => !current)}
-                onPrevious={() => setExampleIndex((current) => (current === 0 ? guideExamples.length - 1 : current - 1))}
-                onNext={() => setExampleIndex((current) => (current + 1) % guideExamples.length)}
+                onNext={() => setExampleIndex((current) => (guideExamples.length ? (current + 1) % guideExamples.length : 0))}
               />
 
               <div className="flex flex-col gap-[10px]">
@@ -1122,12 +1153,16 @@ export default function CreateWizardPage() {
 
       {agentAOpen ? (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[rgba(19,20,22,0.42)] px-[16px]">
-          <div className="flex max-h-[85vh] w-full max-w-[375px] flex-col overflow-hidden rounded-[24px] bg-white">
+          <div className="flex w-full max-w-[343px] flex-col overflow-hidden rounded-[24px] bg-white">
             <div className="flex items-start justify-between px-[24px] pb-[12px] pt-[24px]">
               <div className="flex flex-col gap-[6px] pr-[12px]">
-                <h3 className="text-[20px] font-[600] leading-[24px] text-[#131416]">AI 보완 질문</h3>
+                <h3 className="text-[20px] font-[600] leading-[24px] text-[#131416]">
+                  더욱 정확한 분석을 위해
+                  <br />
+                  몇 가지만 여쭤볼게요
+                </h3>
                 <p className="text-[14px] leading-[19.6px] text-[#6F6F6F]">
-                  {agentAMessage ?? '분석 정확도를 높이기 위해 몇 가지를 더 알려주세요.'}
+                  {agentAMessage ?? '작성 내용을 바탕으로, 분석에 도움이 될 만한 질문을 준비했어요.'}
                 </p>
               </div>
               <button
@@ -1142,34 +1177,46 @@ export default function CreateWizardPage() {
               </button>
             </div>
 
-            <div className="flex flex-1 flex-col gap-[16px] overflow-y-auto px-[24px] pb-[20px]">
-              {agentAQuestions.map((question, index) => (
-                <div key={question.slot} className="flex flex-col gap-[8px] rounded-[16px] border border-[#EAEAEA] p-[16px]">
-                  <div className="flex items-center gap-[8px]">
-                    <span className="inline-flex h-[24px] min-w-[24px] items-center justify-center rounded-full bg-[#E8F3EC] px-[8px] text-[12px] font-[600] text-[#5A876E]">
-                      Q{index + 1}
+            <div className="px-[24px] pb-[20px]">
+              <div className="flex items-center justify-between pb-[16px]">
+                <div className="h-[6px] flex-1 rounded-full bg-[#EAEAEA]">
+                  <div
+                    className="h-full rounded-full bg-[#7FA590]"
+                    style={{ width: `${((activeAgentAQuestionIndex + 1) / Math.max(agentAQuestions.length, 1)) * 100}%` }}
+                  />
+                </div>
+                <span className="pl-[12px] text-[14px] font-[500] leading-[16.8px] text-[#494949]">
+                  {activeAgentAQuestionIndex + 1}/{Math.max(agentAQuestions.length, 1)}
+                </span>
+              </div>
+
+              {currentAgentAQuestion ? (
+                <div className="flex flex-col gap-[14px] rounded-[16px] border border-[#EAEAEA] p-[16px]">
+                  <div className="flex items-center gap-[10px]">
+                    <span className="inline-flex h-[28px] min-w-[28px] items-center justify-center rounded-full bg-[#C9E8D5] px-[8px] text-[12px] font-[700] text-[#4E8C69]">
+                      Q{activeAgentAQuestionIndex + 1}
                     </span>
-                    <p className="text-[15px] font-[600] leading-[21px] text-[#131416]">
-                      {question.question}
-                      {question.required ? ' *' : ''}
+                    <p className="text-[16px] font-[600] leading-[22.4px] text-[#131416]">
+                      {currentAgentAQuestion.question}
+                      {currentAgentAQuestion.required ? ' *' : ''}
                     </p>
                   </div>
 
-                  {question.hint ? (
-                    <p className="text-[12px] leading-[16.8px] text-[#8A8A8A]">{question.hint}</p>
+                  {currentAgentAQuestion.hint ? (
+                    <p className="text-[12px] leading-[16.8px] text-[#8A8A8A]">{currentAgentAQuestion.hint}</p>
                   ) : null}
 
-                  {question.input_type === 'select' && question.options?.length ? (
+                  {currentAgentAQuestion.options?.length ? (
                     <div className="flex flex-wrap gap-[8px]">
-                      {question.options.map((option) => {
-                        const selected = agentAAnswers[question.slot] === option;
+                      {currentAgentAQuestion.options.map((option) => {
+                        const selected = agentAAnswers[currentAgentAQuestion.slot] === option;
                         return (
                           <button
-                            key={`${question.slot}-${option}`}
+                            key={`${currentAgentAQuestion.slot}-${option}`}
                             type="button"
-                            onClick={() => setAgentAAnswers((current) => ({ ...current, [question.slot]: option }))}
-                            className={`rounded-full border px-[12px] py-[8px] text-[13px] ${
-                              selected ? 'border-[#5A876E] bg-[#E8F3EC] text-[#2E5C41]' : 'border-[#E0E0E0] text-[#6F6F6F]'
+                            onClick={() => setAgentAAnswers((current) => ({ ...current, [currentAgentAQuestion.slot]: option }))}
+                            className={`rounded-full px-[12px] py-[6px] text-[12px] leading-[14.4px] ${
+                              selected ? 'bg-[#E8F3EC] text-[#2E5C41]' : 'bg-[#F5F5F5] text-[#7A7A7A]'
                             }`}
                           >
                             {option}
@@ -1177,35 +1224,34 @@ export default function CreateWizardPage() {
                         );
                       })}
                     </div>
-                  ) : (
-                    <input
-                      type={question.input_type === 'number' ? 'number' : 'text'}
-                      value={agentAAnswers[question.slot] ?? ''}
-                      onChange={(event) => setAgentAAnswers((current) => ({ ...current, [question.slot]: event.target.value }))}
-                      placeholder={question.input_type === 'tag' ? '쉼표로 구분해 입력해 주세요' : '답변을 입력해 주세요'}
-                      className="h-[44px] rounded-[12px] border border-[#E0E0E0] px-[12px] text-[14px] text-[#131416] outline-none placeholder:text-[#B6B6B6]"
-                    />
-                  )}
+                  ) : null}
+
+                  <textarea
+                    value={agentAAnswers[currentAgentAQuestion.slot] ?? ''}
+                    onChange={(event) => setAgentAAnswers((current) => ({ ...current, [currentAgentAQuestion.slot]: event.target.value }))}
+                    placeholder={currentAgentAQuestion.input_type === 'tag' ? '쉼표로 구분해 입력해 주세요' : '답변을 입력해주세요.'}
+                    className="h-[100px] resize-none rounded-[12px] bg-[#F8F8F8] px-[12px] py-[10px] text-[14px] leading-[19.6px] text-[#131416] outline-none placeholder:text-[#C2C2C2]"
+                  />
                 </div>
-              ))}
+              ) : null}
             </div>
 
             <div className="grid grid-cols-2 gap-[12px] border-t border-[#F1F1F1] px-[24px] py-[20px]">
               <button
                 type="button"
-                onClick={() => void handleAgentASubmit(true)}
+                onClick={skipCurrentAgentAQuestion}
                 disabled={submitting}
-                className="h-[48px] rounded-[12px] border border-[#D9D9D9] text-[15px] font-[600] text-[#6F6F6F] disabled:opacity-60"
+                className="h-[40px] rounded-[10px] border border-[#5A876E] text-[15px] font-[600] text-[#6F6F6F] disabled:opacity-60"
               >
-                그대로 저장
+                건너뛰기
               </button>
               <button
                 type="button"
-                onClick={() => void handleAgentASubmit(false)}
+                onClick={goToNextAgentAQuestion}
                 disabled={submitting}
-                className="h-[48px] rounded-[12px] bg-[#5A876E] text-[15px] font-[600] text-white disabled:opacity-60"
+                className="h-[40px] rounded-[10px] bg-[#BFE6CC] text-[15px] font-[600] text-white disabled:opacity-60"
               >
-                {submitting ? '저장 중...' : '답변 저장'}
+                {submitting ? '저장 중...' : activeAgentAQuestionIndex === agentAQuestions.length - 1 ? '완료' : '다음 질문'}
               </button>
             </div>
           </div>

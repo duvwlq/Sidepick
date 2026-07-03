@@ -1,0 +1,84 @@
+{"kind":"deck","id":"pr/suwywf","name":"Deck"}
+{"kind":"layout","layoutId":"2ca82b74-c481-4645-a2c9-da12b89c15e1","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"01686c57-820d-4e47-9053-415a60fd8998","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/6rt201","slide":1,"title":"PIVOT DAY","textShapes":4}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":1,"text":"PIVOT DAY","textPreview":"PIVOT DAY","textChars":9,"textLines":1,"bbox":[80,80,220,40]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":1,"text":"Sidepick","textPreview":"Sidepick","textChars":8,"textLines":1,"bbox":[80,170,900,120]}
+{"kind":"textbox","id":"sh/za1gvy90","slide":1,"text":"AI 기반 부업 실패 분석 플랫폼\n실패를 다음 선택의 데이터로","textPreview":"AI 기반 부업 실패 분석 플랫폼 | 실패를 다음 선택의 데이터로","textChars":34,"textLines":2,"bbox":[80,320,920,120]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":1,"text":"AI 기반 부업 실패 분석 플랫폼","textPreview":"AI 기반 부업 실패 분석 플랫폼","textChars":18,"textLines":1,"bbox":[80,610,540,40]}
+{"kind":"notes","id":"nt/6rt201","slide":1,"text":""}
+{"kind":"slide","id":"sl/69od69","slide":2,"title":"왜 실패 학습 플랫폼이 필요한가","textShapes":3}
+{"kind":"shape","id":"sh/vu9knih4","slide":2,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":2,"text":"왜 실패 학습 플랫폼이 필요한가","textPreview":"왜 실패 학습 플랫폼이 필요한가","textChars":17,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/d0z61032","slide":2,"text":"• 성공 후기 콘텐츠는 많다\n\n• 실패 경험은 흩어져 있어 비교가 어렵다\n\n• 사용자는 결국 같은 실수를 반복하기 쉽다","textPreview":"• 성공 후기 콘텐츠는 많다 |  | • 실패 경험은 흩어져 있어 비교가 어렵다 |  | • 사용자는 결국 같은 실수를 반복하기 쉽다","textChars":66,"textLines":5,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":2,"text":"Sidepick | 02","textPreview":"Sidepick | 02","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/69od69","slide":2,"text":""}
+{"kind":"slide","id":"sl/gvkrao","slide":3,"title":"사람들이 진짜 궁금한 것","textShapes":3}
+{"kind":"shape","id":"sh/6xkf6dcb","slide":3,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":3,"text":"사람들이 진짜 궁금한 것","textPreview":"사람들이 진짜 궁금한 것","textChars":13,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":3,"text":"• 누가 성공했는가보다 무엇을 피해야 하는가\n\n• 실패 경험은 감정 소비가 아니라 의사결정 데이터가 될 수 있다","textPreview":"• 누가 성공했는가보다 무엇을 피해야 하는가 |  | • 실패 경험은 감정 소비가 아니라 의사결정 데이터가 될 수 있다","textChars":62,"textLines":3,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":3,"text":"Sidepick | 03","textPreview":"Sidepick | 03","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/gvkrao","slide":3,"text":""}
+{"kind":"slide","id":"sl/duiwxf","slide":4,"title":"Sidepick의 접근","textShapes":3}
+{"kind":"shape","id":"sh/t47y1kre","slide":4,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/idonyd0z","slide":4,"text":"Sidepick의 접근","textPreview":"Sidepick의 접근","textChars":12,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/byhgn29g","slide":4,"text":"• 실패 경험 구조화 등록\n\n• AI 기반 실패 원인 및 다음 액션 분석\n\n• 유사 사례 탐색\n\n• FAQ / 가이드 연결","textPreview":"• 실패 경험 구조화 등록 |  | • AI 기반 실패 원인 및 다음 액션 분석 |  | • 유사 사례 탐색 |  | • FAQ / 가이드 연결","textChars":68,"textLines":7,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/0rqd4vmt","slide":4,"text":"Sidepick | 04","textPreview":"Sidepick | 04","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/duiwxf","slide":4,"text":""}
+{"kind":"slide","id":"sl/ivf3vn","slide":5,"title":"기록에서 판단까지","textShapes":4}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":5,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":5,"text":"기록에서 판단까지","textPreview":"기록에서 판단까지","textChars":9,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":5,"text":"기록 → 분석 → 비교 → 학습 → 다음 실행 판단","textPreview":"기록 → 분석 → 비교 → 학습 → 다음 실행 판단","textChars":28,"textLines":1,"bbox":[72,158,1080,60]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":5,"text":"• 읽고 끝나는 서비스가 아니라 판단 흐름을 만든다","textPreview":"• 읽고 끝나는 서비스가 아니라 판단 흐름을 만든다","textChars":28,"textLines":1,"bbox":[90,255,1040,360]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":5,"text":"Sidepick | 05","textPreview":"Sidepick | 05","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/ivf3vn","slide":5,"text":""}
+{"kind":"slide","id":"sl/mthw79","slide":6,"title":"탐색: 나와 비슷한 실패 찾기","textShapes":3}
+{"kind":"shape","id":"sh/a5gbq1or","slide":6,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":6,"text":"탐색: 나와 비슷한 실패 찾기","textPreview":"탐색: 나와 비슷한 실패 찾기","textChars":16,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":6,"text":"• 홈 / 탐색에서 사례 진입\n\n• 검색 / 카테고리 기반 필터링\n\n• 비슷한 실패를 비교 가능한 맥락 안에서 탐색","textPreview":"• 홈 / 탐색에서 사례 진입 |  | • 검색 / 카테고리 기반 필터링 |  | • 비슷한 실패를 비교 가능한 맥락 안에서 탐색","textChars":64,"textLines":5,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":6,"text":"Sidepick | 06","textPreview":"Sidepick | 06","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/mthw79","slide":6,"text":""}
+{"kind":"slide","id":"sl/zf2o0d","slide":7,"title":"상세: 실패를 AI가 해석","textShapes":3}
+{"kind":"shape","id":"sh/z25kb6xk","slide":7,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":7,"text":"상세: 실패를 AI가 해석","textPreview":"상세: 실패를 AI가 해석","textChars":14,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":7,"text":"• 사례 본문과 맥락 확인\n\n• 실패 원인과 다음 액션 요약\n\n• 긴 후기를 더 빠르게 이해","textPreview":"• 사례 본문과 맥락 확인 |  | • 실패 원인과 다음 액션 요약 |  | • 긴 후기를 더 빠르게 이해","textChars":51,"textLines":5,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":7,"text":"Sidepick | 07","textPreview":"Sidepick | 07","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/zf2o0d","slide":7,"text":""}
+{"kind":"slide","id":"sl/otje9h","slide":8,"title":"비교와 학습으로 연결","textShapes":3}
+{"kind":"shape","id":"sh/judg7ads","slide":8,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/cfa9w3m9","slide":8,"text":"비교와 학습으로 연결","textPreview":"비교와 학습으로 연결","textChars":11,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/1032lszq","slide":8,"text":"• 유사 사례 비교\n\n• FAQ / 가이드 연결\n\n• 한 사람의 실패가 아니라 패턴으로 읽게 만든다","textPreview":"• 유사 사례 비교 |  | • FAQ / 가이드 연결 |  | • 한 사람의 실패가 아니라 패턴으로 읽게 만든다","textChars":55,"textLines":5,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":8,"text":"Sidepick | 08","textPreview":"Sidepick | 08","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/otje9h","slide":8,"text":""}
+{"kind":"slide","id":"sl/rabyuc","slide":9,"title":"실제 구현 및 배포 구조","textShapes":3}
+{"kind":"shape","id":"sh/epkzupwb","slide":9,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/pg3ex0nu","slide":9,"text":"실제 구현 및 배포 구조","textPreview":"실제 구현 및 배포 구조","textChars":13,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/wval87ed","slide":9,"text":"• Frontend: React + Vite\n\n• Backend: Spring Boot + MySQL\n\n• AI: FastAPI + Claude\n\n• Similarity: SBERT + FAISS\n\n• Infra: Amplify + EC2 + RDS + Nginx","textPreview":"• Frontend: React + Vite |  | • Backend: Spring Boot + MySQL |  | • AI: FastAPI + Claude |  | • Similarity: SBERT + FAISS |  | • Infra: A...","textChars":147,"textLines":9,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":9,"text":"Sidepick | 09","textPreview":"Sidepick | 09","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/rabyuc","slide":9,"text":""}
+{"kind":"slide","id":"sl/9dvz05","slide":10,"title":"우리가 다른 지점","textShapes":3}
+{"kind":"shape","id":"sh/k3q5o7qp","slide":10,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/vixczed8","slide":10,"text":"우리가 다른 지점","textPreview":"우리가 다른 지점","textChars":9,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/2x4nap4r","slide":10,"text":"• 실패 경험 자체를 구조화된 데이터로 다룬다\n\n• AI 분석과 유사 사례를 한 흐름으로 연결한다\n\n• 콘텐츠 소비가 아니라 판단 속도 단축에 집중한다","textPreview":"• 실패 경험 자체를 구조화된 데이터로 다룬다 |  | • AI 분석과 유사 사례를 한 흐름으로 연결한다 |  | • 콘텐츠 소비가 아니라 판단 속도 단축에 집중한다","textChars":84,"textLines":5,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":10,"text":"Sidepick | 10","textPreview":"Sidepick | 10","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/9dvz05","slide":10,"text":""}
+{"kind":"slide","id":"sl/jem7m5","slide":11,"title":"결론: Persevere","textShapes":4}
+{"kind":"shape","id":"sh/zidonyd0","slide":11,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":11,"text":"결론: Persevere","textPreview":"결론: Persevere","textChars":13,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"shape","id":"sh/hoza1gvy","slide":11,"bbox":[790,190,350,160]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":11,"text":"Persevere","textPreview":"Persevere","textChars":9,"textLines":1,"bbox":[820,235,290,60]}
+{"kind":"textbox","id":"sh/za1gvy90","slide":11,"text":"• 문제 정의는 여전히 유효하다\n\n• 핵심 사용자 루프는 이미 MVP로 구현됐다\n\n• 지금 필요한 것은 Pivot이 아니라 사용자 검증과 고도화다","textPreview":"• 문제 정의는 여전히 유효하다 |  | • 핵심 사용자 루프는 이미 MVP로 구현됐다 |  | • 지금 필요한 것은 Pivot이 아니라 사용자 검증과 고도화다","textChars":81,"textLines":5,"bbox":[90,190,660,360]}
+{"kind":"textbox","id":"sh/svu9knih","slide":11,"text":"Sidepick | 11","textPreview":"Sidepick | 11","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/jem7m5","slide":11,"text":""}
+{"kind":"slide","id":"sl/ch0p20","slide":12,"title":"다음 단계에서 검증할 것","textShapes":3}
+{"kind":"shape","id":"sh/x0nuxc3y","slide":12,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":12,"text":"다음 단계에서 검증할 것","textPreview":"다음 단계에서 검증할 것","textChars":13,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/fu18jqh0","slide":12,"text":"• 반복 사용성\n\n• 시장성\n\n• 수익 모델\n\n• 데이터 신뢰도","textPreview":"• 반복 사용성 |  | • 시장성 |  | • 수익 모델 |  | • 데이터 신뢰도","textChars":35,"textLines":7,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/83itgfml","slide":12,"text":"Sidepick | 12","textPreview":"Sidepick | 12","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/ch0p20","slide":12,"text":""}
+{"kind":"slide","id":"sl/l2kmng","slide":13,"title":"실패를 다음 판단으로","textShapes":3}
+{"kind":"shape","id":"sh/hwfyxobm","slide":13,"bbox":[72,52,180,8]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":13,"text":"실패를 다음 판단으로","textPreview":"실패를 다음 판단으로","textChars":11,"textLines":1,"bbox":[72,84,980,64]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":13,"text":"• Sidepick은 실패를 저장하는 곳이 아니라\n\n• 실패를 다음 선택의 데이터로 바꾸는 도구입니다","textPreview":"• Sidepick은 실패를 저장하는 곳이 아니라 |  | • 실패를 다음 선택의 데이터로 바꾸는 도구입니다","textChars":56,"textLines":3,"bbox":[90,190,1040,360]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":13,"text":"Sidepick | 13","textPreview":"Sidepick | 13","textChars":13,"textLines":1,"bbox":[72,670,300,24]}
+{"kind":"notes","id":"nt/l2kmng","slide":13,"text":""}

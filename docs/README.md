@@ -1,4 +1,4 @@
-﻿# Sidepick Docs
+# Sidepick Docs
 
 Sidepick의 공식 문서 허브입니다.  
 루트 README가 프로젝트 개요와 브랜딩을 담당한다면, 이 문서는 실제 개발·운영에 필요한 세부 문서로 연결되는 인덱스 역할을 합니다.
@@ -9,12 +9,13 @@ Sidepick의 공식 문서 허브입니다.
 
 1. [Project Overview](./00_project_overview.md)
 2. [Functional Specification](./08_functional_spec.md)
-3. [Current Architecture](./01_current_architecture.md)
-4. [API Contract](./02_api_contract.md)
-5. [Frontend Structure](./03_frontend_structure.md)
-6. [Backend Structure](./04_backend_structure.md)
-7. [AI Integration Contract](./05_ai_integration_contract.md)
-8. [Deployment Guide](./07_deployment.md)
+3. [Design System Guide](./09_design_system_guide.md)
+4. [Current Architecture](./01_current_architecture.md)
+5. [API Contract](./02_api_contract.md)
+6. [Frontend Structure](./03_frontend_structure.md)
+7. [Backend Structure](./04_backend_structure.md)
+8. [AI Integration Contract](./05_ai_integration_contract.md)
+9. [Deployment Guide](./07_deployment.md)
 
 ---
 
@@ -24,12 +25,13 @@ Sidepick의 공식 문서 허브입니다.
 | --- | --- |
 | [00_project_overview.md](./00_project_overview.md) | MVP 범위와 핵심 사용자 흐름 |
 | [08_functional_spec.md](./08_functional_spec.md) | 발표/운영 기준 기능명세 중앙 문서 |
+| [09_design_system_guide.md](./09_design_system_guide.md) | 피그마 기반 UI 토큰/컴포넌트 운영 기준 |
 | [01_current_architecture.md](./01_current_architecture.md) | 현재 서비스 아키텍처와 런타임 구조 |
 | [02_api_contract.md](./02_api_contract.md) | 프론트-백엔드 API 계약 |
 | [03_frontend_structure.md](./03_frontend_structure.md) | 프론트엔드 구조와 화면 책임 |
 | [04_backend_structure.md](./04_backend_structure.md) | 백엔드 모듈 구조와 도메인 책임 |
 | [05_ai_integration_contract.md](./05_ai_integration_contract.md) | 백엔드-AI 서버 연동 방식 |
-| [BE-FE-AI-연결-하네스-설계.md](./BE-FE-AI-연결-하네스-설계.md) | 현재 FE/BE 실행 범위와 하네스 우선순위 정리 |
+| [BE-FE-AI-연결-하네스-설계.md](./BE-FE-AI-%EC%97%B0%EA%B2%B0-%ED%95%98%EB%84%A4%EC%8A%A4-%EC%84%A4%EA%B3%84.md) | 현재 FE/BE 실행 범위와 하네스 우선순위 정리 |
 | [BE-37 알림 MVP 계약.md](./BE-37%20알림%20MVP%20계약.md) | 알림 MVP 범위와 API/이벤트 규칙 |
 | [BE-40 에이전트 A 연결 계약.md](./BE-40%20에이전트%20A%20연결%20계약.md) | 질문 카드/Plan B 연결 계약 |
 | [BE-41 성공사례 MVP 계약.md](./BE-41%20성공사례%20MVP%20계약.md) | 성공사례 리스트/상세 MVP 계약 |

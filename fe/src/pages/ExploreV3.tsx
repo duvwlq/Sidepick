@@ -1154,8 +1154,8 @@ function SharedFooterArea({
       onFabToggle={onToggleFab}
       onCreateClick={onCreateClick}
       accessory={
-        <div className="pointer-events-auto inline-flex items-start rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
-          <div className="flex items-center gap-[4px]">
+          <div className="pointer-events-auto inline-flex items-start rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+            <div className="flex items-center gap-[4px]">
             {FEED_OPTIONS.map((option) => {
               const active = option.key === feedMode;
 
@@ -1179,8 +1179,8 @@ function SharedFooterArea({
                 </button>
               );
             })}
+            </div>
           </div>
-        </div>
       }
     />
   );
