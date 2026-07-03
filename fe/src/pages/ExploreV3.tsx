@@ -1,3 +1,4 @@
+import { PencilLine, X } from 'lucide-react';
 import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import BottomNav from '../components/layout/BottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,6 +14,7 @@ import plusIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검�
 import searchNavIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
 import userIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
 import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
+import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import HorizontalScroll from '../components/common/HorizontalScroll';
 import { useToast } from '../components/common/useToast';
@@ -1143,18 +1145,18 @@ function SharedFooterArea({
   onToggleFab: () => void;
   onCreateClick: () => void;
 }) {
+  const navigate = useNavigate();
+
   return (
     <BottomNav
       active="explore"
-      showFab
       showCenterCreateButton
       accessoryBottom={108}
       accessoryLayout="center"
-      fabExpanded={fabOpen}
-      onFabToggle={onToggleFab}
       onCreateClick={onCreateClick}
       accessory={
-          <div className="pointer-events-auto inline-flex items-start rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+        <div className="pointer-events-auto relative flex h-[38px] w-[327px] items-center justify-center">
+          <div className="inline-flex h-[36px] items-center rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
             <div className="flex items-center gap-[4px]">
             {FEED_OPTIONS.map((option) => {
               const active = option.key === feedMode;
@@ -1181,6 +1183,51 @@ function SharedFooterArea({
             })}
             </div>
           </div>
+          <div className="absolute right-0 top-1/2 flex h-[36px] w-[36px] -translate-y-1/2 items-center justify-center">
+            <div
+              className={`pointer-events-auto absolute bottom-[52px] right-0 z-50 flex min-w-[132px] flex-col items-stretch rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+                fabOpen
+                  ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
+                  : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => {
+                  onToggleFab();
+                  navigate('/chatbot');
+                }}
+                className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+              >
+                <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
+              </button>
+              <button
+                type="button"
+                onClick={onCreateClick}
+                className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+              >
+                <PencilLine size={18} strokeWidth={2} className="shrink-0 text-black" />
+                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
+              </button>
+            </div>
+            <button
+              type="button"
+              aria-label={fabOpen ? '경험 작성 메뉴 닫기' : '경험 작성 메뉴 열기'}
+              aria-expanded={fabOpen}
+              onClick={onToggleFab}
+              className={`flex h-[36px] w-[36px] items-center justify-center rounded-full ${
+                fabOpen ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
+              }`}
+            >
+              {fabOpen ? (
+                <X size={20} strokeWidth={2.2} color="#FFFFFF" />
+              ) : (
+                <img src={plusIcon} alt="" className="h-[18px] w-[18px]" />
+              )}
+            </button>
+          </div>
+        </div>
       }
     />
   );
