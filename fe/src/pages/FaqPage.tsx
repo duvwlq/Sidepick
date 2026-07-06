@@ -1,16 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import arrowLeftIcon from '../assets/auth-figma/arrow-left.svg';
-import searchIcon from '../assets/home-v1-figma/icons/search-figma.svg';
-import CrossTopicGuideSection from '../components/guide/CrossTopicGuideSection';
-import GuideDetailSection from '../components/guide/GuideDetailSection';
-import BottomNav from '../components/layout/BottomNav';
-import { getAccessToken } from '../lib/session';
-import { FAQ_CATEGORIES, FAQ_INTRO, type FaqCategory, type FaqItem } from './faqData';
+import HorizontalScroll from '../components/common/HorizontalScroll';
+import SearchBar from '../components/common/SearchBar';
+import Layout from '../components/layout/Layout';
+import { FAQ_CATEGORIES, FAQ_INTRO } from './faqData';
 
-const ALL_TAG_ID = 'all';
+const ALL_TAG = '전체';
 
-const BUSINESS_CATEGORY_IDS = new Set([
+const BUSINESS_FIELD_CATEGORIES = new Set<string>([
   'online-commerce',
   'content-sns',
   'digital-products',
@@ -20,303 +18,404 @@ const BUSINESS_CATEGORY_IDS = new Set([
   'offline-sidejob',
 ]);
 
-type GuideRow = {
+type SelectedTag = typeof ALL_TAG | (typeof FAQ_CATEGORIES)[number]['label'];
+
+type VisibleFaqItem = {
+  categoryId: string;
+  categoryLabel: string;
+  item: (typeof FAQ_CATEGORIES)[number]['items'][number];
   key: string;
-  category: FaqCategory;
-  item: FaqItem;
 };
 
-function isBusinessCategory(categoryId: string) {
-  return BUSINESS_CATEGORY_IDS.has(categoryId);
-}
+type CrossTopicSections = {
+  type: 'cross_topic';
+  steps: string[];
+  answer: string;
+  warnings: string;
+};
 
-function buildIntroLines(value: string[] | string | undefined) {
-  if (!value) {
-    return [];
-  }
+type BusinessFieldSections = {
+  type: 'business_field';
+  tips: string[];
+  failures: string[];
+  warnings: string;
+};
 
-  if (Array.isArray(value)) {
-    return value.filter(Boolean);
-  }
+type ParsedSections = CrossTopicSections | BusinessFieldSections | { type: 'plain'; text: string };
 
-  return value
+const FAQ_DISCLAIMER_LINES = [
+  '본 콘텐츠는 일반적인 가이드라인입니다. 개인 상황에 따라 결과가 다를 수 있으며,',
+  '법률, 세금, 투자 관련 사항은 전문가 상담을 권장합니다.',
+  '총 16개 카테고리로 정리했습니다.',
+] as const;
+
+function parseNumberedList(block: string): string[] {
+  return block
     .split('\n')
     .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => line.replace(/^\d+\.\s*/, ''))
     .filter(Boolean);
 }
 
-function Header({ onBack }: { onBack: () => void }) {
-  return (
-    <div className="flex h-[64px] items-center justify-between bg-white px-[16px] py-[20px]">
-      <button
-        type="button"
-        onClick={onBack}
-        className="flex h-[24px] w-[24px] items-center justify-center active:opacity-60"
-        aria-label="뒤로가기"
-      >
-        <img src={arrowLeftIcon} alt="" className="h-[24px] w-[24px]" />
-      </button>
-      <h1 className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-black">부업 가이드</h1>
-      <div className="h-[24px] w-[24px]" aria-hidden="true" />
-    </div>
-  );
+function splitByHeaders(answer: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  const headerRe = /\*\*([^*]+)\*\*/g;
+  const matches: Array<{ header: string; start: number; end: number }> = [];
+  let m: RegExpExecArray | null;
+  while ((m = headerRe.exec(answer)) !== null) {
+    matches.push({ header: m[1].trim(), start: m.index, end: m.index + m[0].length });
+  }
+  if (!matches.length) return result;
+  for (let i = 0; i < matches.length; i += 1) {
+    const next = matches[i + 1];
+    const bodyStart = matches[i].end;
+    const bodyEnd = next ? next.start : answer.length;
+    result[matches[i].header] = answer.slice(bodyStart, bodyEnd).trim();
+  }
+  return result;
 }
 
-function SearchBar({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <div className="flex h-[44px] items-center gap-[8px] rounded-[999px] border border-[#EEEEEE] bg-white px-[16px]">
-      <input
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        placeholder="궁금한 질문을 검색해보세요"
-        className="h-full flex-1 bg-transparent font-['Pretendard'] text-[14px] font-[400] leading-[16.8px] text-black outline-none placeholder:text-[#B8B8B8]"
-      />
-      <img src={searchIcon} alt="" className="h-[20px] w-[20px]" />
-    </div>
-  );
-}
+function parseAnswerSections(categoryId: string, answer: string): ParsedSections {
+  const sections = splitByHeaders(answer);
+  const isBusiness = BUSINESS_FIELD_CATEGORIES.has(categoryId);
 
-function GuideCategoryChip({
-  label,
-  className,
-}: {
-  label: string;
-  className: string;
-}) {
-  return (
-    <span
-      className={`inline-flex h-[26px] items-center justify-center whitespace-nowrap rounded-[999px] border px-[10px] py-[6px] font-['Pretendard'] text-[12px] font-[500] leading-[14.4px] ${className}`}
-    >
-      {label}
-    </span>
-  );
-}
+  if (isBusiness) {
+    const tips = sections['실전 Tip'];
+    const failures = sections['실패 요인 TOP3'];
+    const warnings = sections['주의사항'];
+    if (tips && failures && warnings) {
+      return {
+        type: 'business_field',
+        tips: parseNumberedList(tips),
+        failures: parseNumberedList(failures),
+        warnings,
+      };
+    }
+  } else {
+    const steps = sections['절차 단계'];
+    const ans = sections['답변'];
+    const warnings = sections['주의사항·법적 안내'] ?? sections['주의사항'];
+    if (steps && ans && warnings) {
+      return {
+        type: 'cross_topic',
+        steps: parseNumberedList(steps),
+        answer: ans,
+        warnings,
+      };
+    }
+  }
 
-function GuideAccordionRow({
-  row,
-  expanded,
-  onToggle,
-  onExploreCategory,
-}: {
-  row: GuideRow;
-  expanded: boolean;
-  onToggle: () => void;
-  onExploreCategory: () => void;
-}) {
-  const isBusiness = isBusinessCategory(row.category.id);
-
-  return (
-    <div className="overflow-hidden rounded-[12px] bg-white">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-start justify-between gap-[12px] px-[6px] py-[14px] text-left active:opacity-80"
-      >
-        <div className="min-w-0 flex-1">
-          <p className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#5A876E]">
-            {row.category.label}
-          </p>
-          <p className="pt-[8px] font-['Pretendard'] text-[16px] font-[500] leading-[22px] text-black">
-            {row.item.question}
-          </p>
-        </div>
-        <span
-          className={`pt-[10px] text-[20px] leading-none text-[#5A876E] transition-transform duration-150 ${
-            expanded ? 'rotate-180' : ''
-          }`}
-        >
-          ˅
-        </span>
-      </button>
-
-      {expanded ? (
-        isBusiness ? (
-          <GuideDetailSection
-            categoryId={row.category.id}
-            answer={row.item.answer}
-            displayLabel={row.category.label}
-            onExplore={onExploreCategory}
-          />
-        ) : (
-          <CrossTopicGuideSection answer={row.item.answer} />
-        )
-      ) : null}
-    </div>
-  );
+  return { type: 'plain', text: answer };
 }
 
 export default function FaqPage() {
   const navigate = useNavigate();
-  const [selectedTagId, setSelectedTagId] = useState(ALL_TAG_ID);
-  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
-  const [fabExpanded, setFabExpanded] = useState(false);
-  const introTitleLines = buildIntroLines((FAQ_INTRO as { titleLines?: string[]; title?: string }).titleLines ?? (FAQ_INTRO as { title?: string }).title);
-  const introDisclaimerLines = buildIntroLines(
-    (FAQ_INTRO as { disclaimerLines?: string[]; disclaimer?: string }).disclaimerLines ??
-      (FAQ_INTRO as { disclaimer?: string }).disclaimer,
-  );
-  const resolvedIntroDisclaimerLines = useMemo(() => {
-    const totalLine = `총 ${FAQ_CATEGORIES.length}개 카테고리로 정리했습니다.`;
-    return introDisclaimerLines.some((line) => line.includes('카테고리'))
-      ? introDisclaimerLines
-      : [...introDisclaimerLines, totalLine];
-  }, [introDisclaimerLines]);
+  const [selectedTag, setSelectedTag] = useState<SelectedTag>(ALL_TAG);
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const rows = useMemo<GuideRow[]>(() => {
+  const tags = useMemo(() => [ALL_TAG, ...FAQ_CATEGORIES.map((category) => category.label)], []);
+
+  const visibleItems = useMemo<VisibleFaqItem[]>(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
+    const scopedCategories =
+      selectedTag === ALL_TAG
+        ? FAQ_CATEGORIES
+        : FAQ_CATEGORIES.filter((category) => category.label === selectedTag);
 
-    return FAQ_CATEGORIES.filter((category) => selectedTagId === ALL_TAG_ID || category.id === selectedTagId).flatMap((category) =>
+    return scopedCategories.flatMap((category) =>
       category.items
         .filter((item) => {
           if (!normalizedQuery) {
             return true;
           }
 
-          return `${category.label} ${item.question} ${item.answer}`.toLowerCase().includes(normalizedQuery);
+          const haystack = `${category.label} ${item.question} ${item.answer}`.toLowerCase();
+          return haystack.includes(normalizedQuery);
         })
         .map((item) => ({
-          key: `${category.id}-${item.id}`,
-          category,
+          categoryId: category.id,
+          categoryLabel: category.label,
           item,
+          key: `${category.id}-${item.id}`,
         })),
     );
-  }, [searchQuery, selectedTagId]);
+  }, [searchQuery, selectedTag]);
 
-  function moveBack() {
-    navigate(-1);
+  useEffect(() => {
+    setExpandedKey(null);
+  }, [searchQuery, selectedTag]);
+
+  return (
+    <Layout
+      title="FAQ"
+      leftType="back"
+      rightIcon="search"
+      onBack={() => navigate(-1)}
+      onRightIconClick={() => searchInputRef.current?.focus()}
+    >
+      <div className="flex w-full flex-col bg-[#FFFFFF]">
+        <section className="flex flex-col gap-3 bg-[#FFFFFF] px-5 pb-[14px] pt-6">
+          <div className="flex flex-col gap-1">
+            <p className="text-[14px] font-normal leading-[1.2] text-[#494949]">
+              {FAQ_INTRO.eyebrow}
+            </p>
+            <h1 className="whitespace-pre-line text-[20px] font-semibold leading-[1.2] text-[#131416]">
+              {FAQ_INTRO.title}
+            </h1>
+          </div>
+          <div className="flex flex-col text-[10px] font-light leading-[1.4] text-[#5D5D5D]">
+            <p>{`※ ${FAQ_DISCLAIMER_LINES[0]}`}</p>
+            <p>{FAQ_DISCLAIMER_LINES[1]}</p>
+            <p>{FAQ_DISCLAIMER_LINES[2]}</p>
+          </div>
+        </section>
+
+        <section className="px-4 pb-4">
+          <SearchBar
+            ref={searchInputRef}
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="질문이나 키워드로 검색해보세요!"
+          />
+        </section>
+
+        <section className="pb-4">
+          <HorizontalScroll
+            wrapperClassName="w-full px-4"
+            contentClassName="horizontal-scroll-content--tags pr-4"
+          >
+            {tags.map((tag) => {
+              const active = tag === selectedTag;
+
+              return (
+                <button
+                  key={tag}
+                  type="button"
+                  onClick={() => setSelectedTag(tag)}
+                  className={`flex shrink-0 items-center justify-center rounded-full px-[10px] py-1 ${
+                    active ? 'bg-[#131416] text-[#FFFFFF]' : 'bg-[#EEEEEE] text-[#757575]'
+                  }`}
+                >
+                  <span className="whitespace-nowrap text-[12px] font-normal leading-[1.2]">
+                    {tag}
+                  </span>
+                </button>
+              );
+            })}
+          </HorizontalScroll>
+        </section>
+
+        <section className="flex w-full flex-col border-t border-[#EEEEEE]">
+          {visibleItems.length ? (
+            visibleItems.map(({ categoryId, categoryLabel, item, key }) => {
+              const expanded = expandedKey === key;
+              const sections = parseAnswerSections(categoryId, item.answer);
+
+              return (
+                <article key={key} className="border-b border-[#EEEEEE]">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedKey((current) => (current === key ? null : key))}
+                    className="flex w-full items-center justify-between bg-[#FFFFFF] px-[20px] py-[12px] text-left"
+                    aria-expanded={expanded}
+                  >
+                    <div className="flex min-w-0 flex-[1_0_0] flex-col items-start justify-center gap-[4px]">
+                      <p className="min-w-full text-left text-[12px] font-semibold leading-[1.2] tracking-[0px] text-[#5A876E]">
+                        {categoryLabel}
+                      </p>
+                      <div className="flex items-start">
+                        <p className="truncate text-left text-[16px] font-normal leading-[1.2] tracking-[0px] text-[#131416]">
+                          {item.question}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="shrink-0 text-[#111111]">
+                      {expanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                    </span>
+                  </button>
+
+                  {expanded ? <ExpandedSections sections={sections} /> : null}
+                </article>
+              );
+            })
+          ) : (
+            <div className="px-5 py-12 text-center text-sm leading-6 text-[#7A7A7A]">
+              검색 결과가 없습니다.
+            </div>
+          )}
+        </section>
+      </div>
+    </Layout>
+  );
+}
+
+function ExpandedSections({ sections }: { sections: ParsedSections }) {
+  if (sections.type === 'cross_topic') {
+    return (
+      <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
+        <SectionCard title="답변">
+          <p className="whitespace-pre-line text-[13px] font-normal leading-[20px] text-[#131416]">
+            {sections.answer}
+          </p>
+        </SectionCard>
+
+        <SectionCard title="절차 단계">
+          <ol className="flex flex-col gap-[8px]">
+            {sections.steps.map((step, index) => (
+              <li key={`step-${index}`} className="flex items-start gap-[6px]">
+                <span className="flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded-full bg-[#CBE5D8] text-[12px] font-semibold leading-[14.4px] text-[#5A876E]">
+                  {index + 1}
+                </span>
+                <p className="pt-[1px] text-[12px] font-medium leading-[16.8px] text-[#131416]">
+                  {step}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </SectionCard>
+
+        <NoteCard iconTone="orange" title="법적 안내 / 주의사항">
+          <div className="flex items-start gap-[4px]">
+            <span className="text-[12px] font-normal leading-[16.8px] text-[#C06D43]">*</span>
+            <p className="whitespace-pre-line text-[12px] font-normal leading-[16.8px] text-[#C06D43]">
+              {sections.warnings}
+            </p>
+          </div>
+        </NoteCard>
+      </div>
+    );
   }
 
-  function moveToCreate() {
-    setFabExpanded(false);
-    const token = getAccessToken();
-    if (!token) {
-      navigate(`/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`);
-      return;
-    }
+  if (sections.type === 'business_field') {
+    return (
+      <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
+        <SectionCard title="실전 Tip" titleColor="#5A876E">
+          <ol className="flex flex-col gap-[6px]">
+            {sections.tips.map((tip, index) => (
+              <li key={`tip-${index}`} className="flex items-start gap-[6px]">
+                <span className="flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded-full bg-[#CBE5D8] text-[12px] font-semibold leading-[14.4px] text-[#5A876E]">
+                  {index + 1}
+                </span>
+                <p className="pt-[1px] text-[12px] font-normal leading-[16.8px] text-[#131416]">
+                  {tip}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </SectionCard>
 
-    navigate('/create');
-  }
+        <SectionCard title="실패 요인 TOP3" titleColor="#C06D43">
+          <ol className="flex flex-col gap-[6px]">
+            {sections.failures.map((fail, index) => (
+              <li key={`fail-${index}`} className="flex items-start gap-[6px]">
+                <span className="flex h-[16px] w-[16px] shrink-0 items-center justify-center rounded-full bg-[#FFD9C6] text-[12px] font-semibold leading-[14.4px] text-[#C06D43]">
+                  {index + 1}
+                </span>
+                <p className="pt-[1px] text-[12px] font-normal leading-[16.8px] text-[#131416]">
+                  {fail}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </SectionCard>
 
-  function getChipTone(categoryId: string, selected: boolean) {
-    const business = isBusinessCategory(categoryId);
-
-    if (selected) {
-      return business
-        ? 'bg-[#5A876E] text-white border-[#5A876E]'
-        : 'bg-[#D9824E] text-white border-[#D9824E]';
-    }
-
-    return business
-      ? 'bg-white text-[#5A876E] border-[#CBE5D8]'
-      : 'bg-white text-[#D9824E] border-[#F0C7AF]';
+        <NoteCard iconTone="orange" title="주의사항">
+          <p className="whitespace-pre-line text-[12px] font-normal leading-[16.8px] text-[#C06D43]">
+            {sections.warnings}
+          </p>
+        </NoteCard>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white">
-        <div className="fixed left-1/2 top-0 z-30 w-full max-w-[375px] -translate-x-1/2 bg-white">
-          <Header onBack={moveBack} />
-        </div>
-
-        <main className="px-[16px] pb-[132px] pt-[80px]">
-          <section className="rounded-[16px] bg-[#F8F8F8] px-[16px] py-[20px]">
-            <p className="font-['Pretendard'] text-[12px] font-[600] leading-[14.4px] text-[#5A876E]">
-              {FAQ_INTRO.eyebrow}
-            </p>
-            <h2 className="pt-[6px] font-['Pretendard'] text-[22px] font-[600] leading-[30px] text-[#131416]">
-              {introTitleLines.map((line, index) => (
-                <span key={`${line}-${index}`}>
-                  {index > 0 ? <br /> : null}
-                  {line}
-                </span>
-              ))}
-            </h2>
-            <div className="pt-[12px] font-['Pretendard'] text-[12px] font-[400] leading-[18px] text-[#6E6E6E]">
-              {resolvedIntroDisclaimerLines.map((line) => (
-                <p key={line}>{line}</p>
-              ))}
-            </div>
-          </section>
-
-          <section className="pt-[16px]">
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          </section>
-
-          <section className="flex flex-wrap gap-[8px] pt-[16px]">
-            <button type="button" onClick={() => setSelectedTagId(ALL_TAG_ID)} className="shrink-0">
-              <GuideCategoryChip
-                label="전체"
-                className={
-                  selectedTagId === ALL_TAG_ID
-                    ? 'border-[#5A876E] bg-[#5A876E] text-white'
-                    : 'border-[#E6E6E6] bg-white text-[#5D5D5D]'
-                }
-              />
-            </button>
-            {FAQ_CATEGORIES.map((category) => (
-              <button
-                key={category.id}
-                type="button"
-                onClick={() => setSelectedTagId(category.id)}
-                className="shrink-0"
-              >
-                <GuideCategoryChip
-                  label={category.label}
-                  className={getChipTone(category.id, selectedTagId === category.id)}
-                />
-              </button>
-            ))}
-          </section>
-
-          <section className="pt-[20px]">
-            <div className="flex items-center justify-between">
-              <p className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-[#131416]">
-                질문 {rows.length}개
-              </p>
-            </div>
-
-            {rows.length ? (
-              <div className="flex flex-col gap-[18px] pt-[18px]">
-                {rows.map((row) => (
-                  <GuideAccordionRow
-                    key={row.key}
-                    row={row}
-                    expanded={expandedKey === row.key}
-                    onToggle={() => setExpandedKey((current) => (current === row.key ? null : row.key))}
-                    onExploreCategory={() => navigate(`/explore?q=${encodeURIComponent(row.category.label)}`)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-[12px] bg-[#F8F8F8] px-[16px] py-[32px] text-center">
-                <p className="font-['Pretendard'] text-[14px] font-[500] leading-[19.6px] text-[#131416]">
-                  검색 결과가 없어요.
-                </p>
-                <p className="pt-[6px] font-['Pretendard'] text-[13px] font-[400] leading-[18px] text-[#8A8A8A]">
-                  다른 질문이나 키워드로 다시 찾아보세요.
-                </p>
-              </div>
-            )}
-          </section>
-        </main>
-
-        <BottomNav
-          active="guide"
-          showFab
-          fabExpanded={fabExpanded}
-          onFabToggle={() => setFabExpanded((current) => !current)}
-          onCreateClick={moveToCreate}
-        />
+    <div className="flex items-start gap-[4px] overflow-hidden bg-[#EEEEEE] p-[20px] text-left text-[12px] font-normal leading-[16.8px] tracking-[0px] not-italic">
+      <p className="shrink-0 whitespace-nowrap text-[#000000]">A.</p>
+      <div className="flex min-w-0 flex-[1_0_0] flex-col items-start gap-[10px] text-[#5E5E5E]">
+        <p className="w-full">안녕하세요. 사이드픽입니다.</p>
+        <p className="w-full whitespace-pre-line break-words">{sections.text}</p>
       </div>
     </div>
   );
 }
 
+function SectionCard({
+  title,
+  titleColor,
+  children,
+}: {
+  title: string;
+  titleColor?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+      <p
+        className="text-[12px] font-semibold leading-[14.4px]"
+        style={{ color: titleColor ?? '#131416' }}
+      >
+        {title}
+      </p>
+      <div className="my-[8px] h-px w-full bg-[#EEEEEE]" />
+      {children}
+    </div>
+  );
+}
 
+function NoteCard({
+  iconTone,
+  title,
+  children,
+}: {
+  iconTone: 'green' | 'orange';
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="rounded-[4px] bg-white p-[12px] shadow-[0_0_2px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center gap-[4px]">
+        <span
+          className={`flex h-[14px] w-[14px] items-center justify-center rounded-full text-[10px] leading-none text-white ${
+            iconTone === 'green' ? 'bg-[#5A876E]' : 'bg-[#C06D43]'
+          }`}
+        >
+          {iconTone === 'green' ? '✓' : '!'}
+        </span>
+        <p className="text-[12px] font-semibold leading-[14.4px] text-[#131416]">{title}</p>
+      </div>
+      <div className="my-[8px] h-px w-full bg-[#EEEEEE]" />
+      {children}
+    </div>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden="true">
+      <path
+        d="M5 8L10 13L15 8"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ChevronUpIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden="true">
+      <path
+        d="M5 12L10 7L15 12"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
