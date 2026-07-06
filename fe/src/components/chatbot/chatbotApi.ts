@@ -1,7 +1,7 @@
 import type { ChatbotResponse } from './types';
+import { resolveAiBaseUrl } from '../../lib/runtime-base-url';
 
-const AI_BASE_URL =
-  import.meta.env.VITE_AI_BASE_URL ?? 'http://localhost:8000';
+const AI_BASE_URL = resolveAiBaseUrl();
 
 export class ChatbotApiError extends Error {
   readonly status: number;

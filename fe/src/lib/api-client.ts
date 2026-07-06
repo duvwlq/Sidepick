@@ -1,8 +1,8 @@
 import { ERROR_CODES } from './error-codes';
+import { resolveApiBaseUrl } from './runtime-base-url';
 import { clearSession, getAccessToken } from './session';
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081/api';
+const API_BASE_URL = resolveApiBaseUrl();
 
 export class ApiError extends Error {
   readonly status: number;
