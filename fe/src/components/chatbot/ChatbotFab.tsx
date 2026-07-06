@@ -1,20 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ChatbotDrawer from './ChatbotDrawer';
 
 export default function ChatbotFab() {
   const navigate = useNavigate();
-  const [chatOpen, setChatOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  function openChat() {
-    setMenuOpen(false);
-    setChatOpen(true);
-  }
 
   function goCreate() {
     setMenuOpen(false);
     navigate('/create');
+  }
+
+  function goChatbot() {
+    setMenuOpen(false);
+    navigate('/chatbot');
   }
 
   return (
@@ -34,7 +32,7 @@ export default function ChatbotFab() {
         >
           <button
             type="button"
-            onClick={openChat}
+            onClick={goChatbot}
             className="flex items-center gap-[8px] text-left"
             role="menuitem"
           >
@@ -59,16 +57,13 @@ export default function ChatbotFab() {
 
       <button
         type="button"
-        onClick={() => setMenuOpen((v) => !v)}
+        onClick={() => setMenuOpen((value) => !value)}
         aria-label={menuOpen ? '메뉴 닫기' : '메뉴 열기'}
         aria-expanded={menuOpen}
         className="fixed bottom-[20px] right-[20px] z-50 flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E] text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)] transition active:scale-95"
-        style={{ display: chatOpen ? 'none' : undefined }}
       >
         {menuOpen ? <CloseIcon /> : <PlusIcon />}
       </button>
-
-      <ChatbotDrawer open={chatOpen} onClose={() => setChatOpen(false)} />
     </>
   );
 }

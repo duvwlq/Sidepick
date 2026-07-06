@@ -109,6 +109,15 @@ function parseAnswerSections(categoryId: string, answer: string): ParsedSections
   return { type: 'plain', text: answer };
 }
 
+function buildChatbotHref(categoryId: string, question: string) {
+  const params = new URLSearchParams();
+  if (BUSINESS_FIELD_CATEGORIES.has(categoryId)) {
+    params.set('category', categoryId);
+  }
+  params.set('q', question);
+  return `/chatbot?${params.toString()}`;
+}
+
 export default function FaqPage() {
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -237,7 +246,20 @@ export default function FaqPage() {
                     </span>
                   </button>
 
-                  {expanded ? <ExpandedSections sections={sections} /> : null}
+                  {expanded ? (
+                    <>
+                      <ExpandedSections sections={sections} />
+                      <div className="bg-[#F8F8F8] px-[16px] pb-[16px]">
+                        <button
+                          type="button"
+                          onClick={() => navigate(buildChatbotHref(categoryId, item.question))}
+                          className="flex h-[40px] w-full items-center justify-center rounded-[10px] border border-[#DDE7E0] bg-white text-[13px] font-[600] leading-[15.6px] text-[#375E49]"
+                        >
+                          AI 챗봇에서 이어서 질문하기
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
                 </article>
               );
             })

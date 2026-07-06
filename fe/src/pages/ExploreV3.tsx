@@ -73,6 +73,16 @@ const CATEGORY_OPTIONS: ExploreCategoryOption[] = [
   { id: 7, label: '오프라인 기반 부업', slug: 'offline-sidejob' },
 ];
 
+const CATEGORY_ID_TO_CHATBOT_SLUG: Record<number, string> = {
+  1: 'online-commerce',
+  2: 'content-sns',
+  3: 'digital-products',
+  4: 'platform-labor',
+  5: 'talent-freelance',
+  6: 'investment',
+  7: 'offline-sidejob',
+};
+
 const SORT_OPTIONS: Array<{ key: SortKey; label: string }> = [
   { key: 'latest', label: '최신순' },
   { key: 'likes', label: '추천순' },
@@ -1138,12 +1148,14 @@ function FooterArea({
 }
 
 function SharedFooterArea({
+  selectedCategoryId,
   feedMode,
   onSelectFeedMode,
   fabOpen,
   onToggleFab,
   onCreateClick,
 }: {
+  selectedCategoryId: number | null;
   feedMode: FeedMode;
   onSelectFeedMode: (mode: FeedMode) => void;
   fabOpen: boolean;
@@ -1200,7 +1212,8 @@ function SharedFooterArea({
                 type="button"
                 onClick={() => {
                   onToggleFab();
-                  navigate('/chatbot');
+                  const chatbotCategory = selectedCategoryId ? CATEGORY_ID_TO_CHATBOT_SLUG[selectedCategoryId] : null;
+                  navigate(chatbotCategory ? `/chatbot?category=${encodeURIComponent(chatbotCategory)}` : '/chatbot');
                 }}
                 className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
               >
@@ -1663,6 +1676,7 @@ export default function ExploreV3() {
         </div>
 
         <SharedFooterArea
+          selectedCategoryId={selectedCategoryId}
           feedMode={feedMode}
           onSelectFeedMode={setFeedMode}
           fabOpen={fabOpen}

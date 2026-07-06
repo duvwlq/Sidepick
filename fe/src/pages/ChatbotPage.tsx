@@ -1,6 +1,6 @@
 import { ArrowLeft, Menu, MoveUp, Sparkles } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import ExplanationModal from '../components/chatbot/ExplanationModal';
 import { sendChatbotMessage, ChatbotApiError } from '../components/chatbot/chatbotApi';
 import {
@@ -271,10 +271,11 @@ function ChatInput({
 
 export default function ChatbotPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const listRef = useRef<HTMLDivElement | null>(null);
   const [messages, setMessages] = useState<ChatbotMessage[]>([WELCOME]);
   const [input, setInput] = useState('');
-  const [categorySlug, setCategorySlug] = useState<CategoryOption['slug']>('online-commerce');
+  const [categorySlug, setCategorySlug] = useState<CategoryOption['slug']>(null);
   const [isSending, setIsSending] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState('');
@@ -286,6 +287,38 @@ export default function ChatbotPage() {
   }, [messages]);
 
   const canSubmit = input.trim().length > 0 && !isSending;
+  const validCategorySlugs = useMemo(
+    () => new Set(CATEGORY_OPTIONS.map((option) => option.slug).filter((value): value is Exclude<CategoryOption['slug'], undefined> => value !== undefined)),
+    [],
+  );
+
+  useEffect(() => {
+    const categoryFromQuery = searchParams.get('category');
+    const questionFromQuery = searchParams.get('q');
+
+    if (categoryFromQuery && validCategorySlugs.has(categoryFromQuery as CategoryOption['slug'])) {
+      setCategorySlug(categoryFromQuery as CategoryOption['slug']);
+    } else if (!categoryFromQuery) {
+      setCategorySlug(null);
+    }
+
+    if (questionFromQuery && messages.length === 1 && !input.trim()) {
+      setInput(questionFromQuery);
+    }
+  }, [input, messages.length, searchParams, validCategorySlugs]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams);
+    if (categorySlug) {
+      nextParams.set('category', categorySlug);
+    } else {
+      nextParams.delete('category');
+    }
+
+    if (nextParams.toString() !== searchParams.toString()) {
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [categorySlug, searchParams, setSearchParams]);
 
   useEffect(() => {
     requestAnimationFrame(() => {
@@ -351,6 +384,11 @@ export default function ChatbotPage() {
     setInput('');
     setIsSending(true);
     setCategorySlug(nextCategory);
+    if (searchParams.get('q')) {
+      const nextParams = new URLSearchParams(searchParams);
+      nextParams.delete('q');
+      setSearchParams(nextParams, { replace: true });
+    }
 
     try {
       const response = await sendChatbotMessage({
