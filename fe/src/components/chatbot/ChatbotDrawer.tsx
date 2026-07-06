@@ -34,6 +34,7 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
   const [categorySlug, setCategorySlug] = useState<CategoryOption['slug']>(null);
   const [isSending, setIsSending] = useState(false);
   const [explainTarget, setExplainTarget] = useState<ChatbotMessage | null>(null);
+  const [inputFocused, setInputFocused] = useState(false);
   const listRef = useRef<HTMLDivElement | null>(null);
 
   const canSubmit = useMemo(
@@ -86,8 +87,8 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
         role: 'assistant',
         text:
           err instanceof ChatbotApiError
-            ? `AI 서버 응답 오류 (${err.status}). 서버가 실행 중인지 확인해주세요.`
-            : 'AI 서버에 연결할 수 없어요. 잠시 후 다시 시도해주세요.',
+            ? '답변을 준비하는 중 문제가 발생했어요.\n잠시 후 다시 시도해주세요.'
+            : '답변을 준비하는 중 문제가 발생했어요.\n잠시 후 다시 시도해주세요.',
         status: 'fallback',
         createdAt: Date.now(),
       };
@@ -97,45 +98,40 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
     }
   }
 
+  const lastMessage = messages[messages.length - 1];
+  const showRetryCta =
+    !isSending && lastMessage?.role === 'assistant' && lastMessage.status === 'fallback';
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40"
-      role="presentation"
-      onClick={onClose}
+      className="fixed inset-0 z-50 bg-white"
+      role="dialog"
+      aria-modal="true"
+      aria-label="사이드픽 챗봇"
     >
-      <div
-        className="flex h-[90vh] w-full max-w-[430px] flex-col rounded-t-[20px] bg-white shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label="사이드픽 챗봇"
-      >
-        <header className="flex items-center justify-between border-b border-[#EDEEF0] px-[20px] py-[14px]">
-          <div className="flex items-center gap-[8px]">
-            <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-[#131416] text-[14px] text-white">
-              💬
-            </span>
-            <div>
-              <h2 className="text-[15px] font-semibold text-[#131416]">사이드픽 챗봇</h2>
-              <p className="text-[11px] text-[#8A8A8A]">Claude Sonnet 4.5 · 환각율 0% 검증</p>
-            </div>
-          </div>
+      <div className="mx-auto flex h-full w-full max-w-[430px] flex-col bg-white">
+        <header className="flex h-[64px] items-center justify-between bg-white px-[16px] py-[20px]">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-[6px] text-[#8A8A8A] hover:bg-[#F4F5F6]"
-            aria-label="닫기"
+            aria-label="홈으로"
+            className="flex h-[24px] w-[24px] items-center justify-center"
           >
-            ✕
+            <HomeIcon />
+          </button>
+          <h2 className="text-[16px] font-semibold leading-[1.2] text-[#131416]">Chat</h2>
+          <button
+            type="button"
+            aria-label="대화 이력"
+            className="flex h-[24px] w-[24px] items-center justify-center"
+          >
+            <MenuIcon />
           </button>
         </header>
 
-        <div className="border-b border-[#EDEEF0] px-[20px] py-[10px]">
-          <label className="block text-[11px] font-semibold uppercase text-[#8A8A8A]">
-            부업 분야
-          </label>
+        <div className="border-b border-[#EEEEEE] px-[16px] pb-[10px]">
           <select
-            className="mt-[4px] w-full rounded-[8px] border border-[#D9DBDF] bg-white px-[10px] py-[6px] text-[13px] text-[#131416]"
+            className="w-full rounded-[8px] border border-[#EEEEEE] bg-white px-[12px] py-[8px] text-[12px] text-[#131416]"
             value={categorySlug ?? ''}
             onChange={(e) => setCategorySlug((e.target.value || null) as CategoryOption['slug'])}
           >
@@ -147,8 +143,8 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
           </select>
         </div>
 
-        <div ref={listRef} className="flex-1 overflow-y-auto px-[20px] py-[16px]">
-          <div className="flex flex-col gap-[14px]">
+        <div ref={listRef} className="flex-1 overflow-y-auto px-[16px] py-[16px]">
+          <div className="flex flex-col gap-[16px]">
             {messages.map((m) => (
               <MessageBubble
                 key={m.id}
@@ -156,19 +152,25 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
                 onShowExplanation={() => setExplainTarget(m)}
               />
             ))}
-            {isSending ? (
-              <div className="flex w-full justify-start">
-                <div className="rounded-[14px] bg-[#F4F5F6] px-[14px] py-[10px] text-[13px] text-[#8A8A8A]">
-                  사례를 검색하고 답변을 생성하는 중...
-                </div>
+            {isSending ? <LoadingBubble /> : null}
+            {showRetryCta ? (
+              <div className="flex justify-start pl-[32px]">
+                <button
+                  type="button"
+                  onClick={() => void handleSend(messages[messages.length - 2]?.text)}
+                  className="flex h-[32px] items-center gap-[4px] rounded-[8px] border border-[#EEEEEE] bg-white px-[12px] py-[8px] text-[12px] font-semibold text-[#131416] hover:bg-[#F8F8F8]"
+                >
+                  다시 시도
+                  <ChevronRightIcon />
+                </button>
               </div>
             ) : null}
           </div>
         </div>
 
         {messages.length <= 1 ? (
-          <div className="border-t border-[#EDEEF0] px-[20px] py-[10px]">
-            <p className="mb-[6px] text-[11px] font-semibold uppercase text-[#8A8A8A]">
+          <div className="border-t border-[#EEEEEE] px-[16px] py-[10px]">
+            <p className="mb-[6px] text-[11px] font-semibold text-[#8A8A8A]">
               빠른 질문 예시
             </p>
             <div className="flex flex-wrap gap-[6px]">
@@ -180,7 +182,7 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
                     setCategorySlug(s.categorySlug as CategoryOption['slug']);
                     void handleSend(s.text, s.categorySlug);
                   }}
-                  className="rounded-[14px] border border-[#D9DBDF] bg-white px-[10px] py-[5px] text-[12px] text-[#494949] hover:bg-[#F4F5F6]"
+                  className="rounded-[999px] border border-[#EEEEEE] bg-white px-[10px] py-[5px] text-[12px] text-[#494949] hover:bg-[#F8F8F8]"
                 >
                   {s.label}
                 </button>
@@ -190,31 +192,40 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
         ) : null}
 
         <form
-          className="flex items-center gap-[8px] border-t border-[#EDEEF0] px-[16px] py-[12px]"
+          className="border-t border-[#EEEEEE] px-[16px] pb-[32px] pt-[12px]"
           onSubmit={(e) => {
             e.preventDefault();
             void handleSend();
           }}
         >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="궁금한 부업 질문을 입력하세요 (5~500자)"
-            disabled={isSending}
-            className="flex-1 rounded-[10px] border border-[#D9DBDF] bg-white px-[12px] py-[9px] text-[14px] text-[#131416] outline-none focus:border-[#131416]"
-          />
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className={`rounded-[10px] px-[14px] py-[9px] text-[13px] font-semibold ${
-              canSubmit
-                ? 'bg-[#131416] text-white hover:bg-[#000]'
-                : 'bg-[#D9DBDF] text-[#8A8A8A]'
-            }`}
+          <div
+            className={`flex h-[48px] items-center gap-[8px] rounded-[999px] border border-[#EEEEEE] px-[16px] py-[12px] ${
+              inputFocused ? 'bg-white' : 'bg-[#F8F8F8]'
+            } ${isSending ? 'bg-[#F8F8F8]' : ''}`}
           >
-            전송
-          </button>
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              placeholder={isSending ? '답변 작성 중입니다' : '어떤 부업이 궁금하세요?'}
+              disabled={isSending}
+              className="flex-1 bg-transparent text-[14px] font-normal leading-[1.4] text-[#494949] outline-none placeholder:text-[#BABABA]"
+            />
+            <button
+              type="submit"
+              disabled={!canSubmit && !isSending}
+              aria-label={isSending ? '전송 중' : '전송'}
+              className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full bg-[#5A876E]"
+            >
+              {isSending ? (
+                <span className="h-[8px] w-[8px] rounded-[1px] bg-white" />
+              ) : (
+                <ArrowUpIcon />
+              )}
+            </button>
+          </div>
         </form>
       </div>
 
@@ -222,5 +233,70 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
         <ExplanationModal message={explainTarget} onClose={() => setExplainTarget(null)} />
       ) : null}
     </div>
+  );
+}
+
+function LoadingBubble() {
+  return (
+    <div className="flex w-full justify-start">
+      <div className="flex items-start gap-[8px]">
+        <span className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full bg-[#5A876E] text-[12px] font-semibold text-white">
+          S
+        </span>
+        <div className="flex flex-col items-start gap-[4px]">
+          <div className="flex h-[33px] w-[43px] items-center justify-center rounded-[10px] bg-white shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+            <span className="text-[12px] font-normal leading-[1.4] text-[#494949] animate-pulse">
+              •••
+            </span>
+          </div>
+          <span className="text-[12px] font-normal leading-[1.4] text-[#BABABA]">
+            정보를 탐색하고 있어요.
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <path
+        d="M4 10L12 4L20 10V20H14V14H10V20H4V10Z"
+        stroke="#131416"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
+      <path d="M4 7H20M4 12H20M4 17H20" stroke="#131416" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ArrowUpIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-[16px] w-[16px]" fill="none" aria-hidden="true">
+      <path d="M8 3V13M4 7L8 3L12 7" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-[16px] w-[16px]" fill="none" aria-hidden="true">
+      <path
+        d="M6 4L10 8L6 12"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
