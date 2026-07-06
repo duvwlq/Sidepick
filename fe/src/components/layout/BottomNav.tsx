@@ -1,13 +1,13 @@
-﻿import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
+﻿import { PencilLine, X } from 'lucide-react';
+import type { MouseEvent, ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import editIcon from '../../assets/figma-downloaded-icons/home/Edit 3.svg';
 import guideIcon from '../../assets/figma-downloaded-icons/home/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
 import homeIcon from '../../assets/figma-downloaded-icons/home/Home.svg';
 import plusIcon from '../../assets/figma-downloaded-icons/home/Plus.svg';
 import searchIcon from '../../assets/figma-downloaded-icons/home/Search.svg';
 import subtractIcon from '../../assets/figma-downloaded-icons/home/Subtract.svg';
+import subtractCenterIcon from '../../assets/figma-downloaded-icons/home/SubtractCenter.svg';
 import userIcon from '../../assets/figma-downloaded-icons/home/User.svg';
 import { getAccessToken } from '../../lib/session';
 
@@ -17,6 +17,8 @@ type BottomNavAccessoryLayout = 'center' | 'end' | 'between';
 type BottomNavProps = {
   active?: BottomNavKey;
   showFab?: boolean;
+  showCenterCreateButton?: boolean;
+  accessoryBottom?: number;
   fabExpanded?: boolean;
   onFabToggle?: () => void;
   onCreateClick?: () => void;
@@ -29,6 +31,7 @@ type NavItem = {
   label: string;
   path: string;
   icon: string;
+  iconClassName: string;
   requiresAuth?: boolean;
   matches: (pathname: string) => boolean;
 };
@@ -40,6 +43,7 @@ const NAV_ITEMS: NavItem[] = [
     label: '홈',
     path: '/',
     icon: homeIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     matches: (pathname) => pathname === '/' || pathname === '/v1/home' || pathname === '/home-legacy',
   },
   {
@@ -47,6 +51,7 @@ const NAV_ITEMS: NavItem[] = [
     label: '탐색',
     path: '/explore',
     icon: searchIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     matches: (pathname) =>
       pathname === '/explore' ||
       pathname === '/v1/explore' ||
@@ -60,6 +65,7 @@ const NAV_ITEMS: NavItem[] = [
     label: '가이드',
     path: '/faq',
     icon: guideIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     matches: (pathname) =>
       pathname === '/faq' ||
       pathname.startsWith('/guide') ||
@@ -70,6 +76,7 @@ const NAV_ITEMS: NavItem[] = [
     label: 'MY',
     path: '/mypage',
     icon: userIcon,
+    iconClassName: 'h-[24px] w-[24px]',
     requiresAuth: true,
     matches: (pathname) => pathname === '/mypage' || pathname.startsWith('/mypage/'),
   },
@@ -92,10 +99,16 @@ function writeStoredNavContext(value: BottomNavKey) {
   window.sessionStorage.setItem(NAV_CONTEXT_STORAGE_KEY, value);
 }
 
-function buildIconFilter(isActive: boolean) {
-  return isActive
-    ? 'brightness(0) saturate(100%) invert(47%) sepia(16%) saturate(661%) hue-rotate(96deg) brightness(92%) contrast(85%)'
-    : 'brightness(0) saturate(100%) invert(0%)';
+function buildIconFilter(itemKey: BottomNavKey, isActive: boolean) {
+  if (isActive) {
+    return 'brightness(0) saturate(100%) invert(47%) sepia(16%) saturate(661%) hue-rotate(96deg) brightness(92%) contrast(85%)';
+  }
+
+  if (itemKey === 'explore') {
+    return 'brightness(0) saturate(100%) invert(74%) sepia(0%) saturate(0%) hue-rotate(187deg) brightness(93%) contrast(88%)';
+  }
+
+  return 'none';
 }
 
 function DefaultFabMenu({
@@ -108,22 +121,35 @@ function DefaultFabMenu({
   onCreateClick: () => void;
 }) {
   const navigate = useNavigate();
+  const handleChatbotClick = (event: MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    onToggle();
+    navigate('/chatbot');
+  };
 
   return (
     <div className="relative z-50 mb-[15px] flex h-[36px] w-[36px] items-center justify-center">
       <div
-        className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+        className={`pointer-events-auto absolute bottom-[52px] right-[-10px] z-50 flex min-w-[132px] flex-col items-stretch rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
           expanded
             ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
             : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
         }`}
       >
-        <button type="button" onClick={() => navigate('/faq')} className="flex items-center gap-[8px] whitespace-nowrap">
+        <button
+          type="button"
+          onClick={handleChatbotClick}
+          className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+        >
           <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
           <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
         </button>
-        <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
-          <img src={editIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
+        <button
+          type="button"
+          onClick={onCreateClick}
+          className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+        >
+          <PencilLine size={18} strokeWidth={2} className="shrink-0 text-black" />
           <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
         </button>
       </div>
@@ -143,9 +169,58 @@ function DefaultFabMenu({
   );
 }
 
+function CenterCreateButton({ onCreateClick }: { onCreateClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-label="경험 작성"
+      onClick={onCreateClick}
+      className="flex h-[50px] w-[50px] items-center justify-center rounded-full bg-[#5A876E] shadow-[0_6px_14px_rgba(90,135,110,0.22)]"
+    >
+      <img src={subtractCenterIcon} alt="" aria-hidden="true" className="h-[24px] w-[24px]" />
+    </button>
+  );
+}
+
+function NavButton({
+  item,
+  isActive,
+  onClick,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-[40px] flex-col items-center justify-start gap-[4px]"
+      aria-current={isActive ? 'page' : undefined}
+    >
+      <img
+        src={item.icon}
+        alt=""
+        aria-hidden="true"
+        className={`block ${item.iconClassName}`}
+        style={{ filter: buildIconFilter(item.key, isActive) }}
+      />
+      <span
+        className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
+          isActive ? 'font-[600] text-[#5A876E]' : 'font-[400] text-[#BABABA]'
+        }`}
+      >
+        {item.label}
+      </span>
+    </button>
+  );
+}
+
 export default function BottomNav({
   active,
   showFab = false,
+  showCenterCreateButton = false,
+  accessoryBottom = 100,
   fabExpanded = false,
   onFabToggle,
   onCreateClick,
@@ -214,30 +289,31 @@ export default function BottomNav({
     navigate('/create');
   }
 
-  const resolvedAccessory =
-    accessory ??
-    (showFab ? (
-      <DefaultFabMenu
-        expanded={expanded}
-        onToggle={() => {
-          if (onFabToggle) {
-            onFabToggle();
-            return;
-          }
+  const resolvedAccessory = accessory ?? null;
+  const resolvedFab = showFab ? (
+    <DefaultFabMenu
+      expanded={expanded}
+      onToggle={() => {
+        if (onFabToggle) {
+          onFabToggle();
+          return;
+        }
 
-          setInternalExpanded((current) => !current);
-        }}
-        onCreateClick={handleCreateClick}
-      />
-    ) : null);
+        setInternalExpanded((current) => !current);
+      }}
+      onCreateClick={handleCreateClick}
+    />
+  ) : null;
 
   const hasAccessory = Boolean(resolvedAccessory);
+  const hasFabAccessory = Boolean(resolvedFab);
   const accessoryLayoutClass =
     accessoryLayout === 'between'
       ? 'justify-between'
       : accessoryLayout === 'center'
         ? 'justify-center'
         : 'justify-end';
+  const shouldShowCenterCreateButton = showCenterCreateButton || (showFab && !accessory);
 
   return (
     <div
@@ -245,41 +321,49 @@ export default function BottomNav({
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
       {hasAccessory ? (
-        <div className={`absolute inset-x-0 bottom-[84px] flex h-[68px] items-center px-[24px] py-[16px] ${accessoryLayoutClass}`}>
-          {resolvedAccessory}
+        <div
+          className={`absolute inset-x-0 flex items-end px-[24px] ${accessoryLayoutClass}`}
+          style={{ bottom: `${accessoryBottom}px` }}
+        >
+          <div className="pointer-events-auto">{resolvedAccessory}</div>
         </div>
       ) : null}
 
-      <nav className="pointer-events-auto relative flex h-[84px] w-full items-start justify-between rounded-t-[20px] bg-white px-[40px] pb-[32px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
-        {NAV_ITEMS.map((item) => {
-          const isActive = visualActive === item.key;
+      {hasFabAccessory ? (
+        <div className="absolute right-[24px] flex items-end" style={{ bottom: `${accessoryBottom}px` }}>
+          <div className="pointer-events-auto">{resolvedFab}</div>
+        </div>
+      ) : null}
 
-          return (
-            <button
+      <nav className="pointer-events-auto relative flex h-[92px] w-full items-start rounded-t-[20px] bg-white px-[32px] pb-[32px] pt-[12px] shadow-[0_0_5px_rgba(0,0,0,0.15)]">
+        <div className="flex w-full items-end justify-between">
+          {NAV_ITEMS.slice(0, 2).map((item) => (
+            <NavButton
               key={item.key}
-              type="button"
+              item={item}
+              isActive={visualActive === item.key}
               onClick={() => move(item)}
-              className={`flex w-[40px] flex-col items-center justify-start gap-[4px] ${isActive ? 'opacity-100' : 'opacity-30'}`}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <img
-                src={item.icon}
-                alt=""
-                aria-hidden="true"
-                className="block h-[24px] w-[24px]"
-                style={{ filter: buildIconFilter(isActive) }}
-              />
-              <span
-                className={`whitespace-nowrap text-center font-['Pretendard'] text-[12px] leading-[12px] tracking-[0px] ${
-                  isActive ? 'font-[600] text-[#5A876E]' : 'font-[400] text-black'
-                }`}
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
+            />
+          ))}
+
+          {shouldShowCenterCreateButton ? (
+            <div className="flex w-[50px] shrink-0 justify-center">
+              <CenterCreateButton onCreateClick={handleCreateClick} />
+            </div>
+          ) : null}
+
+          {NAV_ITEMS.slice(2).map((item) => (
+            <NavButton
+              key={item.key}
+              item={item}
+              isActive={visualActive === item.key}
+              onClick={() => move(item)}
+            />
+          ))}
+        </div>
       </nav>
     </div>
   );
 }
+
+

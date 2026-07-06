@@ -5,12 +5,14 @@ type Props = {
   onShowExplanation?: () => void;
 };
 
-const STATUS_BADGE: Record<NonNullable<ChatbotMessage['status']>, { label: string; tone: string }> = {
-  ok: { label: '응답 완료', tone: 'bg-[#E6F4EA] text-[#1E7E3E]' },
-  fallback: { label: '재시도 권장', tone: 'bg-[#FFF4E5] text-[#B36500]' },
-  blocked: { label: '차단', tone: 'bg-[#FDECEC] text-[#B3261E]' },
-  guide_redirect: { label: '가이드 페이지 안내', tone: 'bg-[#EAF1FB] text-[#1A56DB]' },
-};
+function formatTime(createdAt: number) {
+  const d = new Date(createdAt);
+  const h = d.getHours();
+  const m = d.getMinutes().toString().padStart(2, '0');
+  const meridiem = h < 12 ? '오전' : '오후';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${meridiem} ${h12}:${m}`;
+}
 
 export default function MessageBubble({ message, onShowExplanation }: Props) {
   const isUser = message.role === 'user';
@@ -18,40 +20,71 @@ export default function MessageBubble({ message, onShowExplanation }: Props) {
     !isUser &&
     ((message.citedCaseIds && message.citedCaseIds.length > 0) ||
       (message.toolCalls && message.toolCalls.length > 0));
-  const badge = message.status && !isUser ? STATUS_BADGE[message.status] : null;
+  const isError = !isUser && message.status === 'fallback';
+  const time = formatTime(message.createdAt);
+
+  if (isUser) {
+    return (
+      <div className="flex w-full justify-end">
+        <div className="flex items-end gap-[4px]">
+          <span className="text-[10px] font-light leading-[1.4] text-[#494949]">
+            {time}
+          </span>
+          <div
+            className="max-w-[293px] rounded-[10px] bg-[#BEE8CF] px-[12px] py-[8px] text-[12px] font-normal leading-[1.4] text-[#315441]"
+          >
+            {message.text}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex max-w-[80%] flex-col gap-[6px] ${isUser ? 'items-end' : 'items-start'}`}>
-        {badge ? (
-          <span
-            className={`rounded-[6px] px-[8px] py-[2px] text-[11px] font-medium ${badge.tone}`}
-          >
-            {badge.label}
-            {typeof message.confidence === 'number'
-              ? ` · 신뢰도 ${(message.confidence * 100).toFixed(0)}%`
-              : ''}
-          </span>
-        ) : null}
-        <div
-          className={`whitespace-pre-wrap rounded-[14px] px-[14px] py-[10px] text-[14px] leading-[1.5] ${
-            isUser
-              ? 'bg-[#131416] text-white'
-              : 'bg-[#F4F5F6] text-[#131416]'
-          }`}
-        >
-          {message.text}
+    <div className="flex w-full justify-start">
+      <div className="flex max-w-[calc(100%-32px)] items-start gap-[8px]">
+        <span className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full bg-[#5A876E] text-[12px] font-semibold text-white">
+          S
+        </span>
+        <div className="flex flex-col items-start gap-[4px]">
+          <div className="flex items-end gap-[4px]">
+            <div
+              className={`max-w-[293px] whitespace-pre-wrap rounded-[10px] bg-white px-[12px] py-[8px] text-[12px] font-normal leading-[1.4] shadow-[0px_0px_2px_rgba(0,0,0,0.15)] ${
+                isError ? 'text-[#F14F5A]' : 'text-[#131416]'
+              }`}
+            >
+              {message.text}
+            </div>
+            <span className="shrink-0 text-[10px] font-light leading-[1.4] text-[#494949]">
+              {time}
+            </span>
+          </div>
+          {hasExplanation ? (
+            <button
+              type="button"
+              onClick={onShowExplanation}
+              className="flex h-[32px] items-center gap-[4px] rounded-[8px] border border-[#EEEEEE] bg-white px-[12px] py-[8px] text-[12px] font-semibold text-[#131416] hover:bg-[#F8F8F8]"
+            >
+              근거 보기
+              <ChevronRightIcon />
+            </button>
+          ) : null}
         </div>
-        {hasExplanation ? (
-          <button
-            type="button"
-            onClick={onShowExplanation}
-            className="rounded-[8px] border border-[#D9DBDF] bg-white px-[10px] py-[4px] text-[12px] font-medium text-[#494949] hover:bg-[#F4F5F6]"
-          >
-            🔍 근거 보기
-          </button>
-        ) : null}
       </div>
     </div>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-[16px] w-[16px]" fill="none" aria-hidden="true">
+      <path
+        d="M6 4L10 8L6 12"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }

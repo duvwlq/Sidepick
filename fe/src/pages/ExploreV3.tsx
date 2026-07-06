@@ -1,3 +1,4 @@
+import { PencilLine, X } from 'lucide-react';
 import { useEffect, useMemo, useState, type MouseEvent } from 'react';
 import BottomNav from '../components/layout/BottomNav';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -13,7 +14,6 @@ import plusIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검�
 import searchNavIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
 import userIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/User.svg';
 import searchIcon from '../assets/explore-v3-figma-icons/사례 탐색 v.2 - 검색어를 치고 들어온 경우에만 유사도 표시/Search.svg';
-import editIcon from '../assets/figma-downloaded-icons/home/Edit 3.svg';
 import subtractIcon from '../assets/figma-downloaded-icons/home/Subtract.svg';
 import { ErrorState, ListSkeleton, PageMessage } from '../components/common/Skeleton';
 import HorizontalScroll from '../components/common/HorizontalScroll';
@@ -564,22 +564,28 @@ function HeaderBlock({
             </button>
 
             {sortOpen ? (
-              <div className="absolute right-0 top-[25px] z-20 flex flex-col gap-[12px] rounded-[4px] bg-white px-[12px] py-[8px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)]">
-                {SORT_OPTIONS.map((option) => (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => onSelectSort(option.key)}
-                    className="flex items-center text-left"
-                  >
-                    <span
-                      className="text-[12px] font-[400] leading-[16.8px] text-[#5E5E5E]"
-                      style={textFeatureStyle}
+              <div className="absolute right-0 top-[25px] z-20 min-w-[88px] rounded-[4px] bg-white px-[8px] py-[8px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)]">
+                <div className="flex flex-col gap-[4px]">
+                  {SORT_OPTIONS.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => onSelectSort(option.key)}
+                      className={`flex w-full items-center rounded-[6px] px-[8px] py-[6px] text-left ${
+                        sortKey === option.key ? 'bg-[#F4F8F5]' : ''
+                      }`}
                     >
-                      {option.label}
-                    </span>
-                  </button>
-                ))}
+                      <span
+                        className={`whitespace-nowrap text-[12px] leading-[16.8px] ${
+                          sortKey === option.key ? 'font-[600] text-[#375E49]' : 'font-[400] text-[#5E5E5E]'
+                        }`}
+                        style={textFeatureStyle}
+                      >
+                        {option.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>
@@ -1136,38 +1142,42 @@ function SharedFooterArea({
   onSelectFeedMode,
   fabOpen,
   onToggleFab,
-  onOpenGuide,
   onCreateClick,
 }: {
   feedMode: FeedMode;
   onSelectFeedMode: (mode: FeedMode) => void;
   fabOpen: boolean;
   onToggleFab: () => void;
-  onOpenGuide: () => void;
   onCreateClick: () => void;
 }) {
+  const navigate = useNavigate();
+
   return (
     <BottomNav
       active="explore"
-      accessoryLayout="between"
+      showCenterCreateButton
+      accessoryBottom={108}
+      accessoryLayout="center"
+      onCreateClick={onCreateClick}
       accessory={
-        <>
-          <div className="h-[36px] w-[36px] shrink-0" aria-hidden="true" />
-          <div className="pointer-events-auto flex h-[38px] w-[162px] items-center rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+        <div className="pointer-events-auto relative flex h-[38px] w-[327px] items-center justify-center">
+          <div className="inline-flex h-[36px] items-center rounded-[999px] bg-white px-[8px] py-[6px] shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
+            <div className="flex items-center gap-[4px]">
             {FEED_OPTIONS.map((option) => {
               const active = option.key === feedMode;
+
               return (
                 <button
                   key={option.key}
                   type="button"
                   onClick={() => onSelectFeedMode(option.key)}
-                  className={`${FEED_SEGMENT_WIDTH_CLASS[option.key]} flex h-[26px] shrink-0 items-center justify-center rounded-[999px] px-[8px] py-[6px] ${
-                    active ? 'bg-[#375E49]' : 'bg-white'
+                  className={`flex shrink-0 items-center justify-center rounded-[999px] px-[8px] py-[6px] ${
+                    active ? 'bg-[#315441]' : 'bg-white'
                   }`}
                 >
                   <span
-                    className={`text-[12px] font-[400] leading-[14.4px] ${
-                      active ? 'text-white' : 'text-black'
+                    className={`whitespace-nowrap text-[12px] font-[400] leading-[14.4px] ${
+                      active ? 'text-white' : 'text-[#131416]'
                     }`}
                     style={textFeatureStyle}
                   >
@@ -1176,40 +1186,53 @@ function SharedFooterArea({
                 </button>
               );
             })}
+            </div>
           </div>
-          <div className="relative flex h-[36px] w-[36px] shrink-0 items-center justify-center">
+          <div className="absolute right-0 top-1/2 flex h-[36px] w-[36px] -translate-y-1/2 items-center justify-center">
             <div
-              className={`pointer-events-auto absolute bottom-[52px] right-[-10px] flex w-max flex-col items-start rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+              className={`pointer-events-auto absolute bottom-[52px] right-0 z-50 flex min-w-[132px] flex-col items-stretch rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
                 fabOpen
                   ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
                   : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
               }`}
             >
-              <button type="button" onClick={onOpenGuide} className="flex items-center gap-[8px] whitespace-nowrap">
+              <button
+                type="button"
+                onClick={() => {
+                  onToggleFab();
+                  navigate('/chatbot');
+                }}
+                className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+              >
                 <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
                 <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
               </button>
-              <button type="button" onClick={onCreateClick} className="flex items-center gap-[8px] whitespace-nowrap">
-                <img src={editIcon} alt="" className="h-[20px] w-[20px] shrink-0" />
+              <button
+                type="button"
+                onClick={onCreateClick}
+                className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+              >
+                <PencilLine size={18} strokeWidth={2} className="shrink-0 text-black" />
                 <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
               </button>
             </div>
-
             <button
               type="button"
-              onClick={onToggleFab}
               aria-label={fabOpen ? '경험 작성 메뉴 닫기' : '경험 작성 메뉴 열기'}
               aria-expanded={fabOpen}
-              className="pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full bg-[#5A876E] shadow-[0px_4px_12px_rgba(90,135,110,0.24)]"
+              onClick={onToggleFab}
+              className={`flex h-[36px] w-[36px] items-center justify-center rounded-full ${
+                fabOpen ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
+              }`}
             >
-              <img
-                src={plusIcon}
-                alt=""
-                className={`h-[20px] w-[20px] transition-transform ${fabOpen ? 'rotate-45' : ''}`}
-              />
+              {fabOpen ? (
+                <X size={20} strokeWidth={2.2} color="#FFFFFF" />
+              ) : (
+                <img src={plusIcon} alt="" className="h-[18px] w-[18px]" />
+              )}
             </button>
           </div>
-        </>
+        </div>
       }
     />
   );
@@ -1517,11 +1540,6 @@ export default function ExploreV3() {
     }
   }
 
-  function handleOpenGuide() {
-    setFabOpen(false);
-    navigate('/faq');
-  }
-
   function handleCreateClick() {
     setFabOpen(false);
 
@@ -1586,13 +1604,13 @@ export default function ExploreV3() {
             sortKey={sortKey}
             sortOpen={sortOpen}
             onSelectCategory={handleSelectCategory}
-          onToggleSort={() => setSortOpen((prev) => !prev)}
-          onSelectSort={(value) => {
-            setSortKey(value);
-            setSortOpen(false);
-          }}
-          onOpenFilterSheet={openFilterSheet}
-        />
+            onToggleSort={() => setSortOpen((prev) => !prev)}
+            onSelectSort={(value) => {
+              setSortKey(value);
+              setSortOpen(false);
+            }}
+            onOpenFilterSheet={openFilterSheet}
+          />
 
           {!isEmptyState ? (
             <StatsAccordion
@@ -1649,7 +1667,6 @@ export default function ExploreV3() {
           onSelectFeedMode={setFeedMode}
           fabOpen={fabOpen}
           onToggleFab={() => setFabOpen((prev) => !prev)}
-          onOpenGuide={handleOpenGuide}
           onCreateClick={handleCreateClick}
         />
 

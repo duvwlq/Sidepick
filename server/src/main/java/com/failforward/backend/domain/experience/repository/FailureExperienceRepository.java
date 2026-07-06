@@ -32,8 +32,8 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
               and (:failureReason is null or :failureReason = '' or lower(coalesce(e.failureReason, '')) = lower(:failureReason))
               and (:durationMonthsMin is null or coalesce(e.durationMonths, 0) >= :durationMonthsMin)
               and (:durationMonthsMax is null or coalesce(e.durationMonths, 0) <= :durationMonthsMax)
-              and (:investmentAmountMin is null or coalesce(e.investmentAmount, 0) >= :investmentAmountMin)
-              and (:investmentAmountMax is null or coalesce(e.investmentAmount, 0) <= :investmentAmountMax)
+              and (:investmentAmountMin is null or coalesce(e.investmentAmount, 0L) >= :investmentAmountMin)
+              and (:investmentAmountMax is null or coalesce(e.investmentAmount, 0L) <= :investmentAmountMax)
               and (
                 :q is null
                 or :q = ''
@@ -51,8 +51,8 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
             @Param("failureReason") String failureReason,
             @Param("durationMonthsMin") Integer durationMonthsMin,
             @Param("durationMonthsMax") Integer durationMonthsMax,
-            @Param("investmentAmountMin") Integer investmentAmountMin,
-            @Param("investmentAmountMax") Integer investmentAmountMax
+            @Param("investmentAmountMin") Long investmentAmountMin,
+            @Param("investmentAmountMax") Long investmentAmountMax
     );
 
     @EntityGraph(attributePaths = {"user", "category"})
@@ -64,8 +64,8 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
               and (:failureReason is null or :failureReason = '' or lower(coalesce(e.failureReason, '')) = lower(:failureReason))
               and (:durationMonthsMin is null or coalesce(e.durationMonths, 0) >= :durationMonthsMin)
               and (:durationMonthsMax is null or coalesce(e.durationMonths, 0) <= :durationMonthsMax)
-              and (:investmentAmountMin is null or coalesce(e.investmentAmount, 0) >= :investmentAmountMin)
-              and (:investmentAmountMax is null or coalesce(e.investmentAmount, 0) <= :investmentAmountMax)
+              and (:investmentAmountMin is null or coalesce(e.investmentAmount, 0L) >= :investmentAmountMin)
+              and (:investmentAmountMax is null or coalesce(e.investmentAmount, 0L) <= :investmentAmountMax)
               and (
                 :q is null
                 or :q = ''
@@ -83,8 +83,8 @@ public interface FailureExperienceRepository extends JpaRepository<FailureExperi
             @Param("failureReason") String failureReason,
             @Param("durationMonthsMin") Integer durationMonthsMin,
             @Param("durationMonthsMax") Integer durationMonthsMax,
-            @Param("investmentAmountMin") Integer investmentAmountMin,
-            @Param("investmentAmountMax") Integer investmentAmountMax
+            @Param("investmentAmountMin") Long investmentAmountMin,
+            @Param("investmentAmountMax") Long investmentAmountMax
     );
 
     @EntityGraph(attributePaths = {"user", "category"})

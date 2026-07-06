@@ -44,7 +44,7 @@ public class FailureExperience extends BaseTimeEntity {
     private String businessType;
 
     @Column(name = "investment_amount")
-    private Integer investmentAmount;
+    private Long investmentAmount;
 
     @Column(name = "duration_months")
     private Integer durationMonths;
@@ -59,7 +59,7 @@ public class FailureExperience extends BaseTimeEntity {
     private Boolean isConcurrentWithMainJob;
 
     @Column(name = "monthly_revenue")
-    private Integer monthlyRevenue;
+    private Long monthlyRevenue;
 
     @Column(name = "failure_reason", nullable = false, length = 50)
     private String failureReason;
@@ -109,12 +109,12 @@ public class FailureExperience extends BaseTimeEntity {
             String title,
             String content,
             String businessType,
-            Integer investmentAmount,
+            Long investmentAmount,
             Integer durationMonths,
             Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
-            Integer monthlyRevenue,
+            Long monthlyRevenue,
             String failureReason,
             String failureReasons,
             String difficulties,
@@ -160,12 +160,12 @@ public class FailureExperience extends BaseTimeEntity {
             String title,
             String content,
             String businessType,
-            Integer investmentAmount,
+            Long investmentAmount,
             Integer durationMonths,
             Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
-            Integer monthlyRevenue,
+            Long monthlyRevenue,
             String failureReason,
             String failureReasons,
             String difficulties,
@@ -221,12 +221,12 @@ public class FailureExperience extends BaseTimeEntity {
             String title,
             String content,
             String businessType,
-            Integer investmentAmount,
+            Long investmentAmount,
             Integer durationMonths,
             Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
-            Integer monthlyRevenue,
+            Long monthlyRevenue,
             String failureReason,
             String failureReasons,
             String difficulties,

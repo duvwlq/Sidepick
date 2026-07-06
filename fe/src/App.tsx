@@ -26,6 +26,7 @@ import HomeV2 from './pages/HomeV2';
 import ExploreV3 from './pages/ExploreV3';
 import SearchPage from './pages/SearchPage';
 import SuccessComparisonPage from './pages/SuccessComparisonPage';
+import ChatbotPage from './pages/ChatbotPage';
 
 export default function App() {
   return (
@@ -58,6 +59,7 @@ export default function App() {
           <Route path="/search" element={<SearchPage />} />
           <Route path="/notifications" element={<NotificationPage />} />
           <Route path="/faq" element={<FaqPage />} />
+          <Route path="/chatbot" element={<ChatbotPage />} />
           <Route path="/create" element={<CreateWizardPage />} />
           <Route path="/create-v2" element={<Navigate to="/create" replace />} />
           <Route path="/create-legacy" element={<Navigate to="/create" replace />} />

@@ -21,9 +21,9 @@ class ExperienceRequestSupport {
 
     void validateWriteRequest(
             String content,
-            Integer investmentAmount,
+            Long investmentAmount,
             Integer durationMonths,
-            Integer monthlyRevenue,
+            Long monthlyRevenue,
             String failureReason,
             List<String> failureReasons
     ) {
@@ -88,7 +88,7 @@ class ExperienceRequestSupport {
             Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
-            Integer monthlyRevenue,
+            Long monthlyRevenue,
             List<String> failureReasons,
             List<String> difficulties,
             String difficultyEtc,

@@ -151,8 +151,8 @@ public class ExperienceService {
             Long categoryId,
             Integer durationMonthsMin,
             Integer durationMonthsMax,
-            Integer investmentAmountMin,
-            Integer investmentAmountMax
+            Long investmentAmountMin,
+            Long investmentAmountMax
     ) {
         validateSearchCriteria(durationMonthsMin, durationMonthsMax, investmentAmountMin, investmentAmountMax);
         String normalizedSort = normalizeSort(sort);
@@ -764,12 +764,12 @@ public class ExperienceService {
             String content,
             Long categoryId,
             String businessType,
-            Integer investmentAmount,
+            Long investmentAmount,
             Integer durationMonths,
             Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
-            Integer monthlyRevenue,
+            Long monthlyRevenue,
             String failureReason,
             List<String> failureReasons,
             List<String> difficulties,
@@ -911,8 +911,8 @@ public class ExperienceService {
     private void validateSearchCriteria(
             Integer durationMonthsMin,
             Integer durationMonthsMax,
-            Integer investmentAmountMin,
-            Integer investmentAmountMax
+            Long investmentAmountMin,
+            Long investmentAmountMax
     ) {
         if (durationMonthsMin != null && durationMonthsMin < 0) {
             throw new BadRequestException("Minimum duration must be zero or greater.");
@@ -939,12 +939,12 @@ public class ExperienceService {
             String title,
             String content,
             String businessType,
-            Integer investmentAmount,
+            Long investmentAmount,
             Integer durationMonths,
             Integer weeklyHours,
             String averageDailyHours,
             Boolean isConcurrentWithMainJob,
-            Integer monthlyRevenue,
+            Long monthlyRevenue,
             String failureReason,
             String failureReasonsJson,
             String difficultiesJson,
