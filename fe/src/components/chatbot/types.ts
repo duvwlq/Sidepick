@@ -19,7 +19,7 @@ export type ChatbotSections =
     };
 
 export type ChatbotResponse = {
-  status: 'ok' | 'fallback' | 'blocked' | 'guide_redirect';
+  status: 'success' | 'fallback' | 'blocked' | 'guide_redirect';
   reply: string;
   route?: string | null;
   cited_case_ids: string[];
