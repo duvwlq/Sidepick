@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import amountIcon from '../../assets/images/amount.svg';
 import durationIcon from '../../assets/images/duration.svg';
+import Badge from '../common/Badge';
 import { ErrorState, LoadingState } from '../common/Skeleton';
 import {
   ApiError,
@@ -54,26 +55,6 @@ function SectionTitle({
       <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
         {description}
       </p>
-    </div>
-  );
-}
-
-function PrimaryBadge({ text }: { text: string }) {
-  return (
-    <div className="flex items-center justify-center rounded-[999px] bg-[#EEEEEE] px-[8px] py-[2px]">
-      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#757575]">
-        {text}
-      </span>
-    </div>
-  );
-}
-
-function SecondaryBadge({ text }: { text: string }) {
-  return (
-    <div className="flex items-center justify-center rounded-[999px] bg-[#BABABA] px-[8px] py-[2px]">
-      <span className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#FFFFFF]">
-        {text}
-      </span>
     </div>
   );
 }
@@ -143,22 +124,29 @@ function SimilarCaseCard({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full flex-col items-start rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] p-[16px] text-left"
+      className="flex w-full flex-col items-start rounded-[10px] border border-[#EEEEEE] bg-[#F8F8F8] px-[20px] py-[16px] text-left"
     >
         <div className="flex w-full flex-col gap-[8px]">
           <div className="flex w-full items-start justify-between gap-[8px]">
             <div className="flex min-w-0 flex-1 flex-wrap items-start gap-[4px]">
-            {item.tags.map((tag) => (
-              <SecondaryBadge key={`${item.caseId}-${tag}`} text={tag} />
+            {item.tags.map((tag, index) => (
+              <Badge
+                key={`${item.caseId}-${tag}`}
+                type={index === 0 ? 'category' : 'keyword'}
+                text={tag}
+              />
             ))}
           </div>
 
-          <div className="flex shrink-0 items-center justify-end gap-[4px] whitespace-nowrap text-right">
-            <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-              유사도
-            </p>
-            <p className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#494949]">
-              {String(item.similarity).padStart(2, '0')}%
+          <div className="flex shrink-0 items-center gap-[4px] whitespace-nowrap">
+            <div className="h-[4px] w-[30px] overflow-hidden rounded-[999px] bg-[#EEEEEE]">
+              <div
+                className="h-full rounded-[999px] bg-[#F4B402]"
+                style={{ width: `${Math.min(100, Math.max(0, item.similarity))}%` }}
+              />
+            </div>
+            <p className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px] tracking-[0px] text-[#131416]">
+              {item.similarity}%
             </p>
           </div>
         </div>
@@ -538,7 +526,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
 
             <div className="flex w-full flex-wrap items-center gap-[4px]">
               {chips.map((chip) => (
-                <PrimaryBadge key={chip} text={chip} />
+                <Badge key={chip} type="category" text={chip} />
               ))}
             </div>
 
@@ -693,7 +681,7 @@ export default function AiAnalysisResult({ experienceId }: Props) {
                   {similarCaseTags.length ? (
                     <div className="flex w-full flex-wrap items-center gap-[4px]">
                       {similarCaseTags.map((tag) => (
-                        <PrimaryBadge key={tag} text={tag} />
+                        <Badge key={tag} type="keyword" text={tag} />
                       ))}
                     </div>
                   ) : null}

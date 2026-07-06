@@ -223,11 +223,11 @@ export default function FaqPage() {
                     aria-expanded={expanded}
                   >
                     <div className="flex min-w-0 flex-[1_0_0] flex-col items-start justify-center gap-[4px]">
-                      <p className="min-w-full text-left text-[12px] font-light leading-[14.4px] tracking-[0px] text-[#5E5E5E]">
+                      <p className="min-w-full text-left text-[12px] font-semibold leading-[1.2] tracking-[0px] text-[#5A876E]">
                         {categoryLabel}
                       </p>
                       <div className="flex items-start">
-                        <p className="truncate text-left text-[14px] font-semibold leading-[16.8px] tracking-[0px] text-[#000000]">
+                        <p className="truncate text-left text-[16px] font-normal leading-[1.2] tracking-[0px] text-[#131416]">
                           {item.question}
                         </p>
                       </div>
@@ -256,6 +256,12 @@ function ExpandedSections({ sections }: { sections: ParsedSections }) {
   if (sections.type === 'cross_topic') {
     return (
       <div className="flex flex-col gap-[8px] bg-[#F8F8F8] p-[16px]">
+        <SectionCard title="답변">
+          <p className="whitespace-pre-line text-[13px] font-normal leading-[20px] text-[#131416]">
+            {sections.answer}
+          </p>
+        </SectionCard>
+
         <SectionCard title="절차 단계">
           <ol className="flex flex-col gap-[8px]">
             {sections.steps.map((step, index) => (
@@ -269,12 +275,6 @@ function ExpandedSections({ sections }: { sections: ParsedSections }) {
               </li>
             ))}
           </ol>
-        </SectionCard>
-
-        <SectionCard title="답변">
-          <p className="whitespace-pre-line text-[13px] font-normal leading-[20px] text-[#131416]">
-            {sections.answer}
-          </p>
         </SectionCard>
 
         <NoteCard iconTone="orange" title="법적 안내 / 주의사항">
