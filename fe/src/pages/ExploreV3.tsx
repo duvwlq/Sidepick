@@ -565,22 +565,28 @@ function HeaderBlock({
             </button>
 
             {sortOpen ? (
-              <div className="absolute right-0 top-[25px] z-20 flex flex-col gap-[12px] rounded-[4px] bg-white px-[12px] py-[8px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)]">
-                {SORT_OPTIONS.map((option) => (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => onSelectSort(option.key)}
-                    className="flex items-center text-left"
-                  >
-                    <span
-                      className="text-[12px] font-[400] leading-[16.8px] text-[#5E5E5E]"
-                      style={textFeatureStyle}
+              <div className="absolute right-0 top-[25px] z-20 min-w-[88px] rounded-[4px] bg-white px-[8px] py-[8px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.15)]">
+                <div className="flex flex-col gap-[4px]">
+                  {SORT_OPTIONS.map((option) => (
+                    <button
+                      key={option.key}
+                      type="button"
+                      onClick={() => onSelectSort(option.key)}
+                      className={`flex w-full items-center rounded-[6px] px-[8px] py-[6px] text-left ${
+                        sortKey === option.key ? 'bg-[#F4F8F5]' : ''
+                      }`}
                     >
-                      {option.label}
-                    </span>
-                  </button>
-                ))}
+                      <span
+                        className={`whitespace-nowrap text-[12px] leading-[16.8px] ${
+                          sortKey === option.key ? 'font-[600] text-[#375E49]' : 'font-[400] text-[#5E5E5E]'
+                        }`}
+                        style={textFeatureStyle}
+                      >
+                        {option.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>
