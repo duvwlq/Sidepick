@@ -157,12 +157,12 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
       aria-label="사이드픽 챗봇"
     >
       <div className="mx-auto flex h-full w-full max-w-[430px] flex-col bg-white">
-        <header className="flex h-[64px] items-center justify-between bg-white px-[16px] py-[20px]">
+        <header className="flex h-[64px] shrink-0 items-center justify-between bg-white px-[16px]">
           <button
             type="button"
             onClick={viewMode === 'list' ? () => setViewMode('chat') : onClose}
             aria-label={viewMode === 'list' ? '뒤로' : '홈으로'}
-            className="flex h-[24px] w-[24px] items-center justify-center"
+            className="flex h-[64px] w-[24px] shrink-0 flex-col items-center justify-center"
           >
             {viewMode === 'list' ? <BackIcon /> : <HomeIcon />}
           </button>
@@ -171,7 +171,7 @@ export default function ChatbotDrawer({ open, onClose }: Props) {
             type="button"
             onClick={viewMode === 'chat' ? openListView : startNewChat}
             aria-label={viewMode === 'chat' ? '대화 이력' : '새 대화'}
-            className="flex h-[24px] w-[24px] items-center justify-center"
+            className="flex h-[64px] w-[24px] shrink-0 flex-col items-center justify-center"
           >
             {viewMode === 'chat' ? <MenuIcon /> : <PlusIcon />}
           </button>
@@ -346,8 +346,8 @@ function LoadingBubble() {
   return (
     <div className="flex w-full justify-start">
       <div className="flex items-start gap-[8px]">
-        <span className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full bg-[#5A876E] text-[12px] font-semibold text-white">
-          S
+        <span className="inline-flex shrink-0 items-center justify-center rounded-full border-[1.5px] border-[#BEE8CF] bg-white p-[6px]">
+          <SidepickMark size={12} color="#5A876E" />
         </span>
         <div className="flex flex-col items-start gap-[4px]">
           <div className="flex h-[33px] w-[43px] items-center justify-center rounded-[10px] bg-white shadow-[0px_0px_2px_rgba(0,0,0,0.15)]">
@@ -366,14 +366,26 @@ function LoadingBubble() {
 
 function SidepickLogo() {
   return (
-    <span className="flex h-[48px] w-[48px] items-center justify-center rounded-full border border-[#5A876E]">
-      <svg viewBox="0 0 24 24" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
-        <path
-          d="M18 6L8 12L18 18V6Z"
-          fill="#5A876E"
-        />
-      </svg>
+    <span className="flex h-[48px] w-[48px] items-center justify-center">
+      <SidepickMark size={48} color="#5A876E" />
     </span>
+  );
+}
+
+function SidepickMark({ size, color }: { size: number; color: string }) {
+  return (
+    <svg
+      viewBox="0 0 12 12"
+      width={size}
+      height={size}
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M8.97731 4.04216C8.91691 4.11473 8.8253 4.15699 8.7284 4.15699L7.24231 4.15699C7.08253 4.15699 6.953 4.28105 6.953 4.43409C6.953 4.58712 7.08253 4.71118 7.24231 4.71118L8.5634 4.71118C8.73921 4.71118 8.88173 4.84769 8.88173 5.01607V8.56806C8.88173 8.69312 8.80199 8.8055 8.68058 8.85154L0.437369 11.9771C0.13254 12.0927 -0.133638 11.7448 0.0732894 11.5012L2.99999 8.05643C3.06044 7.98528 3.15113 7.94398 3.2469 7.94398H4.73496C4.89474 7.94398 5.02426 7.81992 5.02426 7.66688C5.02426 7.51385 4.89474 7.38979 4.73496 7.38979H3.41386C3.23805 7.38979 3.09553 7.25328 3.09553 7.0849L3.09553 3.44055C3.09553 3.31548 3.17527 3.2031 3.29668 3.15707L11.5627 0.0228384C11.8659 -0.0921479 12.1321 0.252121 11.9287 0.496382L8.97731 4.04216Z"
+        fill={color}
+      />
+    </svg>
   );
 }
 
@@ -381,9 +393,10 @@ function HomeIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
       <path
-        d="M4 10L12 4L20 10V20H14V14H10V20H4V10Z"
+        d="M9 22V12H15V22M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
         stroke="#131416"
-        strokeWidth="1.6"
+        strokeWidth="2"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
@@ -407,7 +420,13 @@ function BackIcon() {
 function MenuIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-[24px] w-[24px]" fill="none" aria-hidden="true">
-      <path d="M4 7H20M4 12H20M4 17H20" stroke="#131416" strokeWidth="1.6" strokeLinecap="round" />
+      <path
+        d="M3 12H21M3 6H21M3 18H21"
+        stroke="#131416"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
