@@ -20,7 +20,7 @@ export const FAQ_INTRO = {
 export const FAQ_CATEGORIES: FaqCategory[] = [
   {
     id: 'online-commerce',
-    label: '온라인 판매·이커머스',
+    label: '온라인 판매 · 이커머스',
     items: [
       {
         id: 1,
@@ -101,7 +101,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'content-sns',
-    label: '콘텐츠·SNS',
+    label: '콘텐츠 · SNS 기반',
     items: [
       {
         id: 1,
@@ -182,7 +182,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'digital-products',
-    label: '디지털·지식판매',
+    label: '디지털 상품·지식 판매',
     items: [
       {
         id: 1,
@@ -263,7 +263,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'platform-labor',
-    label: '플랫폼 노동',
+    label: '플랫폼 기반 노동형',
     items: [
       {
         id: 1,
@@ -344,7 +344,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'talent-freelance',
-    label: '재능·프리랜서',
+    label: '재능 판매·프리랜서',
     items: [
       {
         id: 1,
@@ -491,7 +491,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'offline-sidejob',
-    label: '오프라인 부업',
+    label: '오프라인 기반 부업',
     items: [
       {
         id: 1,
@@ -865,7 +865,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'marketing',
-    label: '마케팅·광고 운영',
+    label: '마케팅/광고 운영',
     items: [
       {
         id: 1,
@@ -946,7 +946,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'tools',
-    label: '도구·툴 추천',
+    label: '도구/툴 추천',
     items: [
       {
         id: 1,
@@ -1027,7 +1027,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'mental-care',
-    label: '멘탈 관리·번아웃',
+    label: '멘탈 관리/번아웃',
     items: [
       {
         id: 1,
@@ -1108,7 +1108,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'legal-contract',
-    label: '법률·계약',
+    label: '법률/계약',
     items: [
       {
         id: 1,
@@ -1189,7 +1189,7 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
   },
   {
     id: 'accounting',
-    label: '회계·장부',
+    label: '회계/장부',
     items: [
       {
         id: 1,
