@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HorizontalScroll from '../components/common/HorizontalScroll';
 import SearchBar from '../components/common/SearchBar';
 import Layout from '../components/layout/Layout';
 import { FAQ_CATEGORIES, FAQ_INTRO } from './faqData';
@@ -182,11 +181,8 @@ export default function FaqPage() {
           />
         </section>
 
-        <section className="pb-4">
-          <HorizontalScroll
-            wrapperClassName="w-full px-4"
-            contentClassName="horizontal-scroll-content--tags pr-4"
-          >
+        <section className="w-full px-4 pb-4">
+          <div className="flex flex-wrap gap-[8px]">
             {tags.map((tag) => {
               const active = tag === selectedTag;
 
@@ -195,7 +191,7 @@ export default function FaqPage() {
                   key={tag}
                   type="button"
                   onClick={() => setSelectedTag(tag)}
-                  className={`flex shrink-0 items-center justify-center rounded-full px-[10px] py-1 ${
+                  className={`flex items-center justify-center rounded-full px-[10px] py-1 ${
                     active ? 'bg-[#131416] text-[#FFFFFF]' : 'bg-[#EEEEEE] text-[#757575]'
                   }`}
                 >
@@ -205,7 +201,7 @@ export default function FaqPage() {
                 </button>
               );
             })}
-          </HorizontalScroll>
+          </div>
         </section>
 
         <section className="flex w-full flex-col border-t border-[#EEEEEE]">
