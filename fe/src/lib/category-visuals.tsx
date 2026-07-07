@@ -27,16 +27,16 @@ export const CATEGORY_VISUALS: CategoryVisual[] = [
   {
     id: 1,
     key: 'online_sales',
-    label: '온라인 판매·이커머스',
+    label: '온라인 판매 · 이커머스',
     descriptionLines: ['스마트스토어, 쿠팡, 오픈마켓', '구매대행, 위탁판매, 재고 기반 쇼핑몰 등'],
-    icon: createCategoryGlyph(shoppingCartIcon, '온라인 판매·이커머스'),
+    icon: createCategoryGlyph(shoppingCartIcon, '온라인 판매 · 이커머스'),
   },
   {
     id: 2,
     key: 'content_sns',
-    label: '콘텐츠·SNS 기반',
+    label: '콘텐츠 · SNS 기반',
     descriptionLines: ['유튜브, 블로그, 인스타그램', '릴스, 뉴스레터, 개인 브랜딩 기반 활동'],
-    icon: createCategoryGlyph(videocamIcon, '콘텐츠·SNS 기반'),
+    icon: createCategoryGlyph(videocamIcon, '콘텐츠 · SNS 기반'),
   },
   {
     id: 3,

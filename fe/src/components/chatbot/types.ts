@@ -46,13 +46,13 @@ export type ChatbotMessage = {
 
 export const CATEGORY_OPTIONS = [
   { slug: null, label: '전체' },
-  { slug: 'online-commerce', label: '온라인 판매' },
-  { slug: 'content-sns', label: '콘텐츠·SNS' },
-  { slug: 'digital-products', label: '디지털 상품' },
-  { slug: 'platform-labor', label: '플랫폼 노동' },
-  { slug: 'talent-freelance', label: '재능·프리랜스' },
-  { slug: 'investment', label: '투자' },
-  { slug: 'offline-sidejob', label: '오프라인 부업' },
+  { slug: 'online-commerce', label: '온라인 판매 · 이커머스' },
+  { slug: 'content-sns', label: '콘텐츠 · SNS 기반' },
+  { slug: 'digital-products', label: '디지털 상품·지식 판매' },
+  { slug: 'platform-labor', label: '플랫폼 기반 노동형' },
+  { slug: 'talent-freelance', label: '재능 판매·프리랜서' },
+  { slug: 'investment', label: '투자·재테크' },
+  { slug: 'offline-sidejob', label: '오프라인 기반 부업' },
 ] as const;
 
 export type CategoryOption = (typeof CATEGORY_OPTIONS)[number];

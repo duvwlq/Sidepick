@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HorizontalScroll from '../components/common/HorizontalScroll';
 import SearchBar from '../components/common/SearchBar';
 import Layout from '../components/layout/Layout';
 import { FAQ_CATEGORIES, FAQ_INTRO } from './faqData';
@@ -44,7 +43,8 @@ type BusinessFieldSections = {
 type ParsedSections = CrossTopicSections | BusinessFieldSections | { type: 'plain'; text: string };
 
 const FAQ_DISCLAIMER_LINES = [
-  '본 콘텐츠는 일반적인 가이드라인입니다. 개인 상황에 따라 결과가 다를 수 있으며,',
+  '본 컨텐츠는 일반적인 가이드 라인입니다.',
+  '개인 상황에 따라 결과가 다를 수 있으며,',
   '법률, 세금, 투자 관련 사항은 전문가 상담을 권장합니다.',
   '총 16개 카테고리로 정리했습니다.',
 ] as const;
@@ -116,7 +116,18 @@ export default function FaqPage() {
   const [selectedTag, setSelectedTag] = useState<SelectedTag>(ALL_TAG);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const tags = useMemo(() => [ALL_TAG, ...FAQ_CATEGORIES.map((category) => category.label)], []);
+  const tags = useMemo(
+    () => [
+      { label: ALL_TAG, type: 'all' as const },
+      ...FAQ_CATEGORIES.map((category) => ({
+        label: category.label,
+        type: BUSINESS_FIELD_CATEGORIES.has(category.id)
+          ? ('business' as const)
+          : ('cross' as const),
+      })),
+    ],
+    [],
+  );
 
   const visibleItems = useMemo<VisibleFaqItem[]>(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -166,10 +177,11 @@ export default function FaqPage() {
               {FAQ_INTRO.title}
             </h1>
           </div>
-          <div className="flex flex-col text-[10px] font-light leading-[1.4] text-[#5D5D5D]">
+          <div className="flex flex-col text-[12px] font-light leading-[1.4] text-[#8A8A8A]">
             <p>{`※ ${FAQ_DISCLAIMER_LINES[0]}`}</p>
             <p>{FAQ_DISCLAIMER_LINES[1]}</p>
             <p>{FAQ_DISCLAIMER_LINES[2]}</p>
+            <p>{FAQ_DISCLAIMER_LINES[3]}</p>
           </div>
         </section>
 
@@ -182,30 +194,41 @@ export default function FaqPage() {
           />
         </section>
 
-        <section className="pb-4">
-          <HorizontalScroll
-            wrapperClassName="w-full px-4"
-            contentClassName="horizontal-scroll-content--tags pr-4"
-          >
-            {tags.map((tag) => {
-              const active = tag === selectedTag;
+        <section className="w-full px-4 pb-4">
+          <div className="flex flex-wrap gap-[8px]">
+            {tags.map(({ label, type }) => {
+              const active = label === selectedTag;
+              const activeBg =
+                type === 'business'
+                  ? 'bg-[#5A876E]'
+                  : type === 'cross'
+                    ? 'bg-[#C06D43]'
+                    : 'bg-[#494949]';
+              const inactiveText =
+                type === 'business'
+                  ? 'text-[#5A876E]'
+                  : type === 'cross'
+                    ? 'text-[#C06D43]'
+                    : 'text-[#131416]';
 
               return (
                 <button
-                  key={tag}
+                  key={label}
                   type="button"
-                  onClick={() => setSelectedTag(tag)}
-                  className={`flex shrink-0 items-center justify-center rounded-full px-[10px] py-1 ${
-                    active ? 'bg-[#131416] text-[#FFFFFF]' : 'bg-[#EEEEEE] text-[#757575]'
+                  onClick={() => setSelectedTag(label)}
+                  className={`flex items-center justify-center rounded-full px-[10px] py-1 ${
+                    active
+                      ? `${activeBg} text-[#FFFFFF]`
+                      : `border border-[#EEEEEE] bg-[#FFFFFF] ${inactiveText}`
                   }`}
                 >
                   <span className="whitespace-nowrap text-[12px] font-normal leading-[1.2]">
-                    {tag}
+                    {label}
                   </span>
                 </button>
               );
             })}
-          </HorizontalScroll>
+          </div>
         </section>
 
         <section className="flex w-full flex-col border-t border-[#EEEEEE]">
@@ -213,6 +236,7 @@ export default function FaqPage() {
             visibleItems.map(({ categoryId, categoryLabel, item, key }) => {
               const expanded = expandedKey === key;
               const sections = parseAnswerSections(categoryId, item.answer);
+              const isBusiness = BUSINESS_FIELD_CATEGORIES.has(categoryId);
 
               return (
                 <article key={key} className="border-b border-[#EEEEEE]">
@@ -223,7 +247,11 @@ export default function FaqPage() {
                     aria-expanded={expanded}
                   >
                     <div className="flex min-w-0 flex-[1_0_0] flex-col items-start justify-center gap-[4px]">
-                      <p className="min-w-full text-left text-[12px] font-semibold leading-[1.2] tracking-[0px] text-[#5A876E]">
+                      <p
+                        className={`min-w-full text-left text-[12px] font-semibold leading-[1.2] tracking-[0px] ${
+                          isBusiness ? 'text-[#5A876E]' : 'text-[#C06D43]'
+                        }`}
+                      >
                         {categoryLabel}
                       </p>
                       <div className="flex items-start">
