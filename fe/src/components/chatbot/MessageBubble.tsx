@@ -3,6 +3,7 @@ import type { ChatbotMessage } from './types';
 type Props = {
   message: ChatbotMessage;
   onShowExplanation?: () => void;
+  onOpenGuide?: () => void;
 };
 
 function formatTime(createdAt: number) {
@@ -14,13 +15,10 @@ function formatTime(createdAt: number) {
   return `${meridiem} ${h12}:${m}`;
 }
 
-export default function MessageBubble({ message, onShowExplanation }: Props) {
+export default function MessageBubble({ message, onShowExplanation, onOpenGuide }: Props) {
   const isUser = message.role === 'user';
-  const hasExplanation =
-    !isUser &&
-    ((message.citedCaseIds && message.citedCaseIds.length > 0) ||
-      (message.toolCalls && message.toolCalls.length > 0));
   const isError = !isUser && message.status === 'fallback';
+  const showGuideCta = !isUser && !isError && message.id !== 'welcome';
   const time = formatTime(message.createdAt);
 
   if (isUser) {
@@ -59,13 +57,13 @@ export default function MessageBubble({ message, onShowExplanation }: Props) {
               {time}
             </span>
           </div>
-          {hasExplanation ? (
+          {showGuideCta ? (
             <button
               type="button"
-              onClick={onShowExplanation}
-              className="flex h-[32px] items-center gap-[4px] rounded-[8px] border border-[#EEEEEE] bg-white px-[12px] py-[8px] text-[12px] font-semibold text-[#131416] hover:bg-[#F8F8F8]"
+              onClick={onOpenGuide ?? onShowExplanation}
+              className="flex h-[32px] items-center gap-[4px] rounded-[8px] bg-[#5A876E] px-[12px] py-[8px] text-[12px] font-semibold text-white hover:bg-[#4A7059]"
             >
-              근거 보기
+              부업 가이드 바로 가기
               <ChevronRightIcon />
             </button>
           ) : null}
