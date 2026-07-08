@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.user.api;
 
 import com.failforward.backend.common.api.ApiResponse;
+import com.failforward.backend.common.config.PublicBaseUrlResolver;
 import com.failforward.backend.domain.user.dto.UserDtos.AccountSettingsUpdateRequest;
 import com.failforward.backend.domain.user.dto.UserDtos.MeResponse;
 import com.failforward.backend.domain.user.dto.UserDtos.PasswordChangeRequest;
@@ -28,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController {
 
     private final UserService userService;
+    private final PublicBaseUrlResolver publicBaseUrlResolver;
 
     @Operation(summary = "내 정보 조회")
     @GetMapping("/me")
@@ -61,23 +63,7 @@ public class UserController {
     ) {
         return ApiResponse.ok(
                 "Profile image uploaded.",
-                userService.uploadCurrentUserProfileImage(file, resolvePublicBaseUrl(request))
+                userService.uploadCurrentUserProfileImage(file, publicBaseUrlResolver.resolve(request))
         );
-    }
-
-    private String resolvePublicBaseUrl(HttpServletRequest request) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(request.getScheme())
-                .append("://")
-                .append(request.getServerName());
-        if (!isDefaultPort(request.getScheme(), request.getServerPort())) {
-            builder.append(":").append(request.getServerPort());
-        }
-        return builder.toString();
-    }
-
-    private boolean isDefaultPort(String scheme, int port) {
-        return ("http".equalsIgnoreCase(scheme) && port == 80)
-                || ("https".equalsIgnoreCase(scheme) && port == 443);
     }
 }

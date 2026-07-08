@@ -1,5 +1,6 @@
-import { Bookmark, Edit, Eye, FileText, Settings } from 'lucide-react';
+﻿import { Bookmark, Edit, Eye, FileText, Settings } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
+import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import batteryFrameIcon from '../assets/auth-figma/battery-frame.svg';
 import cellularConnectionIcon from '../assets/auth-figma/cellular-connection.svg';
@@ -105,7 +106,7 @@ function SectionHeader({
         {iconNode}
         <span className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-[#494949]">{title}</span>
       </div>
-      <CaseTextLink label="전체보기" onClick={onViewAll} />
+      <CaseTextLink label="전체보기" onClick={onViewAll} className="!text-[12px]" />
     </div>
   );
 }
@@ -170,6 +171,7 @@ function StoryPreviewCard({
   const imageUrls = extractExperienceImageUrls(experience);
   const keywords = extractKeywordTags(experience);
   const preview = sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기');
+  const useThumbnailLayout = showThumbnail && Boolean(imageUrls[0]);
 
   return (
     <button
@@ -187,7 +189,7 @@ function StoryPreviewCard({
         </div>
 
         <div className="flex h-[60px] items-start gap-[8px]">
-          {showThumbnail ? (
+          {useThumbnailLayout ? (
             <div className="relative h-[60px] w-[80px] shrink-0 rounded-[4px] bg-[#D8D8D8]">
               {imageUrls[0] ? <img src={imageUrls[0]} alt="" className="h-full w-full rounded-[4px] object-cover" /> : null}
               {imageUrls.length > 1 ? (
@@ -202,7 +204,7 @@ function StoryPreviewCard({
             <p className="line-clamp-1 font-['Pretendard'] text-[16px] font-[500] leading-[19.2px] text-[#131416]">
               {sanitizeText(experience.title, '제목')}
             </p>
-            <p className={`${showThumbnail ? 'line-clamp-2' : 'line-clamp-1'} font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]`}>
+            <p className={`${useThumbnailLayout ? 'line-clamp-2' : 'line-clamp-1'} font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#494949]`}>
               {preview}
             </p>
           </div>
@@ -423,6 +425,72 @@ function BookmarkSection({ items }: { items: Experience[] }) {
   );
 }
 
+function LogoutSection({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center gap-[6px] rounded-[4px] bg-white p-[12px] text-left shadow-[0_0_2px_rgba(0,0,0,0.1)]"
+    >
+      <LogOut size={16} strokeWidth={1.9} color="#8A8A8A" />
+      <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#8A8A8A]">로그아웃</span>
+    </button>
+  );
+}
+
+function LogoutConfirmModal({
+  open,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!open) {
+    return null;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/25 px-[24px]"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="w-full max-w-[280px] rounded-[16px] bg-white px-[20px] py-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.16)]"
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="로그아웃 확인"
+      >
+        <div className="text-center">
+          <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]">로그아웃할까요?</p>
+          <p className="mt-[8px] font-['Pretendard'] text-[13px] font-[400] leading-[18.2px] text-[#8A8A8A]">
+            현재 기기에서 로그인 정보가 삭제됩니다.
+          </p>
+        </div>
+        <div className="mt-[20px] flex gap-[8px]">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-[40px] flex-1 items-center justify-center rounded-[10px] border border-[#E6E6E6] bg-white font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#8A8A8A]"
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="flex h-[40px] flex-1 items-center justify-center rounded-[10px] bg-[#5A876E] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-white"
+          >
+            로그아웃
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MyPageOverview() {
   const navigate = useNavigate();
   const token = getAccessToken();
@@ -435,6 +503,7 @@ export default function MyPageOverview() {
   const [recentExperiences, setRecentExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(Boolean(token));
   const [error, setError] = useState('');
+  const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -512,6 +581,12 @@ export default function MyPageOverview() {
     [bookmarkedExperiences.length, recentExperiences.length, writtenExperiences.length],
   );
 
+  function handleLogout() {
+    clearSession();
+    setLogoutConfirmOpen(false);
+    navigate('/', { replace: true });
+  }
+
   if (!token || authRequired) {
     return (
       <div className="mx-auto min-h-screen w-full max-w-[375px] bg-white px-[16px] py-[48px]">
@@ -557,6 +632,7 @@ export default function MyPageOverview() {
             emptyMessage={loading ? '불러오는 중...' : '최근 본 글이 없어요'}
             onViewAll={() => navigate('/mypage/recent')}
           />
+          <LogoutSection onClick={() => setLogoutConfirmOpen(true)} />
         </div>
 
         {error ? (
@@ -567,6 +643,11 @@ export default function MyPageOverview() {
       </main>
 
       <BottomNav active="mypage" showFab />
+      <LogoutConfirmModal
+        open={logoutConfirmOpen}
+        onClose={() => setLogoutConfirmOpen(false)}
+        onConfirm={handleLogout}
+      />
     </div>
   );
 }

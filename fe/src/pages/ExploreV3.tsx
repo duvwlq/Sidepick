@@ -495,7 +495,7 @@ function HeaderBlock({
         <button
           type="button"
           onClick={() => navigate('/search')}
-          className="flex h-[36px] w-[343px] items-center justify-between rounded-[999px] border border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[8px]"
+          className="flex h-[36px] w-[343px] items-center rounded-[999px] border border-[#EEEEEE] bg-[#F8F8F8] px-[16px] py-[8px]"
         >
           <span
             className="text-[14px] font-[400] leading-[19.6px] text-[#494949]"
@@ -503,7 +503,6 @@ function HeaderBlock({
           >
             검색어
           </span>
-          <img src={searchIcon} alt="" className="h-[24px] w-[24px]" />
         </button>
       </div>
 
@@ -1215,7 +1214,7 @@ function SharedFooterArea({
                   const chatbotCategory = selectedCategoryId ? CATEGORY_ID_TO_CHATBOT_SLUG[selectedCategoryId] : null;
                   navigate(chatbotCategory ? `/chatbot?category=${encodeURIComponent(chatbotCategory)}` : '/chatbot');
                 }}
-                className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+                className="hidden"
               >
                 <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
                 <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
@@ -1555,17 +1554,20 @@ export default function ExploreV3() {
 
   function handleCreateClick() {
     setFabOpen(false);
+    const chatbotCategory = selectedCategoryId ? CATEGORY_ID_TO_CHATBOT_SLUG[selectedCategoryId] : null;
 
     if (!accessToken) {
       navigate(
-        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent(
+        `/auth?next=${encodeURIComponent(
+          chatbotCategory ? `/chatbot?category=${encodeURIComponent(chatbotCategory)}` : '/chatbot',
+        )}&reason=${encodeURIComponent(
           '경험 작성은 로그인이 필요한 서비스입니다.',
         )}`,
       );
       return;
     }
 
-    navigate('/create');
+    navigate(chatbotCategory ? `/chatbot?category=${encodeURIComponent(chatbotCategory)}` : '/chatbot');
   }
 
   function openFilterSheet() {

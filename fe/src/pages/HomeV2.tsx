@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type MouseEvent, type WheelEvent } from 'react';
+import { useEffect, useMemo, useState, type MouseEvent, type WheelEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import categoryCommerceImage from '../assets/home-v1-figma/category-commerce.webp';
 import categoryContentImage from '../assets/home-v1-figma/category-content.webp';
@@ -856,15 +856,8 @@ function ExploreSection({
 
 function FloatingActionsExact() {
   const navigate = useNavigate();
-  const accessToken = getAccessToken();
 
-  return (
-    <BottomNav
-      active="home"
-      showFab
-      onCreateClick={() => navigate(accessToken ? '/create' : '/auth?next=%2Fcreate')}
-    />
-  );
+  return <BottomNav active="home" showFab onCreateClick={() => navigate('/chatbot')} />;
 }
 
 export default function HomeV2() {

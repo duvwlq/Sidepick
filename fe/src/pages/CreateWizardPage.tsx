@@ -887,17 +887,25 @@ export default function CreateWizardPage() {
                   <button
                     type="button"
                     onClick={() => setIsConcurrentWithMainJob(true)}
-                    className={`flex h-[40px] items-center rounded-[10px] border px-[16px] text-[14px] ${isConcurrentWithMainJob === true ? 'border-[#D9D9D9] bg-white text-[#494949]' : 'border-[#E6E6E6] text-[#8A8A8A]'}`}
+                    className={`flex h-[40px] items-center rounded-[10px] border bg-white px-[16px] text-[14px] ${
+                      isConcurrentWithMainJob === true
+                        ? 'border-[#5A876E] text-[#5A876E]'
+                        : 'border-[#E6E6E6] text-[#BABABA]'
+                    }`}
                   >
-                    <span className="mr-[8px] text-[#C3C3C3]">✓</span>
+                    <span className={`mr-[8px] ${isConcurrentWithMainJob === true ? 'text-[#5A876E]' : 'text-[#D9D9D9]'}`}>✓</span>
                     네
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsConcurrentWithMainJob(false)}
-                    className={`flex h-[40px] items-center rounded-[10px] border px-[16px] text-[14px] ${isConcurrentWithMainJob === false ? 'border-[#D9D9D9] bg-white text-[#494949]' : 'border-[#E6E6E6] text-[#8A8A8A]'}`}
+                    className={`flex h-[40px] items-center rounded-[10px] border bg-white px-[16px] text-[14px] ${
+                      isConcurrentWithMainJob === false
+                        ? 'border-[#5A876E] text-[#5A876E]'
+                        : 'border-[#E6E6E6] text-[#BABABA]'
+                    }`}
                   >
-                    <span className="mr-[8px] text-[#C3C3C3]">✓</span>
+                    <span className={`mr-[8px] ${isConcurrentWithMainJob === false ? 'text-[#5A876E]' : 'text-[#D9D9D9]'}`}>✓</span>
                     아니요
                   </button>
                 </div>

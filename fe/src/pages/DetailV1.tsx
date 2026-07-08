@@ -1,8 +1,9 @@
 ﻿import {
   ChevronRight,
   Heart,
-  X,
+  PencilLine,
   Upload,
+  X,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -12,14 +13,13 @@ import clockIcon from '../assets/detail-v1-figma/clock.svg';
 import dollarSignIcon from '../assets/detail-v1-figma/dollar-sign.svg';
 import moreVerticalIcon from '../assets/detail-v1-figma/more-vertical.svg';
 import bookmarkIcon from '../assets/explore-figma/bookmark.svg';
-import editIcon from '../assets/explore-figma/edit.svg';
+import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
 import HeaderBookmarkIcon from '../components/common/HeaderBookmarkIcon';
 import BottomNav from '../components/layout/BottomNav';
 import { CaseChip, CaseChipRow, CaseTextLink } from '../components/common/CaseUi';
 import { ErrorState, LoadingState } from '../components/common/Skeleton';
 import { useToast } from '../components/common/useToast';
 import guideIcon from '../assets/home-v1-figma/icons/guide-figma.svg';
-import plusIcon from '../assets/home-v1-figma/icons/plus-figma.svg';
 import userIcon from '../assets/home-v1-figma/icons/user-figma.svg';
 import {
   bookmarkExperience,
@@ -29,6 +29,7 @@ import {
   getExperienceGuide,
   getExperienceShare,
   getRelatedSuccessCases,
+  getSimilarExperiences,
   type Experience,
   unbookmarkExperience,
 } from '../lib/api';
@@ -82,7 +83,6 @@ function formatMoneyValue(value: number | null) {
 
 function buildTopTags(experience: Experience) {
   const raw = [
-    experience.category.name,
     ...experience.failureReasons,
     ...experience.difficulties,
     ...(experience.analysis?.keywords ?? []),
@@ -92,11 +92,10 @@ function buildTopTags(experience: Experience) {
 
   const deduped = Array.from(new Set(raw));
   const category = sanitizeText(experience.category.name, '카테고리');
-  const type = sanitizeText(experience.businessType, '부업');
   const keywords = deduped.filter((item) => item !== category).slice(0, 2);
 
   return [
-    type,
+    experience.caseStatus === 'SUCCESS' ? '성공' : '실패',
     category,
     keywords[0] ?? '키워드',
     keywords[1] ?? '키워드',
@@ -244,7 +243,6 @@ function SimilarCaseCard({
   viewCount,
   author,
   createdAt,
-  similarity,
   onClick,
 }: {
   title: string;
@@ -256,37 +254,21 @@ function SimilarCaseCard({
   viewCount: number;
   author: string;
   createdAt: string;
-  similarity?: number | null;
   onClick: () => void;
 }) {
-  const similarityValue = similarity ?? 99;
-  const tone = success ? { text: '#5A876E', bar: '#4CAF50' } : { text: '#8A8A8A', bar: '#FFC13B' };
-  const barWidth = Math.max(8, Math.min(30, Math.round((similarityValue / 100) * 30)));
-
   return (
     <button
       type="button"
       onClick={onClick}
       className="flex h-[150px] w-[311px] flex-col gap-[8px] rounded-[4px] bg-[#F8F8F8] px-[16px] py-[20px] text-left"
     >
-      <div className="flex w-full items-center justify-between gap-[8px]">
-        <CaseChipRow className="min-w-0 flex-1 pr-[8px]">
+      <div className="flex w-full items-center gap-[8px]">
+        <CaseChipRow className="min-w-0 flex-1">
           <CaseChip label={success ? '성공' : '실패'} tone={success ? 'status-success' : 'status-failure'} compact maxWidthClassName="max-w-[40px]" />
           <CaseChip label={tags[0] ?? '카테고리'} tone="category" compact maxWidthClassName="max-w-[108px]" />
           <CaseChip label={tags[1] ?? '키워드'} tone="keyword" compact maxWidthClassName="max-w-[58px]" />
           <CaseChip label={tags[2] ?? '키워드'} tone="keyword" compact maxWidthClassName="max-w-[58px]" />
         </CaseChipRow>
-        <div className="flex shrink-0 items-center gap-[4px]">
-          <span className="relative h-[4px] w-[30px] rounded-[999px] bg-[#EEEEEE]">
-            <span
-              className="absolute left-0 top-0 h-[4px] rounded-[999px]"
-              style={{ width: `${barWidth}px`, backgroundColor: tone.bar }}
-            />
-          </span>
-          <span className="font-['Pretendard'] text-[12px] font-[600] leading-[16.8px]" style={{ color: tone.text }}>
-            {similarityValue}%
-          </span>
-        </div>
       </div>
 
       <div className="flex h-[60px] w-full items-start gap-[8px]">
@@ -340,8 +322,9 @@ export default function DetailV1() {
   const [bookmarked, setBookmarked] = useState(false);
   const [actionMenuOpen, setActionMenuOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [successCases, setSuccessCases] = useState<Experience[]>([]);
   const [fabExpanded, setFabExpanded] = useState(false);
+  const [failureCases, setFailureCases] = useState<Experience[]>([]);
+  const [successCases, setSuccessCases] = useState<Experience[]>([]);
   const [matchedGuideLines, setMatchedGuideLines] = useState<string[]>([]);
 
   const isOwner = useMemo(() => {
@@ -388,9 +371,29 @@ export default function DetailV1() {
         }
 
         try {
-          const related = await getRelatedSuccessCases(payload.id, 2);
+          const similar = await getSimilarExperiences(payload.id, 4);
           if (!cancelled) {
-            setSuccessCases(related);
+            setFailureCases(
+              similar
+                .map((item) => item.similarExperience)
+                .filter((item) => item.id !== payload.id && item.caseStatus === 'FAILURE')
+                .slice(0, 1),
+            );
+          }
+        } catch {
+          if (!cancelled) {
+            setFailureCases([]);
+          }
+        }
+
+        try {
+          const related = await getRelatedSuccessCases(payload.id, 4);
+          if (!cancelled) {
+            setSuccessCases(
+              related
+                .filter((item) => item.id !== payload.id)
+                .slice(0, 1),
+            );
           }
         } catch {
           if (!cancelled) {
@@ -553,10 +556,16 @@ export default function DetailV1() {
   }
 
   function handleCreateClick() {
+    navigate('/chatbot');
+  }
+
+  function handleFabCreateClick() {
     setFabExpanded(false);
 
     if (!accessToken) {
-      navigate(`/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`);
+      navigate(
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`,
+      );
       return;
     }
 
@@ -721,7 +730,11 @@ export default function DetailV1() {
               ) : null}
 
               <CaseChipRow>
-                <CaseChip label={tags[0] ?? '부업'} tone="type" maxWidthClassName="max-w-[44px]" />
+                <CaseChip
+                  label={tags[0] ?? '실패'}
+                  tone={experience.caseStatus === 'SUCCESS' ? 'status-success' : 'status-failure'}
+                  maxWidthClassName="max-w-[44px]"
+                />
                 <CaseChip label={tags[1] ?? '카테고리'} tone="category" maxWidthClassName="max-w-[116px]" />
                 <CaseChip label={tags[2] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
                 <CaseChip label={tags[3] ?? '키워드'} tone="keyword" maxWidthClassName="max-w-[58px]" />
@@ -827,18 +840,29 @@ export default function DetailV1() {
                 <div className="pb-[4px]">
                   <p className="font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] tracking-[0px] text-[#5A876E]">실패 사례</p>
                 </div>
-                <SimilarCaseCard
-                  title={sanitizeText(experience.title, '제목')}
-                  summary={sanitizeText(stripImageMarkdown(experience.content), '본문 텍스트 미리보기')}
-                  tags={buildTopTags(experience).slice(1)}
-                  success={false}
-                  likeCount={experience.likeCount}
-                  bookmarkCount={experience.bookmarkCount ?? 0}
-                  viewCount={experience.viewCount}
-                  author={sanitizeText(experience.author.nickname, '닉네임')}
-                  createdAt={formatDate(experience.createdAt)}
-                  onClick={() => navigate(`/experiences/${experience.id}`)}
-                />
+                {failureCases.length ? (
+                  <div className="flex flex-col gap-[4px]">
+                    {failureCases.slice(0, 1).map((item) => (
+                      <SimilarCaseCard
+                        key={item.id}
+                        title={sanitizeText(item.title, '제목')}
+                        summary={sanitizeText(stripImageMarkdown(item.content), '본문 텍스트 미리보기')}
+                        tags={buildTopTags(item).slice(1)}
+                        success={false}
+                        likeCount={item.likeCount}
+                        bookmarkCount={item.bookmarkCount ?? 0}
+                        viewCount={item.viewCount}
+                        author={sanitizeText(item.author.nickname, '닉네임')}
+                        createdAt={formatDate(item.createdAt)}
+                        onClick={() => navigate(`/experiences/${item.id}`)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-[4px] bg-[#F8F8F8] px-[14px] py-[10px] font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] tracking-[0px] text-[#8A8A8A]">
+                    아직 등록된 실패 사례가 없어요.
+                  </div>
+                )}
               </div>
 
               <div className="flex w-[311px] flex-col gap-[4px]">
@@ -882,58 +906,68 @@ export default function DetailV1() {
           </section>
         </main>
 
-        <div className="pointer-events-none fixed bottom-0 left-1/2 z-[19] h-[152px] w-full max-w-[375px] -translate-x-1/2 bg-white" />
-        <div className="pointer-events-none fixed bottom-[84px] left-1/2 z-20 flex h-[68px] w-full max-w-[375px] -translate-x-1/2 items-center justify-between px-[24px] py-[16px]">
-          <div className="relative">
-            <button
-              type="button"
-              onClick={moveToGuide}
-              className="pointer-events-auto inline-flex h-[36px] w-[208px] shrink-0 items-center justify-center gap-[4px] rounded-[999px] bg-[#375E49] px-[12px] text-white"
-            >
-              <img
-                src={guideIcon}
-                alt=""
-                className="h-[16px] w-[16px] shrink-0"
-                style={{ filter: 'brightness(0) invert(1)' }}
-              />
-              <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px]">
-                해당 부업 가이드 바로가기
-              </span>
-              <ChevronRight size={16} strokeWidth={2.2} className="shrink-0" />
-            </button>
-          </div>
-
-          <div className="pointer-events-auto relative h-[36px] w-[36px] shrink-0">
-            {fabExpanded ? (
+        <BottomNav
+          active="explore"
+          showCenterCreateButton
+          onCreateClick={handleCreateClick}
+          accessoryStructure="stacked"
+          accessoryLayout="center"
+          accessory={
+            <div className="pointer-events-auto flex w-[327px] items-center justify-between">
               <button
                 type="button"
-                onClick={handleCreateClick}
-                className="pointer-events-auto absolute right-0 top-[-52px] flex h-[41px] min-w-[122px] items-center gap-[8px] rounded-[10px] bg-white px-[10px] py-[12px] shadow-[0_0_4px_rgba(0,0,0,0.15)]"
-                aria-label="경험 작성 열기"
+                onClick={moveToGuide}
+                className="inline-flex h-[36px] w-[208px] shrink-0 items-center justify-center gap-[4px] rounded-[999px] bg-[#375E49] px-[12px] text-white"
               >
-                <img src={editIcon} alt="" className="h-[17px] w-[17px]" />
-                <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
+                <img
+                  src={guideIcon}
+                  alt=""
+                  className="h-[16px] w-[16px] shrink-0"
+                  style={{ filter: 'brightness(0) invert(1)' }}
+                />
+                <span className="whitespace-nowrap font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] tracking-[0px]">
+                  해당 부업 가이드 바로가기
+                </span>
+                <ChevronRight size={16} strokeWidth={2.2} className="shrink-0" />
               </button>
-            ) : null}
 
-            <button
-              type="button"
-              onClick={() => setFabExpanded((current) => !current)}
-              className={`pointer-events-auto absolute right-0 top-0 flex h-[36px] w-[36px] items-center justify-center rounded-full ${
-                fabExpanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
-              }`}
-              aria-label={fabExpanded ? '경험 작성 닫기' : '경험 작성'}
-            >
-              {fabExpanded ? (
-                <X size={20} strokeWidth={2.2} color="#FFFFFF" />
-              ) : (
-                <img src={plusIcon} alt="" className="h-[20px] w-[20px]" />
-              )}
-            </button>
-          </div>
-        </div>
+              <div className="relative z-50 flex h-[36px] w-[36px] shrink-0 items-center justify-center">
+                <div
+                  className={`pointer-events-auto absolute bottom-[52px] right-[-10px] z-50 flex min-w-[132px] flex-col items-stretch rounded-[10px] bg-white px-[10px] shadow-[0_0_4px_rgba(0,0,0,0.15)] transition-[max-height,opacity,padding] duration-150 ${
+                    fabExpanded
+                      ? 'max-h-[120px] gap-[12px] overflow-visible py-[12px] opacity-100'
+                      : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={handleFabCreateClick}
+                    className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
+                  >
+                    <PencilLine size={18} strokeWidth={2} className="shrink-0 text-black" />
+                    <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">경험 작성</span>
+                  </button>
+                </div>
 
-        <BottomNav showFab={false} />
+                <button
+                  type="button"
+                  aria-label={fabExpanded ? '경험 작성 메뉴 닫기' : '경험 작성 메뉴 열기'}
+                  aria-expanded={fabExpanded}
+                  onClick={() => setFabExpanded((current) => !current)}
+                  className={`pointer-events-auto flex h-[36px] w-[36px] items-center justify-center rounded-full ${
+                    fabExpanded ? 'bg-[#A8D3BD]' : 'bg-[#5A876E]'
+                  }`}
+                >
+                  {fabExpanded ? (
+                    <X size={20} strokeWidth={2.2} color="#FFFFFF" />
+                  ) : (
+                    <img src={plusIcon} alt="" className="h-[18px] w-[18px]" />
+                  )}
+                </button>
+              </div>
+            </div>
+          }
+        />
       </div>
     </div>
   );

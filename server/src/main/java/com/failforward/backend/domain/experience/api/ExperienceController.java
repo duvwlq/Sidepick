@@ -1,6 +1,7 @@
 package com.failforward.backend.domain.experience.api;
 
 import com.failforward.backend.common.api.ApiResponse;
+import com.failforward.backend.common.config.PublicBaseUrlResolver;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.CompareRequest;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.CompareResponse;
 import com.failforward.backend.domain.experience.dto.ExperienceDtos.ExperienceCreateRequest;
@@ -44,6 +45,7 @@ public class ExperienceController {
 
     private final ExperienceService experienceService;
     private final ExperienceSharePageRenderer experienceSharePageRenderer;
+    private final PublicBaseUrlResolver publicBaseUrlResolver;
 
     @Operation(summary = "List experiences")
     @GetMapping
@@ -116,7 +118,7 @@ public class ExperienceController {
     ) {
         return ApiResponse.ok(
                 "Experience images uploaded.",
-                experienceService.uploadExperienceImages(files, resolvePublicBaseUrl(request))
+                experienceService.uploadExperienceImages(files, publicBaseUrlResolver.resolve(request))
         );
     }
 
@@ -204,21 +206,5 @@ public class ExperienceController {
     @PostMapping("/compare")
     public ApiResponse<CompareResponse> compareExperiences(@RequestBody CompareRequest request) {
         return ApiResponse.ok("Experiences compared.", experienceService.compare(request.experienceIds()));
-    }
-
-    private String resolvePublicBaseUrl(HttpServletRequest request) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(request.getScheme())
-                .append("://")
-                .append(request.getServerName());
-        if (!isDefaultPort(request.getScheme(), request.getServerPort())) {
-            builder.append(":").append(request.getServerPort());
-        }
-        return builder.toString();
-    }
-
-    private boolean isDefaultPort(String scheme, int port) {
-        return ("http".equalsIgnoreCase(scheme) && port == 80)
-                || ("https".equalsIgnoreCase(scheme) && port == 443);
     }
 }

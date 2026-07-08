@@ -1,18 +1,18 @@
 ﻿import { PencilLine, X } from 'lucide-react';
-import type { MouseEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import guideIcon from '../../assets/figma-downloaded-icons/home/NavigationBar/live_help_20dp_1F1F1F_FILL0_wght400_GRAD0_opsz20 1.svg';
 import homeIcon from '../../assets/figma-downloaded-icons/home/Home.svg';
 import plusIcon from '../../assets/figma-downloaded-icons/home/Plus.svg';
 import searchIcon from '../../assets/figma-downloaded-icons/home/Search.svg';
-import subtractIcon from '../../assets/figma-downloaded-icons/home/Subtract.svg';
 import subtractCenterIcon from '../../assets/figma-downloaded-icons/home/SubtractCenter.svg';
 import userIcon from '../../assets/figma-downloaded-icons/home/User.svg';
 import { getAccessToken } from '../../lib/session';
 
 export type BottomNavKey = 'home' | 'explore' | 'guide' | 'mypage';
 type BottomNavAccessoryLayout = 'center' | 'end' | 'between';
+type BottomNavAccessoryStructure = 'overlay' | 'stacked';
 
 type BottomNavProps = {
   active?: BottomNavKey;
@@ -22,8 +22,10 @@ type BottomNavProps = {
   fabExpanded?: boolean;
   onFabToggle?: () => void;
   onCreateClick?: () => void;
+  onFabCreateClick?: () => void;
   accessory?: ReactNode;
   accessoryLayout?: BottomNavAccessoryLayout;
+  accessoryStructure?: BottomNavAccessoryStructure;
 };
 
 type NavItem = {
@@ -120,13 +122,6 @@ function DefaultFabMenu({
   onToggle: () => void;
   onCreateClick: () => void;
 }) {
-  const navigate = useNavigate();
-  const handleChatbotClick = (event: MouseEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
-    onToggle();
-    navigate('/chatbot');
-  };
-
   return (
     <div className="relative z-50 mb-[15px] flex h-[36px] w-[36px] items-center justify-center">
       <div
@@ -136,14 +131,6 @@ function DefaultFabMenu({
             : 'pointer-events-none max-h-0 gap-0 overflow-hidden py-0 opacity-0'
         }`}
       >
-        <button
-          type="button"
-          onClick={handleChatbotClick}
-          className="flex w-full items-center gap-[8px] whitespace-nowrap text-left"
-        >
-          <img src={subtractIcon} alt="" className="h-[17px] w-[17px] shrink-0" />
-          <span className="font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-black">AI 챗봇</span>
-        </button>
         <button
           type="button"
           onClick={onCreateClick}
@@ -224,8 +211,10 @@ export default function BottomNav({
   fabExpanded = false,
   onFabToggle,
   onCreateClick,
+  onFabCreateClick,
   accessory,
   accessoryLayout = 'end',
+  accessoryStructure = 'overlay',
 }: BottomNavProps) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -289,6 +278,24 @@ export default function BottomNav({
     navigate('/create');
   }
 
+  function handleFabMenuCreateClick() {
+    setInternalExpanded(false);
+
+    if (onFabCreateClick) {
+      onFabCreateClick();
+      return;
+    }
+
+    if (!token) {
+      navigate(
+        `/auth?next=${encodeURIComponent('/create')}&reason=${encodeURIComponent('경험 작성은 로그인이 필요한 서비스입니다.')}`,
+      );
+      return;
+    }
+
+    navigate('/create');
+  }
+
   const resolvedAccessory = accessory ?? null;
   const resolvedFab = showFab ? (
     <DefaultFabMenu
@@ -301,12 +308,14 @@ export default function BottomNav({
 
         setInternalExpanded((current) => !current);
       }}
-      onCreateClick={handleCreateClick}
+      onCreateClick={handleFabMenuCreateClick}
     />
   ) : null;
 
   const hasAccessory = Boolean(resolvedAccessory);
   const hasFabAccessory = Boolean(resolvedFab);
+  const shouldRenderStackedAccessory = hasAccessory && accessoryStructure === 'stacked';
+  const shouldRenderOverlayAccessory = hasAccessory && accessoryStructure !== 'stacked';
   const accessoryLayoutClass =
     accessoryLayout === 'between'
       ? 'justify-between'
@@ -320,7 +329,7 @@ export default function BottomNav({
       className="pointer-events-none fixed bottom-0 left-1/2 z-40 w-full max-w-[375px] -translate-x-1/2"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      {hasAccessory ? (
+      {shouldRenderOverlayAccessory ? (
         <div
           className={`absolute inset-x-0 flex items-end px-[24px] ${accessoryLayoutClass}`}
           style={{ bottom: `${accessoryBottom}px` }}
@@ -332,6 +341,12 @@ export default function BottomNav({
       {hasFabAccessory ? (
         <div className="absolute right-[24px] flex items-end" style={{ bottom: `${accessoryBottom}px` }}>
           <div className="pointer-events-auto">{resolvedFab}</div>
+        </div>
+      ) : null}
+
+      {shouldRenderStackedAccessory ? (
+        <div className={`pointer-events-auto flex items-center px-[24px] py-[16px] ${accessoryLayoutClass}`}>
+          {resolvedAccessory}
         </div>
       ) : null}
 
