@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { BottomNavKey } from './BottomNav';
 import ChatbotFab from '../chatbot/ChatbotFab';
 import BottomNav from './BottomNav';
 import HeaderNav from './HeaderNav';
@@ -14,9 +15,14 @@ type Props = {
   showHeader?: boolean;
   showStatusBar?: boolean;
   showBottomNav?: boolean;
+  showChatbotFab?: boolean;
+  bottomNavActive?: BottomNavKey;
+  bottomNavShowFab?: boolean;
+  maxWidthClass?: string;
   onBack?: () => void;
   onMenuClick?: () => void;
   onRightIconClick?: () => void;
+  onBottomNavCreateClick?: () => void;
 };
 
 export default function Layout({
@@ -28,13 +34,18 @@ export default function Layout({
   showHeader = true,
   showStatusBar = false,
   showBottomNav = true,
+  showChatbotFab = true,
+  bottomNavActive,
+  bottomNavShowFab = false,
+  maxWidthClass = 'max-w-[430px]',
   onBack,
   onMenuClick,
   onRightIconClick,
+  onBottomNavCreateClick,
 }: Props) {
   return (
     <div
-      className="mx-auto min-h-screen w-full max-w-[430px] overflow-x-clip bg-white notranslate"
+      className={`mx-auto min-h-screen w-full overflow-x-clip bg-white notranslate ${maxWidthClass}`}
       translate="no"
     >
       {showHeader ? (
@@ -44,6 +55,7 @@ export default function Layout({
           showRightIcon={showRightIcon}
           rightIcon={rightIcon}
           showStatusBar={showStatusBar}
+          maxWidthClass={maxWidthClass}
           onBack={onBack}
           onMenuClick={onMenuClick}
           onRightIconClick={onRightIconClick}
@@ -59,9 +71,11 @@ export default function Layout({
         {children}
       </main>
 
-      {showBottomNav ? <BottomNav /> : null}
+      {showBottomNav ? (
+        <BottomNav active={bottomNavActive} showFab={bottomNavShowFab} onCreateClick={onBottomNavCreateClick} />
+      ) : null}
 
-      <ChatbotFab />
+      {showChatbotFab ? <ChatbotFab /> : null}
     </div>
   );
 }

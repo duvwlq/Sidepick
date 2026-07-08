@@ -164,7 +164,12 @@ export default function FaqPage() {
       title="FAQ"
       leftType="back"
       rightIcon="search"
+      showChatbotFab={false}
+      bottomNavActive="guide"
+      bottomNavShowFab
+      maxWidthClass="max-w-[375px]"
       onBack={() => navigate(-1)}
+      onBottomNavCreateClick={() => navigate('/chatbot')}
       onRightIconClick={() => searchInputRef.current?.focus()}
     >
       <div className="flex w-full flex-col bg-[#FFFFFF]">
@@ -216,13 +221,13 @@ export default function FaqPage() {
                   key={label}
                   type="button"
                   onClick={() => setSelectedTag(label)}
-                  className={`flex items-center justify-center rounded-full px-[10px] py-1 ${
+                  className={`flex h-[26px] items-center justify-center rounded-[999px] px-[10px] ${
                     active
                       ? `${activeBg} text-[#FFFFFF]`
                       : `border border-[#EEEEEE] bg-[#FFFFFF] ${inactiveText}`
                   }`}
                 >
-                  <span className="whitespace-nowrap text-[12px] font-normal leading-[1.2]">
+                  <span className="whitespace-nowrap text-[12px] font-[500] leading-[14px]">
                     {label}
                   </span>
                 </button>

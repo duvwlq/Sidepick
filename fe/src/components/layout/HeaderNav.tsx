@@ -11,6 +11,7 @@ type Props = {
   showRightIcon?: boolean;
   rightIcon?: RightIconType;
   showStatusBar?: boolean;
+  maxWidthClass?: string;
   onBack?: () => void;
   onMenuClick?: () => void;
   onRightIconClick?: () => void;
@@ -36,6 +37,7 @@ export default function HeaderNav({
   showRightIcon = true,
   rightIcon = 'bell',
   showStatusBar = false,
+  maxWidthClass = 'max-w-[430px]',
   onBack,
   onMenuClick,
   onRightIconClick,
@@ -94,7 +96,7 @@ export default function HeaderNav({
 
   return (
     <header
-      className="fixed left-1/2 top-0 z-50 w-full max-w-[430px] -translate-x-1/2 bg-[#FFFFFF] notranslate"
+      className={`fixed left-1/2 top-0 z-50 w-full -translate-x-1/2 bg-[#FFFFFF] notranslate ${maxWidthClass}`}
       translate="no"
     >
       <div className="flex h-[64px] w-full items-center bg-[#FFFFFF] px-[16px] py-[20px]">
