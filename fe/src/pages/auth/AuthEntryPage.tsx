@@ -6,7 +6,6 @@ import arrowLeftIcon from '../../assets/auth-figma/arrow-left.svg';
 import brandMarkIcon from '../../assets/auth-figma/brand-mark.svg';
 import googleIcon from '../../assets/auth-figma/google-icon.svg';
 import kakaoIcon from '../../assets/auth-figma/kakao-icon.svg';
-import naverIcon from '../../assets/auth-figma/naver-icon.svg';
 import { issueOAuthState, login } from '../../lib/api';
 import { setFlashToast } from '../../lib/flash-toast';
 import { buildOAuthRedirectUri } from '../../lib/oauth-redirect';
@@ -14,7 +13,7 @@ import { saveOAuthState } from '../../lib/oauth-state';
 import { resolveErrorMessage } from '../../lib/resolve-error-message';
 import { saveSession } from '../../lib/session';
 
-type OAuthProvider = 'KAKAO' | 'GOOGLE' | 'NAVER';
+type OAuthProvider = 'KAKAO' | 'GOOGLE';
 
 export default function AuthEntryPage() {
   const location = useLocation();
@@ -94,7 +93,7 @@ export default function AuthEntryPage() {
       const authUrl = buildOAuthAuthorizeUrl(provider, clientId, redirectUri, payload.state);
       window.location.href = authUrl;
     } catch (error) {
-      const message = resolveErrorMessage(error, '소셜 로그인을 준비하는 중 문제가 발생했어요. 다시 시도해 주세요.');
+      const message = resolveErrorMessage(error, '소셜 로그인을 준비하던 중 문제가 발생했어요. 다시 시도해 주세요.');
       setOauthError(message);
       setOauthLoading(null);
       showToast(message);
@@ -174,10 +173,7 @@ export default function AuthEntryPage() {
               <div className="flex w-full items-center justify-center gap-[8px] font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] text-[#494949]">
                 <Link to={`/signup/email?next=${encodeURIComponent(nextPath)}&mode=local`}>회원가입</Link>
                 <span>|</span>
-                <button
-                  type="button"
-                  onClick={() => showToast('ID/PW 찾기 기능은 준비 중입니다.')}
-                >
+                <button type="button" onClick={() => showToast('ID/PW 찾기 기능은 준비 중입니다.')}>
                   ID/PW 찾기
                 </button>
               </div>
@@ -199,16 +195,6 @@ export default function AuthEntryPage() {
                   aria-label="카카오 로그인"
                 >
                   <img src={kakaoIcon} alt="" className="h-[17px] w-[18px]" />
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => void startOAuthLogin('NAVER')}
-                  disabled={oauthLoading !== null}
-                  className="flex h-[48px] w-[48px] items-center justify-center rounded-[999px] bg-[#06BE34] disabled:opacity-60"
-                  aria-label="네이버 로그인"
-                >
-                  <img src={naverIcon} alt="" className="h-[16px] w-[17px]" />
                 </button>
 
                 <button
@@ -246,20 +232,11 @@ function buildOAuthAuthorizeUrl(
     );
   }
 
-  if (provider === 'GOOGLE') {
-    return (
-      `https://accounts.google.com/o/oauth2/v2/auth?response_type=code` +
-      `&client_id=${encodeURIComponent(clientId)}` +
-      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&scope=${encodeURIComponent('openid email profile')}` +
-      `&state=${encodeURIComponent(state)}`
-    );
-  }
-
   return (
-    `https://nid.naver.com/oauth2.0/authorize?response_type=code` +
+    `https://accounts.google.com/o/oauth2/v2/auth?response_type=code` +
     `&client_id=${encodeURIComponent(clientId)}` +
     `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+    `&scope=${encodeURIComponent('openid email profile')}` +
     `&state=${encodeURIComponent(state)}`
   );
 }

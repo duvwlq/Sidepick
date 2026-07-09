@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SearchBar from '../components/common/SearchBar';
 import Layout from '../components/layout/Layout';
 import { FAQ_CATEGORIES, FAQ_INTRO } from './faqData';
@@ -111,6 +111,7 @@ function parseAnswerSections(categoryId: string, answer: string): ParsedSections
 
 export default function FaqPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [expandedKey, setExpandedKey] = useState<string | null>(null);
   const [selectedTag, setSelectedTag] = useState<SelectedTag>(ALL_TAG);
@@ -158,6 +159,19 @@ export default function FaqPage() {
   useEffect(() => {
     setExpandedKey(null);
   }, [searchQuery, selectedTag]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const requestedTag = params.get('tag');
+
+    if (!requestedTag) {
+      setSelectedTag(ALL_TAG);
+      return;
+    }
+
+    const matchedTag = tags.find(({ label }) => label === requestedTag);
+    setSelectedTag(matchedTag ? (matchedTag.label as SelectedTag) : ALL_TAG);
+  }, [location.search, tags]);
 
   return (
     <Layout

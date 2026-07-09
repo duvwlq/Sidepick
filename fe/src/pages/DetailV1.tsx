@@ -38,6 +38,7 @@ import { extractExperienceImageUrls } from '../lib/experience-images';
 import { resolveExperienceGuideLines } from '../lib/experience-guide-match';
 import { resolveErrorMessage } from '../lib/resolve-error-message';
 import { getAccessToken, getStoredUser } from '../lib/session';
+import { FAQ_CATEGORIES } from './faqData';
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -524,7 +525,20 @@ export default function DetailV1() {
   }
 
   function moveToGuide() {
-    navigate('/faq');
+    if (!experience) {
+      navigate('/faq');
+      return;
+    }
+
+    const categoryLabel = sanitizeText(experience.category.name, '');
+    const matchedCategory = FAQ_CATEGORIES.find((category) => category.label === categoryLabel);
+
+    if (!matchedCategory) {
+      navigate('/faq');
+      return;
+    }
+
+    navigate(`/faq?tag=${encodeURIComponent(matchedCategory.label)}`);
   }
 
   async function handleShare() {
