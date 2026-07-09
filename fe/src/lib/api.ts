@@ -388,6 +388,10 @@ export type AgentAAnalyzeDraftPayload = {
   status: 'ok' | 'fallback';
   needs_questions: boolean;
   questions: AgentAQuestionCard[];
+  quality_score: number | null;
+  missing_slots: string[];
+  trigger_reason: 'INSUFFICIENT_CONTEXT' | 'MISSING_CORE_FIELDS' | 'LOW_ANALYSIS_CONFIDENCE' | 'NONE' | null;
+  reason_message: string | null;
   meta: {
     input_tokens: number;
     output_tokens: number;

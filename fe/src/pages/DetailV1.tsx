@@ -79,6 +79,15 @@ function formatMoneyValue(value: number | null) {
   if (value == null) {
     return '0원';
   }
+  if (value >= 1000000000000) {
+    return `${(value / 1000000000000).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}조 원`;
+  }
+  if (value >= 100000000) {
+    return `${(value / 100000000).toLocaleString('ko-KR', { maximumFractionDigits: 1 })}억 원`;
+  }
+  if (value >= 10000) {
+    return `${(value / 10000).toLocaleString('ko-KR', { maximumFractionDigits: 0 })}만 원`;
+  }
   return `${value.toLocaleString()}원`;
 }
 
@@ -183,9 +192,9 @@ function MetricStatColumn({
   label: string;
 }) {
   return (
-    <div className="flex min-h-[72px] flex-1 flex-col items-center justify-center gap-[4px] px-[10px] py-[10px] text-center">
+    <div className="flex min-h-[72px] min-w-0 flex-1 flex-col items-center justify-center gap-[4px] px-[8px] py-[10px] text-center">
       <div className="flex h-[16px] w-[16px] items-center justify-center text-[#5A876E]">{icon}</div>
-      <p className="whitespace-nowrap font-['Pretendard'] text-[18px] font-[600] leading-[25.2px] tracking-[0px] text-[#131416]">{value}</p>
+      <p className="max-w-full break-all font-['Pretendard'] text-[16px] font-[600] leading-[20px] tracking-[0px] text-[#131416]">{value}</p>
       <p className="font-['Pretendard'] text-[12px] font-[400] leading-[14.4px] tracking-[0px] text-[#8A8A8A]">{label}</p>
     </div>
   );

@@ -458,32 +458,27 @@ function LogoutConfirmModal({
       role="presentation"
     >
       <div
-        className="w-full max-w-[280px] rounded-[16px] bg-white px-[20px] py-[20px] shadow-[0_8px_24px_rgba(0,0,0,0.16)]"
+        className="w-full max-w-[360px] rounded-[14px] bg-white px-[22px] pb-[20px] pt-[18px] shadow-[0_8px_24px_rgba(0,0,0,0.16)]"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-label="로그아웃 확인"
       >
-        <div className="text-center">
-          <p className="font-['Pretendard'] text-[16px] font-[600] leading-[19.2px] text-[#131416]">로그아웃할까요?</p>
-          <p className="mt-[8px] font-['Pretendard'] text-[13px] font-[400] leading-[18.2px] text-[#8A8A8A]">
-            현재 기기에서 로그인 정보가 삭제됩니다.
-          </p>
-        </div>
-        <div className="mt-[20px] flex gap-[8px]">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex h-[40px] flex-1 items-center justify-center rounded-[10px] border border-[#E6E6E6] bg-white font-['Pretendard'] text-[14px] font-[500] leading-[16.8px] text-[#8A8A8A]"
-          >
-            취소
-          </button>
+        <p className="font-['Pretendard'] text-[14px] font-[500] leading-[22px] text-[#131416]">로그아웃 하시겠습니까?</p>
+        <div className="mt-[26px] flex items-center justify-end gap-[16px]">
           <button
             type="button"
             onClick={onConfirm}
-            className="flex h-[40px] flex-1 items-center justify-center rounded-[10px] bg-[#5A876E] font-['Pretendard'] text-[14px] font-[600] leading-[16.8px] text-white"
+            className="font-['Pretendard'] text-[14px] font-[600] leading-[20px] text-[#5A876E]"
           >
             로그아웃
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="font-['Pretendard'] text-[14px] font-[600] leading-[20px] text-[#8A8A8A]"
+          >
+            취소
           </button>
         </div>
       </div>

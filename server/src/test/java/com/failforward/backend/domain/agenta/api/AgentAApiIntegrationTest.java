@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 class AgentAApiIntegrationTest extends ApiIntegrationTestSupport {
 
     @Test
-    void analyzeDraftReturnsQuestionCardsForShortDraft() throws Exception {
+    void analyzeDraftReturnsQuestionCardsWhenCoreContextIsMissing() throws Exception {
         String token = registerAndLogin("agenta_user@sidepick.dev", "password123", "agentaUser", "20s");
 
         mockMvc.perform(post("/api/agent-a/analyze-draft")
@@ -32,13 +32,14 @@ class AgentAApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "draft": {
                                     "category_slug": "content-sns",
-                                    "body": "SNS 부업을 가볍게 시작했는데 어디서부터 정리해야 할지 막막합니다."
+                                    "body": "I started an SNS side job."
                                   }
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("ok"))
                 .andExpect(jsonPath("$.data.needs_questions").value(true))
+                .andExpect(jsonPath("$.data.trigger_reason").value("MISSING_CORE_FIELDS"))
                 .andExpect(jsonPath("$.data.questions.length()").value(5))
                 .andExpect(jsonPath("$.data.questions[0].slot").value("goal"))
                 .andExpect(jsonPath("$.data.questions[1].slot").value("obstacle"))
@@ -56,7 +57,7 @@ class AgentAApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "draft": {
                                     "category_slug": "online-commerce",
-                                    "body": "3개월 동안 온라인 판매를 했고 50만원 정도를 썼습니다. 고객은 직장인이었고 인스타그램 광고를 썼는데 반응이 낮았습니다."
+                                    "body": "For 3 months I sold handmade goods online, spent 500000 won on ads, targeted office workers, used instagram marketing, but I got stuck because conversion was low."
                                   }
                                 }
                                 """))
@@ -66,6 +67,48 @@ class AgentAApiIntegrationTest extends ApiIntegrationTestSupport {
         JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
         int questionCount = response.path("data").path("questions").size();
         org.assertj.core.api.Assertions.assertThat(questionCount).isBetween(3, 5);
+    }
+
+    @Test
+    void analyzeDraftSkipsQuestionCardsWhenDraftHasEnoughContext() throws Exception {
+        String token = registerAndLogin("agenta_quality@sidepick.dev", "password123", "agentaQuality", "20s");
+
+        mockMvc.perform(post("/api/agent-a/analyze-draft")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "draft": {
+                                    "category_slug": "online-commerce",
+                                    "body": "My goal was to validate repeat purchase demand. For 4 months I ran an online store, spent 800000 won, targeted office workers in their 20s, researched the market and competitors, used instagram and blog channels, hit a problem with low conversion, and the result was only 3 orders with almost no revenue."
+                                  }
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.needs_questions").value(false))
+                .andExpect(jsonPath("$.data.trigger_reason").value("NONE"))
+                .andExpect(jsonPath("$.data.questions.length()").value(0));
+    }
+
+    @Test
+    void analyzeDraftRecognizesCommonKoreanDraftSignals() throws Exception {
+        String token = registerAndLogin("agenta_korean@sidepick.dev", "password123", "agentaKorean", "20s");
+
+        mockMvc.perform(post("/api/agent-a/analyze-draft")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "draft": {
+                                    "category_slug": "online-commerce",
+                                    "body": "회사 다니면서 추가 수익을 내보려고 스마트스토어를 4개월 운영했습니다. 광고비로 30만원 정도 썼고, 직장인을 타깃으로 인스타그램 채널을 사용했습니다. 과외 매칭 반응은 있었는데 주문 전환이 잘 안 돼서 걱정이 컸고 결국 주문은 거의 없었습니다."
+                                  }
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.needs_questions").value(false))
+                .andExpect(jsonPath("$.data.trigger_reason").value("NONE"))
+                .andExpect(jsonPath("$.data.questions.length()").value(0));
     }
 
     @Test
@@ -95,7 +138,7 @@ class AgentAApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "draft": {
                                     "category_slug": "investment",
-                                    "body": "초안입니다."
+                                    "body": "draft"
                                   }
                                 }
                                 """))
@@ -114,7 +157,7 @@ class AgentAApiIntegrationTest extends ApiIntegrationTestSupport {
                                     {
                                       "draft": {
                                         "category_slug": "online-commerce",
-                                        "body": "반복 요청 %d"
+                                        "body": "rate limit request %d"
                                       }
                                     }
                                     """.formatted(index)))
@@ -128,7 +171,7 @@ class AgentAApiIntegrationTest extends ApiIntegrationTestSupport {
                                 {
                                   "draft": {
                                     "category_slug": "online-commerce",
-                                    "body": "여섯 번째 요청"
+                                    "body": "one more request"
                                   }
                                 }
                                 """))

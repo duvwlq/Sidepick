@@ -29,6 +29,7 @@ import { getAccessToken, getStoredUser } from '../lib/session';
 
 const MIN_CONTENT_LENGTH = 10;
 const MAX_CONTENT_LENGTH = 2000;
+const MAX_AMOUNT_DIGITS = 15;
 const DURATION_OPTIONS = ['1개월 미만', '1개월', '2개월', '3개월', '4개월', '5개월', '6개월', '7개월', '8개월', '9개월', '10개월', '11개월', '1년 이상'];
 const DAILY_TIME_OPTIONS = ['1시간 미만', '1시간', '2시간', '3시간', '4시간', '5시간', '6시간', '7시간', '8시간 이상'];
 const DIFFICULTY_OPTIONS = ['고객 확보 (마케팅)', '수익 구조 이해', '시간 관리', '수익화 연결', '운영 지속성', '정보 부족', '경쟁 심화', '기타'];
@@ -116,6 +117,17 @@ const CATEGORY_SLUG_BY_KEY: Record<string, string> = {
   common: 'common',
 };
 
+const AGENT_A_SLOT_LABELS: Record<string, string> = {
+  goal: '목표',
+  timeline: '진행 기간',
+  budget: '투입 비용',
+  target_customer: '타깃 고객',
+  obstacle: '핵심 문제',
+  market: '시장 조사',
+  channel: '유입 채널',
+  result: '결과',
+};
+
 function buildFallbackCategories(): Category[] {
   return CATEGORY_VISUALS.map((item) => ({
     id: item.id,
@@ -128,9 +140,18 @@ function buildFallbackCategories(): Category[] {
   }));
 }
 
+function sanitizeAmountInput(value: string) {
+  return value.replace(/[^\d]/g, '').slice(0, MAX_AMOUNT_DIGITS);
+}
+
 function parseAmount(value: string) {
-  const digits = value.replace(/[^\d]/g, '');
-  return digits ? Number(digits) : undefined;
+  const digits = sanitizeAmountInput(value);
+  if (!digits) {
+    return undefined;
+  }
+
+  const parsed = Number(digits);
+  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function mapDurationToMonths(value: string | null) {
@@ -322,7 +343,7 @@ function MoneyField({ label, value, placeholder, onChange }: { label: string; va
       <label className="flex h-[40px] w-full items-center rounded-[10px] bg-[#F8F8F8] px-[16px] text-[14px] leading-[20px] text-[#131416]">
         <input
           value={value}
-          onChange={(event) => onChange(event.target.value.replace(/[^\d]/g, ''))}
+          onChange={(event) => onChange(sanitizeAmountInput(event.target.value))}
           placeholder={placeholder}
           className="flex-1 bg-transparent outline-none placeholder:text-[#BABABA]"
           inputMode="numeric"
@@ -364,6 +385,8 @@ export default function CreateWizardPage() {
   const [agentAQuestions, setAgentAQuestions] = useState<AgentAQuestionCard[]>([]);
   const [agentAAnswers, setAgentAAnswers] = useState<AgentAAnswerMap>({});
   const [agentAMessage, setAgentAMessage] = useState<string | null>(null);
+  const [agentAQualityScore, setAgentAQualityScore] = useState<number | null>(null);
+  const [agentAMissingSlots, setAgentAMissingSlots] = useState<string[]>([]);
   const [activeAgentAQuestionIndex, setActiveAgentAQuestionIndex] = useState(0);
   const [pendingCreatePayload, setPendingCreatePayload] = useState<PendingPayload | null>(null);
   const galleryImageInputRef = useRef<HTMLInputElement | null>(null);
@@ -535,6 +558,10 @@ export default function CreateWizardPage() {
   const uploadingImages = uploadStatus === 'uploading';
   const uploadErrorOpen = uploadStatus === 'error';
   const currentAgentAQuestion = agentAQuestions[activeAgentAQuestionIndex] ?? null;
+  const agentAMissingSlotLabels = useMemo(
+    () => agentAMissingSlots.map((slot) => AGENT_A_SLOT_LABELS[slot] ?? slot),
+    [agentAMissingSlots],
+  );
 
   const matchedCategory = useMemo(
     () => findMatchedCategory(selectedCategoryKey, selectedCategory, categories),
@@ -612,6 +639,8 @@ export default function CreateWizardPage() {
     setAgentAQuestions([]);
     setAgentAAnswers({});
     setAgentAMessage(null);
+    setAgentAQualityScore(null);
+    setAgentAMissingSlots([]);
     setActiveAgentAQuestionIndex(0);
     setPendingCreatePayload(null);
   }
@@ -812,7 +841,9 @@ export default function CreateWizardPage() {
           });
           setAgentAQuestions(agentAResult.questions);
           setAgentAAnswers(Object.fromEntries(agentAResult.questions.map((question) => [question.slot, ''])));
-          setAgentAMessage(agentAResult.message);
+          setAgentAMessage(agentAResult.reason_message ?? agentAResult.message);
+          setAgentAQualityScore(agentAResult.quality_score);
+          setAgentAMissingSlots(agentAResult.missing_slots ?? []);
           setActiveAgentAQuestionIndex(0);
           setAgentAOpen(true);
           return;
@@ -1172,6 +1203,20 @@ export default function CreateWizardPage() {
                 <p className="text-[14px] leading-[19.6px] text-[#6F6F6F]">
                   {agentAMessage ?? '작성 내용을 바탕으로, 분석에 도움이 될 만한 질문을 준비했어요.'}
                 </p>
+                {agentAQualityScore !== null || agentAMissingSlotLabels.length ? (
+                  <div className="flex flex-col gap-[6px] pt-[4px]">
+                    {agentAQualityScore !== null ? (
+                      <p className="text-[12px] leading-[16.8px] text-[#7A7A7A]">
+                        현재 분석 준비도 {agentAQualityScore}점
+                      </p>
+                    ) : null}
+                    {agentAMissingSlotLabels.length ? (
+                      <p className="text-[12px] leading-[16.8px] text-[#7A7A7A]">
+                        보완이 필요한 정보: {agentAMissingSlotLabels.join(', ')}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
               <button
                 type="button"

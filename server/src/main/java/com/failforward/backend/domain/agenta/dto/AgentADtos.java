@@ -30,6 +30,14 @@ public final class AgentADtos {
             @JsonProperty("needs_questions")
             boolean needsQuestions,
             List<QuestionCard> questions,
+            @JsonProperty("quality_score")
+            Integer qualityScore,
+            @JsonProperty("missing_slots")
+            List<String> missingSlots,
+            @JsonProperty("trigger_reason")
+            String triggerReason,
+            @JsonProperty("reason_message")
+            String reasonMessage,
             Meta meta,
             String message
     ) {
