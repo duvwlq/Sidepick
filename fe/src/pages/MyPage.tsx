@@ -169,7 +169,7 @@ function StoryCard({
         bookmarkActive={mode === 'bookmarked'}
         onBookmarkClick={mode === 'bookmarked' && onBookmarkRemove ? () => onBookmarkRemove(experience.id) : undefined}
         showCta={experience.caseStatus === 'FAILURE'}
-        ctaLabel="성공 사례 보기"
+        ctaLabel="유사 성공 사례"
         ctaDisabled={!experience.hasPatternAnalysis}
         onCtaClick={() => navigate(`/experiences/${experience.id}/success-comparison`)}
         surfaceClassName="min-h-[171px]"
@@ -326,6 +326,10 @@ export default function MyPage() {
           <button
             type="button"
             onClick={() => {
+              if (location.pathname !== '/mypage') {
+                navigate('/mypage');
+                return;
+              }
               if (window.history.length > 1) {
                 navigate(-1);
                 return;
@@ -436,7 +440,7 @@ export default function MyPage() {
         )}
       </main>
 
-      <BottomNav active="mypage" />
+      <BottomNav active="mypage" showCenterCreateButton />
     </div>
   );
 }

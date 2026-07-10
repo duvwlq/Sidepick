@@ -200,7 +200,7 @@ function ResultThumbnail({ count, imageUrl }: { count: number; imageUrl: string 
 function SuccessCta() {
   return (
     <span className="inline-flex h-[28px] items-center justify-center rounded-[8px] bg-[#5A876E] px-[11px] text-[12px] font-[600] leading-[14.4px] tracking-[0px] text-white">
-      성공 사례 보기
+      유사 성공 사례
     </span>
   );
 }

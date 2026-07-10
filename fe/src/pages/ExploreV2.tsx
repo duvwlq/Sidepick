@@ -174,7 +174,7 @@ function createFigmaSearchFixture(
     },
     structuredData: {
       figmaCardCtaDisabled: options.ctaDisabled ?? false,
-      figmaCardCtaLabel: options.ctaLabel ?? '성공 사례 보기',
+      figmaCardCtaLabel: options.ctaLabel ?? '유사 성공 사례',
       figmaCardShowThumbnail: options.showThumbnail ?? false,
       ...(typeof options.sourceExperienceId === 'number' ? { sourceExperienceId: options.sourceExperienceId } : {}),
     },
@@ -605,7 +605,7 @@ function ExploreCard({
   const showThumbnail = experience.structuredData.figmaCardShowThumbnail === true || Boolean(thumbnailUrl);
   const isSuccess = experience.caseStatus === 'SUCCESS';
   const ctaLabel =
-    typeof experience.structuredData.figmaCardCtaLabel === 'string' ? experience.structuredData.figmaCardCtaLabel : '성공 사례 보기';
+    typeof experience.structuredData.figmaCardCtaLabel === 'string' ? experience.structuredData.figmaCardCtaLabel : '유사 성공 사례';
   const ctaDisabled = experience.structuredData.figmaCardCtaDisabled === true;
   const safeTitle = sanitizeDisplayText(experience.title, `${experience.category.name} 사례`);
   const safePreview = sanitizeDisplayText(

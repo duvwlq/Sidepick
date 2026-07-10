@@ -420,7 +420,7 @@ export default function MyPageProfileEdit() {
           </section>
         </main>
 
-        <BottomNav active="mypage" />
+        <BottomNav active="mypage" showCenterCreateButton />
       </div>
 
       <PhotoActionSheet

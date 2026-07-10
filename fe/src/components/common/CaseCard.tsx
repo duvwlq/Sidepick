@@ -190,7 +190,7 @@ export default function CaseCard({
               <CardActionButton
                 label={ctaLabel}
                 disabled={ctaDisabled}
-                className={`${ctaCompact ? 'h-[30px] min-w-[48px]' : 'h-[32px] min-w-[106px]'} rounded-[8px] px-[12px] text-[12px] font-[600] leading-[14.4px] ${
+                className={`${ctaCompact ? '!h-[30px] min-w-[48px]' : '!h-[30px] !w-[92px] !min-w-[92px]'} rounded-[8px] px-[12px] !text-[12px] !font-[600] !leading-[14.4px] ${
                   ctaDisabled ? 'bg-[#CBE5D8] text-white opacity-100' : ''
                 }`.trim()}
                 onClick={(event) => {

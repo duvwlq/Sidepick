@@ -41,7 +41,7 @@ export default function FailureToSuccessButton({ caseId, relatedSuccessCount, on
       className="flex h-[42px] w-full items-center justify-center gap-[8px] rounded-[10px] bg-[#131416] px-[16px] text-[14px] font-[600] text-white transition-colors hover:bg-[#1A1A1A] active:bg-[#2A2A2A]"
       aria-label={`관련 성공 사례 ${relatedSuccessCount}건 보기`}
     >
-      <span>비슷한 성공 사례 보기</span>
+      <span>유사 성공 사례</span>
       <span className="inline-flex min-w-[20px] items-center justify-center rounded-[999px] bg-white px-[6px] py-[2px] text-[10px] font-[700] text-black">
         {relatedSuccessCount}
       </span>

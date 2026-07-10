@@ -163,7 +163,7 @@ function createFigmaSearchFixture(
     },
     structuredData: {
       figmaCardCtaDisabled: options.ctaDisabled ?? false,
-      figmaCardCtaLabel: options.ctaLabel ?? '성공 사례 보기',
+      figmaCardCtaLabel: options.ctaLabel ?? '유사 성공 사례',
       figmaCardShowThumbnail: options.showThumbnail ?? false,
       ...(typeof options.sourceExperienceId === 'number' ? { sourceExperienceId: options.sourceExperienceId } : {}),
     },
@@ -642,7 +642,7 @@ function ExploreCardV1({
   const showThumbnail = experience.structuredData.figmaCardShowThumbnail === true || hasImage;
   const ctaLabel = typeof experience.structuredData.figmaCardCtaLabel === 'string'
     ? experience.structuredData.figmaCardCtaLabel
-    : '성공 사례 보기';
+    : '유사 성공 사례';
   const ctaDisabled = experience.structuredData.figmaCardCtaDisabled === true;
   const similarityPercent = 99;
   const safeTitle = sanitizeDisplayText(experience.title, `${experience.category.name} 사례`);
