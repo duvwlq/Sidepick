@@ -27,6 +27,22 @@ import ExploreV3 from './pages/ExploreV3';
 import SearchPage from './pages/SearchPage';
 import SuccessComparisonPage from './pages/SuccessComparisonPage';
 import ChatbotPage from './pages/ChatbotPage';
+import { getAccessToken } from './lib/session';
+
+function RootEntryRoute() {
+  const accessToken = getAccessToken();
+
+  if (!accessToken) {
+    return (
+      <Navigate
+        to={`/auth?next=${encodeURIComponent('/')}&reason=${encodeURIComponent('서비스 이용을 위해 먼저 로그인해 주세요.')}`}
+        replace
+      />
+    );
+  }
+
+  return <HomeV2 />;
+}
 
 export default function App() {
   return (
@@ -34,7 +50,7 @@ export default function App() {
       <AuthFlowProvider>
         <FlashToastListener />
         <Routes>
-          <Route path="/" element={<HomeV2 />} />
+          <Route path="/" element={<RootEntryRoute />} />
           <Route path="/v1/home" element={<Navigate to="/" replace />} />
           <Route path="/home-legacy" element={<Navigate to="/" replace />} />
           <Route path="/v1/explore" element={<Navigate to="/explore" replace />} />
