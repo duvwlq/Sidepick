@@ -42,7 +42,7 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
     @Test
     void chatbotMessageReturnsUpstreamReply() throws Exception {
         String token = registerAndLogin("chatbot_user@sidepick.dev", "password123", "chatbotUser", "20s");
-        mockServer.expect(requestTo("http://localhost:8001/chatbot/message"))
+        mockServer.expect(requestTo("http://localhost:8001/api/chatbot/message"))
                 .andExpect(method(POST))
                 .andRespond(withSuccess("""
                         {
@@ -72,7 +72,7 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
     @Test
     void chatbotMessageFallsBackWhenUpstreamFails() throws Exception {
         String token = registerAndLogin("chatbot_fallback@sidepick.dev", "password123", "chatbotFallback", "20s");
-        mockServer.expect(requestTo("http://localhost:8001/chatbot/message"))
+        mockServer.expect(requestTo("http://localhost:8001/api/chatbot/message"))
                 .andExpect(method(POST))
                 .andRespond(withServerError());
 
@@ -101,13 +101,42 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
                         .content("""
                                 {
                                   "session_id": "session-short",
-                                  "message": "brief"
+                                  "message": "네?"
                                 }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("success"))
                 .andExpect(jsonPath("$.data.type").value("guide_redirect"))
                 .andExpect(jsonPath("$.data.reason").value("input_too_short"));
+    }
+
+    @Test
+    void chatbotMessageSendsNaturalKoreanQuestionUpstream() throws Exception {
+        String token = registerAndLogin("chatbot_korean@sidepick.dev", "password123", "chatbotKorean", "20s");
+        mockServer.expect(requestTo("http://localhost:8001/api/chatbot/message"))
+                .andExpect(method(POST))
+                .andRespond(withSuccess("""
+                        {
+                          "reply": "스마트스토어는 상품 선정, 공급처 검증, 상세페이지 준비부터 시작하면 됩니다.",
+                          "type": "rag",
+                          "sources": ["doc_case_001"],
+                          "status": "success"
+                        }
+                        """, MediaType.APPLICATION_JSON));
+
+        mockMvc.perform(post("/api/chatbot/message")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "session_id": "session-korean",
+                                  "message": "스마트스토어 시작 어떻게 해야 하나요?"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.status").value("success"))
+                .andExpect(jsonPath("$.data.type").value("rag"))
+                .andExpect(jsonPath("$.data.reply").value("스마트스토어는 상품 선정, 공급처 검증, 상세페이지 준비부터 시작하면 됩니다."));
     }
 
     @Test
@@ -130,7 +159,7 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
     @Test
     void chatbotMessageFallsBackWhenUpstreamContainsBlockedOutput() throws Exception {
         String token = registerAndLogin("chatbot_output@sidepick.dev", "password123", "chatbotOutput", "20s");
-        mockServer.expect(requestTo("http://localhost:8001/chatbot/message"))
+        mockServer.expect(requestTo("http://localhost:8001/api/chatbot/message"))
                 .andExpect(method(POST))
                 .andRespond(withSuccess("""
                         {
@@ -158,7 +187,7 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
     @Test
     void chatbotMessageFallsBackWhenUpstreamReturnsUnknownCaseId() throws Exception {
         String token = registerAndLogin("chatbot_source@sidepick.dev", "password123", "chatbotSource", "20s");
-        mockServer.expect(requestTo("http://localhost:8001/chatbot/message"))
+        mockServer.expect(requestTo("http://localhost:8001/api/chatbot/message"))
                 .andExpect(method(POST))
                 .andRespond(withSuccess("""
                         {
@@ -216,7 +245,7 @@ class ChatbotApiIntegrationTest extends ApiIntegrationTestSupport {
     @Test
     void chatbotMessageAppliesRateLimit() throws Exception {
         String token = registerAndLogin("chatbot_limit@sidepick.dev", "password123", "chatbotLimit", "20s");
-        mockServer.expect(ExpectedCount.times(10), requestTo("http://localhost:8001/chatbot/message"))
+        mockServer.expect(ExpectedCount.times(10), requestTo("http://localhost:8001/api/chatbot/message"))
                 .andExpect(method(POST))
                 .andRespond(withSuccess("""
                         {

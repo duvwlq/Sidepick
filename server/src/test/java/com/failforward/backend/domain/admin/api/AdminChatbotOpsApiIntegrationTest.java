@@ -60,7 +60,7 @@ class AdminChatbotOpsApiIntegrationTest extends ApiIntegrationTestSupport {
         String adminToken = registerAndLogin("admin@sidepick.dev", "password123", "opsAdmin", "20s");
         String userToken = registerAndLogin("ops_target@sidepick.dev", "password123", "opsTarget", "20s");
 
-        mockServer.expect(ExpectedCount.times(2), requestTo("http://localhost:8001/chatbot/message"))
+        mockServer.expect(ExpectedCount.times(2), requestTo("http://localhost:8001/api/chatbot/message"))
                 .andExpect(method(POST))
                 .andRespond(withSuccess("""
                         {

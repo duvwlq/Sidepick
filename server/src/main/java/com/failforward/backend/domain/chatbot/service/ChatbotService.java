@@ -32,6 +32,14 @@ public class ChatbotService {
     private static final String TYPE_GUIDE_REDIRECT = "guide_redirect";
     private static final String FALLBACK_REPLY =
             "Only a simple guide is available right now. Please try again in a moment.";
+    private static final List<String> REACT_ROUTE_KEYWORDS = List.of(
+            "compare", "stats", "similar", "analysis", "case",
+            "비교", "통계", "유사", "분석", "사례"
+    );
+    private static final List<String> EXPLICIT_GUIDE_REDIRECT_KEYWORDS = List.of(
+            "guide page", "stats guide", "case guide",
+            "가이드 페이지", "통계 가이드", "사례 가이드"
+    );
 
     private final CurrentUserProvider currentUserProvider;
     private final ChatbotRateLimiter chatbotRateLimiter;
@@ -55,7 +63,7 @@ public class ChatbotService {
             if (chatbotSafetyService.needsGuideRedirect(normalizedMessage, routeHint)) {
                 return new ChatbotMessageResponse(
                         STATUS_SUCCESS,
-                        "Please share more detail so I can route you to the right case or stats guide.",
+                        "질문을 조금만 더 구체적으로 적어 주세요. 너무 짧은 입력은 안내가 어려워요.",
                         TYPE_GUIDE_REDIRECT,
                         List.of(),
                         Map.of("fallback", false, "reason", "input_too_short"),
@@ -91,7 +99,7 @@ public class ChatbotService {
     }
 
     private AiChatbotResponse requestUpstream(ChatbotMessageRequest request, String routeHint) {
-        String endpoint = aiServerProperties.url() + "/chatbot/message";
+        String endpoint = aiServerProperties.url() + "/api/chatbot/message";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<AiChatbotRequest> entity = new HttpEntity<>(AiChatbotRequest.from(request, routeHint), headers);
@@ -114,20 +122,16 @@ public class ChatbotService {
         if (normalized.isBlank()) {
             return TYPE_RAG;
         }
-        if (containsAny(normalized,
-                "compare", "stats", "similar", "analysis", "case",
-                "비교", "통계", "유사", "분석", "사례")) {
+        if (containsAny(normalized, REACT_ROUTE_KEYWORDS)) {
             return TYPE_REACT;
         }
-        if (containsAny(normalized,
-                "guide", "help", "how", "what",
-                "가이드", "도움", "어떻게", "무엇")) {
+        if (containsAny(normalized, EXPLICIT_GUIDE_REDIRECT_KEYWORDS)) {
             return TYPE_GUIDE_REDIRECT;
         }
         return normalized.length() < chatbotProperties.minimumGuideMessageLength() ? TYPE_RAG : TYPE_REACT;
     }
 
-    private boolean containsAny(String message, String... keywords) {
+    private boolean containsAny(String message, List<String> keywords) {
         for (String keyword : keywords) {
             if (message.contains(keyword)) {
                 return true;

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ChatbotSafetyService {
 
+    static final int MIN_GUIDE_REDIRECT_LENGTH = 5;
+
     private static final List<String> BANNED_INPUT_PHRASES = List.of(
             "guaranteed profit",
             "100% success",
@@ -46,7 +48,7 @@ public class ChatbotSafetyService {
     }
 
     public boolean needsGuideRedirect(String message, String routeHint) {
-        return message.length() < properties.minimumGuideMessageLength() && "rag".equals(routeHint);
+        return message.codePointCount(0, message.length()) < MIN_GUIDE_REDIRECT_LENGTH && "rag".equals(routeHint);
     }
 
     public String validateUpstream(AiChatbotResponse response) {
