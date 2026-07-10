@@ -1,4 +1,3 @@
-import { Heart } from 'lucide-react';
 import type { MouseEvent, ReactNode } from 'react';
 import { buttonClassName } from './button-class-name';
 
@@ -105,9 +104,45 @@ export function CaseReactionCount({
 }) {
   return (
     <div className="flex items-center gap-[2px]">
-      <Heart size={14} strokeWidth={1.75} fill={active ? '#5A876E' : 'none'} color={active ? '#5A876E' : '#8A8A8A'} />
+      <HeartReactionIcon active={active} />
       <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">{count}</span>
     </div>
+  );
+}
+
+export function HeartReactionIcon({
+  active = false,
+}: {
+  active?: boolean;
+}) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path
+        d="M12.1566 2.68926C11.8586 2.39117 11.5049 2.15472 11.1155 1.99339C10.7262 1.83206 10.3089 1.74902 9.88741 1.74902C9.46596 1.74902 9.04863 1.83206 8.65928 1.99339C8.26993 2.15472 7.91618 2.39117 7.61824 2.68926L6.99991 3.30759L6.38157 2.68926C5.77975 2.08743 4.96351 1.74934 4.11241 1.74934C3.2613 1.74934 2.44506 2.08743 1.84324 2.68926C1.24142 3.29108 0.90332 4.10732 0.90332 4.95842C0.90332 5.80952 1.24142 6.62577 1.84324 7.22759L6.99991 12.3843L12.1566 7.22759C12.4547 6.92965 12.6911 6.5759 12.8524 6.18655C13.0138 5.79719 13.0968 5.37987 13.0968 4.95842C13.0968 4.53697 13.0138 4.11965 12.8524 3.7303C12.6911 3.34095 12.4547 2.9872 12.1566 2.68926Z"
+        fill={active ? '#F14F5A' : 'none'}
+        stroke="#8A8A8A"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function BookmarkReactionIcon({
+  active = false,
+}: {
+  active?: boolean;
+}) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path
+        d="M11.0837 12.25L7.00033 9.33333L2.91699 12.25V2.91667C2.91699 2.60725 3.03991 2.3105 3.2587 2.09171C3.47749 1.87292 3.77424 1.75 4.08366 1.75H9.91699C10.2264 1.75 10.5232 1.87292 10.742 2.09171C10.9607 2.3105 11.0837 2.60725 11.0837 2.91667V12.25Z"
+        fill={active ? '#5A876E' : 'none'}
+        stroke="#8A8A8A"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
 

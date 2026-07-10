@@ -1,6 +1,6 @@
-import { Bookmark } from 'lucide-react';
 import type { MouseEvent } from 'react';
 import {
+  BookmarkReactionIcon,
   CardActionButton,
   CardMetaRow,
   CaseChip,
@@ -157,24 +157,14 @@ export default function CaseCard({
                       className="translate-y-[0.25px] flex shrink-0 items-center gap-[2px]"
                       aria-label={bookmarkActive ? '북마크 해제' : '북마크 저장'}
                     >
-                      <Bookmark
-                        size={14}
-                        strokeWidth={1.75}
-                        fill={bookmarkActive ? '#5A876E' : 'none'}
-                        color={bookmarkActive ? '#5A876E' : '#8A8A8A'}
-                      />
+                      <BookmarkReactionIcon active={bookmarkActive} />
                       <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
                         {bookmarkCount.toLocaleString()}
                       </span>
                     </button>
                   ) : (
                     <div className="translate-y-[0.25px] flex shrink-0 items-center gap-[2px]">
-                      <Bookmark
-                        size={14}
-                        strokeWidth={1.75}
-                        fill={bookmarkActive ? '#5A876E' : 'none'}
-                        color={bookmarkActive ? '#5A876E' : '#8A8A8A'}
-                      />
+                      <BookmarkReactionIcon active={bookmarkActive} />
                       <span className="font-['Pretendard'] text-[12px] font-[400] leading-[16.8px] text-[#8A8A8A]">
                         {bookmarkCount.toLocaleString()}
                       </span>
