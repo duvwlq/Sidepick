@@ -49,6 +49,23 @@ const FAQ_DISCLAIMER_LINES = [
   '총 16개 카테고리로 정리했습니다.',
 ] as const;
 
+function normalizeFaqTag(value: string | null | undefined) {
+  if (!value) {
+    return '';
+  }
+
+  return value
+    .normalize('NFKC')
+    .trim()
+    .toLowerCase()
+    .replaceAll(' ', '')
+    .replaceAll('_', '')
+    .replaceAll('-', '')
+    .replaceAll('·', '')
+    .replaceAll(',', '')
+    .replaceAll('.', '');
+}
+
 function parseNumberedList(block: string): string[] {
   return block
     .split('\n')
@@ -162,14 +179,22 @@ export default function FaqPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
+    const requestedCategoryId = params.get('category');
     const requestedTag = params.get('tag');
 
-    if (!requestedTag) {
+    if (!requestedCategoryId && !requestedTag) {
       setSelectedTag(ALL_TAG);
       return;
     }
 
-    const matchedTag = tags.find(({ label }) => label === requestedTag);
+    const matchedTag =
+      (requestedCategoryId
+        ? FAQ_CATEGORIES.find((category) => category.id === requestedCategoryId)
+        : null) ??
+      (requestedTag
+        ? FAQ_CATEGORIES.find((category) => normalizeFaqTag(category.label) === normalizeFaqTag(requestedTag))
+        : null);
+
     setSelectedTag(matchedTag ? (matchedTag.label as SelectedTag) : ALL_TAG);
   }, [location.search, tags]);
 

@@ -59,6 +59,23 @@ function sanitizeText(value: string | null | undefined, fallback: string) {
   return normalized;
 }
 
+function normalizeFaqCategoryLabel(value: string | null | undefined) {
+  if (!value) {
+    return '';
+  }
+
+  return value
+    .normalize('NFKC')
+    .trim()
+    .toLowerCase()
+    .replaceAll(' ', '')
+    .replaceAll('_', '')
+    .replaceAll('-', '')
+    .replaceAll('·', '')
+    .replaceAll(',', '')
+    .replaceAll('.', '');
+}
+
 function stripImageMarkdown(content: string) {
   return content.replace(/!\[[^\]]*]\(([^)]+)\)/g, '').replace(/\s+/g, ' ').trim();
 }
@@ -540,14 +557,16 @@ export default function DetailV1() {
     }
 
     const categoryLabel = sanitizeText(experience.category.name, '');
-    const matchedCategory = FAQ_CATEGORIES.find((category) => category.label === categoryLabel);
+    const matchedCategory = FAQ_CATEGORIES.find(
+      (category) => normalizeFaqCategoryLabel(category.label) === normalizeFaqCategoryLabel(categoryLabel),
+    );
 
     if (!matchedCategory) {
       navigate('/faq');
       return;
     }
 
-    navigate(`/faq?tag=${encodeURIComponent(matchedCategory.label)}`);
+    navigate(`/faq?category=${encodeURIComponent(matchedCategory.id)}&tag=${encodeURIComponent(matchedCategory.label)}`);
   }
 
   async function handleShare() {
