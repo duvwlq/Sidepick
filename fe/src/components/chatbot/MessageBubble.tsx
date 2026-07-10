@@ -11,7 +11,7 @@ function formatTime(createdAt: number) {
   const d = new Date(createdAt);
   const h = d.getHours();
   const m = d.getMinutes().toString().padStart(2, '0');
-  const meridiem = h < 12 ? '?�전' : '?�후';
+  const meridiem = h < 12 ? '오전' : '오후';
   const h12 = h % 12 === 0 ? 12 : h % 12;
   return `${meridiem} ${h12}:${m}`;
 }
@@ -70,7 +70,7 @@ export default function MessageBubble({ message, onShowExplanation, onOpenGuide 
               onClick={onOpenGuide ?? onShowExplanation}
               className="flex h-[32px] items-center gap-[4px] rounded-[8px] bg-[#5A876E] px-[12px] py-[8px] text-[12px] font-semibold text-white hover:bg-[#4A7059]"
             >
-              부??가?�드 바로 가�?
+              부업 가이드 바로 가기
               <ChevronRightIcon />
             </button>
           ) : null}
